@@ -1,0 +1,840 @@
+/* bookmarks.module.css */
+:root {
+  --primary-dark: #002060;
+  --primary-light: #0066ff;
+  --primary-gradient: linear-gradient(45deg, #0099ff, #002060 70%);
+  --success-color: #10b981;
+  --error-color: #ef4444;
+  --warning-color: #f59e0b;
+  --info-color: #3b82f6;
+  --bg-primary: #ffffff;
+  --bg-secondary: #f8fafc;
+  --bg-accent: #f1f5f9;
+  --text-primary: #1e293b;
+  --text-secondary: #64748b;
+  --border-color: #e2e8f0;
+  --border-hover: #cbd5e1;
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+}
+.bookmarksPage {
+  min-height: 100vh;
+  background: #ffffff;
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+  color: var(--text-primary);
+}
+.loadingContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  gap: 1rem;
+}
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid var(--border-color);
+  border-top: 4px solid var(--primary-light);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+/* Header */
+.bookmarksHeader {
+  background: var(--primary-gradient);
+  color: white;
+  padding: 1.5rem 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: var(--shadow-lg);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.backBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-md);
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  border: none;
+}
+.backBtn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateX(-3px);
+}
+.bookmarksHeader h1 {
+  margin: 0;
+  font-size: 1.75rem;
+  font-weight: 600;
+  flex: 1;
+  text-align: center;
+}
+.bookmarkStats {
+  background: rgba(255, 255, 255, 0.1);
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius-md);
+  font-weight: 500;
+}
+/* Container */
+.bookmarksContainer {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+/* Courses View */
+.coursesView {
+  width: 100%;
+}
+.noBookmarks {
+  text-align: center;
+  padding: 4rem 2rem;
+  background: white;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+}
+.noBookmarks i {
+  font-size: 4rem;
+  color: var(--text-secondary);
+  margin-bottom: 1rem;
+}
+.noBookmarks h3 {
+  margin: 0 0 1rem 0;
+  color: var(--text-primary);
+  font-size: 1.5rem;
+}
+.noBookmarks p {
+  margin: 0 0 2rem 0;
+  color: var(--text-secondary);
+  font-size: 1rem;
+}
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 2rem;
+  border: none;
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 1rem;
+  text-decoration: none;
+}
+.btnPrimary {
+  background: var(--primary-gradient);
+  color: white;
+}
+.btnPrimary:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+.btnSecondary {
+  background: var(--bg-accent);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+}
+.btnSecondary:hover {
+  background: var(--bg-secondary);
+}
+.btnDanger {
+  background: var(--error-color);
+  color: white;
+}
+.btnDanger:hover {
+  background: #dc2626;
+}
+.coursesGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+}
+.courseCard {
+  background: white;
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+  box-shadow: var(--shadow-md);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border-left: 4px solid var(--primary-light);
+}
+.courseCard:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+}
+.courseHeader {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+.courseIcon {
+  width: 50px;
+  height: 50px;
+  background: var(--primary-gradient);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 1.25rem;
+}
+.courseInfo h3 {
+  margin: 0;
+  font-size: 1.25rem;
+  color: var(--text-primary);
+}
+.questionCount {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+}
+.courseArrow {
+  text-align: right;
+  color: var(--text-secondary);
+  font-size: 1.2rem;
+}
+/* Questions View */
+.questionsView {
+  width: 100%;
+}
+.questionsHeader {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  background: white;
+  padding: 1.5rem;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+}
+.questionsHeader .backBtn {
+  background: var(--bg-accent);
+  color: var(--text-primary);
+}
+.questionsHeader .backBtn:hover {
+  background: var(--border-color);
+  transform: translateX(-3px);
+}
+.courseTitle h2 {
+  margin: 0;
+  font-size: 1.5rem;
+  color: var(--text-primary);
+}
+.courseTitle span {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+}
+.loadingQuestions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
+  gap: 1rem;
+}
+.noQuestions {
+  text-align: center;
+  padding: 4rem 2rem;
+  background: white;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  color: var(--text-secondary);
+}
+/* Questions List */
+.questionsList {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+.questionCard {
+  background: white;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  overflow: hidden;
+  transition: all 0.3s ease;
+  position: relative;
+}
+.questionCard:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+.questionHeader {
+  background: var(--bg-accent);
+  padding: 1rem 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--border-color);
+}
+.questionNumber {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+.removeBtn {
+  background: none;
+  border: none;
+  color: var(--error-color);
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: var(--radius-sm);
+  transition: all 0.3s ease;
+}
+.removeBtn:hover {
+  background: rgba(239, 68, 68, 0.1);
+}
+.questionContent {
+  padding: 1.5rem;
+}
+.questionText {
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  margin-bottom: 1.5rem;
+  line-height: 1.6;
+}
+/* Options */
+.optionsContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+.option {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.75rem 1rem;
+  background: var(--bg-secondary);
+  border: 2px solid var(--border-color);
+  border-radius: var(--radius-md);
+  position: relative;
+}
+.option.correct {
+  border-color: var(--success-color);
+  background: rgba(16, 185, 129, 0.05);
+}
+.optionLetter {
+  width: 28px;
+  height: 28px;
+  background: var(--text-secondary);
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 0.9rem;
+  flex-shrink: 0;
+}
+.option.correct .optionLetter {
+  background: var(--success-color);
+}
+.optionText {
+  flex: 1;
+  font-size: 0.95rem;
+  line-height: 1.4;
+}
+.optionIcon {
+  font-size: 1.1rem;
+  position: absolute;
+  right: 1rem;
+}
+.correctIcon {
+  color: var(--success-color);
+}
+/* Explanation */
+.explanationContainer {
+  background: var(--bg-accent);
+  border-radius: var(--radius-md);
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+  border-left: 4px solid var(--info-color);
+}
+.explanationHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+  font-weight: 600;
+  color: var(--info-color);
+  font-size: 0.9rem;
+}
+.explanationText {
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: var(--text-primary);
+}
+/* Tags */
+.tagsContainer {
+  margin-bottom: 1.5rem;
+}
+.tagsHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+.tagsList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+.tag {
+  background: var(--primary-light);
+  color: white;
+  padding: 0.25rem 0.75rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+/* Question Meta */
+.questionMeta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border-color);
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+.courseInfo {
+  font-weight: 500;
+}
+.topicInfo {
+  font-style: italic;
+}
+/* Pagination */
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 2rem;
+  padding: 2rem 0;
+}
+.paginationBtn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  background: white;
+  border: 2px solid var(--border-color);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+.paginationBtn:hover:not(:disabled) {
+  border-color: var(--primary-light);
+  color: var(--primary-light);
+  transform: translateY(-1px);
+}
+.paginationBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+.paginationInfo {
+  padding: 0.75rem 1.5rem;
+  background: var(--bg-accent);
+  border-radius: var(--radius-md);
+  font-weight: 500;
+  color: var(--text-primary);
+}
+/* Modal */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+.modal {
+  background: white;
+  border-radius: var(--radius-lg);
+  padding: 2rem;
+  max-width: 400px;
+  width: 90%;
+  box-shadow: var(--shadow-xl);
+}
+.modalHeader h3 {
+  margin: 0 0 1rem 0;
+  color: var(--text-primary);
+}
+.modalBody {
+  margin-bottom: 2rem;
+}
+.modalBody p {
+  margin: 0;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+.modalFooter {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+}
+/* Message Toast */
+.messageToast {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background: white;
+  padding: 1rem 1.5rem;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  z-index: 3000;
+  animation: slideInRight 0.3s ease;
+  border-left: 4px solid var(--primary-light);
+}
+.messageToast.success {
+  border-left-color: var(--success-color);
+}
+.messageToast.error {
+  border-left-color: var(--error-color);
+}
+.messageToast.warning {
+  border-left-color: var(--warning-color);
+}
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+@keyframes slideOutRight {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}
+/* Question Image */
+.questionImage {
+  margin-bottom: 1.5rem;
+  text-align: center;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-md);
+}
+.questionImage img {
+  max-width: 100%;
+  height: auto;
+  max-height: 400px;
+  object-fit: contain;
+  border-radius: var(--radius-lg);
+  background: var(--bg-secondary);
+}
+/* Responsive Design */
+@media (max-width: 768px) {
+  .bookmarksHeader {
+    padding: 1rem;
+  }
+  
+  .bookmarksHeader h1 {
+    font-size: 1.5rem;
+  }
+  
+  .bookmarksContainer {
+    padding: 1rem;
+  }
+  
+  .coursesGrid {
+    grid-template-columns: 1fr;
+  }
+  
+  .courseCard {
+    padding: 1rem;
+  }
+  
+  .questionsHeader {
+    padding: 1rem;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+  
+  .questionContent {
+    padding: 1rem;
+  }
+  
+  .questionText {
+    font-size: 1rem;
+  }
+  
+  .option {
+    padding: 0.5rem 0.75rem;
+  }
+  
+  .optionLetter {
+    width: 24px;
+    height: 24px;
+    font-size: 0.8rem;
+  }
+  
+  .optionText {
+    font-size: 0.9rem;
+  }
+  
+  .explanationContainer,
+  .tagsContainer {
+    padding: 0.75rem;
+  }
+  
+  .questionMeta {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
+  }
+  
+  .pagination {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .paginationBtn {
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .questionImage img {
+    max-height: 250px;
+  }
+}
+
+@media (max-width: 480px) {
+  .bookmarksHeader {
+    padding: 0.75rem;
+    /* flex-direction: column; */
+    gap: 0.75rem;
+  }
+  
+  .bookmarksHeader h1 {
+    font-size: 1.22rem;
+  }
+  
+  .backBtn {
+    width: 32px;
+    height: 32px;
+  }
+  
+  .bookmarkStats {
+    font-size: 0.85rem;
+    padding: 0.4rem 0.8rem;
+  }
+  
+  .bookmarksContainer {
+    padding: 0.75rem;
+  }
+  
+  .noBookmarks {
+    padding: 2rem 1rem;
+  }
+  
+  .noBookmarks i {
+    font-size: 3rem;
+  }
+  
+  .noBookmarks h3 {
+    font-size: 1.25rem;
+  }
+  
+  .noBookmarks p {
+    font-size: 0.9rem;
+  }
+  
+  .btn {
+    padding: 0.5rem 1.5rem;
+    font-size: 0.85rem;
+  }
+  
+  .coursesGrid {
+    gap: 1rem;
+  }
+  
+  .courseCard {
+    padding: 0.75rem;
+  }
+  
+  .courseHeader {
+    gap: 0.75rem;
+  }
+  
+  .courseIcon {
+    width: 40px;
+    height: 40px;
+    font-size: 1rem;
+  }
+  
+  .courseInfo h3 {
+    font-size: 1rem;
+  }
+  
+  .questionCount {
+    font-size: 0.8rem;
+  }
+  
+  .questionsHeader {
+    padding: 0.75rem;
+    margin-bottom: 1rem;
+  }
+  
+  .courseTitle h2 {
+    font-size: 1.25rem;
+  }
+  
+  .courseTitle span {
+    font-size: 0.8rem;
+  }
+  
+  .questionsList {
+    gap: 1rem;
+  }
+  
+  .questionHeader {
+    padding: 0.75rem 1rem;
+  }
+  
+  .questionNumber {
+    font-size: 0.9rem;
+  }
+  
+  .questionContent {
+    padding: 0.75rem;
+  }
+  
+  .questionText {
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+  }
+  
+  .option {
+    padding: 0.5rem;
+    gap: 0.75rem;
+  }
+  
+  .optionLetter {
+    width: 24px;
+    height: 24px;
+    font-size: 0.8rem;
+  }
+  
+  .optionText {
+    font-size: 0.85rem;
+  }
+  
+  .explanationContainer {
+    padding: 0.5rem;
+    margin-bottom: 1rem;
+  }
+  
+  .explanationHeader {
+    font-size: 0.8rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .explanationText {
+    font-size: 0.85rem;
+  }
+  
+  .tagsContainer {
+    margin-bottom: 1rem;
+  }
+  
+  .tagsHeader {
+    font-size: 0.8rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .tagsList {
+    gap: 0.25rem;
+  }
+  
+  .tag {
+    font-size: 0.75rem;
+    padding: 0.2rem 0.5rem;
+  }
+  
+  .questionMeta {
+    font-size: 0.75rem;
+    padding-top: 0.75rem;
+  }
+  
+  .questionImage {
+    margin-bottom: 1rem;
+  }
+  
+  .questionImage img {
+    max-height: 200px;
+  }
+  
+  .modal {
+    padding: 1.5rem 1rem;
+  }
+  
+  .modalHeader h3 {
+    font-size: 1.2rem;
+  }
+  
+  .modalBody p {
+    font-size: 0.85rem;
+  }
+  
+  .modalFooter {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .btn {
+    width: 100%;
+  }
+  
+  .pagination {
+    padding: 1rem 0;
+    margin-top: 1rem;
+  }
+  
+  .paginationBtn {
+    padding: 0.5rem 1rem;
+    font-size: 0.85rem;
+  }
+  
+  .paginationInfo {
+    padding: 0.5rem 1rem;
+    font-size: 0.85rem;
+  }
+}

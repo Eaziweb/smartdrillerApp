@@ -1,0 +1,514 @@
+:root {
+  --primary-color: #002060;
+  --secondary-color: #0066ff;
+  --gradient-primary: linear-gradient(45deg, #0099ff, #002060 70%);
+  --gradient-secondary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --text-primary: #333;
+  --text-secondary: #666;
+  --background-color: #f8f9fa;
+  --card-background: #ffffff;
+  --border-color: #e0e0e0;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
+  --danger-color: #ff3860;
+  --success-color: #23d160;
+  --warning-color: #ffdd57;
+}
+
+/* Main container */
+.materialManagement {
+  min-height: 100vh;
+  background: var(--gradient-secondary);
+  padding: 1rem;
+}
+
+/* Header */
+.managementHeader {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  padding: 1.5rem;
+  border-radius: var(--radius-lg);
+  margin-bottom: 1.5rem;
+  color: white;
+}
+
+.backBtn {
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  color: white;
+  padding: 0.75rem;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.backBtn:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: scale(1.05);
+}
+
+.headerContent h1 {
+  margin: 0;
+  font-size: 1.8rem;
+  font-weight: 600;
+}
+
+.headerContent p {
+  margin: 0;
+  opacity: 0.9;
+}
+
+/* Filters Section */
+.filtersSection {
+  background: var(--card-background);
+  padding: 1.5rem;
+  border-radius: var(--radius-lg);
+  margin-bottom: 1.5rem;
+  box-shadow: var(--shadow-md);
+}
+
+.searchContainer {
+  margin-bottom: 1rem;
+}
+
+.searchInput {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 2px solid var(--border-color);
+  border-radius: var(--radius-md);
+  font-size: 1rem;
+  transition: border-color 0.3s ease;
+}
+
+.searchInput:focus {
+  outline: none;
+  border-color: var(--secondary-color);
+}
+
+.filterContainer {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.filterSelect {
+  flex: 1;
+  min-width: 150px;
+  padding: 0.75rem;
+  border: 2px solid var(--border-color);
+  border-radius: var(--radius-md);
+  font-size: 0.9rem;
+  transition: border-color 0.3s ease;
+}
+
+.filterSelect:focus {
+  outline: none;
+  border-color: var(--secondary-color);
+}
+
+.clearBtn {
+  background: var(--background-color);
+  border: 2px solid var(--border-color);
+  color: var(--text-secondary);
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: 500;
+}
+
+.clearBtn:hover {
+  background: #e9ecef;
+  border-color: #ccc;
+}
+
+/* Loading state */
+.loading {
+  text-align: center;
+  padding: 3rem;
+  color: white;
+  font-size: 1.2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.loading i {
+  font-size: 2rem;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Materials Table */
+.materialsTable {
+  background: var(--card-background);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-md);
+  margin-bottom: 2rem;
+}
+
+.materialsTable table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.materialsTable th,
+.materialsTable td {
+  padding: 1rem;
+  text-align: left;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.materialsTable th {
+  background: var(--background-color);
+  font-weight: 600;
+  color: var(--text-primary);
+  position: sticky;
+  top: 0;
+}
+
+.materialsTable tr:hover {
+  background: rgba(0, 102, 255, 0.03);
+}
+
+.materialTitleCell {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.materialTitleCell i {
+  color: var(--secondary-color);
+  font-size: 1.2rem;
+}
+
+.materialTitleCell .title {
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.materialTitleCell .filename {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+
+.actionButtons {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.downloadBtn,
+.deleteBtn {
+  background: none;
+  border: none;
+  padding: 0.5rem;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+}
+
+.downloadBtn {
+  color: var(--success-color);
+}
+
+.downloadBtn:hover {
+  background: rgba(35, 209, 96, 0.1);
+}
+
+.deleteBtn {
+  color: var(--danger-color);
+}
+
+.deleteBtn:hover {
+  background: rgba(255, 107, 107, 0.1);
+}
+
+/* Pagination */
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.pageBtn {
+  background: var(--card-background);
+  border: 2px solid var(--border-color);
+  color: var(--text-primary);
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: 500;
+}
+
+.pageBtn:hover:not(:disabled) {
+  background: var(--gradient-primary);
+  color: white;
+  border-color: transparent;
+}
+
+.pageBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.pageInfo {
+  color: white;
+  font-weight: 500;
+}
+
+/* Confirmation Modal */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+.modal {
+  background: var(--card-background);
+  padding: 2rem;
+  border-radius: var(--radius-lg);
+  width: 90%;
+  max-width: 400px;
+  text-align: center;
+  box-shadow: var(--shadow-lg);
+  animation: slideUp 0.3s ease-in-out;
+}
+
+.modal h2 {
+  margin-bottom: 1rem;
+  font-size: 1.5rem;
+  color: var(--text-primary);
+}
+
+.modal p {
+  color: var(--text-secondary);
+  margin-bottom: 1.5rem;
+}
+
+.modalActions {
+  display: flex;
+  justify-content: space-around;
+  gap: 1rem;
+}
+
+.confirmBtn {
+  background: var(--danger-color);
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  font-weight: 600;
+  transition: background 0.3s ease;
+}
+
+.confirmBtn:hover {
+  background: #e00035;
+}
+
+.cancelBtn {
+  background: var(--background-color);
+  color: var(--text-primary);
+  padding: 0.75rem 1.5rem;
+  border: 2px solid var(--border-color);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.cancelBtn:hover {
+  background: #e9ecef;
+  border-color: #ccc;
+}
+
+/* Notification */
+.notification {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  padding: 1rem 1.5rem;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  box-shadow: var(--shadow-md);
+  z-index: 1000;
+  animation: slideInRight 0.3s ease forwards;
+  font-weight: 500;
+}
+
+.notification.success {
+  background: rgba(35, 209, 96, 0.1);
+  color: var(--success-color);
+  border-left: 4px solid var(--success-color);
+}
+
+.notification.error {
+  background: rgba(255, 107, 107, 0.1);
+  color: var(--danger-color);
+  border-left: 4px solid var(--danger-color);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes slideInRight {
+  from { transform: translateX(100%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .materialManagement {
+    padding: 0.75rem;
+  }
+  
+  .managementHeader {
+    padding: 1.2rem;
+  }
+  
+  .headerContent h1 {
+    font-size: 1.5rem;
+  }
+  
+  .filtersSection {
+    padding: 1.2rem;
+  }
+  
+  .filterContainer {
+    flex-direction: column;
+  }
+  
+  .materialsTable {
+    overflow-x: auto;
+  }
+  
+  .materialsTable table {
+    min-width: 600px;
+  }
+  
+  .materialsTable th,
+  .materialsTable td {
+    padding: 0.75rem;
+    font-size: 0.9rem;
+  }
+  
+  .modal {
+    padding: 1.5rem;
+  }
+  
+  .modal h2 {
+    font-size: 1.3rem;
+  }
+  
+  .modalActions {
+    flex-direction: column;
+  }
+  
+  .confirmBtn,
+  .cancelBtn {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .materialManagement {
+    padding: 0.5rem;
+  }
+  
+  .managementHeader {
+    padding: 1rem;
+  }
+  
+  .headerContent h1 {
+    font-size: 1.3rem;
+  }
+  
+  .filtersSection {
+    padding: 1rem;
+  }
+  
+  .searchInput,
+  .filterSelect {
+    padding: 0.65rem 0.85rem;
+    font-size: 0.9rem;
+  }
+  
+  .clearBtn {
+    padding: 0.65rem 0.85rem;
+    font-size: 0.9rem;
+  }
+  
+  .materialsTable th,
+  .materialsTable td {
+    padding: 0.6rem;
+    font-size: 0.85rem;
+  }
+  
+  .materialTitleCell {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+  
+  .actionButtons {
+    flex-direction: column;
+  }
+  
+  .downloadBtn,
+  .deleteBtn {
+    width: 100%;
+    border-radius: var(--radius-md);
+  }
+  
+  .pageBtn {
+    padding: 0.6rem 0.8rem;
+    font-size: 0.9rem;
+  }
+  
+  .notification {
+    top: 10px;
+    right: 10px;
+    left: 10px;
+    padding: 0.8rem 1rem;
+  }
+}

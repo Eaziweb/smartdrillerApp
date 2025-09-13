@@ -1,0 +1,1008 @@
+:root {
+  --primary-dark: #002060;
+  --primary-light: #0066ff;
+  --primary-gradient: linear-gradient(45deg, #0099ff, #002060 70%);
+  --success-color: #10b981;
+  --error-color: #ef4444;
+  --warning-color: #f59e0b;
+  --info-color: #3b82f6;
+  --bg-primary: #ffffff;
+  --bg-secondary: #f8fafc;
+  --bg-accent: #f1f5f9;
+  --text-primary: #1e293b;
+  --text-secondary: #64748b;
+  --border-color: #e2e8f0;
+  --border-hover: #cbd5e1;
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+}
+
+.adminPage {
+  min-height: 100vh;
+  background: var(--bg-secondary);
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+  color: var(--text-primary);
+  padding: 1rem;
+}
+
+/* Page Header */
+.adminHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 2rem;
+  padding: 1.5rem;
+  background: var(--primary-gradient);
+  color: white;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.backBtn {
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  color: white;
+  text-decoration: none;
+  font-size: 1.2rem;
+  cursor: pointer;
+  padding: 0.75rem;
+  border-radius: var(--radius-md);
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+}
+
+.backBtn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateX(-3px);
+}
+
+.headerContent {
+  flex: 1;
+  text-align: center;
+}
+
+.headerContent h1 {
+  margin: 0;
+  font-size: 1.75rem;
+  font-weight: 600;
+}
+
+.competitionInfo {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  justify-content: center;
+  margin-top: 0.5rem;
+}
+
+.statusBadge {
+  padding: 0.25rem 0.75rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.statusUpcoming {
+  background: rgba(245, 158, 11, 0.1);
+  color: var(--warning-color);
+}
+
+.statusActive {
+  background: rgba(16, 185, 129, 0.1);
+  color: var(--success-color);
+}
+
+.statusEnded {
+  background: rgba(100, 116, 139, 0.1);
+  color: var(--text-secondary);
+}
+
+.competitionDate {
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 0.9rem;
+}
+
+.headerActions {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 1rem;
+  text-decoration: none;
+}
+
+.btnPrimary {
+  background: var(--primary-gradient);
+  color: white;
+}
+
+.btnPrimary:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.btnSecondary {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.btnSecondary:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Admin Content */
+.adminContent {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+/* Stats Section */
+.leaderboardStats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.statCard {
+  background: white;
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--border-color);
+  transition: all 0.3s ease;
+}
+
+.statCard:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+}
+
+.statIcon {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: var(--primary-gradient);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  margin-bottom: 1rem;
+}
+
+.statContent h3 {
+  margin: 0 0 0.5rem 0;
+  color: var(--text-primary);
+  font-size: 1.8rem;
+  font-weight: 700;
+}
+
+.statContent p {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+
+/* Filters */
+.leaderboardFilters {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-end;
+  margin-bottom: 2rem;
+  padding: 1.5rem;
+  background: white;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  flex-wrap: wrap;
+}
+
+.filterGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  min-width: 150px;
+}
+
+.filterGroup label {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.filterGroup select {
+  padding: 0.5rem;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-size: 0.9rem;
+  transition: all 0.3s ease;
+}
+
+.filterGroup select:focus {
+  outline: none;
+  border-color: var(--primary-light);
+  box-shadow: 0 0 0 3px rgba(0, 102, 255, 0.1);
+}
+
+.searchGroup {
+  position: relative;
+  min-width: 200px;
+  flex: 1;
+}
+
+.searchGroup input {
+  width: 100%;
+  padding: 0.5rem 2.5rem 0.5rem 1rem;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-size: 0.9rem;
+  transition: all 0.3s ease;
+}
+
+.searchGroup input:focus {
+  outline: none;
+  border-color: var(--primary-light);
+  box-shadow: 0 0 0 3px rgba(0, 102, 255, 0.1);
+}
+
+.searchGroup i {
+  position: absolute;
+  right: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-secondary);
+}
+
+/* Admin Leaderboard Table */
+.adminLeaderboardTable {
+  background: white;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  overflow: hidden;
+  margin-bottom: 2rem;
+}
+
+.tableHeader {
+  display: grid;
+  grid-template-columns: 80px 1fr 150px 150px 100px 80px 250px 200px;
+  background: var(--primary-gradient);
+  color: white;
+  font-weight: 600;
+  font-size: 0.9rem;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.headerCell {
+  padding: 1rem;
+  text-align: center;
+  border-right: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.headerCell:last-child {
+  border-right: none;
+}
+
+.tableBody {
+  max-height: 600px;
+  overflow-y: auto;
+}
+
+.tableRow {
+  display: grid;
+  grid-template-columns: 80px 1fr 150px 150px 100px 80px 250px 200px;
+  border-bottom: 1px solid var(--border-color);
+  transition: all 0.3s ease;
+}
+
+.tableRow:hover {
+  background: var(--bg-accent);
+}
+
+.tableCell {
+  padding: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  border-right: 1px solid var(--border-color);
+  font-size: 0.9rem;
+}
+
+.tableCell:last-child {
+  border-right: none;
+}
+
+/* Rank Cell */
+.rankDisplay {
+  font-size: 1.2rem;
+  font-weight: 700;
+}
+
+/* Participant Cell */
+.participantInfo {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  text-align: left;
+  width: 100%;
+}
+
+.participantAvatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--primary-gradient);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.participantDetails {
+  flex: 1;
+  min-width: 0;
+}
+
+.participantName {
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 0.25rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.participantCourse {
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+}
+
+/* Contact Cell */
+.contactInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  width: 100%;
+}
+
+.contactEmail,
+.contactPhone {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Banking Cell */
+.bankingInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  width: 100%;
+}
+
+.accountNumber,
+.bankName {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Score Cell */
+.scoreDisplay {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.scoreValue {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.scoreFraction {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+
+.graceIndicator {
+  background: rgba(245, 158, 11, 0.1);
+  color: var(--warning-color);
+  padding: 0.125rem 0.5rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+/* Time Cell */
+.timeCell {
+  font-weight: 600;
+}
+
+/* Courses Cell */
+.courseScores {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  width: 100%;
+}
+
+.courseScore {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.25rem 0.5rem;
+  background: var(--bg-accent);
+  border-radius: var(--radius-sm);
+  font-size: 0.8rem;
+  min-width: 0;
+}
+
+.courseCode {
+  font-weight: 600;
+  color: var(--primary-light);
+  flex-shrink: 0;
+}
+
+.coursePercentage {
+  font-weight: 600;
+  color: var(--text-primary);
+  flex-shrink: 0;
+}
+
+.courseFraction {
+  font-size: 0.7rem;
+  color: var(--text-secondary);
+  flex-shrink: 0;
+}
+
+/* Submission Cell */
+.submissionInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  width: 100%;
+}
+
+.submissionTime {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Pagination */
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.paginationBtn {
+  background: white;
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 500;
+}
+
+.paginationBtn:hover:not(:disabled) {
+  background: var(--primary-gradient);
+  color: white;
+  border-color: transparent;
+}
+
+.paginationBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.paginationInfo {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+
+/* Empty State */
+.emptyState {
+  text-align: center;
+  padding: 4rem 2rem;
+  background: white;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  max-width: 600px;
+  margin: 2rem auto;
+}
+
+.emptyState i {
+  font-size: 4rem;
+  color: var(--text-secondary);
+  margin-bottom: 1rem;
+}
+
+.emptyState h3 {
+  margin: 0 0 1rem 0;
+  color: var(--text-primary);
+  font-size: 1.5rem;
+}
+
+.emptyState p {
+  margin: 0 0 2rem 0;
+  color: var(--text-secondary);
+}
+
+/* Loading State */
+.loadingContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  gap: 1rem;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid var(--border-color);
+  border-top: 4px solid var(--primary-light);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Error State */
+.errorContainer {
+  text-align: center;
+  padding: 4rem 2rem;
+  background: white;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  max-width: 600px;
+  margin: 2rem auto;
+}
+
+.errorContainer h3 {
+  margin: 0 0 1rem 0;
+  color: var(--text-primary);
+  font-size: 1.5rem;
+}
+
+/* Message Toast */
+.messageToast {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background: white;
+  padding: 1rem 1.5rem;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  z-index: 3000;
+  animation: slideInRight 0.3s ease;
+  border-left: 4px solid var(--primary-light);
+}
+
+.messageToast.success {
+  border-left-color: var(--success-color);
+}
+
+.messageToast.error {
+  border-left-color: var(--error-color);
+}
+
+.messageToast.warning {
+  border-left-color: var(--warning-color);
+}
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideOutRight {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+  .tableHeader,
+  .tableRow {
+    grid-template-columns: 70px 1fr 120px 120px 90px 70px 200px 150px;
+  }
+  
+  .headerCell,
+  .tableCell {
+    padding: 0.75rem;
+    font-size: 0.85rem;
+  }
+}
+
+@media (max-width: 992px) {
+  .tableHeader,
+  .tableRow {
+    grid-template-columns: 60px 1fr 100px 100px 80px 60px 180px 130px;
+  }
+  
+  .headerCell,
+  .tableCell {
+    padding: 0.5rem;
+    font-size: 0.8rem;
+  }
+  
+  .participantAvatar {
+    width: 35px;
+    height: 35px;
+  }
+  
+  .courseScore {
+    padding: 0.2rem 0.4rem;
+    font-size: 0.75rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .adminPage {
+    padding: 0.5rem;
+  }
+  
+  .adminHeader {
+    flex-direction: row;
+    align-items: center;
+    padding: 1rem;
+    gap: 0.75rem;
+  }
+  
+  .backBtn {
+    width: 40px;
+    height: 40px;
+    padding: 0.5rem;
+    font-size: 1rem;
+  }
+  
+  .headerContent h1 {
+    font-size: 1.5rem;
+    margin-bottom: 0.25rem;
+  }
+  
+  .competitionInfo {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-top: 0.25rem;
+  }
+  
+  .statusBadge {
+    font-size: 0.65rem;
+    padding: 0.2rem 0.5rem;
+  }
+  
+  .competitionDate {
+    font-size: 0.8rem;
+  }
+  
+  .headerActions {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .btn {
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+  }
+  
+  .leaderboardStats {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+  }
+  
+  .statCard {
+    padding: 1rem;
+  }
+  
+  .statIcon {
+    width: 40px;
+    height: 40px;
+    font-size: 1rem;
+  }
+  
+  .statContent h3 {
+    font-size: 1.5rem;
+  }
+  
+  .statContent p {
+    font-size: 0.8rem;
+  }
+  
+  .leaderboardFilters {
+    padding: 1rem;
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .filterGroup,
+  .searchGroup {
+    min-width: auto;
+  }
+  
+  /* Mobile Table - Horizontal Layout */
+  .adminLeaderboardTable {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border-color) transparent;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    will-change: transform;
+  }
+  
+  .adminLeaderboardTable::-webkit-scrollbar {
+    height: 6px;
+  }
+  
+  .adminLeaderboardTable::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  
+  .adminLeaderboardTable::-webkit-scrollbar-thumb {
+    background-color: var(--border-color);
+    border-radius: 3px;
+  }
+  
+  .adminLeaderboardTable::-webkit-scrollbar-thumb:hover {
+    background-color: var(--border-hover);
+  }
+  
+  .tableHeader {
+    min-width: 800px;
+  }
+  
+  .tableBody {
+    min-width: 800px;
+    max-height: 500px;
+  }
+  
+  .tableHeader,
+  .tableRow {
+    grid-template-columns: 50px 1fr 100px 100px 80px 60px 180px 130px;
+  }
+  
+  /* Course scores adjustments for mobile */
+  .courseScores {
+    flex-direction: row;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    gap: 0.25rem;
+    padding-bottom: 0.25rem;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border-color) transparent;
+  }
+  
+  .courseScores::-webkit-scrollbar {
+    height: 4px;
+  }
+  
+  .courseScores::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  
+  .courseScores::-webkit-scrollbar-thumb {
+    background-color: var(--border-color);
+    border-radius: 2px;
+  }
+  
+  .courseScore {
+    flex-direction: column;
+    align-items: center;
+    padding: 0.2rem 0.4rem;
+    min-width: 70px;
+    flex-shrink: 0;
+  }
+  
+  .courseCode {
+    font-size: 0.7rem;
+    margin-bottom: 0.1rem;
+  }
+  
+  .coursePercentage {
+    font-size: 0.7rem;
+  }
+  
+  .courseFraction {
+    font-size: 0.65rem;
+  }
+  
+  .pagination {
+    flex-wrap: wrap;
+  }
+  
+  .paginationBtn {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.9rem;
+  }
+  
+  .paginationInfo {
+    font-size: 0.8rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .adminHeader {
+    padding: 0.75rem;
+    gap: 0.5rem;
+  }
+  
+  .backBtn {
+    width: 36px;
+    height: 36px;
+    padding: 0.4rem;
+    font-size: 0.9rem;
+  }
+  
+  .headerContent h1 {
+    font-size: 1.25rem;
+  }
+  
+  .competitionInfo {
+    gap: 0.4rem;
+  }
+  
+  .statusBadge {
+    font-size: 0.6rem;
+    padding: 0.15rem 0.4rem;
+  }
+  
+  .competitionDate {
+    font-size: 0.75rem;
+  }
+  
+  .leaderboardStats {
+    grid-template-columns: 1fr;
+  }
+  
+  .statCard {
+    padding: 0.75rem;
+  }
+  
+  .statIcon {
+    width: 35px;
+    height: 35px;
+    font-size: 0.9rem;
+  }
+  
+  .statContent h3 {
+    font-size: 1.2rem;
+  }
+  
+  .statContent p {
+    font-size: 0.75rem;
+  }
+  
+  /* Table adjustments for smaller screens */
+  .tableHeader,
+  .tableRow {
+    grid-template-columns: 40px 1fr 80px 80px 70px 50px 150px 100px;
+  }
+  
+  .tableHeader {
+    min-width: 700px;
+  }
+  
+  .tableBody {
+    min-width: 700px;
+  }
+  
+  .headerCell,
+  .tableCell {
+    padding: 0.4rem;
+    font-size: 0.75rem;
+  }
+  
+  .participantAvatar {
+    width: 30px;
+    height: 30px;
+    font-size: 0.8rem;
+  }
+  
+  .courseScore {
+    min-width: 60px;
+    padding: 0.15rem 0.3rem;
+  }
+  
+  .courseCode {
+    font-size: 0.65rem;
+  }
+  
+  .coursePercentage {
+    font-size: 0.65rem;
+  }
+  
+  .courseFraction {
+    font-size: 0.6rem;
+  }
+  
+  .emptyState {
+    padding: 2rem 1rem;
+  }
+  
+  .emptyState i {
+    font-size: 3rem;
+  }
+  
+  .emptyState h3 {
+    font-size: 1.25rem;
+  }
+  
+  .emptyState p {
+    font-size: 0.85rem;
+  }
+}

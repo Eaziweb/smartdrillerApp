@@ -1,0 +1,549 @@
+/* styles/NoteReader.module.css */
+.noteReader {
+  min-height: 100vh;
+  background: #f5f7fa;
+  color: #333;
+  position: relative;
+}
+
+.noteHeader {
+  background: white;
+  box-shadow: 0 2px 10px rgba(0, 32, 96, 0.1);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.headerContent {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.backBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #f0f4f8;
+  color: #002060;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  flex-shrink: 0;
+}
+
+.backBtn:hover {
+  background: #e1ebf7;
+  transform: translateX(-3px);
+}
+
+.noteTitleSection {
+  flex: 1;
+}
+
+.noteTitleSection h1 {
+  margin: 0 0 0.25rem 0;
+  font-size: 1.5rem;
+  color: #002060;
+  line-height: 1.3;
+  font-weight: 600;
+}
+
+.courseName {
+  color: #0066ff;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.completedIndicator {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #28a745;
+  font-weight: 500;
+  flex-shrink: 0;
+  background: rgba(40, 167, 69, 0.1);
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+}
+
+.noteContent {
+  padding: 2rem 1rem;
+  position: relative;
+  z-index: 1;
+}
+
+.contentContainer {
+  max-width: 800px;
+  margin: 0 auto;
+  background: white;
+  border-radius: 16px;
+  padding: 2rem;
+  box-shadow: 0 4px 15px rgba(0, 32, 96, 0.08);
+}
+
+.noteMeta {
+  display: flex;
+  gap: 2rem;
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #e1ebf7;
+}
+
+.metaItem {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #555;
+  font-size: 0.9rem;
+}
+
+.metaItem i {
+  color: #0066ff;
+}
+
+.noteDescription {
+  margin-bottom: 2rem;
+  padding: 1rem;
+  background: #f5f7fa;
+  border-radius: 8px;
+  border-left: 4px solid #0066ff;
+}
+
+.noteDescription p {
+  margin: 0;
+  color: #555;
+  font-style: italic;
+  line-height: 1.6;
+}
+
+.noteBody {
+  line-height: 1.8;
+  color: #333;
+  font-size: 1rem;
+}
+
+.noteBody h1,
+.noteBody h2,
+.noteBody h3,
+.noteBody h4,
+.noteBody h5,
+.noteBody h6 {
+  margin: 2rem 0 1rem 0;
+  color: #002060;
+}
+
+.noteBody h1 {
+  font-size: 2rem;
+  border-bottom: 2px solid #0066ff;
+  padding-bottom: 0.5rem;
+}
+
+.noteBody h2 {
+  font-size: 1.5rem;
+  color: #0066ff;
+}
+
+.noteBody h3 {
+  font-size: 1.25rem;
+}
+
+.noteBody p {
+  margin: 1rem 0;
+  line-height: 1.8;
+}
+
+.noteBody ul,
+.noteBody ol {
+  margin: 1rem 0;
+  padding-left: 2rem;
+}
+
+.noteBody li {
+  margin: 0.5rem 0;
+  line-height: 1.6;
+}
+
+.noteBody blockquote {
+  margin: 2rem 0;
+  padding: 1rem 1.5rem;
+  background: #f5f7fa;
+  border-left: 4px solid #0066ff;
+  border-radius: 0 8px 8px 0;
+  font-style: italic;
+  color: #555;
+}
+
+.noteBody code {
+  background: #f1f3f4;
+  padding: 0.2rem 0.4rem;
+  border-radius: 4px;
+  font-family: "Courier New", monospace;
+  font-size: 0.9rem;
+  color: #0066ff;
+}
+
+.noteBody pre {
+  background: #f5f7fa;
+  padding: 1rem;
+  border-radius: 8px;
+  overflow-x: auto;
+  margin: 1rem 0;
+  border: 1px solid #e1ebf7;
+}
+
+.noteBody pre code {
+  background: none;
+  padding: 0;
+  color: #333;
+}
+
+.noteBody strong {
+  font-weight: 600;
+  color: #002060;
+}
+
+.noteBody em {
+  font-style: italic;
+  color: #555;
+}
+
+/* Math formula styling */
+.noteBody .formula {
+  background: rgba(0, 102, 255, 0.05);
+  padding: 0.5rem;
+  border-radius: 8px;
+  margin: 0.5rem 0;
+  text-align: center;
+  overflow-x: auto;
+}
+
+.noteBody .MathJax {
+  color: #002060;
+  font-size: 1.1rem;
+}
+
+/* Fraction styling */
+.noteBody .fraction {
+  display: inline-block;
+  text-align: center;
+  vertical-align: middle;
+  margin: 0 0.2em;
+}
+
+.noteBody .fraction .numerator,
+.noteBody .fraction .denominator {
+  display: block;
+  padding: 0 0.2em;
+}
+
+.noteBody .fraction .numerator {
+  border-bottom: 1px solid #002060;
+}
+
+/* Table styling */
+.noteBody table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1rem 0;
+}
+
+.noteBody table th,
+.noteBody table td {
+  border: 1px solid #e1ebf7;
+  padding: 0.75rem;
+  text-align: left;
+}
+
+.noteBody table th {
+  background: #f5f7fa;
+  font-weight: 600;
+  color: #002060;
+}
+
+.noteBody table tr:nth-child(even) {
+  background: #f9fbfd;
+}
+
+.completionSection {
+  margin-top: 3rem;
+  padding-top: 2rem;
+  border-top: 1px solid #e1ebf7;
+  text-align: center;
+}
+
+.completeBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1rem 2rem;
+  background: linear-gradient(135deg, #0066ff 0%, #002060 70%);
+  color: white;
+  border: none;
+  border-radius: 25px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(0, 102, 255, 0.3);
+}
+
+.completeBtn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 102, 255, 0.4);
+}
+
+.completionToast {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background: #28a745;
+  color: white;
+  padding: 1rem 1.5rem;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transform: translateX(100%);
+  transition: transform 0.3s ease;
+  z-index: 1000;
+}
+
+.completionToast.show {
+  transform: translateX(0);
+}
+
+.loadingSpinner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 50vh;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #0066ff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+.errorMessage {
+  text-align: center;
+  padding: 3rem 1rem;
+}
+
+.errorMessage h2 {
+  color: #666;
+  margin-bottom: 1rem;
+}
+
+.backLink {
+  color: #0066ff;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.backLink:hover {
+  text-decoration: underline;
+}
+
+/* Watermark styles */
+.watermarkContainer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1000;
+  overflow: hidden;
+  opacity: 0.07;
+  user-select: none;
+}
+
+.watermarkItem {
+  position: absolute;
+  color: #000;
+  font-size: 14px;
+  font-weight: bold;
+  white-space: nowrap;
+  transform: rotate(-45deg);
+  text-transform: capitalize;
+}
+
+/* Generate watermark grid pattern */
+.watermarkItem:nth-child(1) { top: 5%; left: 5%; }
+.watermarkItem:nth-child(2) { top: 5%; left: 25%; }
+.watermarkItem:nth-child(3) { top: 5%; left: 45%; }
+.watermarkItem:nth-child(4) { top: 5%; left: 65%; }
+.watermarkItem:nth-child(5) { top: 5%; left: 85%; }
+.watermarkItem:nth-child(6) { top: 20%; left: 15%; }
+.watermarkItem:nth-child(7) { top: 20%; left: 35%; }
+.watermarkItem:nth-child(8) { top: 20%; left: 55%; }
+.watermarkItem:nth-child(9) { top: 20%; left: 75%; }
+.watermarkItem:nth-child(10) { top: 20%; left: 95%; }
+.watermarkItem:nth-child(11) { top: 35%; left: 5%; }
+.watermarkItem:nth-child(12) { top: 35%; left: 25%; }
+.watermarkItem:nth-child(13) { top: 35%; left: 45%; }
+.watermarkItem:nth-child(14) { top: 35%; left: 65%; }
+.watermarkItem:nth-child(15) { top: 35%; left: 85%; }
+.watermarkItem:nth-child(16) { top: 50%; left: 15%; }
+.watermarkItem:nth-child(17) { top: 50%; left: 35%; }
+.watermarkItem:nth-child(18) { top: 50%; left: 55%; }
+.watermarkItem:nth-child(19) { top: 50%; left: 75%; }
+.watermarkItem:nth-child(20) { top: 50%; left: 95%; }
+.watermarkItem:nth-child(21) { top: 65%; left: 5%; }
+.watermarkItem:nth-child(22) { top: 65%; left: 25%; }
+.watermarkItem:nth-child(23) { top: 65%; left: 45%; }
+.watermarkItem:nth-child(24) { top: 65%; left: 65%; }
+.watermarkItem:nth-child(25) { top: 65%; left: 85%; }
+.watermarkItem:nth-child(26) { top: 80%; left: 15%; }
+.watermarkItem:nth-child(27) { top: 80%; left: 35%; }
+.watermarkItem:nth-child(28) { top: 80%; left: 55%; }
+.watermarkItem:nth-child(29) { top: 80%; left: 75%; }
+.watermarkItem:nth-child(30) { top: 80%; left: 95%; }
+.watermarkItem:nth-child(31) { top: 95%; left: 5%; }
+.watermarkItem:nth-child(32) { top: 95%; left: 25%; }
+.watermarkItem:nth-child(33) { top: 95%; left: 45%; }
+.watermarkItem:nth-child(34) { top: 95%; left: 65%; }
+.watermarkItem:nth-child(35) { top: 95%; left: 85%; }
+/* Additional watermark items for better coverage */
+.watermarkItem:nth-child(36) { top: 10%; left: 10%; }
+.watermarkItem:nth-child(37) { top: 10%; left: 30%; }
+.watermarkItem:nth-child(38) { top: 10%; left: 50%; }
+.watermarkItem:nth-child(39) { top: 10%; left: 70%; }
+.watermarkItem:nth-child(40) { top: 10%; left: 90%; }
+.watermarkItem:nth-child(41) { top: 25%; left: 20%; }
+.watermarkItem:nth-child(42) { top: 25%; left: 40%; }
+.watermarkItem:nth-child(43) { top: 25%; left: 60%; }
+.watermarkItem:nth-child(44) { top: 25%; left: 80%; }
+.watermarkItem:nth-child(45) { top: 40%; left: 10%; }
+.watermarkItem:nth-child(46) { top: 40%; left: 30%; }
+.watermarkItem:nth-child(47) { top: 40%; left: 50%; }
+.watermarkItem:nth-child(48) { top: 40%; left: 70%; }
+.watermarkItem:nth-child(49) { top: 40%; left: 90%; }
+.watermarkItem:nth-child(50) { top: 55%; left: 20%; }
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* Responsive styles */
+@media (max-width: 768px) {
+  .headerContent {
+    padding: 1rem 0.5rem;
+  }
+  
+  .noteTitleSection h1 {
+    font-size: 1.25rem;
+  }
+  
+  .courseName {
+    font-size: 0.8rem;
+  }
+  
+  .contentContainer {
+    margin: 0 0.5rem;
+    padding: 1.5rem;
+  }
+  
+  .noteMeta {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .completeBtn {
+    padding: 0.75rem 1.5rem;
+    font-size: 0.9rem;
+  }
+  
+  .noteBody h1 {
+    font-size: 1.75rem;
+  }
+  
+  .noteBody h2 {
+    font-size: 1.3rem;
+  }
+  
+  .noteBody h3 {
+    font-size: 1.1rem;
+  }
+  
+  .noteBody p {
+    font-size: 0.95rem;
+  }
+  
+  .noteBody code {
+    font-size: 0.85rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .headerContent {
+    padding: 0.8rem 0.5rem;
+  }
+  
+  .backBtn {
+    width: 36px;
+    height: 36px;
+  }
+  
+  .noteTitleSection h1 {
+    font-size: 1.1rem;
+  }
+  
+  .courseName {
+    font-size: 0.75rem;
+  }
+  
+  .contentContainer {
+    padding: 1rem;
+  }
+  
+  .noteMeta {
+    font-size: 0.85rem;
+  }
+  
+  .noteDescription {
+    padding: 0.8rem;
+  }
+  
+  .noteBody h1 {
+    font-size: 1.5rem;
+  }
+  
+  .noteBody h2 {
+    font-size: 1.2rem;
+  }
+  
+  .noteBody h3 {
+    font-size: 1rem;
+  }
+  
+  .noteBody p {
+    font-size: 0.9rem;
+  }
+  
+  .noteBody code {
+    font-size: 0.8rem;
+  }
+  
+  .completeBtn {
+    padding: 0.6rem 1.2rem;
+    font-size: 0.85rem;
+  }
+}

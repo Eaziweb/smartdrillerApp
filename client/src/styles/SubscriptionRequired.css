@@ -1,0 +1,144 @@
+.subscription-required {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 20px;
+}
+
+.subscription-container {
+  background: white;
+  border-radius: 20px;
+  padding: 40px;
+  max-width: 500px;
+  width: 100%;
+  text-align: center;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+}
+
+.subscription-icon {
+  margin-bottom: 20px;
+}
+
+.subscription-container h2 {
+  color: #333;
+  margin-bottom: 10px;
+  font-size: 28px;
+  font-weight: 600;
+}
+
+.subscription-container > p {
+  color: #666;
+  margin-bottom: 30px;
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+.features-list {
+  text-align: left;
+  margin-bottom: 30px;
+  background-color: #f8f9fa;
+  padding: 20px;
+  border-radius: 10px;
+}
+
+.features-list h3 {
+  color: #333;
+  margin-bottom: 15px;
+  font-size: 18px;
+  text-align: center;
+}
+
+.features-list ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.features-list li {
+  padding: 8px 0;
+  color: #555;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+}
+
+.features-list li::before {
+  content: "";
+  margin-right: 10px;
+}
+
+.subscription-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.btn-upgrade,
+.btn-home {
+  padding: 15px 30px;
+  border: none;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-upgrade {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.btn-upgrade:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+}
+
+.btn-home {
+  background-color: #f8f9fa;
+  color: #666;
+  border: 1px solid #e9ecef;
+}
+
+.btn-home:hover {
+  background-color: #e9ecef;
+}
+
+.loading-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.loading-spinner {
+  color: #666;
+  font-size: 18px;
+}
+
+@media (max-width: 768px) {
+  .subscription-container {
+    padding: 30px 20px;
+    margin: 10px;
+  }
+
+  .subscription-container h2 {
+    font-size: 24px;
+  }
+
+  .features-list {
+    padding: 15px;
+  }
+
+  .subscription-actions {
+    gap: 10px;
+  }
+
+  .btn-upgrade,
+  .btn-home {
+    padding: 12px 20px;
+    font-size: 14px;
+  }
+}

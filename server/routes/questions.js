@@ -1,0 +1,656 @@
+const express = require("express");
+const multer = require('multer');
+const path = require('path');
+const fs = require('fs');
+const Question = require("../models/Question");
+const CourseYear = require("../models/CourseYear");
+const Course = require("../models/Course");
+const StudyProgress = require("../models/StudyProgress");
+const { ensureCourseYearExists } = require("../utils/courseYearUtils");
+const { auth, adminAuth } = require("../middleware/auth");
+const subscriptionCheck = require("../middleware/subscriptionCheck");
+const uploadMiddleware = require('../middleware/upload');
+
+// Configure multer for image uploads
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    const uploadDir = path.join(__dirname, "../uploads/questions");
+    // Create directory if it doesn't exist
+    if (!fs.existsSync(uploadDir)) {
+      fs.mkdirSync(uploadDir, { recursive: true });
+    }
+    cb(null, uploadDir);
+  },
+  filename: function (req, file, cb) {
+    // Generate unique filename
+    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1E9);
+    cb(null, file.fieldname + "-" + uniqueSuffix + path.extname(file.originalname));
+  }
+});
+
+const fileFilter = (req, file, cb) => {
+  // Accept images only
+  if (file.mimetype.startsWith("image/")) {
+    cb(null, true);
+  } else {
+    cb(new Error("Only image files are allowed!"), false);
+  }
+};
+
+const upload = multer({
+  storage: storage,
+  fileFilter: fileFilter,
+  limits: {
+    fileSize: 5 * 1024 * 1024, // 5MB limit
+  }
+});
+
+const router = express.Router();
+
+// Get questions for study/mock (protected route)
+router.post("/fetch", auth, subscriptionCheck, async (req, res) => {
+  try {
+    const { course, year, topics, questionCount, examType } = req.body;
+    // Build query
+    const query = {
+      course: course.toLowerCase(), // Search with lowercase course code
+      year,
+      isActive: true,
+    };
+    // Add topic filter if specific topics are selected
+    if (topics && topics !== "all" && topics.length > 0) {
+      const topicArray = Array.isArray(topics) ? topics : topics.split(",");
+      query.topic = { $in: topicArray };
+    }
+    // Get questions
+    let questions = await Question.find(query).select("-createdBy");
+    // Shuffle questions for randomness
+    questions = questions.sort(() => Math.random() - 0.5);
+    // Limit to requested count
+    if (questionCount && questionCount > 0) {
+      questions = questions.slice(0, Number.parseInt(questionCount));
+    }
+    res.json({
+      success: true,
+      questions,
+      totalFound: questions.length,
+      examType,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+router.get("/search", auth, async (req, res) => {
+  try {
+    const {
+      q,
+      course,
+      searchType = "question",
+      page = 1,
+      limit = 10
+    } = req.query;
+    // Build the search query
+    const query = { isActive: true };
+    // Add course filter if specified
+    if (course) {
+      query.course = course.toLowerCase();
+    }
+    // Add search query based on searchType
+    if (q && q.trim() !== "") {
+      const searchQuery = q.trim();
+      
+      if (searchType === "everything") {
+        // Search in question, explanation, tags, and topic
+        query.$or = [
+          { question: { $regex: searchQuery, $options: "i" } },
+          { explanation: { $regex: searchQuery, $options: "i" } },
+          { tags: { $in: [new RegExp(searchQuery, "i")] } },
+          { topic: { $regex: searchQuery, $options: "i" } }
+        ];
+      } else {
+        // Default: search only in question text
+        query.question = { $regex: searchQuery, $options: "i" };
+      }
+    }
+    // Calculate pagination values
+    const currentPage = Math.max(1, parseInt(page));
+    const itemsPerPage = Math.max(1, Math.min(parseInt(limit), 50)); // Cap at 50 items per page
+    const skip = (currentPage - 1) * itemsPerPage;
+    // Execute query with pagination
+    const [questions, totalCount] = await Promise.all([
+      Question.find(query)
+        .select("-createdBy") // Exclude createdBy field
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(itemsPerPage),
+      Question.countDocuments(query)
+    ]);
+    // Calculate pagination details
+    const totalPages = Math.ceil(totalCount / itemsPerPage);
+    const hasNext = currentPage < totalPages;
+    const hasPrev = currentPage > 1;
+    res.json({
+      success: true,
+      questions,
+      pagination: {
+        current: currentPage,
+        pages: totalPages,
+        total: totalCount,
+        hasNext,
+        hasPrev
+      }
+    });
+  } catch (error) {
+    console.error("Search error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Server error during search"
+    });
+  }
+});
+
+// Get available courses for search
+// Get available course years
+
+router.get("/study-progress", auth, subscriptionCheck, async (req, res) => {
+  try {
+    // Get all study progress records for this user
+    const progressRecords = await StudyProgress.find({
+      user: req.user.id
+    }).populate("studiedQuestions");
+    
+    // Get all available courses and years
+    const courseYears = await CourseYear.find({ isActive: true });
+    
+    // Structure the response
+    const progressMap = {};
+    
+    // First, initialize progressMap with all courses and years
+    for (const cy of courseYears) {
+      if (!progressMap[cy.course]) {
+        progressMap[cy.course] = {};
+      }
+      
+      // Count total questions for this course and year
+      const totalQuestions = await Question.countDocuments({
+        course: cy.course,
+        year: cy.year,
+        isActive: true
+      });
+      
+      // Initialize with default progress (0%)
+      progressMap[cy.course][cy.year] = {
+        studiedCount: 0,
+        totalQuestions,
+        percentage: 0
+      };
+    }
+    
+    // Then, update with actual progress data for studied courses/years
+    for (const record of progressRecords) {
+      // Only update if this course-year combination exists in our map
+      if (progressMap[record.course] && progressMap[record.course][record.year]) {
+        // Recalculate total questions to ensure accuracy
+        const totalQuestions = await Question.countDocuments({
+          course: record.course,
+          year: record.year,
+          isActive: true
+        });
+        
+        progressMap[record.course][record.year] = {
+          studiedCount: record.studiedQuestions.length,
+          totalQuestions,
+          percentage: totalQuestions > 0 ? Math.round((record.studiedQuestions.length / totalQuestions) * 100) : 0
+        };
+      }
+    }
+    
+    res.json({
+      success: true,
+      progress: progressMap
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+// Reset study progress for a specific course and year
+router.delete("/study-progress/:course/:year", auth, subscriptionCheck, async (req, res) => {
+  try {
+    const { course, year } = req.params;
+    
+    await StudyProgress.findOneAndDelete({
+      user: req.user.id,
+      course: course.toLowerCase(),
+      year
+    });
+    
+    res.json({
+      success: true,
+      message: "Study progress reset successfully"
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+router.get("/course-years", auth, subscriptionCheck, async (req, res) => {
+  try {
+    const courseYears = await CourseYear.find({ isActive: true }).select("course year").sort({ course: 1, year: -1 });
+    // Group by course
+    const groupedYears = {};
+    courseYears.forEach((cy) => {
+      if (!groupedYears[cy.course]) {
+        groupedYears[cy.course] = [];
+      }
+      groupedYears[cy.course].push(cy.year);
+    });
+    res.json(groupedYears);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+// Get available topics for a course
+router.get("/topics/:course", auth, subscriptionCheck, async (req, res) => {
+  try {
+    const { course } = req.params;
+    const topics = await Question.distinct("topic", {
+      course: course.toLowerCase(), // Search with lowercase course code
+      isActive: true,
+    });
+    res.json(topics.sort());
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+// Get study progress for a specific course
+router.get("/study-progress/:courseCode", auth, subscriptionCheck, async (req, res) => {
+  try {
+    const { courseCode } = req.params;
+    const course = courseCode.toLowerCase();
+    // Get all years for this course that have questions
+    const yearsWithQuestions = await Question.distinct('year', {
+      course,
+      isActive: true
+    });
+    // Get all study progress records for this user and course
+    const progressRecords = await StudyProgress.find({
+      user: req.user.id,
+      course
+    });
+    // Create a map of year to progress data
+    const progressMap = {};
+    for (const year of yearsWithQuestions) {
+      // Count total questions for this year
+      const totalQuestions = await Question.countDocuments({
+        course,
+        year,
+        isActive: true
+      });
+      // Find the progress record for this year
+      const record = progressRecords.find(p => p.year === year);
+      const studiedQuestions = record ? record.studiedQuestions.length : 0;
+      progressMap[year] = {
+        totalQuestions,
+        studiedQuestions,
+        percentage: totalQuestions > 0 ? Math.round((studiedQuestions / totalQuestions) * 100) : 0
+      };
+    }
+    res.json({
+      success: true,
+      progress: progressMap
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+// Record study progress when a user studies a question
+router.post("/study-progress", auth, subscriptionCheck, async (req, res) => {
+  try {
+    const { questionId } = req.body;
+    if (!questionId) {
+      return res.status(400).json({ message: "Question ID is required" });
+    }
+    // Find the question to get course and year
+    const question = await Question.findById(questionId);
+    if (!question) {
+      return res.status(404).json({ message: "Question not found" });
+    }
+    const { course, year } = question;
+    // Find or create study progress record
+    let progress = await StudyProgress.findOne({
+      user: req.user.id,
+      course,
+      year
+    });
+    if (!progress) {
+      progress = new StudyProgress({
+        user: req.user.id,
+        course,
+        year,
+        studiedQuestions: [questionId]
+      });
+    } else {
+      // Add the question if not already studied
+      if (!progress.studiedQuestions.includes(questionId)) {
+        progress.studiedQuestions.push(questionId);
+      }
+    }
+    await progress.save();
+    res.status(201).json({
+      message: "Study progress recorded",
+      progress: {
+        course,
+        year,
+        studiedCount: progress.studiedQuestions.length
+      }
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+// Admin: Add question with image upload
+router.post("/admin/add", adminAuth, upload.single("image"), async (req, res) => {
+  try {
+    const { question, options, correctOption, explanation, tags, course, year, topic } = req.body;
+    
+    // Validate required fields
+    if (!question || !options || correctOption === undefined || !explanation || !course || !year || !topic) {
+      return res.status(400).json({ message: "All fields are required" });
+    }
+    
+    // Parse options
+    let parsedOptions;
+    try {
+      parsedOptions = Array.isArray(options) ? options : JSON.parse(options);
+    } catch (error) {
+      return res.status(400).json({ message: "Invalid options format" });
+    }
+    
+    if (!Array.isArray(parsedOptions) || parsedOptions.length !== 4) {
+      return res.status(400).json({ message: "Options must be an array of 4 items" });
+    }
+    
+    // Convert and validate correctOption
+    const correctOptionNumber = Number(correctOption);
+    if (isNaN(correctOptionNumber)) {
+      return res.status(400).json({ message: "Correct option must be a number" });
+    }
+    // FIXED: Changed validation from 0-3 to 1-4
+    if (correctOptionNumber < 1 || correctOptionNumber > 4) {
+      return res.status(400).json({ message: "Correct option must be between 1 and 4" });
+    }
+    
+    // Check if course exists and is active
+    const courseExists = await Course.findOne({ courseCode: course.toLowerCase(), isActive: true });
+    if (!courseExists) {
+      return res.status(400).json({ message: "Course does not exist or is not active. Please add the course first." });
+    }
+    
+    // Ensure course-year combination exists
+    await ensureCourseYearExists(course.toLowerCase(), year.trim(), req.user.id);
+    
+    // Parse tags
+    let parsedTags = [];
+    try {
+      if (tags) {
+        parsedTags = Array.isArray(tags) ? tags : JSON.parse(tags);
+      }
+    } catch (error) {
+      // If tags is not valid JSON, try splitting by comma
+      parsedTags = tags.split(",").map(tag => tag.trim()).filter(Boolean);
+    }
+    
+    const newQuestion = new Question({
+      question: question.trim(),
+      image: req.file ? `/uploads/questions/${req.file.filename}` : null,
+      options: parsedOptions.map(opt => opt.trim()),
+      correctOption: correctOptionNumber, // FIXED: Store as 1-4 (no conversion)
+      explanation: explanation.trim(),
+      tags: parsedTags,
+      course: course.toLowerCase(),
+      year: year.trim(),
+      topic: topic.trim(),
+      createdBy: req.user.id,
+    });
+    
+    await newQuestion.save();
+    res.status(201).json({
+      message: "Question added successfully",
+      question: newQuestion,
+    });
+  } catch (error) {
+    console.error("Error adding question:", error);
+    res.status(500).json({ message: "Server error: " + error.message });
+  }
+});
+
+router.put("/admin/:id", adminAuth, upload.single("image"), async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { question, options, correctOption, explanation, tags, course, year, topic } = req.body;
+    
+    // Find the existing question
+    const existingQuestion = await Question.findById(id);
+    if (!existingQuestion) {
+      return res.status(404).json({ message: "Question not found" });
+    }
+    
+    // Prepare update object
+    const updates = {};
+    
+    // Update fields if provided
+    if (question !== undefined) updates.question = question.trim();
+    if (options !== undefined) {
+      try {
+        const parsedOptions = Array.isArray(options) ? options : JSON.parse(options);
+        if (!Array.isArray(parsedOptions) || parsedOptions.length !== 4) {
+          return res.status(400).json({ message: "Options must be an array of 4 items" });
+        }
+        updates.options = parsedOptions.map(opt => opt.trim());
+      } catch (error) {
+        return res.status(400).json({ message: "Invalid options format" });
+      }
+    }
+    if (correctOption !== undefined) {
+      const correctOptionNumber = Number(correctOption);
+      if (isNaN(correctOptionNumber)) {
+        return res.status(400).json({ message: "Correct option must be a number" });
+      }
+      // FIXED: Changed validation from 0-3 to 1-4
+      if (correctOptionNumber < 1 || correctOptionNumber > 4) {
+        return res.status(400).json({ message: "Correct option must be between 1 and 4" });
+      }
+      updates.correctOption = correctOptionNumber; // FIXED: Store as 1-4 (no conversion)
+    }
+    if (explanation !== undefined) updates.explanation = explanation.trim();
+    if (course !== undefined) updates.course = course.toLowerCase();
+    if (year !== undefined) updates.year = year.trim();
+    if (topic !== undefined) updates.topic = topic.trim();
+    
+    // Handle tags
+    if (tags !== undefined) {
+      try {
+        updates.tags = Array.isArray(tags) ? tags : JSON.parse(tags);
+      } catch (error) {
+        // If tags is not valid JSON, try splitting by comma
+        updates.tags = tags.split(",").map(tag => tag.trim()).filter(Boolean);
+      }
+    }
+    
+    // Handle image
+    if (req.file) {
+      updates.image = `/uploads/questions/${req.file.filename}`;
+    }
+    
+    // Update the question
+    const updatedQuestion = await Question.findByIdAndUpdate(id, updates, { new: true, runValidators: true });
+    
+    res.json({
+      message: "Question updated successfully",
+      question: updatedQuestion,
+    });
+  } catch (error) {
+    console.error("Error updating question:", error);
+    res.status(500).json({ message: "Server error: " + error.message });
+  }
+});
+
+// Admin: Bulk import questions
+router.post("/admin/bulk-import", adminAuth, async (req, res) => {
+  try {
+    let questions = req.body.questions;
+    
+    // Check if questions is an array
+    if (!Array.isArray(questions)) {
+      return res.status(400).json({ 
+        message: "Invalid request format. 'questions' must be an array." 
+      });
+    }
+    
+    const questionsToInsert = [];
+    const courseYearChecks = new Set();
+    
+    for (let i = 0; i < questions.length; i++) {
+      const q = questions[i];
+      
+      // Validate required fields
+      if (!q.question || !q.options || q.correctOption === undefined || 
+          !q.explanation || !q.course || !q.year || !q.topic) {
+        return res.status(400).json({ 
+          message: `Question ${i + 1}: Missing required fields` 
+        });
+      }
+      
+      // Validate options
+      if (!Array.isArray(q.options) || q.options.length !== 4) {
+        return res.status(400).json({ 
+          message: `Question ${i + 1}: Must have exactly 4 options` 
+        });
+      }
+      
+      // Validate correct option (must be 1-4)
+      const correctOptionNumber = Number(q.correctOption);
+      if (isNaN(correctOptionNumber) || correctOptionNumber < 1 || correctOptionNumber > 4) {
+        return res.status(400).json({ 
+          message: `Question ${i + 1}: Correct option must be between 1 and 4` 
+        });
+      }
+      
+      // Check if course exists and is active
+      const courseExists = await Course.findOne({
+        courseCode: q.course.toLowerCase(),
+        isActive: true,
+      });
+      
+      if (!courseExists) {
+        return res.status(400).json({
+          message: `Question ${i + 1}: Course ${q.course.toUpperCase()} does not exist or is not active. Please add the course first.`,
+        });
+      }
+      
+      courseYearChecks.add(`${q.course.toLowerCase()}-${q.year.trim()}`);
+      
+      questionsToInsert.push({
+        question: q.question.trim(),
+        image: q.image ? q.image.trim() : null,
+        options: q.options.map((opt) => opt.trim()),
+        correctOption: correctOptionNumber, // FIXED: Store as 1-4 (no conversion)
+        explanation: q.explanation.trim(),
+        tags: Array.isArray(q.tags) ? q.tags.map((tag) => tag.trim()) : [],
+        course: q.course.toLowerCase(),
+        year: q.year.trim(),
+        topic: q.topic.trim(),
+        createdBy: req.user.id,
+      });
+    }
+    
+    // Ensure course-year combinations exist
+    for (const courseYear of courseYearChecks) {
+      const [course, year] = courseYear.split("-");
+      let exists = await CourseYear.findOne({ course, year });
+      if (!exists) {
+        await new CourseYear({
+          course,
+          year,
+          createdBy: req.user.id,
+        }).save();
+      }
+    }
+    
+    const result = await Question.insertMany(questionsToInsert);
+    res.json({
+      message: `Successfully imported ${result.length} questions`,
+      imported: result.length,
+    });
+  } catch (error) {
+    console.error("Bulk import error:", error);
+    res.status(500).json({ message: "Server error: " + error.message });
+  }
+});   
+
+
+// Admin: Search questions
+router.get("/admin/search", adminAuth, async (req, res) => {
+  try {
+    const { q, course, year, topic, page = 1, limit = 20 } = req.query;
+    const query = { isActive: true };
+    if (q) {
+      query.$or = [
+        { question: { $regex: q, $options: "i" } },
+        { explanation: { $regex: q, $options: "i" } },
+        { tags: { $in: [new RegExp(q, "i")] } },
+      ];
+    }
+    if (course) query.course = course.toLowerCase(); // Search with lowercase course code
+    if (year) query.year = year;
+    if (topic) query.topic = topic;
+    const skip = (page - 1) * limit;
+    const questions = await Question.find(query)
+      .populate("createdBy", "fullName")
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(Number.parseInt(limit));
+    const total = await Question.countDocuments(query);
+    res.json({
+      questions,
+      pagination: {
+        current: Number.parseInt(page),
+        pages: Math.ceil(total / limit),
+        total,
+      },
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+// Admin: Delete question
+router.delete("/admin/:id", adminAuth, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const question = await Question.findByIdAndUpdate(id, { isActive: false }, { new: true });
+    if (!question) {
+      return res.status(404).json({ message: "Question not found" });
+    }
+    res.json({ message: "Question deleted successfully" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+module.exports = router;

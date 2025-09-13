@@ -1,0 +1,839 @@
+/* styles/AdminQuizManagement.module.css */
+.adminDashboard {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background-color: #f8f9fa;
+  min-height: 100vh;
+}
+
+/* Toast Notification */
+.toast {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  padding: 12px 20px;
+  border-radius: 8px;
+  color: white;
+  font-weight: 500;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+  animation: slideIn 0.3s ease-out;
+}
+
+.toast.success {
+  background: linear-gradient(135deg, #28a745, #20c997);
+}
+
+.toast.error {
+  background: linear-gradient(135deg, #dc3545, #c82333);
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+/* Header */
+.adminHeader {
+  background: linear-gradient(135deg, #ffffff, #f8f9fa);
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 24px;
+  box-shadow: 0 4px 12px rgba(0, 32, 96, 0.08);
+  border: 1px solid #e1ebf7;
+}
+
+.adminHeader h1 {
+  margin: 0 0 20px 0;
+  color: #002060;
+  font-size: 1.8rem;
+  font-weight: 600;
+}
+
+.adminNav {
+  display: flex;
+  gap: 12px;
+}
+
+.navBtn {
+  padding: 10px 20px;
+  border: 1px solid #e1ebf7;
+  background: #f8f9fa;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: 500;
+  color: #495057;
+}
+
+.navBtn:hover {
+  background: #e1ebf7;
+  transform: translateY(-2px);
+}
+
+.navBtn.active {
+  background: linear-gradient(135deg, #0066ff, #002060);
+  color: white;
+  border-color: transparent;
+  box-shadow: 0 4px 8px rgba(0, 102, 255, 0.2);
+}
+
+/* Section Headers */
+.sectionHeader {
+  margin-bottom: 24px;
+}
+
+.sectionHeader h2 {
+  color: #002060;
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+/* Form Sections */
+.formSection {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 24px;
+  box-shadow: 0 4px 12px rgba(0, 32, 96, 0.08);
+  border: 1px solid #e1ebf7;
+}
+
+.formSection h3 {
+  margin: 0 0 20px 0;
+  color: #002060;
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+.formRow {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+}
+
+.formGroup label {
+  margin-bottom: 8px;
+  font-weight: 500;
+  color: #495057;
+  font-size: 0.9rem;
+}
+
+.formGroup input,
+.formGroup textarea,
+.formGroup select {
+  padding: 10px 14px;
+  border: 1px solid #e1ebf7;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  transition: all 0.3s ease;
+}
+
+.formGroup input:focus,
+.formGroup textarea:focus,
+.formGroup select:focus {
+  outline: none;
+  border-color: #0066ff;
+  box-shadow: 0 0 0 3px rgba(0, 102, 255, 0.1);
+}
+
+.formGroup textarea {
+  min-height: 100px;
+  resize: vertical;
+}
+
+/* Image Upload */
+.imageUploadContainer {
+  margin-bottom: 16px;
+}
+
+.imagePreviewContainer {
+  position: relative;
+  display: inline-block;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid #e1ebf7;
+}
+
+.imagePreview {
+  max-width: 100%;
+  max-height: 300px;
+  display: block;
+}
+
+.removeImageBtn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: rgba(220, 53, 69, 0.8);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.removeImageBtn:hover {
+  background: rgba(220, 53, 69, 1);
+}
+
+.imageUploadBox {
+  border: 2px dashed #e1ebf7;
+  border-radius: 8px;
+  padding: 20px;
+  text-align: center;
+  background: #f8f9fa;
+  transition: all 0.3s ease;
+}
+
+.imageUploadBox:hover {
+  border-color: #0066ff;
+  background: #f0f4f8;
+}
+
+.imageInput {
+  display: none;
+}
+
+.imageUploadLabel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  gap: 10px;
+  color: #495057;
+}
+
+.imageUploadLabel i {
+  font-size: 2rem;
+  color: #0066ff;
+}
+
+.imageUploadLabel span {
+  font-weight: 500;
+}
+
+.imageUploadLabel p {
+  margin: 0;
+  font-size: 0.8rem;
+  color: #6c757d;
+}
+
+/* Options */
+.optionsSection {
+  margin-bottom: 16px;
+}
+
+.optionsSection label {
+  display: block;
+  margin-bottom: 12px;
+  font-weight: 500;
+  color: #495057;
+  font-size: 0.9rem;
+}
+
+.optionInput {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.optionInput input[type="radio"] {
+  margin: 0;
+  width: 18px;
+  height: 18px;
+}
+
+.optionInput input[type="text"] {
+  flex: 1;
+  padding: 10px 14px;
+  border: 1px solid #e1ebf7;
+  border-radius: 8px;
+  font-size: 0.95rem;
+}
+
+/* Form Actions */
+.formActions {
+  display: flex;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+/* Buttons */
+.btn {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.95rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btnPrimary {
+  background: linear-gradient(135deg, #0066ff, #002060);
+  color: white;
+  box-shadow: 0 4px 8px rgba(0, 102, 255, 0.2);
+}
+
+.btnPrimary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(0, 102, 255, 0.3);
+}
+
+.btnSecondary {
+  background: #6c757d;
+  color: white;
+}
+
+.btnSecondary:hover {
+  background: #545b62;
+}
+
+.btnEdit {
+  background: #ffc107;
+  color: #212529;
+}
+
+.btnEdit:hover {
+  background: #e0a800;
+}
+
+.btnDelete {
+  background: #dc3545;
+  color: white;
+}
+
+.btnDelete:hover {
+  background: #c82333;
+}
+
+.btnDeleteSmall {
+  background: #dc3545;
+  color: white;
+  border: none;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btnDeleteSmall:hover {
+  background: #c82333;
+}
+
+.btnConfirm {
+  background: #dc3545;
+  color: white;
+}
+
+.btnCancel {
+  background: #6c757d;
+  color: white;
+}
+
+.btnWarning {
+  background: #ffc107;
+  color: #212529;
+}
+
+.btnWarning:hover {
+  background: #e0a800;
+}
+
+.btnDanger {
+  background: #dc3545;
+  color: white;
+}
+
+.btnDanger:hover {
+  background: #c82333;
+}
+
+.btnActivate {
+  background: #28a745;
+  color: white;
+}
+
+.btnActivate:hover {
+  background: #218838;
+}
+
+.btnDeactivate {
+  background: #ffc107;
+  color: #212529;
+}
+
+.btnDeactivate:hover {
+  background: #e0a800;
+}
+
+/* Search Section */
+.searchSection {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 24px;
+  box-shadow: 0 4px 12px rgba(0, 32, 96, 0.08);
+  border: 1px solid #e1ebf7;
+}
+
+.searchRow {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.searchRow input {
+  flex: 1;
+  padding: 10px 14px;
+  border: 1px solid #e1ebf7;
+  border-radius: 8px;
+  font-size: 0.95rem;
+}
+
+.filterRow {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.filterRow select,
+.filterRow input {
+  padding: 10px 14px;
+  border: 1px solid #e1ebf7;
+  border-radius: 8px;
+  min-width: 150px;
+  font-size: 0.95rem;
+}
+
+/* Questions List */
+.questionsList {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.questionCard {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 4px 12px rgba(0, 32, 96, 0.08);
+  border: 1px solid #e1ebf7;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.questionCard:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px rgba(0, 32, 96, 0.12);
+}
+
+.questionHeader {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.badge {
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.courseBadge {
+  background: rgba(0, 102, 255, 0.1);
+  color: #0066ff;
+}
+
+.yearBadge {
+  background: rgba(0, 32, 96, 0.1);
+  color: #002060;
+}
+
+.topicBadge {
+  background: rgba(40, 167, 69, 0.1);
+  color: #28a745;
+}
+
+.questionContent {
+  margin-bottom: 16px;
+}
+
+.questionText {
+  font-weight: 500;
+  margin-bottom: 12px;
+  color: #333;
+  font-size: 1.1rem;
+  line-height: 1.5;
+}
+
+.questionImage {
+  margin-bottom: 12px;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.questionImage img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+.options {
+  margin-bottom: 12px;
+}
+
+.option {
+  padding: 8px 0;
+  color: #495057;
+  font-size: 0.95rem;
+}
+
+.option.correct {
+  color: #28a745;
+  font-weight: 500;
+}
+
+.explanation {
+  margin-bottom: 12px;
+  padding: 12px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  border-left: 4px solid #0066ff;
+}
+
+.explanation strong {
+  color: #002060;
+}
+
+.tags {
+  font-size: 0.9rem;
+  color: #495057;
+}
+
+.tags strong {
+  color: #002060;
+}
+
+.questionActions {
+  display: flex;
+  gap: 10px;
+}
+
+/* Course Years Section */
+.courseYearsSection {
+  margin-top: 20px;
+}
+
+.courseYearsList {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.courseGroup {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 4px 12px rgba(0, 32, 96, 0.08);
+  border: 1px solid #e1ebf7;
+}
+
+.courseTitle {
+  margin: 0 0 16px 0;
+  color: #002060;
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+.yearsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 12px;
+}
+
+.yearCard {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #e1ebf7;
+  transition: all 0.3s ease;
+}
+
+.yearCard:hover {
+  background: #e1ebf7;
+}
+
+.yearText {
+  font-weight: 500;
+  color: #333;
+}
+
+/* Courses Section */
+.coursesSection {
+  margin-top: 20px;
+}
+
+.semesterActions {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.coursesList {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.courseCard {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 4px 12px rgba(0, 32, 96, 0.08);
+  border: 1px solid #e1ebf7;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.courseCard:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px rgba(0, 32, 96, 0.12);
+}
+
+.courseCard.inactive {
+  opacity: 0.7;
+  background-color: #f8f9fa;
+}
+
+.courseHeader {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.courseCode {
+  background: rgba(0, 102, 255, 0.1);
+  color: #0066ff;
+}
+
+.courseName {
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: #333;
+}
+
+.semesterBadge {
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.semesterBadge.first {
+  background: rgba(40, 167, 69, 0.1);
+  color: #28a745;
+}
+
+.semesterBadge.second {
+  background: rgba(255, 193, 7, 0.1);
+  color: #ffc107;
+}
+
+.statusBadge {
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.statusBadge.active {
+  background: rgba(40, 167, 69, 0.1);
+  color: #28a745;
+}
+
+.statusBadge.inactive {
+  background: rgba(220, 53, 69, 0.1);
+  color: #dc3545;
+}
+
+.courseActions {
+  display: flex;
+  gap: 10px;
+}
+
+/* Loading and Empty States */
+.loading {
+  text-align: center;
+  padding: 40px;
+  color: #6c757d;
+  font-size: 1.1rem;
+}
+
+.noResults {
+  text-align: center;
+  padding: 40px 20px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 32, 96, 0.08);
+  border: 1px solid #e1ebf7;
+}
+
+.noResults p {
+  margin: 0;
+  color: #6c757d;
+  font-size: 1.1rem;
+}
+
+/* Confirmation Dialog */
+.confirmDialogOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.confirmDialog {
+  background: white;
+  padding: 24px;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  max-width: 400px;
+  width: 90%;
+}
+
+.confirmDialog p {
+  margin: 0 0 20px 0;
+  color: #333;
+  font-size: 1.1rem;
+}
+
+.confirmDialogButtons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .adminDashboard {
+    padding: 12px;
+  }
+  
+  .formRow {
+    grid-template-columns: 1fr;
+  }
+  
+  .searchRow {
+    flex-direction: column;
+  }
+  
+  .filterRow {
+    flex-direction: column;
+  }
+  
+  .yearsGrid {
+    grid-template-columns: 1fr;
+  }
+  
+  .courseHeader {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .courseActions {
+    margin-top: 12px;
+    width: 100%;
+  }
+  
+  .semesterActions {
+    flex-direction: column;
+  }
+  
+  .btn {
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .adminHeader h1 {
+    font-size: 1.5rem;
+  }
+  
+  .adminNav {
+    flex-wrap: wrap;
+  }
+  
+  .navBtn {
+    font-size: 0.85rem;
+    padding: 8px 16px;
+  }
+  
+  .formSection {
+    padding: 16px;
+  }
+  
+  .questionCard {
+    padding: 16px;
+  }
+  
+  .questionText {
+    font-size: 1rem;
+  }
+  
+  .courseCard {
+    padding: 16px;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .courseActions {
+    width: 100%;
+    margin-top: 12px;
+  }
+}

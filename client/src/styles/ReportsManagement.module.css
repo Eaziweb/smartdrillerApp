@@ -1,0 +1,360 @@
+:root {
+  --primary-color: #002060;
+  --secondary-color: #0066ff;
+  --gradient-primary: linear-gradient(45deg, #0099ff, #002060 70%);
+  --text-primary: #333;
+  --text-secondary: #666;
+  --background-color: #f8f9fa;
+  --card-background: #ffffff;
+  --border-color: #e0e0e0;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
+  --danger-color: #ff3860;
+  --success-color: #23d160;
+  --warning-color: #ffdd57;
+  --pending-color: #f39c12;
+  --reviewed-color: #3498db;
+  --resolved-color: #27ae60;
+  --dismissed-color: #95a5a6;
+}
+
+/* Main container */
+.reportsManagement {
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f5f7fa 0%, #e4ecf7 100%);
+}
+
+/* Header */
+.managementHeader {
+  margin-bottom: 30px;
+  padding-bottom: 15px;
+  border-bottom: 2px solid var(--border-color);
+}
+
+.managementHeader h2 {
+  color: var(--primary-color);
+  margin: 0;
+  font-size: 1.8rem;
+  font-weight: 600;
+}
+
+/* Filters */
+.reportsFilters {
+  margin-bottom: 25px;
+  padding: 20px;
+  background-color: var(--card-background);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+.statusFilter {
+  padding: 10px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  font-size: 14px;
+  min-width: 150px;
+  transition: border-color 0.3s;
+}
+
+.statusFilter:focus {
+  outline: none;
+  border-color: var(--secondary-color);
+}
+
+/* Reports list */
+.reportsList {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.reportItem {
+  background: var(--card-background);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  box-shadow: var(--shadow-md);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.reportItem:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-lg);
+}
+
+.reportHeader {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 15px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.reportNumber {
+  background-color: var(--text-secondary);
+  color: white;
+  padding: 5px 10px;
+  border-radius: 15px;
+  font-weight: 500;
+  font-size: 12px;
+}
+
+.reportStatus {
+  color: white;
+  padding: 5px 12px;
+  border-radius: 15px;
+  font-weight: 500;
+  font-size: 12px;
+  text-transform: uppercase;
+}
+
+.reportDate {
+  background-color: var(--background-color);
+  padding: 5px 10px;
+  border-radius: 15px;
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-left: auto;
+}
+
+.reportContent {
+  margin-bottom: 20px;
+}
+
+.reportQuestion,
+.reportDetails {
+  margin-bottom: 20px;
+}
+
+.reportQuestion h4,
+.reportDetails h4 {
+  margin: 0 0 10px 0;
+  color: var(--primary-color);
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.reportQuestion p {
+  background-color: var(--background-color);
+  padding: 15px;
+  border-radius: var(--radius-md);
+  margin: 10px 0;
+  line-height: 1.5;
+  border-left: 4px solid var(--secondary-color);
+}
+
+.questionDetails {
+  display: flex;
+  gap: 15px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+
+.questionDetails span {
+  background-color: rgba(0, 102, 255, 0.1);
+  padding: 5px 10px;
+  border-radius: 15px;
+  font-size: 12px;
+  color: var(--secondary-color);
+  font-weight: 500;
+}
+
+.reportDetails p {
+  margin: 8px 0;
+  line-height: 1.5;
+}
+
+.reportDetails strong {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.reportActions {
+  display: flex;
+  gap: 15px;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.statusSelect {
+  padding: 8px 12px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  font-size: 14px;
+  background-color: white;
+  transition: border-color 0.3s;
+}
+
+.statusSelect:focus {
+  outline: none;
+  border-color: var(--secondary-color);
+}
+
+.btnDelete {
+  padding: 8px 15px;
+  background-color: var(--danger-color);
+  color: white;
+  border: none;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 500;
+  transition: background-color 0.3s, transform 0.2s;
+}
+
+.btnDelete:hover {
+  background-color: #e00035;
+  transform: translateY(-2px);
+}
+
+.loading,
+.noReports {
+  text-align: center;
+  padding: 40px;
+  color: var(--text-secondary);
+  font-style: italic;
+  background: var(--card-background);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+.loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
+}
+
+.loading i {
+  font-size: 2rem;
+  color: var(--secondary-color);
+  animation: spin 1s linear infinite;
+}
+
+/* Pagination */
+.pagination {
+  display: flex;
+  justify-content: center;
+  gap: 5px;
+  margin-top: 30px;
+}
+
+.pageBtn {
+  padding: 8px 12px;
+  border: 1px solid var(--border-color);
+  background-color: var(--card-background);
+  cursor: pointer;
+  border-radius: var(--radius-md);
+  transition: all 0.3s;
+  font-weight: 500;
+}
+
+.pageBtn:hover {
+  background-color: var(--background-color);
+  border-color: var(--secondary-color);
+  color: var(--secondary-color);
+}
+
+.pageBtn.active {
+  background-color: var(--gradient-primary);
+  color: white;
+  border-color: transparent;
+}
+
+/* Animations */
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .reportsManagement {
+    padding: 15px;
+  }
+  
+  .managementHeader h2 {
+    font-size: 1.5rem;
+  }
+  
+  .reportHeader {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  
+  .reportDate {
+    margin-left: 0;
+  }
+  
+  .questionDetails {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .reportActions {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+  
+  .statusSelect,
+  .btnDelete {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .reportsManagement {
+    padding: 10px;
+  }
+  
+  .managementHeader {
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+  }
+  
+  .managementHeader h2 {
+    font-size: 1.3rem;
+  }
+  
+  .reportsFilters {
+    padding: 15px;
+    margin-bottom: 20px;
+  }
+  
+  .reportItem {
+    padding: 15px;
+  }
+  
+  .reportQuestion h4,
+  .reportDetails h4 {
+    font-size: 15px;
+  }
+  
+  .reportQuestion p {
+    padding: 12px;
+    font-size: 14px;
+  }
+  
+  .questionDetails span {
+    font-size: 11px;
+    padding: 4px 8px;
+  }
+  
+  .reportDetails p {
+    font-size: 14px;
+  }
+  
+  .pageBtn {
+    padding: 6px 10px;
+    font-size: 14px;
+  }
+}

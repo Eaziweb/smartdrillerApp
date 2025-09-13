@@ -1,0 +1,375 @@
+.premiumPlans {
+  padding: 80px 2rem;
+  background: #f8fafc;
+  overflow: hidden;
+}
+.sectionHeader {
+  text-align: center;
+  margin-bottom: 60px;
+}
+
+.sectionTitle {
+  font-size: clamp(2.5rem, 5vw, 3.5rem);
+  font-weight: 800;
+  color: #1f2937;
+  margin-bottom: 16px;
+}
+
+.sectionSubtitle {
+  font-size: 1.2rem;
+  color: #6b7280;
+  max-width: 600px;
+  margin: 0 auto;
+}
+.plansWrapper {
+  display: grid;
+  gap: 30px;
+  max-width: 1000px;
+  margin: 0 auto;
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 768px) {
+  .plansWrapper {
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+  }
+}
+
+.planCard {
+  background: white;
+  border-radius: 24px;
+  padding: 40px 30px;
+  text-align: center;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  position: relative;
+  border: 2px solid transparent;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.planCard::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 5px;
+  background: linear-gradient(45deg, #0099ff, #002060 70%);
+  transform: translateY(-100%);
+  transition: transform 0.3s ease;
+}
+
+.planCard:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+}
+
+.planCard:hover::before {
+  transform: translateY(0);
+}
+
+.premiumPlan {
+  border-color: #002060;
+}
+
+.planBadge {
+  position: absolute;
+  top: -9px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: linear-gradient(45deg, #0099ff, #002060 70%);
+  color: white;
+  padding: 8px 20px;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  box-shadow: 0 4px 10px rgba(0, 32, 96, 0.3);
+}
+
+.planHeader {
+  margin-bottom: 30px;
+}
+
+.planIcon {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 20px;
+  font-size: 32px;
+}
+
+.freePlan .planIcon {
+  background: linear-gradient(135deg, #6b7280, #4b5563);
+  color: white;
+  box-shadow: 0 4px 10px rgba(107, 114, 128, 0.3);
+}
+
+.premiumPlan .planIcon {
+  background: linear-gradient(45deg, #0099ff, #002060 70%);
+  color: white;
+  box-shadow: 0 4px 10px rgba(0, 32, 96, 0.3);
+}
+
+.planCard h3 {
+  font-size: 1.8rem;
+  font-weight: 800;
+  margin-bottom: 12px;
+  color: #1f2937;
+}
+
+.planDescription {
+  color: #6b7280;
+  margin-bottom: 20px;
+  font-style: italic;
+}
+
+.planPrice {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 4px;
+  margin-bottom: 8px;
+}
+
+.currency {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #6b7280;
+}
+
+.amount {
+  font-size: 3rem;
+  font-weight: 900;
+  background: linear-gradient(45deg, #0099ff, #002060 70%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.period {
+  font-size: 1rem;
+  color: #6b7280;
+}
+
+.planFeatures {
+  list-style: none;
+  margin-bottom: 30px;
+  text-align: left;
+  flex-grow: 1;
+}
+
+.planFeatures li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+  font-size: 1rem;
+  color: #6b7280;
+}
+
+.planFeatures i {
+  color: #10b981;
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+.planBtn {
+  width: 100%;
+  padding: 16px 24px;
+  font-size: 1.1rem;
+  margin-bottom: 16px;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border-radius: 50px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  border: none;
+}
+
+.btnOutline {
+  background: transparent;
+  color: #002060;
+  border: 2px solid #002060;
+}
+
+.btnOutline:hover {
+  background: #002060;
+  color: white;
+}
+
+.btnPrimary {
+  background: linear-gradient(45deg, #0099ff, #002060 70%);
+  color: white;
+  box-shadow: 0 4px 10px rgba(0, 32, 96, 0.3);
+}
+
+.btnPrimary:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+.planNote {
+  text-align: center;
+  margin-top: 40px;
+  padding: 20px;
+  background: rgba(0, 32, 96, 0.05);
+  border-radius: 12px;
+  color: #6b7280;
+}
+
+.planNote i {
+  color: #002060;
+  margin-right: 8px;
+}
+
+@media (max-width: 768px) {
+  .premiumPlans {
+    padding: 60px 1.5rem;
+  }
+  
+  .planCard {
+    padding: 30px 20px;
+  }
+  
+  .planBadge {
+    padding: 6px 16px;
+    font-size: 0.8rem;
+  }
+  .sectionTitle {
+    font-size: clamp(2rem, 5vw, 3rem);
+    margin-bottom: 12px;
+  }
+  
+  .sectionSubtitle {
+    font-size: 1rem;
+  }
+  .planHeader {
+    margin-bottom: 20px;
+  }
+  
+  .planIcon {
+    width: 60px;
+    height: 60px;
+    font-size: 24px;
+  }
+  
+  .planCard h3 {
+    font-size: 1.5rem;
+  }
+  
+  .planDescription {
+    margin-bottom: 15px;
+  }
+  
+  .currency {
+    font-size: 1rem;
+  }
+  
+  .amount {
+    font-size: 2.5rem;
+  }
+  
+  .period {
+    font-size: 0.9rem;
+  }
+  
+  .planFeatures li {
+    font-size: 0.9rem;
+  }
+  
+  .planBtn {
+    padding: 12px 20px;
+    font-size: 1rem;
+  }
+  
+  .planNote {
+    padding: 15px;
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .premiumPlans {
+    padding: 60px 1rem;
+    margin-top: 50px;
+  }
+  
+  .planCard {
+    padding: 20px 15px;
+  }
+  
+  .planBadge {
+    padding: 5px 12px;
+    font-size: 0.7rem;
+      top: -6px;
+  }
+  
+  .planHeader {
+    margin-bottom: 15px;
+  }
+  
+  .planIcon {
+    width: 50px;
+    height: 50px;
+    font-size: 20px;
+    margin-top: 10px;
+  }
+  
+  .planCard h3 {
+    font-size: 1.3rem;
+  }
+  
+  .planDescription {
+    margin-bottom: 10px;
+    font-size: 0.9rem;
+  }
+  
+  .currency {
+    font-size: 0.9rem;
+  }
+  
+  .amount {
+    font-size: 2rem;
+  }
+  
+  .period {
+    font-size: 0.8rem;
+  }
+  
+  .planFeatures li {
+    font-size: 0.7rem;
+    margin-bottom: 8px;
+  }
+  
+  .planBtn {
+    padding: 10px 15px;
+    font-size: 0.9rem;
+  }
+  
+  .planNote {
+    padding: 10px;
+    font-size: 0.8rem;
+  }
+      .sectionTitle {
+    font-size: clamp(1.8rem, 5vw, 2.5rem);
+    margin-bottom: 10px;
+  }
+  
+  .sectionSubtitle {
+    font-size: 0.9rem;
+  }
+}

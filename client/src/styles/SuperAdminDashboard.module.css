@@ -1,0 +1,463 @@
+:root {
+  --primary-color: #002060;
+  --secondary-color: #0066ff;
+  --gradient-primary: linear-gradient(45deg, #0099ff, #002060 70%);
+  --text-primary: #333;
+  --text-secondary: #666;
+  --background-color: #f8f9fa;
+  --card-background: #ffffff;
+  --border-color: #e0e0e0;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
+  --danger-color: #ff3860;
+  --success-color: #23d160;
+  --warning-color: #ffdd57;
+}
+
+/* Base styles */
+.adminPage {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f5f7fa 0%, #e4ecf7 100%);
+  padding: 20px;
+}
+
+.adminContainer {
+  max-width: 1200px;
+  margin: 0 auto;
+  background: var(--card-background);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+}
+
+.adminHeader {
+  background: var(--gradient-primary);
+  color: white;
+  padding: 1.5rem 2rem;
+}
+
+.adminHeader h1 {
+  font-size: 1.8rem;
+  margin: 0 0 0.5rem 0;
+}
+
+.adminHeader p {
+  margin: 0;
+  opacity: 0.9;
+}
+
+.adminTabs {
+  display: flex;
+  border-bottom: 1px solid var(--border-color);
+  background: var(--card-background);
+  flex-wrap: wrap;
+}
+
+.adminTab {
+  background: none;
+  border: none;
+  padding: 1rem 1.5rem;
+  font-size: 1rem;
+  cursor: pointer;
+  color: var(--text-secondary);
+  border-bottom: 3px solid transparent;
+  transition: all 0.3s ease;
+  font-weight: 500;
+}
+
+.adminTab.active {
+  color: var(--primary-color);
+  border-bottom-color: var(--primary-color);
+}
+
+.adminTab:hover {
+  color: var(--primary-color);
+  background: rgba(0, 102, 255, 0.05);
+}
+
+.adminSection {
+  padding: 2rem;
+}
+
+.adminSection h2 {
+  color: var(--primary-color);
+  margin-top: 0;
+  margin-bottom: 1.5rem;
+  font-size: 1.6rem;
+}
+
+.adminSection h3 {
+  color: var(--text-primary);
+  margin-top: 0;
+  margin-bottom: 1.2rem;
+  font-size: 1.3rem;
+}
+
+/* Stats Grid */
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.statCard {
+  background: var(--card-background);
+  border-radius: var(--radius-md);
+  padding: 1.5rem;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border-color);
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.statCard:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-md);
+}
+
+.statIcon {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: var(--gradient-primary);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.statValue {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--primary-color);
+  margin-bottom: 0.5rem;
+}
+
+.statLabel {
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+}
+
+/* Admin Form */
+.adminFormContainer {
+  background: var(--background-color);
+  border-radius: var(--radius-md);
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  border: 1px solid var(--border-color);
+}
+
+.adminForm {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+
+.inputRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.inputGroup {
+  display: flex;
+  flex-direction: column;
+}
+
+.inputGroup label {
+  margin-bottom: 0.5rem;
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+.inputGroup input {
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  font-size: 1rem;
+  transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.inputGroup input:focus {
+  border-color: var(--secondary-color);
+  box-shadow: 0 0 0 3px rgba(0, 102, 255, 0.1);
+  outline: none;
+}
+
+/* Table Styles */
+.adminTable {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1rem;
+}
+
+.adminTable th,
+.adminTable td {
+  padding: 0.75rem 1rem;
+  text-align: left;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.adminTable th {
+  background: var(--background-color);
+  color: var(--text-primary);
+  font-weight: 600;
+  position: sticky;
+  top: 0;
+}
+
+.adminTable tr:hover {
+  background: rgba(0, 102, 255, 0.03);
+}
+
+.deleteBtn {
+  background: var(--danger-color);
+  color: white;
+  border: none;
+  border-radius: var(--radius-md);
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.3s, transform 0.2s;
+}
+
+.deleteBtn:hover {
+  background: #e00035;
+  transform: scale(1.05);
+}
+
+/* Status Badge */
+.statusBadge {
+  display: inline-block;
+  padding: 0.25rem 0.6rem;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.statusBadge.subscribed {
+  background: rgba(35, 209, 96, 0.1);
+  color: var(--success-color);
+}
+
+.statusBadge.expired {
+  background: rgba(255, 107, 107, 0.1);
+  color: var(--danger-color);
+}
+
+/* Message Toast */
+.messageToast {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  padding: 1rem 1.5rem;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  box-shadow: var(--shadow-md);
+  z-index: 1000;
+  animation: slideInRight 0.3s ease forwards;
+}
+
+.messageToast.success {
+  background: rgba(35, 209, 96, 0.1);
+  color: var(--success-color);
+  border-left: 4px solid var(--success-color);
+}
+
+.messageToast.error {
+  background: rgba(255, 107, 107, 0.1);
+  color: var(--danger-color);
+  border-left: 4px solid var(--danger-color);
+}
+
+.messageToast.info {
+  background: rgba(0, 102, 255, 0.1);
+  color: var(--secondary-color);
+  border-left: 4px solid var(--secondary-color);
+}
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideOutRight {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}
+
+/* Loading state */
+.loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  font-size: 1.2rem;
+  color: var(--text-secondary);
+}
+
+.loading i {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  color: var(--primary-color);
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Responsive styles */
+@media (max-width: 1024px) {
+  .statsGrid {
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  }
+}
+
+@media (max-width: 768px) {
+  .adminPage {
+    padding: 15px;
+  }
+  
+  .adminHeader {
+    padding: 1.2rem 1.5rem;
+  }
+  
+  .adminHeader h1 {
+    font-size: 1.5rem;
+  }
+  
+  .adminTabs {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  .adminTab {
+    padding: 0.8rem 1rem;
+    font-size: 0.9rem;
+  }
+  
+  .adminSection {
+    padding: 1.5rem;
+  }
+  
+  .adminSection h2 {
+    font-size: 1.4rem;
+  }
+  
+  .adminSection h3 {
+    font-size: 1.1rem;
+  }
+  
+  .statsGrid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  
+  .statCard {
+    padding: 1.2rem;
+  }
+  
+  .statValue {
+    font-size: 1.5rem;
+  }
+  
+  .inputRow {
+    grid-template-columns: 1fr;
+  }
+  
+  .adminFormContainer {
+    padding: 1.2rem;
+  }
+  
+  .adminTable {
+    font-size: 0.9rem;
+  }
+  
+  .adminTable th,
+  .adminTable td {
+    padding: 0.6rem 0.8rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .adminPage {
+    padding: 10px;
+  }
+  
+  .adminHeader {
+    padding: 1rem;
+  }
+  
+  .adminHeader h1 {
+    font-size: 1.3rem;
+  }
+  
+  .adminSection {
+    padding: 1rem;
+  }
+  
+  .adminSection h2 {
+    font-size: 1.2rem;
+  }
+  
+  .adminSection h3 {
+    font-size: 1rem;
+  }
+  
+  .statCard {
+    padding: 1rem;
+  }
+  
+  .statValue {
+    font-size: 1.3rem;
+  }
+  
+  .adminFormContainer {
+    padding: 1rem;
+  }
+  
+  .adminTable {
+    font-size: 0.85rem;
+  }
+  
+  .adminTable th,
+  .adminTable td {
+    padding: 0.5rem 0.6rem;
+  }
+  
+  .deleteBtn {
+    width: 32px;
+    height: 32px;
+  }
+  
+  .messageToast {
+    top: 10px;
+    right: 10px;
+    left: 10px;
+    padding: 0.8rem 1rem;
+  }
+}

@@ -1,0 +1,484 @@
+/* correction.module.css */
+.correctionPage {
+  min-height: 100vh;
+  background: #ffffff;
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+  padding-bottom: 120px;
+  color: #1e293b;
+}
+
+.loadingContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  gap: 1rem;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #e2e8f0;
+  border-top: 4px solid #0066ff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Header */
+.quizHeader {
+  background: linear-gradient(135deg, #0066ff 0%, #002060 100%);
+  color: white;
+  padding: 1rem 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.headerLeft {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.backBtn {
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  color: white;
+  font-size: 1.2rem;
+  cursor: pointer;
+  padding: 0.75rem;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.backBtn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateX(-3px);
+}
+
+.subjectInfo h2 {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.subjectInfo span {
+  font-size: 0.9rem;
+  opacity: 0.8;
+}
+
+.headerRight {
+  display: flex;
+  align-items: center;
+}
+
+.scoreDisplay {
+  background: rgba(255, 255, 255, 0.1);
+  padding: 0.5rem 1rem;
+  border-radius: 12px;
+  font-weight: 600;
+}
+
+/* Question Container */
+.questionContainer {
+  max-width: 800px;
+  margin: 2rem auto;
+  padding: 0 2rem;
+}
+
+.questionText {
+  font-size: 1.25rem;
+  font-weight: 500;
+  color: #1e293b;
+  margin-bottom: 2rem;
+  line-height: 1.6;
+  padding: 1.5rem;
+  background: #f8fafc;
+  border-radius: 16px;
+  border-left: 4px solid #0066ff;
+}
+
+/* Options */
+.optionsContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.option {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.5rem;
+  background: #f8fafc;
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.option:hover {
+  border-color: #cbd5e1;
+  transform: translateY(-1px);
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+.option.selected {
+  border-color: #0066ff;
+  background: rgba(102, 126, 234, 0.05);
+}
+
+.option.correct {
+  border-color: #10b981;
+  background: rgba(16, 185, 129, 0.05);
+}
+
+.option.wrong {
+  border-color: #ef4444;
+  background: rgba(239, 68, 68, 0.05);
+}
+
+.optionLetter {
+  width: 32px;
+  height: 32px;
+  background: #0066ff;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.optionText {
+  flex: 1;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+.optionIcon {
+  position: absolute;
+  right: 1rem;
+  font-size: 1.25rem;
+}
+
+.correctIcon {
+  color: #10b981;
+}
+
+.wrongIcon {
+  color: #ef4444;
+}
+
+/* Explanation */
+.explanationContainer {
+  margin-bottom: 2rem;
+  background: #f8fafc;
+  border-radius: 16px;
+  border-left: 4px solid #0066ff;
+  overflow: hidden;
+}
+
+.explanationHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1rem 1.5rem;
+  background: rgba(0, 102, 255, 0.1);
+  color: #0066ff;
+  font-weight: 600;
+}
+
+.explanationText {
+  padding: 1.5rem;
+  font-size: 1rem;
+  line-height: 1.6;
+  color: #1e293b;
+}
+
+/* Answer Status */
+.answerStatus {
+  margin-top: 2rem;
+  padding: 1rem 1.5rem;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-weight: 500;
+}
+
+.answerStatus.correct {
+  background: rgba(16, 185, 129, 0.1);
+  border: 2px solid #10b981;
+  color: #10b981;
+}
+
+.answerStatus.wrong {
+  background: rgba(239, 68, 68, 0.1);
+  border: 2px solid #ef4444;
+  color: #ef4444;
+}
+
+.answerStatus.unanswered {
+  background: rgba(245, 158, 11, 0.1);
+  border: 2px solid #f59e0b;
+  color: #f59e0b;
+}
+
+/* Question Grid */
+.questionGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(40px, 1fr));
+  gap: 0.5rem;
+  max-width: 800px;
+  margin: 2rem auto;
+  padding: 0 2rem;
+}
+
+.gridItem {
+  width: 40px;
+  height: 40px;
+  border: 2px solid #e2e8f0;
+  background: white;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.gridItem:hover {
+  border-color: #cbd5e1;
+  transform: translateY(-1px);
+}
+
+.gridItem.current {
+  border-color: #0066ff;
+  background: rgba(0, 102, 255, 0.1);
+  color: #0066ff;
+  border-width: 3px;
+}
+
+.gridItem.correct {
+  border-color: #10b981;
+  background: #10b981;
+  color: white;
+}
+
+.gridItem.wrong {
+  border-color: #ef4444;
+  background: #ef4444;
+  color: white;
+}
+
+.gridItem.unanswered {
+  border-color: #f59e0b;
+  background: #f59e0b;
+  color: white;
+}
+
+/* Navigation */
+.navigationContainer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: white;
+  padding: 1rem 2rem;
+  display: flex;
+  justify-content: space-between;
+  box-shadow: 0 -4px 6px -1px rgba(0, 0, 0, 0.1);
+  z-index: 50;
+  border-top: 1px solid #e2e8f0;
+}
+
+.navBtn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  background: linear-gradient(135deg, #0066ff 0%, #002060 100%);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.navBtn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.navBtn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .quizHeader {
+    padding: 1rem;
+  }
+  
+  .subjectInfo h2 {
+    font-size: 1.3rem;
+  }
+  
+  .subjectInfo span {
+    font-size: 0.8rem;
+  }
+  
+  .scoreDisplay {
+    font-size: 0.9rem;
+    padding: 0.4rem 0.8rem;
+  }
+  
+  .questionContainer {
+    padding: 0 1rem;
+  }
+  
+  .questionGrid {
+    padding: 0 1rem;
+    grid-template-columns: repeat(auto-fill, minmax(35px, 1fr));
+  }
+  
+  .gridItem {
+    width: 35px;
+    height: 35px;
+    font-size: 0.9rem;
+  }
+  
+  .navigationContainer {
+    padding: 1rem;
+  }
+  
+  .navBtn {
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+  }
+  
+  .option {
+    padding: 0.75rem 1rem;
+  }
+  
+  .optionLetter {
+    width: 28px;
+    height: 28px;
+    font-size: 0.9rem;
+  }
+  
+  .questionText {
+    font-size: 1.1rem;
+    padding: 1rem;
+  }
+  
+  .optionText {
+    font-size: 0.9rem;
+  }
+  
+  .explanationText {
+    font-size: 0.9rem;
+    padding: 1rem;
+  }
+  
+  .answerStatus {
+    padding: 0.75rem 1rem;
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .quizHeader {
+    padding: 0.75rem;
+  }
+  
+  .subjectInfo h2 {
+    font-size: 1.1rem;
+  }
+  
+  .subjectInfo span {
+    font-size: 0.7rem;
+  }
+  
+  .scoreDisplay {
+    font-size: 0.8rem;
+    padding: 0.3rem 0.6rem;
+  }
+  
+  .backBtn {
+    padding: 0.5rem;
+    font-size: 1rem;
+  }
+  
+  .questionText {
+    font-size: 1rem;
+    padding: 0.75rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .option {
+    padding: 0.6rem 0.75rem;
+    gap: 0.75rem;
+  }
+  
+  .optionLetter {
+    width: 24px;
+    height: 24px;
+    font-size: 0.8rem;
+  }
+  
+  .optionText {
+    font-size: 0.85rem;
+  }
+  
+  .questionGrid {
+    grid-template-columns: repeat(auto-fill, minmax(30px, 1fr));
+    gap: 0.4rem;
+  }
+  
+  .gridItem {
+    width: 30px;
+    height: 30px;
+    font-size: 0.8rem;
+  }
+  
+  .navigationContainer {
+    padding: 0.75rem;
+  }
+  
+  .navBtn {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.8rem;
+  }
+  
+  .explanationText {
+    font-size: 0.85rem;
+    padding: 0.75rem;
+  }
+  
+  .answerStatus {
+    padding: 0.6rem 0.8rem;
+    font-size: 0.85rem;
+  }
+}

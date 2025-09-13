@@ -1,0 +1,610 @@
+/* Competitions.module.css */
+:root {
+  --primary-dark: #002060;
+  --primary-light: #0066ff;
+  --primary-gradient: linear-gradient(45deg, #0099ff, #002060 70%);
+  --success-color: #10b981;
+  --error-color: #ef4444;
+  --warning-color: #f59e0b;
+  --info-color: #3b82f6;
+  --bg-primary: #ffffff;
+  --bg-secondary: #f8fafc;
+  --bg-accent: #f1f5f9;
+  --text-primary: #1e293b;
+  --text-secondary: #64748b;
+  --border-color: #e2e8f0;
+  --border-hover: #cbd5e1;
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+}
+
+.competitionsPage {
+  min-height: 100vh;
+  background: var(--bg-secondary);
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+  color: var(--text-primary);
+}
+
+.pageHeader {
+  background: var(--primary-gradient);
+  color: white;
+  padding: 1.5rem 2rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  box-shadow: var(--shadow-lg);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.backBtn {
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  color: white;
+  text-decoration: none;
+  font-size: 1.2rem;
+  cursor: pointer;
+  padding: 0.75rem;
+  border-radius: var(--radius-md);
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.backBtn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateX(-3px);
+}
+
+.headerContent {
+  flex: 1;
+  text-align: center;
+}
+
+.headerContent h1 {
+  margin: 0;
+  font-size: 1.75rem;
+  font-weight: 600;
+}
+
+.headerContent p {
+  margin: 0.25rem 0 0 0;
+  font-size: 0.9rem;
+  opacity: 0.9;
+}
+
+.competitionsFilters {
+  display: flex;
+  gap: 1rem;
+  padding: 1.5rem;
+  background: white;
+  border-radius: var(--radius-lg);
+  margin: 1.5rem auto;
+  max-width: 1200px;
+  box-shadow: var(--shadow-md);
+  overflow-x: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-color) transparent;
+}
+
+.competitionsFilters::-webkit-scrollbar {
+  height: 6px;
+}
+
+.competitionsFilters::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.competitionsFilters::-webkit-scrollbar-thumb {
+  background-color: var(--border-color);
+  border-radius: 3px;
+}
+
+.competitionsFilters::-webkit-scrollbar-thumb:hover {
+  background-color: var(--border-hover);
+}
+
+.filterBtn {
+  background: var(--bg-accent);
+  border: 2px solid var(--border-color);
+  color: var(--text-primary);
+  padding: 0.75rem 1.5rem;
+  border-radius: var(--radius-md);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  white-space: nowrap;
+}
+
+.filterBtn:hover {
+  background: var(--bg-secondary);
+  border-color: var(--border-hover);
+}
+
+.filterBtn.active {
+  background: var(--primary-gradient);
+  color: white;
+  border-color: transparent;
+}
+
+.competitionsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 1.5rem;
+  margin: 0 auto 2rem;
+  max-width: 1200px;
+  padding: 0 1.5rem;
+}
+
+.competitionCard {
+  background: white;
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+  box-shadow: var(--shadow-md);
+  transition: all 0.3s ease;
+  border: 1px solid var(--border-color);
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.competitionCard:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+}
+
+.competitionCard.upcoming {
+  border-left: 4px solid var(--warning-color);
+}
+
+.competitionCard.active {
+  border-left: 4px solid var(--success-color);
+}
+
+.competitionCard.ended {
+  border-left: 4px solid var(--text-secondary);
+}
+
+.competitionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+}
+
+.competitionHeader h3 {
+  margin: 0;
+  color: var(--text-primary);
+  font-size: 1.25rem;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.statusBadge {
+  padding: 0.25rem 0.75rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  white-space: nowrap;
+}
+
+.statusUpcoming {
+  background: rgba(245, 158, 11, 0.1);
+  color: var(--warning-color);
+}
+
+.statusActive {
+  background: rgba(16, 185, 129, 0.1);
+  color: var(--success-color);
+}
+
+.statusEnded {
+  background: rgba(100, 116, 139, 0.1);
+  color: var(--text-secondary);
+}
+
+.competitionDescription {
+  color: var(--text-secondary);
+  margin-bottom: 1.5rem;
+  line-height: 1.5;
+  flex: 1;
+  font-size: 0.95rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.competitionMeta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.metaItem {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+
+.metaItem i {
+  color: var(--primary-light);
+  flex-shrink: 0;
+}
+
+.timeRemaining {
+  margin-top: auto;
+  padding: 0.75rem;
+  background: var(--bg-accent);
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--primary-light);
+}
+
+.competitionAction {
+  margin-top: auto;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border-color);
+  display: flex;
+  justify-content: center;
+}
+
+.actionText {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.actionText.participate {
+  color: var(--success-color);
+}
+
+.actionText.leaderboard {
+  color: var(--primary-light);
+}
+
+.emptyState {
+  text-align: center;
+  padding: 4rem 2rem;
+  background: white;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  max-width: 600px;
+  margin: 2rem auto;
+}
+
+.emptyState i {
+  font-size: 4rem;
+  color: var(--text-secondary);
+  margin-bottom: 1rem;
+}
+
+.emptyState h3 {
+  margin: 0 0 1rem 0;
+  color: var(--text-primary);
+  font-size: 1.5rem;
+}
+
+.emptyState p {
+  margin: 0 0 2rem 0;
+  color: var(--text-secondary);
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 1rem;
+  text-decoration: none;
+}
+
+.btnPrimary {
+  background: var(--primary-gradient);
+  color: white;
+}
+
+.btnPrimary:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+/* Loading State */
+.loadingContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  gap: 1rem;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid var(--border-color);
+  border-top: 4px solid var(--primary-light);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Message Toast */
+.messageToast {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background: white;
+  padding: 1rem 1.5rem;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  z-index: 3000;
+  animation: slideInRight 0.3s ease;
+  border-left: 4px solid var(--primary-light);
+}
+
+.messageToast.success {
+  border-left-color: var(--success-color);
+}
+
+.messageToast.error {
+  border-left-color: var(--error-color);
+}
+
+.messageToast.warning {
+  border-left-color: var(--warning-color);
+}
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideOutRight {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+  .competitionsGrid {
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  }
+}
+
+@media (max-width: 768px) {
+  .pageHeader {
+    padding: 1rem;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .headerContent h1 {
+    font-size: 1.5rem;
+  }
+  
+  .headerContent p {
+    font-size: 0.8rem;
+  }
+  
+  .backBtn {
+    padding: 0.5rem;
+    font-size: 1rem;
+  }
+  
+  .competitionsFilters {
+    padding: 1rem;
+    margin: 1rem auto;
+    gap: 0.5rem;
+  }
+  
+  .filterBtn {
+    padding: 0.5rem 1rem;
+    font-size: 0.85rem;
+  }
+  
+  .competitionsGrid {
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1rem;
+    padding: 0 1rem;
+  }
+  
+  .competitionCard {
+    padding: 1.25rem;
+  }
+  
+  .competitionHeader h3 {
+    font-size: 1.1rem;
+  }
+  
+  .competitionDescription {
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+  }
+  
+  .metaItem {
+    font-size: 0.85rem;
+  }
+  
+  .timeRemaining {
+    font-size: 0.85rem;
+    padding: 0.5rem;
+  }
+  
+  .actionText {
+    font-size: 0.85rem;
+  }
+  
+  .emptyState {
+    padding: 3rem 1.5rem;
+  }
+  
+  .emptyState i {
+    font-size: 3rem;
+  }
+  
+  .emptyState h3 {
+    font-size: 1.25rem;
+  }
+  
+  .btn {
+    padding: 0.5rem 1.2rem;
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .pageHeader {
+    padding: 0.75rem;
+  }
+  
+  .headerContent h1 {
+    font-size: 1.25rem;
+  }
+  
+  .headerContent p {
+    font-size: 0.75rem;
+  }
+  
+  .backBtn {
+    padding: 0.4rem 0.6rem;
+    font-size: 0.9rem;
+  }
+  
+  .competitionsFilters {
+    padding: 0.75rem;
+    margin: 0.75rem auto;
+    flex-wrap: wrap;
+  }
+  
+  .filterBtn {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.8rem;
+  }
+  
+  .competitionsGrid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    padding: 0 0.75rem;
+  }
+  
+  .competitionCard {
+    padding: 1rem;
+  }
+  
+  .competitionHeader {
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+  }
+  
+  .competitionHeader h3 {
+    font-size: 1rem;
+  }
+  
+  .statusBadge {
+    font-size: 0.7rem;
+  }
+  
+  .competitionDescription {
+    font-size: 0.85rem;
+    margin-bottom: 0.75rem;
+  }
+  
+  .competitionMeta {
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+  }
+  
+  .metaItem {
+    font-size: 0.8rem;
+  }
+  
+  .metaItem i {
+    font-size: 0.85rem;
+  }
+  
+  .timeRemaining {
+    font-size: 0.8rem;
+    padding: 0.5rem;
+  }
+  
+  .competitionAction {
+    padding-top: 0.75rem;
+  }
+  
+  .actionText {
+    font-size: 0.8rem;
+  }
+  
+  .emptyState {
+    padding: 2rem 1rem;
+  }
+  
+  .emptyState i {
+    font-size: 2.5rem;
+  }
+  
+  .emptyState h3 {
+    font-size: 1.1rem;
+  }
+  
+  .emptyState p {
+    font-size: 0.85rem;
+  }
+  
+  .btn {
+    padding: 0.4rem 1rem;
+    font-size: 0.85rem;
+  }
+}

@@ -1,0 +1,685 @@
+/* Authentication Pages Styles */
+.authPage {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  background: linear-gradient(135deg, #002060, #0066ff);
+  position: relative;
+  overflow: hidden;
+}
+
+.authPage::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: 
+    radial-gradient(circle at 10% 20%, rgba(255, 255, 255, 0.05) 0%, transparent 20%),
+    radial-gradient(circle at 90% 80%, rgba(255, 255, 255, 0.05) 0%, transparent 20%);
+  pointer-events: none;
+}
+
+.authContainer {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-radius: 20px;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+  width: 100%;
+  max-width: 500px;
+  overflow: hidden;
+  position: relative;
+  z-index: 1;
+}
+
+/* Auth Header */
+.authHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.5rem 2rem;
+  background: rgba(255, 255, 255, 0.8);
+  border-bottom: 1px solid rgba(0, 32, 96, 0.1);
+}
+
+.backBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: white;
+  color: #0066ff;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  border: 1px solid rgba(0, 102, 255, 0.2);
+  cursor: pointer;
+}
+
+.backBtn:hover {
+  background: #0066ff;
+  color: white;
+  transform: translateX(-3px);
+  box-shadow: 0 5px 15px rgba(0, 102, 255, 0.3);
+}
+
+.appLogo {
+  background: linear-gradient(45deg, #0099ff, #002060);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-weight: 700;
+  font-size: 1.5rem;
+}
+
+/* Form Container */
+.resetForm,
+.signinForm,
+.verifyForm,
+.successForm {
+  padding: 2.5rem;
+}
+
+.formHeader {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.formHeader h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #002060;
+  margin-bottom: 0.5rem;
+}
+
+.formHeader p {
+  color: #555;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+/* Icon Circle */
+.iconCircle {
+  width: 80px;
+  height: 80px;
+  background: linear-gradient(45deg, #0099ff, #002060);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1rem;
+  color: white;
+  font-size: 2rem;
+  box-shadow: 0 10px 20px rgba(0, 102, 255, 0.2);
+}
+
+/* Input Styles */
+.inputGroup {
+  margin-bottom: 1.5rem;
+}
+
+.inputGroup label {
+  display: block;
+  font-weight: 600;
+  color: #002060;
+  margin-bottom: 0.5rem;
+  font-size: 0.95rem;
+}
+
+.inputGroup input,
+.inputGroup select {
+  width: 100%;
+  padding: 0.875rem 1rem;
+  border: 2px solid #e1e5f2;
+  border-radius: 12px;
+  font-size: 1rem;
+  background: white;
+  transition: all 0.3s ease;
+  font-family: inherit;
+}
+
+.inputGroup input:focus,
+.inputGroup select:focus {
+  outline: none;
+  border-color: #0066ff;
+  box-shadow: 0 0 0 3px rgba(0, 102, 255, 0.1);
+  transform: translateY(-2px);
+}
+
+/* Submit Button */
+.submitBtn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.5rem;
+  background: linear-gradient(45deg, #0099ff, #002060);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-top: 1rem;
+  box-shadow: 0 5px 15px rgba(0, 102, 255, 0.2);
+}
+
+.submitBtn:hover:not(:disabled) {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(0, 102, 255, 0.3);
+}
+
+.submitBtn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+.btnContent {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btnText {
+  transition: opacity 0.2s ease;
+}
+
+.submitBtn.loading .btnText {
+  opacity: 0;
+}
+
+.btnLoader {
+  position: absolute;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.submitBtn.loading .btnLoader {
+  opacity: 1;
+}
+
+.spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top: 2px solid white;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.btnArrow {
+  margin-left: 0.5rem;
+  transition: transform 0.2s ease;
+}
+
+.submitBtn:hover .btnArrow {
+  transform: translateX(3px);
+}
+
+/* Form Footer */
+.formFooter {
+  text-align: center;
+  margin-top: 2rem;
+  padding-top: 2rem;
+  border-top: 1px solid rgba(0, 32, 96, 0.1);
+}
+
+.formFooter p {
+  margin-bottom: 0.5rem;
+  color: #555;
+}
+
+.link {
+  color: #0066ff;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s ease;
+}
+
+.link:hover {
+  color: #002060;
+  text-decoration: underline;
+}
+
+/* Error and Success Messages */
+.errorMessage {
+  background: rgba(255, 107, 107, 0.1);
+  color: #ff6b6b;
+  padding: 1rem;
+  border-radius: 12px;
+  margin-bottom: 1rem;
+  text-align: center;
+  border: 1px solid rgba(255, 107, 107, 0.2);
+}
+
+.successMessage {
+  background: rgba(81, 207, 102, 0.1);
+  color: #51cf66;
+  padding: 1rem;
+  border-radius: 12px;
+  margin-bottom: 1rem;
+  text-align: center;
+  border: 1px solid rgba(81, 207, 102, 0.2);
+}
+
+/* Progress Bar for Registration */
+.progressContainer {
+  padding: 1.5rem 2rem;
+  background: rgba(255, 255, 255, 0.8);
+  border-bottom: 1px solid rgba(0, 32, 96, 0.1);
+  margin-bottom: 2rem;
+}
+
+.progressBar {
+  width: 100%;
+  height: 6px;
+  background: #e1e5f2;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.progressFill {
+  height: 100%;
+  background: linear-gradient(45deg, #0099ff, #002060);
+  transition: width 0.3s ease;
+}
+
+.progressText {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 0.5rem;
+  font-size: 0.9rem;
+  color: #555;
+}
+
+/* Form Sections for Registration */
+.formSection {
+  margin-bottom: 2rem;
+  padding: 1.5rem;
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: 16px;
+  border: 1px solid rgba(0, 32, 96, 0.1);
+  transition: all 0.3s ease;
+}
+
+.formSection.active {
+  background: rgba(0, 102, 255, 0.05);
+  border-color: #0066ff;
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(0, 102, 255, 0.1);
+}
+
+.sectionTitle {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.sectionIcon {
+  width: 40px;
+  height: 40px;
+  background: linear-gradient(45deg, #0099ff, #002060);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 1.2rem;
+}
+
+.sectionTitle span {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #002060;
+}
+
+/* OTP Form Styles */
+.deviceInfo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 1rem;
+  color: #0066ff;
+  font-weight: 500;
+}
+
+.autoLoginNotice {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+  color: #51cf66;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+/* Verify Email Form */
+.verifyIcon {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 2rem;
+}
+
+.emailAnimation {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.emailIcon {
+  width: 80px;
+  height: 80px;
+  background: linear-gradient(45deg, #0099ff, #002060);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 2rem;
+  box-shadow: 0 10px 20px rgba(0, 102, 255, 0.2);
+  z-index: 2;
+}
+
+.pulseRing {
+  position: absolute;
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  border: 3px solid rgba(0, 102, 255, 0.5);
+  animation: pulse 2s infinite;
+  z-index: 1;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1.5);
+    opacity: 0;
+  }
+}
+
+.emailDisplay {
+  font-weight: 600;
+  color: #002060;
+  margin: 0.5rem 0 1.5rem;
+  padding: 0.75rem 1rem;
+  background: rgba(0, 102, 255, 0.05);
+  border-radius: 10px;
+  display: inline-block;
+}
+
+.codeSection {
+  margin-bottom: 2rem;
+}
+
+.codeSection label {
+  display: block;
+  font-weight: 600;
+  color: #002060;
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+.codeInputs {
+  display: flex;
+  justify-content: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.codeInput {
+  width: 50px;
+  height: 50px;
+  text-align: center;
+  font-size: 1.5rem;
+  font-weight: 600;
+  border: 2px solid #e1e5f2;
+  border-radius: 10px;
+  transition: all 0.3s ease;
+}
+
+.codeInput:focus {
+  outline: none;
+  border-color: #0066ff;
+  box-shadow: 0 0 0 3px rgba(0, 102, 255, 0.1);
+  transform: translateY(-2px);
+}
+
+.inputFeedback {
+  min-height: 1.5rem;
+  text-align: center;
+}
+
+.errorMsg {
+  color: #ff6b6b;
+  font-size: 0.9rem;
+}
+
+.resendSection {
+  text-align: center;
+  margin-top: 2rem;
+}
+
+.resendSection p {
+  color: #555;
+  margin-bottom: 1rem;
+}
+
+.resendBtn {
+  background: none;
+  border: none;
+  color: #0066ff;
+  font-weight: 500;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.resendBtn:hover {
+  color: #002060;
+  text-decoration: underline;
+}
+
+.resendTimer {
+  color: #555;
+  font-size: 0.95rem;
+}
+
+.resendTimer .countdown {
+  font-weight: 600;
+  color: #0066ff;
+}
+
+/* Loading Container */
+.loadingContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem;
+  text-align: center;
+}
+
+.loadingContainer p {
+  margin-top: 1rem;
+  color: #555;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .authPage {
+    padding: 1rem;
+  }
+  
+  .authContainer {
+    width: 100%;
+    max-width: none;
+  }
+  
+  .authHeader {
+    padding: 1rem 1.5rem;
+  }
+  
+  .formHeader h1 {
+    font-size: 1.75rem;
+  }
+  
+  .formHeader p {
+    font-size: 0.95rem;
+  }
+  
+  .resetForm,
+  .signinForm,
+  .verifyForm,
+  .successForm {
+    padding: 2rem 1.5rem;
+  }
+  
+  .formSection {
+    padding: 1.25rem;
+  }
+  
+  .sectionIcon {
+    width: 36px;
+    height: 36px;
+    font-size: 1.1rem;
+  }
+  
+  .sectionTitle span {
+    font-size: 1rem;
+  }
+  
+  .inputGroup label {
+    font-size: 0.9rem;
+  }
+  
+  .inputGroup input,
+  .inputGroup select {
+    padding: 0.75rem 0.875rem;
+    font-size: 0.95rem;
+  }
+  
+  .submitBtn {
+    padding: 0.875rem 1.25rem;
+    font-size: 0.95rem;
+  }
+  
+  .codeInput {
+    width: 45px;
+    height: 45px;
+    font-size: 1.25rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .authPage {
+    padding: 0.5rem;
+  }
+  
+  .authHeader {
+    padding: 1rem;
+  }
+  
+  .backBtn {
+    width: 36px;
+    height: 36px;
+  }
+  
+  .appLogo {
+    font-size: 1.3rem;
+  }
+  
+  .resetForm,
+  .signinForm,
+  .verifyForm,
+  .successForm {
+    padding: 1.5rem 1rem;
+  }
+  
+  .formHeader h1 {
+    font-size: 1.5rem;
+  }
+  
+  .formHeader p {
+    font-size: 0.9rem;
+  }
+  
+  .iconCircle {
+    width: 70px;
+    height: 70px;
+    font-size: 1.75rem;
+  }
+  
+  .formSection {
+    padding: 1rem;
+  }
+  
+  .sectionIcon {
+    width: 32px;
+    height: 32px;
+    font-size: 1rem;
+  }
+  
+  .sectionTitle span {
+    font-size: 0.95rem;
+  }
+  
+  .inputGroup label {
+    font-size: 0.85rem;
+  }
+  
+  .inputGroup input,
+  .inputGroup select {
+    padding: 0.75rem;
+    font-size: 0.9rem;
+  }
+  
+  .submitBtn {
+    padding: 0.75rem 1rem;
+    font-size: 0.9rem;
+  }
+  
+  .formFooter p {
+    font-size: 0.85rem;
+  }
+  
+  .codeInputs {
+    gap: 0.5rem;
+  }
+  
+  .codeInput {
+    width: 40px;
+    height: 40px;
+    font-size: 1.1rem;
+  }
+  
+  .resendSection p {
+    font-size: 0.85rem;
+  }
+  
+  .resendBtn {
+    font-size: 0.9rem;
+  }
+  
+  .resendTimer {
+    font-size: 0.85rem;
+  }
+}

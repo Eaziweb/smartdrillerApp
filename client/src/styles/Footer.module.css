@@ -1,0 +1,203 @@
+.footer {
+  background: #1f2937;
+  color: white;
+  padding: 60px 0 20px;
+  overflow: hidden;
+}
+
+.footerHeader {
+  margin-bottom: 40px;
+  text-align: center;
+}
+
+.appLogo {
+  font-size: 2rem;
+  font-weight: 800;
+  margin-bottom: 16px;
+  color: white;
+}
+
+.footerHeader p {
+  color: #9ca3af;
+  line-height: 1.6;
+  margin-bottom: 20px;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.socialLinks {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+}
+
+.socialLinks a {
+  width: 40px;
+  height: 40px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+
+.socialLinks a:hover {
+  background: linear-gradient(45deg, #0099ff, #002060 70%);
+  transform: translateY(-2px);
+}
+
+.footerContent {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 40px;
+  margin-bottom: 40px;
+ 
+  padding: 0 80px;
+}
+
+.footerSection h4 {
+  font-size: 1.2rem;
+  font-weight: 700;
+  margin-bottom: 20px;
+  position: relative;
+  padding-bottom: 10px;
+}
+
+.footerSection h4::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 40px;
+  height: 3px;
+  background: linear-gradient(45deg, #0099ff, #002060 70%);
+}
+
+.footerSection ul {
+  list-style: none;
+}
+
+.footerSection ul li {
+  margin-bottom: 12px;
+}
+
+.footerSection ul li a {
+  color: #9ca3af;
+  text-decoration: none;
+  transition: color 0.3s ease;
+  display: block;
+}
+
+.footerSection ul li a:hover {
+  color: white;
+  transform: translateX(5px);
+}
+
+.footerBottom {
+  border-top: 1px solid #374151;
+  padding-top: 20px;
+  text-align: center;
+  color: #9ca3af;
+}
+
+@media (max-width: 768px) {
+  .footer {
+    padding: 50px 0 15px;
+  }
+  
+  .footerHeader {
+    margin-bottom: 30px;
+  }
+  
+  .appLogo {
+    font-size: 1.8rem;
+  }
+  
+  .footerHeader p {
+    font-size: 0.95rem;
+  }
+  
+  .socialLinks a {
+    width: 36px;
+    height: 36px;
+  }
+  
+  .footerContent {
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 25px;
+  padding: 0 40px;
+
+  }
+  
+  .footerSection h4 {
+    font-size: 1.1rem;
+    margin-bottom: 15px;
+  }
+  
+  .footerSection ul li a {
+    font-size: 0.95rem;
+  }
+  
+  .footerBottom {
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .footer {
+    padding: 40px 0 15px;
+  }
+  
+  .footerHeader {
+    margin-bottom: 20px;
+  }
+  
+  .appLogo {
+    font-size: 1.5rem;
+  }
+  
+  .footerHeader p {
+    font-size: 0.9rem;
+    margin-bottom: 15px;
+  }
+  
+  .socialLinks a {
+    width: 32px;
+    height: 32px;
+  }
+  
+  .footerContent {
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 15px;
+  padding: 0 20px;
+
+  }
+  
+  .footerSection h4 {
+    font-size: 1rem;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+  }
+  
+  .footerSection h4::after {
+    width: 30px;
+    height: 2px;
+  }
+  
+  .footerSection ul li {
+    margin-bottom: 8px;
+  }
+  
+  .footerSection ul li a {
+    font-size: 0.85rem;
+  }
+  
+  .footerBottom {
+    font-size: 0.8rem;
+    padding-top: 15px;
+  }
+}

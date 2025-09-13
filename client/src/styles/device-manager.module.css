@@ -1,0 +1,517 @@
+/* Device Management Page Styles */
+
+.page {
+  padding: 2rem 0;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.container {
+  padding: 0 1rem;
+}
+
+.header {
+  margin-bottom: 2rem;
+}
+
+.header h1 {
+  font-size: 2rem;
+  color: #333;
+  margin-bottom: 0.5rem;
+}
+
+.header p {
+  color: #666;
+  font-size: 1.1rem;
+}
+
+/* Loading State */
+.loadingContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem;
+  background: #f8f9fa;
+  border-radius: 8px;
+}
+
+.loadingContainer .spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #e9ecef;
+  border-top: 4px solid #007bff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 1rem;
+}
+
+/* Empty State */
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem;
+  background: #f8f9fa;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.emptyIcon {
+  font-size: 3rem;
+  color: #dee2e6;
+  margin-bottom: 1rem;
+}
+
+.emptyState h3 {
+  font-size: 1.5rem;
+  color: #495057;
+  margin-bottom: 0.5rem;
+}
+
+.emptyState p {
+  color: #6c757d;
+  max-width: 500px;
+}
+
+/* Devices List */
+.devicesList {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+}
+
+.listHeader {
+  padding: 1.5rem;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.listHeader h3 {
+  font-size: 1.25rem;
+  color: #333;
+  margin-bottom: 0.5rem;
+}
+
+.listDescription {
+  color: #6c757d;
+  font-size: 0.95rem;
+}
+
+.devicesGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 1.5rem;
+  padding: 1.5rem;
+}
+
+/* Device Card */
+.deviceCard {
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  padding: 1.5rem;
+  background: white;
+  transition: all 0.2s ease;
+}
+
+.deviceCard:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
+}
+
+.deviceHeader {
+  display: flex;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.deviceIcon {
+  font-size: 1.5rem;
+  margin-right: 1rem;
+}
+
+.deviceIconMobile {
+  composes: deviceIcon;
+  color: #007bff;
+}
+
+.deviceIconTablet {
+  composes: deviceIcon;
+  color: #6f42c1;
+}
+
+.deviceIconLaptop {
+  composes: deviceIcon;
+  color: #28a745;
+}
+
+.deviceInfo {
+  flex: 1;
+}
+
+.deviceInfo h4 {
+  font-size: 1.1rem;
+  color: #333;
+  margin-bottom: 0.25rem;
+}
+
+.currentDeviceBadge {
+  display: inline-block;
+  background: #d4edda;
+  color: #155724;
+  font-size: 0.75rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-weight: 500;
+}
+
+.deviceDetails {
+  margin-bottom: 1rem;
+}
+
+.detailItem {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+}
+
+.detailLabel {
+  color: #6c757d;
+}
+
+.detailValue {
+  color: #333;
+  font-weight: 500;
+}
+
+.fingerprint {
+  font-family: monospace;
+  background: #f8f9fa;
+  padding: 0.125rem 0.25rem;
+  border-radius: 3px;
+}
+
+.deviceActions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.btnRemove {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: #dc3545;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background 0.2s ease;
+}
+
+.btnRemove:hover {
+  background: #c82333;
+}
+
+.btnRemoveLoading {
+  composes: btnRemove;
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.spinnerSmall {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top: 2px solid white;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+/* Devices Footer */
+.devicesFooter {
+  padding: 1.5rem;
+  border-top: 1px solid #e9ecef;
+}
+
+.infoBox {
+  display: flex;
+  align-items: flex-start;
+  background: #fff3cd;
+  border: 1px solid #ffeaa7;
+  border-radius: 8px;
+  padding: 1rem;
+}
+
+.infoIcon {
+  font-size: 1.5rem;
+  color: #856404;
+  margin-right: 1rem;
+  margin-top: 0.25rem;
+}
+
+.infoContent h4 {
+  color: #856404;
+  margin-bottom: 0.5rem;
+}
+
+.infoContent p {
+  color: #856404;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+/* Modal Styles */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
+}
+
+.modalContainer {
+  background: white;
+  border-radius: 8px;
+  max-width: 500px;
+  width: 100%;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  animation: modalSlideIn 0.3s ease;
+}
+
+.modalHeader {
+  padding: 1.5rem;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.modalHeader h3 {
+  font-size: 1.25rem;
+  color: #333;
+  margin-bottom: 0.5rem;
+}
+
+.modalHeader p {
+  color: #6c757d;
+  font-size: 0.95rem;
+}
+
+.modalBody {
+  padding: 1.5rem;
+}
+
+.devicePreview {
+  display: flex;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  background: #f8f9fa;
+  border-radius: 8px;
+}
+
+.devicePreviewIcon {
+  font-size: 2rem;
+  margin-right: 1rem;
+}
+
+.devicePreviewInfo h4 {
+  font-size: 1.1rem;
+  color: #333;
+  margin-bottom: 0.25rem;
+}
+
+.devicePreviewInfo p {
+  color: #6c757d;
+  font-size: 0.9rem;
+}
+
+.warningBox {
+  display: flex;
+  align-items: flex-start;
+  background: #f8d7da;
+  border: 1px solid #f5c6cb;
+  border-radius: 8px;
+  padding: 1rem;
+}
+
+.warningIcon {
+  font-size: 1.25rem;
+  color: #721c24;
+  margin-right: 0.75rem;
+  margin-top: 0.125rem;
+}
+
+.warningBox p {
+  color: #721c24;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.modalFooter {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  padding: 1.5rem;
+  border-top: 1px solid #e9ecef;
+}
+
+.btnCancel {
+  background: #6c757d;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.95rem;
+  transition: background 0.2s ease;
+}
+
+.btnCancel:hover {
+  background: #5a6268;
+}
+
+.btnConfirm {
+  background: #dc3545;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.95rem;
+  transition: background 0.2s ease;
+}
+
+.btnConfirm:hover {
+  background: #c82333;
+}
+
+.btnConfirm:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+/* Alert Styles */
+.alert {
+  padding: 0.75rem 1.25rem;
+  margin-bottom: 1rem;
+  border: 1px solid transparent;
+  border-radius: 0.25rem;
+}
+
+.alertDanger {
+  composes: alert;
+  color: #721c24;
+  background-color: #f8d7da;
+  border-color: #f5c6cb;
+}
+
+/* Animations */
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes modalSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .devicesGrid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    padding: 1rem;
+  }
+  
+  .modalContainer {
+    margin: 0 1rem;
+    max-width: calc(100% - 2rem);
+  }
+  
+  .devicePreview {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .devicePreviewIcon {
+    margin-right: 0;
+    margin-bottom: 0.75rem;
+  }
+  
+  .infoBox {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .infoIcon {
+    margin-right: 0;
+    margin-bottom: 0.75rem;
+    align-self: center;
+  }
+  
+  .deviceHeader {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .deviceIcon {
+    margin-right: 0;
+    margin-bottom: 0.75rem;
+  }
+  
+  .detailItem {
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+  
+  .modalFooter {
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 480px) {
+  .page {
+    padding: 1rem 0;
+  }
+  
+  .header h1 {
+    font-size: 1.75rem;
+  }
+  
+  .header p {
+    font-size: 1rem;
+  }
+  
+  .listHeader {
+    padding: 1rem;
+  }
+  
+  .deviceCard {
+    padding: 1rem;
+  }
+  
+  .devicesFooter {
+    padding: 1rem;
+  }
+  
+  .modalHeader,
+  .modalBody,
+  .modalFooter {
+    padding: 1rem;
+  }
+}

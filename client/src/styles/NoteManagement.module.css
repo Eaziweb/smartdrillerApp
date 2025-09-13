@@ -1,0 +1,630 @@
+:root {
+  --primary-color: #002060;
+  --secondary-color: #0066ff;
+  --gradient-primary: linear-gradient(45deg, #0099ff, #002060 70%);
+  --text-primary: #333;
+  --text-secondary: #666;
+  --background-color: #f8f9fa;
+  --card-background: #ffffff;
+  --border-color: #e0e0e0;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
+  --danger-color: #ff3860;
+  --success-color: #23d160;
+  --warning-color: #ffdd57;
+}
+/* Main container */
+.noteManagement {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f5f7fa 0%, #e4ecf7 100%);
+}
+/* Header */
+.managementHeader {
+  background: var(--gradient-primary);
+  box-shadow: var(--shadow-md);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.headerContent {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.2rem 1.5rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  color: white;
+}
+.backBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+.backBtn:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: scale(1.05);
+}
+.managementHeader h1 {
+  font-size: 1.8rem;
+  margin: 0;
+  font-weight: 600;
+}
+/* Content */
+.managementContent {
+  padding: 1.5rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+/* Course section */
+.courseSection {
+  background: var(--card-background);
+  border-radius: var(--radius-lg);
+  margin-bottom: 2rem;
+  box-shadow: var(--shadow-md);
+  overflow: hidden;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.courseSection:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-lg);
+}
+.courseHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 1.5rem;
+  background: rgba(0, 102, 255, 0.05);
+  border-bottom: 1px solid var(--border-color);
+}
+.courseInfo h3 {
+  margin: 0 0 0.5rem 0;
+  color: var(--primary-color);
+  font-size: 1.4rem;
+  font-weight: 600;
+}
+.courseInfo p {
+  margin: 0 0 0.5rem 0;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+.itemCount {
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+  background: rgba(0, 102, 255, 0.1);
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  display: inline-block;
+}
+.courseActions {
+  display: flex;
+  gap: 0.5rem;
+}
+/* Notes grid */
+.notesGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+  padding: 1.5rem;
+}
+.noteItem {
+  background: var(--card-background);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 1.25rem;
+  transition: all 0.3s ease;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+.noteItem:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+.noteContent {
+  flex: 1;
+}
+.noteContent h4 {
+  margin: 0 0 0.5rem 0;
+  color: var(--primary-color);
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+.noteContent p {
+  margin: 0 0 1rem 0;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.noteMeta {
+  margin-bottom: 1rem;
+}
+.noteDate {
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+.noteDate::before {
+  content: "\f073";
+  font-family: "Font Awesome 5 Free";
+  font-weight: 900;
+  color: var(--secondary-color);
+}
+.noteActions {
+  display: flex;
+  gap: 0.5rem;
+}
+/* Buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-decoration: none;
+}
+.btnPrimary {
+  background: var(--gradient-primary);
+  color: white;
+}
+.btnPrimary:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+.btnSecondary {
+  background: var(--text-secondary);
+  color: white;
+}
+.btnSecondary:hover {
+  background: var(--text-primary);
+}
+.btnOutline {
+  background: transparent;
+  color: var(--text-secondary);
+  border: 1px solid var(--border-color);
+}
+.btnOutline:hover {
+  background: rgba(0, 102, 255, 0.05);
+  color: var(--secondary-color);
+  border-color: var(--secondary-color);
+}
+.btnDanger {
+  background: var(--danger-color);
+  color: white;
+}
+.btnDanger:hover {
+  background: #e00035;
+}
+.btnSm {
+  padding: 0.375rem 0.75rem;
+  font-size: 0.8rem;
+}
+/* Modal */
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.modalLarge .modalContent {
+  max-width: 800px;
+  width: 95%;
+}
+.modalBackdrop {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  animation: fadeIn 0.3s ease;
+}
+.modalContent {
+  position: relative;
+  background: var(--card-background);
+  border-radius: var(--radius-lg);
+  width: 90%;
+  max-width: 500px;
+  max-height: 90vh;
+  overflow: hidden;
+  box-shadow: var(--shadow-lg);
+  animation: slideUp 0.3s ease;
+}
+.modalLarge .modalContent {
+  max-width: 800px;
+}
+.modalHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid var(--border-color);
+  background: rgba(0, 102, 255, 0.05);
+}
+.modalHeader h3 {
+  margin: 0;
+  color: var(--primary-color);
+  font-size: 1.3rem;
+  font-weight: 600;
+}
+.closeBtn {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 0.25rem;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+.closeBtn:hover {
+  background: rgba(0, 0, 0, 0.1);
+  color: var(--danger-color);
+}
+.modalForm {
+  padding: 1.5rem;
+  max-height: calc(90vh - 120px);
+  overflow-y: auto;
+}
+.formGroup {
+  margin-bottom: 1.25rem;
+}
+.formGroup label {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: var(--text-primary);
+  font-weight: 500;
+}
+.formGroup input,
+.formGroup textarea {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 2px solid var(--border-color);
+  border-radius: var(--radius-md);
+  font-size: 1rem;
+  outline: none;
+  transition: all 0.3s ease;
+  font-family: inherit;
+}
+.formGroup input:focus,
+.formGroup textarea:focus {
+  border-color: var(--secondary-color);
+  box-shadow: 0 0 0 3px rgba(0, 102, 255, 0.1);
+}
+/* Editor toolbar */
+.editorToolbar {
+  display: flex;
+  gap: 0.25rem;
+  margin-bottom: 0.5rem;
+  padding: 0.5rem;
+  background: var(--background-color);
+  border-radius: var(--radius-md) var(--radius-md) 0 0;
+  border: 2px solid var(--border-color);
+  border-bottom: none;
+  flex-wrap: wrap;
+}
+.toolbarDivider {
+  width: 1px;
+  height: 24px;
+  background-color: var(--border-color);
+  margin: 0 0.25rem;
+}
+.editorToolbar button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 0.875rem;
+  font-weight: bold;
+}
+.editorToolbar button:hover {
+  background: rgba(0, 102, 255, 0.1);
+  color: var(--secondary-color);
+}
+.formGroup textarea#noteContent {
+  border-radius: 0 0 var(--radius-md) var(--radius-md);
+  border-top: none;
+  resize: vertical;
+  min-height: 300px;
+  font-family: "Courier New", monospace;
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+.formHelp {
+  margin-top: 0.5rem;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+.formHelp p {
+  margin: 0.25rem 0;
+}
+/* Formula styles */
+.formula {
+  background: rgba(0, 102, 255, 0.05);
+  padding: 0.5rem;
+  border-radius: var(--radius-md);
+  margin: 0.5rem 0;
+  font-family: 'Times New Roman', serif;
+  font-style: italic;
+  text-align: center;
+}
+.fraction {
+  display: inline-block;
+  text-align: center;
+  vertical-align: middle;
+  margin: 0 0.2em;
+}
+.fraction .numerator,
+.fraction .denominator {
+  display: block;
+  padding: 0 0.2em;
+}
+.fraction .numerator {
+  border-bottom: 1px solid var(--text-primary);
+}
+.formActions {
+  margin-top: 1.5rem;
+  display: flex;
+  justify-content: flex-end;
+}
+/* Toast notification */
+.toast {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  padding: 1rem 1.5rem;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  box-shadow: var(--shadow-md);
+  z-index: 1001;
+  animation: slideInRight 0.3s ease forwards;
+  font-weight: 500;
+}
+.toastSuccess {
+  background: rgba(35, 209, 96, 0.1);
+  color: var(--success-color);
+  border-left: 4px solid var(--success-color);
+}
+.toastError {
+  background: rgba(255, 107, 107, 0.1);
+  color: var(--danger-color);
+  border-left: 4px solid var(--danger-color);
+}
+/* Loading spinner */
+.loadingSpinner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 50vh;
+}
+.spinner {
+  width: 50px;
+  height: 50px;
+  border: 4px solid rgba(0, 102, 255, 0.1);
+  border-top: 4px solid var(--secondary-color);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+/* Animations */
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes slideUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+@keyframes slideInRight {
+  from { transform: translateX(100%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+/* Responsive Design */
+@media (max-width: 768px) {
+  .managementContent {
+    padding: 1rem;
+  }
+  
+  .headerContent {
+    padding: 1rem;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+  
+  .managementHeader h1 {
+    font-size: 1.5rem;
+    flex: 1;
+    text-align: center;
+  }
+  
+  .courseHeader {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: flex-start;
+  }
+  
+  .courseActions {
+    align-self: stretch;
+    justify-content: space-between;
+  }
+  
+  .notesGrid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    padding: 1rem;
+  }
+  
+  .modalLarge .modalContent {
+    width: 98%;
+    margin: 1%;
+  }
+  
+  .editorToolbar {
+    flex-wrap: wrap;
+  }
+}
+@media (max-width: 480px) {
+  .managementContent {
+    padding: 0.75rem;
+  }
+  
+  .headerContent {
+    padding: 0.75rem;
+  }
+  
+  .managementHeader h1 {
+    font-size: 1.3rem;
+  }
+  
+  .courseSection {
+    margin-bottom: 1.5rem;
+  }
+  
+  .courseHeader {
+    padding: 1rem;
+  }
+  
+  .courseInfo h3 {
+    font-size: 1.2rem;
+  }
+  
+  .notesGrid {
+    padding: 0.75rem;
+  }
+  
+  .noteItem {
+    padding: 1rem;
+  }
+  
+  .modalContent {
+    width: 95%;
+    margin: 2.5%;
+  }
+  
+  .modalHeader {
+    padding: 0.75rem 1rem;
+  }
+  
+  .modalHeader h3 {
+    font-size: 1.1rem;
+  }
+  
+  .modalForm {
+    padding: 1rem;
+  }
+  
+  .formGroup input,
+  .formGroup textarea {
+    padding: 0.65rem 0.85rem;
+    font-size: 0.9rem;
+  }
+  
+  .toast {
+    top: 10px;
+    right: 10px;
+    left: 10px;
+    padding: 0.8rem 1rem;
+  }
+}
+
+/* Add these styles to your NoteManagement.module.css file */
+
+/* Textarea styling */
+.formGroup textarea#noteContent {
+  border-radius: 0 0 var(--radius-md) var(--radius-md);
+  border-top: none;
+  resize: vertical;
+  min-height: 300px;
+  font-family: "Courier New", monospace;
+  font-size: 0.9rem;
+  line-height: 1.6;
+  color: var(--text-primary);
+  background-color: var(--card-background);
+}
+
+/* Ensure text is visible in both light and dark modes */
+.formGroup textarea#noteContent:focus {
+  border-color: var(--secondary-color);
+  box-shadow: 0 0 0 3px rgba(0, 102, 255, 0.1);
+  outline: none;
+}
+
+/* Form help text */
+.formHelp {
+  margin-top: 0.5rem;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+
+.formHelp p {
+  margin: 0.25rem 0;
+}
+
+/* Formula preview styles */
+.formula-preview {
+  margin-top: 1rem;
+  padding: 1rem;
+  background: var(--background-color);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
+}
+
+.formula-preview h4 {
+  margin-top: 0;
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+}
+
+.formula-preview .formula {
+  background: rgba(0, 102, 255, 0.05);
+  padding: 0.5rem;
+  border-radius: var(--radius-md);
+  margin: 0.5rem 0;
+  text-align: center;
+  overflow-x: auto;
+}

@@ -1,0 +1,894 @@
+:root {
+  --primary-dark: #002060;
+  --primary-light: #0066ff;
+  --primary-gradient: linear-gradient(45deg, #0099ff, #002060 70%);
+  --success-color: #10b981;
+  --error-color: #ef4444;
+  --warning-color: #f59e0b;
+  --info-color: #3b82f6;
+  --bg-primary: #ffffff;
+  --bg-secondary: #f8fafc;
+  --bg-accent: #f1f5f9;
+  --text-primary: #1e293b;
+  --text-secondary: #64748b;
+  --border-color: #e2e8f0;
+  --border-hover: #cbd5e1;
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+}
+
+.videosPage {
+  min-height: 100vh;
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+.videosHeader {
+  background: var(--primary-gradient);
+  box-shadow: var(--shadow-lg);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  padding: 1rem 0;
+}
+
+.headerContent {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 1.5rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.backBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-md);
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+
+.backBtn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateX(-3px);
+}
+
+.videosHeader h1 {
+  font-size: 1.5rem;
+  color: white;
+  margin: 0;
+  font-weight: 600;
+}
+
+.headerActions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.viewToggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.viewToggle:hover,
+.viewToggle.active {
+  background: rgba(255, 255, 255, 0.2);
+  transform: scale(1.05);
+}
+
+.searchSection {
+  padding: 1.5rem;
+  background: var(--bg-primary);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.searchBar {
+  position: relative;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.searchBar i {
+  position: absolute;
+  left: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--primary-light);
+}
+
+.searchBar input {
+  width: 100%;
+  padding: 0.75rem 1rem 0.75rem 3rem;
+  border: 2px solid var(--border-color);
+  border-radius: 25px;
+  font-size: 1rem;
+  outline: none;
+  transition: all 0.3s ease;
+  background: var(--bg-accent);
+  color: var(--text-primary);
+}
+
+.searchBar input:focus {
+  border-color: var(--primary-light);
+  box-shadow: 0 0 0 3px rgba(0, 102, 255, 0.1);
+}
+
+.clearSearch {
+  position: absolute;
+  right: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 0.25rem;
+  transition: color 0.3s ease;
+}
+
+.clearSearch:hover {
+  color: var(--primary-dark);
+}
+
+.coursesContainer {
+  padding: 1.5rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Enhanced Course Item Design */
+.courseItem {
+  background: var(--bg-primary);
+  border-radius: var(--radius-lg);
+  margin-bottom: 1.5rem;
+  box-shadow: var(--shadow-md);
+  overflow: hidden;
+  transition: all 0.3s ease;
+  border: 1px solid var(--border-color);
+}
+
+.courseItem:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-lg);
+}
+
+.courseHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.5rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-accent) 100%);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.courseHeader:hover {
+  background: linear-gradient(135deg, var(--bg-accent) 0%, var(--bg-secondary) 100%);
+}
+
+.courseInfo {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.courseInfo h3 {
+  margin: 0;
+  color: var(--text-primary);
+  font-size: 1.25rem;
+  font-weight: 600;
+  position: relative;
+  padding-left: 1.5rem;
+}
+
+.courseInfo h3::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 8px;
+  height: 8px;
+  background: var(--primary-light);
+  border-radius: 50%;
+}
+
+.topicCount {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--primary-light);
+  font-size: 0.875rem;
+  font-weight: 500;
+  background: rgba(0, 102, 255, 0.1);
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+}
+
+.topicCount i {
+  font-size: 0.75rem;
+}
+
+.course-chevron {
+  color: var(--primary-light);
+  font-size: 1.2rem;
+  transition: transform 0.3s ease;
+}
+
+.topicsContainer {
+  border-top: 1px solid var(--border-color);
+  background: var(--bg-accent);
+}
+
+/* Enhanced Topic Item Design */
+.topicItem {
+  border-bottom: 1px solid var(--border-color);
+  transition: all 0.3s ease;
+}
+
+.topicItem:last-child {
+  border-bottom: none;
+}
+
+.topicItem:hover {
+  background: rgba(0, 102, 255, 0.03);
+}
+
+.topicHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.2rem 1.5rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.topicHeader:hover {
+  background: rgba(0, 102, 255, 0.05);
+}
+
+.topicInfo {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.topicInfo h4 {
+  margin: 0;
+  color: var(--text-primary);
+  font-size: 1.1rem;
+  font-weight: 500;
+  position: relative;
+  padding-left: 1.5rem;
+}
+
+.topicInfo h4::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 6px;
+  height: 6px;
+  background: var(--primary-light);
+  border-radius: 50%;
+}
+
+.videoCount {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--primary-light);
+  font-size: 0.8rem;
+  font-weight: 500;
+  background: rgba(0, 102, 255, 0.1);
+  padding: 0.2rem 0.6rem;
+  border-radius: 15px;
+}
+
+.videoCount i {
+  font-size: 0.7rem;
+}
+
+.topic-chevron {
+  color: var(--primary-light);
+  font-size: 1rem;
+  transition: transform 0.3s ease;
+}
+
+/* Grid View Styles */
+.videosGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.5rem;
+  padding: 1.5rem;
+}
+
+/* List View Styles */
+.videosList {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1rem 1.5rem;
+}
+
+.videoCard {
+  background: var(--bg-primary);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--border-color);
+}
+
+/* Grid view card styles */
+.videosGrid .videoCard {
+  display: flex;
+  flex-direction: column;
+}
+
+/* List view card styles */
+.videosList .videoCard {
+  display: flex;
+  flex-direction: row;
+  height: 140px;
+}
+
+.videosList .videoCard:hover {
+  transform: translateX(5px);
+}
+
+.videoCard:hover {
+  box-shadow: var(--shadow-lg);
+}
+
+/* Grid view thumbnail styles */
+.videosGrid .videoThumbnail {
+  position: relative;
+  width: 100%;
+  height: 180px;
+  overflow: hidden;
+  background: #000;
+}
+
+/* List view thumbnail styles */
+.videosList .videoThumbnail {
+  position: relative;
+  width: 240px;
+  height: 100%;
+  overflow: hidden;
+  background: #000;
+  flex-shrink: 0;
+}
+
+.videoThumbnail img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s ease;
+}
+
+.videoCard:hover .videoThumbnail img {
+  transform: scale(1.05);
+}
+
+.playOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 32, 96, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.videoCard:hover .playOverlay {
+  opacity: 1;
+}
+
+.playButton {
+  width: 60px;
+  height: 60px;
+  background: rgba(0, 102, 255, 0.9);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 1.5rem;
+  transition: all 0.3s ease;
+  box-shadow: var(--shadow-md);
+}
+
+.videosList .playButton {
+  width: 50px;
+  height: 50px;
+  font-size: 1.2rem;
+}
+
+.playButton:hover {
+  background: var(--primary-dark);
+  transform: scale(1.1);
+}
+
+.playButton i {
+  margin-left: 3px;
+}
+
+.videoDuration {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  background: rgba(0, 0, 0, 0.7);
+  color: white;
+  padding: 4px 8px;
+  border-radius: var(--radius-sm);
+  font-size: 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Grid view info styles */
+.videosGrid .videoInfo {
+  padding: 1rem;
+}
+
+/* List view info styles */
+.videosList .videoInfo {
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  flex: 1;
+  overflow: hidden;
+}
+
+.videoInfo h5 {
+  margin: 0 0 0.5rem 0;
+  color: var(--text-primary);
+  font-size: 1rem;
+  line-height: 1.4;
+  font-weight: 500;
+}
+
+.videosList .videoInfo h5 {
+  font-size: 1.1rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.videoInfo p {
+  margin: 0 0 0.75rem 0;
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.videosList .videoInfo p {
+  -webkit-line-clamp: 1;
+}
+
+.videoMeta {
+  display: flex;
+  justify-content: space-between;
+  color: var(--text-secondary);
+  font-size: 0.75rem;
+}
+
+.videosList .videoMeta {
+  margin-top: auto;
+}
+
+.videoViews,
+.videoDate {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.videoModal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modalBackdrop {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.85);
+}
+
+.modalContent {
+  position: relative;
+  background: var(--bg-primary);
+  border-radius: var(--radius-lg);
+  width: 90%;
+  max-width: 900px;
+  max-height: 90vh;
+  overflow: hidden;
+  box-shadow: var(--shadow-xl);
+}
+
+.modalHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.modalHeader h3 {
+  margin: 0;
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.closeBtn {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 0.25rem;
+  transition: color 0.3s ease;
+}
+
+.closeBtn:hover {
+  color: var(--primary-dark);
+}
+
+.modalBody {
+  padding: 0;
+}
+
+.videoPlayer {
+  width: 100%;
+  height: 450px;
+}
+
+.videoDetails {
+  padding: 1.5rem;
+}
+
+.videoDetails p {
+  margin: 0 0 1.5rem 0;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+.videoStats {
+  display: flex;
+  gap: 2rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border-color);
+}
+
+.statItem {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+
+.statItem i {
+  color: var(--primary-light);
+}
+
+.loadingSpinner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 50vh;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid var(--bg-accent);
+  border-top: 4px solid var(--primary-light);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+.noResults {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem;
+  text-align: center;
+  color: var(--text-secondary);
+  background: var(--bg-primary);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+}
+
+.noResults i {
+  font-size: 3rem;
+  color: var(--primary-light);
+  margin-bottom: 1rem;
+  opacity: 0.7;
+}
+
+.noResults p {
+  font-size: 1.1rem;
+  margin: 0;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* Responsive styles */
+@media (max-width: 768px) {
+  .headerContent {
+    padding: 0 1rem;
+  }
+  
+  .backBtn {
+    width: 36px;
+    height: 36px;
+  }
+  
+  .videosHeader h1 {
+    font-size: 1.2rem;
+  }
+  
+  .searchSection {
+    padding: 1rem;
+  }
+  
+  .coursesContainer {
+    padding: 1rem;
+  }
+  
+  .videosGrid {
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 1rem;
+    padding: 1rem;
+  }
+  
+  .videosList .videoCard {
+    height: 120px;
+  }
+  
+  .videosList .videoThumbnail {
+    width: 200px;
+  }
+  
+  .videosList .playButton {
+    width: 45px;
+    height: 45px;
+    font-size: 1rem;
+  }
+  
+  .modalContent {
+    width: 95%;
+    margin: 1rem;
+  }
+  
+  .videoPlayer {
+    height: 250px;
+  }
+  
+  .videoStats {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  
+  .courseHeader {
+    padding: 1.2rem;
+  }
+  
+  .courseInfo h3 {
+    font-size: 1.1rem;
+  }
+  
+  .topicHeader {
+    padding: 0.8rem 1.2rem;
+  }
+  
+  .topicInfo h4 {
+    font-size: 1rem;
+  }
+  
+  .videosGrid .videoThumbnail {
+    height: 160px;
+  }
+  
+  .playButton {
+    width: 50px;
+    height: 50px;
+    font-size: 1.2rem;
+  }
+  
+  .videosGrid .videoInfo {
+    padding: 0.8rem;
+  }
+  
+  .videosGrid .videoInfo h5 {
+    font-size: 0.95rem;
+  }
+  
+  .videosGrid .videoInfo p {
+    font-size: 0.8rem;
+  }
+  
+  .videosGrid .videoMeta {
+    font-size: 0.7rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .headerContent {
+    padding: 0 0.75rem;
+  }
+  
+  .backBtn {
+    width: 32px;
+    height: 32px;
+  }
+  
+  .videosHeader h1 {
+    font-size: 1.1rem;
+  }
+  
+  .searchBar input {
+    padding: 0.6rem 1rem 0.6rem 2.5rem;
+    font-size: 0.9rem;
+  }
+  
+  .coursesContainer {
+    padding: 0.75rem;
+  }
+  
+  .videosGrid {
+    grid-template-columns: 1fr;
+  }
+  
+  .videosList .videoCard {
+    height: 100px;
+  }
+  
+  .videosList .videoThumbnail {
+    width: 160px;
+  }
+  
+  .videosList .videoInfo {
+    padding: 0.8rem 0.8rem 0.8rem 1rem;
+  }
+  
+  .videosList .videoInfo h5 {
+    font-size: 1rem;
+  }
+  
+  .courseHeader {
+    padding: 1rem;
+  }
+  
+  .courseInfo h3 {
+    font-size: 1rem;
+  }
+  
+  .topicHeader {
+    padding: 0.7rem 1rem;
+  }
+  
+  .topicInfo h4 {
+    font-size: 0.95rem;
+  }
+  
+  .videosGrid .videoThumbnail {
+    height: 140px;
+  }
+  
+  .playButton {
+    width: 45px;
+    height: 45px;
+    font-size: 1rem;
+  }
+  
+  .videosGrid .videoInfo {
+    padding: 0.7rem;
+  }
+  
+  .videosGrid .videoInfo h5 {
+    font-size: 0.9rem;
+  }
+  
+  .videosGrid .videoInfo p {
+    font-size: 0.75rem;
+  }
+  
+  .videoPlayer {
+    height: 200px;
+  }
+  
+  .modalHeader {
+    padding: 0.8rem 1rem;
+  }
+  
+  .modalHeader h3 {
+    font-size: 1rem;
+  }
+  
+  .videoDetails {
+    padding: 1rem;
+  }
+  
+  .videoStats {
+    gap: 0.5rem;
+  }
+  
+  .statItem {
+    font-size: 0.8rem;
+  }
+    
+  .videosList .videoMeta {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
+    font-size: 0.65rem;
+  }
+  
+  .videosList .videoViews,
+  .videosList .videoDate {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+  }
+  
+  .videosList .videoViews i,
+  .videosList .videoDate i {
+    font-size: 0.6rem;
+  }
+}
