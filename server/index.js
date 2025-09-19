@@ -51,9 +51,6 @@ const universityRoutes = require("./routes/universities");
 app.use("/api/universities", universityRoutes);
 require('./utils/updateVideoMetadata');
 
-const errorLogger = require('./middleware/errorLogger');
-
-app.use(errorLogger);
 
 
 // Serve static files from uploads directory
