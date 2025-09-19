@@ -13,8 +13,35 @@ const ResetPassword = () => {
   const [error, setError] = useState("")
   const [success, setSuccess] = useState(false)
   const [tokenValid, setTokenValid] = useState(null)
+  const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+  const [passwordStrength, setPasswordStrength] = useState(0)
+  const [passwordCriteria, setPasswordCriteria] = useState({
+    length: false,
+    number: false,
+    specialChar: false,
+  })
+  
   const { token } = useParams()
   const navigate = useNavigate()
+
+  // Calculate password strength
+  const calculatePasswordStrength = (password) => {
+    const criteria = {
+      length: password.length >= 6,
+      number: /\d/.test(password),
+      specialChar: /[!@#$%^&*(),.?":{}|<>]/.test(password),
+    }
+    
+    setPasswordCriteria(criteria)
+    
+    let strength = 0
+    if (criteria.length) strength += 33
+    if (criteria.number) strength += 33
+    if (criteria.specialChar) strength += 34
+    
+    setPasswordStrength(strength)
+  }
 
   // Verify token on component mount
   useEffect(() => {
@@ -39,10 +66,15 @@ const ResetPassword = () => {
   }, [token])
 
   const handleChange = (e) => {
+    const { name, value } = e.target
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value,
+      [name]: value,
     })
+
+    if (name === "password") {
+      calculatePasswordStrength(value)
+    }
   }
 
   const handleSubmit = async (e) => {
@@ -80,6 +112,12 @@ const ResetPassword = () => {
     }
   }
 
+  const getPasswordStrengthColor = () => {
+    if (passwordStrength <= 33) return "#ff6b6b" // Red
+    if (passwordStrength <= 66) return "#ffd43b" // Yellow
+    return "#51cf66" // Green
+  }
+
   if (success) {
     return (
       <div className={styles.authPage}>
@@ -90,6 +128,7 @@ const ResetPassword = () => {
             </Link>
             <h1 className={styles.appLogo}>SmartDrill</h1>
           </div>
+          
           <div className={styles.successForm}>
             <div className={styles.formHeader}>
               <div style={{ textAlign: "center", marginBottom: "2rem" }}>
@@ -117,6 +156,7 @@ const ResetPassword = () => {
             </Link>
             <h1 className={styles.appLogo}>SmartDrill</h1>
           </div>
+          
           <div className={styles.resetForm}>
             <div className={styles.formHeader}>
               <h1>Invalid Reset Link</h1>
@@ -141,6 +181,7 @@ const ResetPassword = () => {
             </Link>
             <h1 className={styles.appLogo}>SmartDrill</h1>
           </div>
+          
           <div className={styles.resetForm}>
             <div className={styles.formHeader}>
               <h1>Verifying Reset Link</h1>
@@ -161,6 +202,7 @@ const ResetPassword = () => {
           </Link>
           <h1 className={styles.appLogo}>SmartDrill</h1>
         </div>
+        
         <div className={styles.resetForm}>
           <div className={styles.formHeader}>
             <div style={{ textAlign: "center", marginBottom: "2rem" }}>
@@ -171,37 +213,93 @@ const ResetPassword = () => {
             <h1>Reset Your Password</h1>
             <p>Enter your new password below</p>
           </div>
+          
           <form onSubmit={handleSubmit}>
             {error && (
               <div className={styles.errorMessage}>
                 {error}
               </div>
             )}
+            
             <div className={styles.inputGroup}>
               <label htmlFor="password">New Password</label>
-              <input
-                type="password"
-                id="password"
-                name="password"
-                value={formData.password}
-                onChange={handleChange}
-                required
-                placeholder="Enter your new password"
-                minLength="6"
-              />
+              <div className={styles.passwordInputContainer}>
+                <input
+                  type={showPassword ? "text" : "password"}
+                  id="password"
+                  name="password"
+                  value={formData.password}
+                  onChange={handleChange}
+                  required
+                  placeholder="Enter your new password"
+                  minLength="6"
+                />
+                <button
+                  type="button"
+                  className={styles.passwordToggle}
+                  onClick={() => setShowPassword(!showPassword)}
+                >
+                  {showPassword ? (
+                    <i className="fas fa-eye-slash"></i>
+                  ) : (
+                    <i className="fas fa-eye"></i>
+                  )}
+                </button>
+              </div>
+              
+              <div className={styles.passwordStrengthContainer}>
+                <div className={styles.passwordStrengthBar}>
+                  <div
+                    className={styles.passwordStrengthFill}
+                    style={{ 
+                      width: `${passwordStrength}%`,
+                      backgroundColor: getPasswordStrengthColor()
+                    }}
+                  ></div>
+                </div>
+                <div className={styles.passwordCriteria}>
+                  <div className={`${styles.criteriaItem} ${passwordCriteria.length ? styles.met : ''}`}>
+                    <i className={`fas ${passwordCriteria.length ? 'fa-check-circle' : 'fa-circle'}`}></i>
+                    <span>At least 6 characters</span>
+                  </div>
+                  <div className={`${styles.criteriaItem} ${passwordCriteria.number ? styles.met : ''}`}>
+                    <i className={`fas ${passwordCriteria.number ? 'fa-check-circle' : 'fa-circle'}`}></i>
+                    <span>At least one number</span>
+                  </div>
+                  <div className={`${styles.criteriaItem} ${passwordCriteria.specialChar ? styles.met : ''}`}>
+                    <i className={`fas ${passwordCriteria.specialChar ? 'fa-check-circle' : 'fa-circle'}`}></i>
+                    <span>At least one special character</span>
+                  </div>
+                </div>
+              </div>
             </div>
+            
             <div className={styles.inputGroup}>
               <label htmlFor="confirmPassword">Confirm New Password</label>
-              <input
-                type="password"
-                id="confirmPassword"
-                name="confirmPassword"
-                value={formData.confirmPassword}
-                onChange={handleChange}
-                required
-                placeholder="Confirm your new password"
-              />
+              <div className={styles.passwordInputContainer}>
+                <input
+                  type={showConfirmPassword ? "text" : "password"}
+                  id="confirmPassword"
+                  name="confirmPassword"
+                  value={formData.confirmPassword}
+                  onChange={handleChange}
+                  required
+                  placeholder="Confirm your new password"
+                />
+                <button
+                  type="button"
+                  className={styles.passwordToggle}
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                >
+                  {showConfirmPassword ? (
+                    <i className="fas fa-eye-slash"></i>
+                  ) : (
+                    <i className="fas fa-eye"></i>
+                  )}
+                </button>
+              </div>
             </div>
+            
             <button 
               type="submit" 
               className={`${styles.submitBtn} ${loading ? styles.loading : ""}`} 
@@ -216,6 +314,7 @@ const ResetPassword = () => {
               <i className={`fas fa-check ${styles.btnArrow}`}></i>
             </button>
           </form>
+          
           <div className={styles.formFooter}>
             <p>
               Remember your password?{" "}

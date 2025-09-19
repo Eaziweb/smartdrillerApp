@@ -1,5 +1,5 @@
+// models/VideoCourse.js
 const mongoose = require("mongoose")
-
 const videoCourseSchema = new mongoose.Schema({
   title: {
     type: String,
@@ -16,6 +16,10 @@ const videoCourseSchema = new mongoose.Schema({
       ref: "VideoTopic",
     },
   ],
+  isVisible: {
+    type: Boolean,
+    default: true,
+  },
   createdAt: {
     type: Date,
     default: Date.now,

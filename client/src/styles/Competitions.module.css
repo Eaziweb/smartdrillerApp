@@ -425,8 +425,7 @@
 @media (max-width: 768px) {
   .pageHeader {
     padding: 1rem;
-    flex-direction: column;
-    gap: 1rem;
+    gap: 0rem;
   }
   
   .headerContent h1 {
@@ -509,11 +508,11 @@
   }
   
   .headerContent h1 {
-    font-size: 1.25rem;
+    font-size: 1.1rem;
   }
   
   .headerContent p {
-    font-size: 0.75rem;
+    font-size: 0.65rem;
   }
   
   .backBtn {

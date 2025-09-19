@@ -60,7 +60,7 @@ const AdminCompetitionLeaderboard = () => {
         limit: filters.limit.toString(),
       })
       if (filters.course) params.append("course", filters.course)
-      if (filters.searchTerm) params.append("search", filters.searchTerm)
+      if (searchTerm) params.append("search", searchTerm)
       const response = await axios.get(`/api/competitions/${id}/leaderboard?${params}`)
       setLeaderboard(response.data.leaderboard)
       setStats(response.data.stats)
@@ -86,75 +86,75 @@ const AdminCompetitionLeaderboard = () => {
     fetchLeaderboard()
   }
 
-  const handleExport = async () => {
-    setExporting(true)
-    try {
-      // Fetch all results for export
-      const params = new URLSearchParams({
-        sortBy: filters.sortBy,
-        page: "1",
-        limit: "10000", // Get all results
+const handleExport = async () => {
+  setExporting(true)
+  try {
+    // Fetch all results for export
+    const params = new URLSearchParams({
+      sortBy: filters.sortBy,
+      page: "1",
+      limit: "10000", // Get all results
+    })
+    if (filters.course) params.append("course", filters.course)
+    if (searchTerm) params.append("search", searchTerm)
+    const response = await axios.get(`/api/competitions/${id}/leaderboard?${params}`)
+    const allResults = response.data.leaderboard
+    // Create CSV content
+    const csvHeaders = [
+      "Rank",
+      "Name",
+      "Email",
+      "Course",
+      "Phone",
+      "Account Number",
+      "Total Score (%)",
+      "Correct Answers",
+      "Total Questions",
+      "Time Used (min)",
+      "Submission Time",
+      "Grace Submission",
+      ...availableCourses.map((course) => `${course.code} Score (%)`),
+    ]
+    const csvRows = allResults.map((entry) => {
+      const courseScores = availableCourses.map((course) => {
+        const courseScore = entry.courseScores?.find((cs) => cs.courseCode === course.code)
+        return courseScore ? courseScore.score : "N/A"
       })
-      if (filters.course) params.append("course", filters.course)
-      if (filters.searchTerm) params.append("search", filters.searchTerm)
-      const response = await axios.get(`/api/competitions/${id}/leaderboard?${params}`)
-      const allResults = response.data.leaderboard
-      // Create CSV content
-      const csvHeaders = [
-        "Rank",
-        "Name",
-        "Email",
-        "Course",
-        "Phone",
-        "Account Number",
-        "Total Score (%)",
-        "Correct Answers",
-        "Total Questions",
-        "Time Used (min)",
-        "Submission Time",
-        "Grace Submission",
-        ...availableCourses.map((course) => `${course.code} Score (%)`),
+      return [
+        entry.rank,
+        entry.user?.fullName || "Unknown",
+        entry.user?.email || "",
+        getCourseName(entry.user), // Use the getCourseName function
+        entry.user?.phoneNumber || "",
+        entry.user?.accountNumber || "",
+        entry.totalScore,
+        entry.correctAnswers,
+        entry.totalQuestions,
+        entry.timeUsed,
+        new Date(entry.submittedAt).toLocaleString(),
+        entry.isGraceSubmission ? "Yes" : "No",
+        ...courseScores,
       ]
-      const csvRows = allResults.map((entry) => {
-        const courseScores = availableCourses.map((course) => {
-          const courseScore = entry.courseScores?.find((cs) => cs.courseCode === course.code)
-          return courseScore ? courseScore.score : "N/A"
-        })
-        return [
-          entry.rank,
-          entry.user?.fullName || "Unknown",
-          entry.user?.email || "",
-          entry.user?.course || "",
-          entry.user?.phoneNumber || "",
-          entry.user?.accountNumber || "",
-          entry.totalScore,
-          entry.correctAnswers,
-          entry.totalQuestions,
-          entry.timeUsed,
-          new Date(entry.submittedAt).toLocaleString(),
-          entry.isGraceSubmission ? "Yes" : "No",
-          ...courseScores,
-        ]
-      })
-      const csvContent = [csvHeaders, ...csvRows].map((row) => row.map((cell) => `"${cell}"`).join(",")).join("\n")
-      // Download CSV
-      const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" })
-      const link = document.createElement("a")
-      const url = URL.createObjectURL(blob)
-      link.setAttribute("href", url)
-      link.setAttribute("download", `${competition.name}_leaderboard_${new Date().toISOString().split("T")[0]}.csv`)
-      link.style.visibility = "hidden"
-      document.body.appendChild(link)
-      link.click()
-      document.body.removeChild(link)
-      showMessage("Leaderboard exported successfully", "success")
-    } catch (error) {
-      console.error("Error exporting leaderboard:", error)
-      showMessage("Failed to export leaderboard", "error")
-    } finally {
-      setExporting(false)
-    }
+    })
+    const csvContent = [csvHeaders, ...csvRows].map((row) => row.map((cell) => `"${cell}"`).join(",")).join("\n")
+    // Download CSV
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" })
+    const link = document.createElement("a")
+    const url = URL.createObjectURL(blob)
+    link.setAttribute("href", url)
+    link.setAttribute("download", `${competition.name}_leaderboard_${new Date().toISOString().split("T")[0]}.csv`)
+    link.style.visibility = "hidden"
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    showMessage("Leaderboard exported successfully", "success")
+  } catch (error) {
+    console.error("Error exporting leaderboard:", error)
+    showMessage("Failed to export leaderboard", "error")
+  } finally {
+    setExporting(false)
   }
+}
 
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleString()
@@ -166,6 +166,34 @@ const AdminCompetitionLeaderboard = () => {
     if (rank === 3) return "🥉"
     return `#${rank}`
   }
+
+// components/AdminCompetitionLeaderboard.js
+
+const getCourseName = (user) => {
+  if (!user) return "N/A"
+  
+  // Use the populated courseName field from the backend
+  if (user.courseName) {
+    return user.courseName
+  }
+  
+  // If course is an object with a name property (fallback)
+  if (typeof user.course === 'object' && user.course !== null && user.course.name) {
+    return user.course.name
+  }
+  
+  // If course is a string (for admin/superadmin)
+  if (typeof user.course === 'string') {
+    return user.course
+  }
+  
+  // If course is an ObjectId (regular user)
+  if (user.course && typeof user.course === 'object' && user.course._id) {
+    return "Course data unavailable"
+  }
+  
+  return "N/A"
+}
 
   const showMessage = (message, type = "info") => {
     const messageEl = document.createElement("div")
@@ -351,7 +379,7 @@ const AdminCompetitionLeaderboard = () => {
                     <div className={styles.participantAvatar}>{entry.user?.fullName?.charAt(0) || "U"}</div>
                     <div className={styles.participantDetails}>
                       <div className={styles.participantName}>{entry.user?.fullName || "Unknown"}</div>
-                      <div className={styles.participantCourse}>{entry.user?.course || ""}</div>
+                      <div className={styles.participantCourse}>{getCourseName(entry.user)}</div>
                     </div>
                   </div>
                 </div>

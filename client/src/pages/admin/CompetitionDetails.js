@@ -216,7 +216,7 @@ const CompetitionDetails = () => {
       
       setShowQuestionModal(false)
       resetQuestionForm()
-      fetchQuestions()
+      fetchQuestions() // Refresh the questions list
       fetchCompetitionDetails() // Update course question count
       showToast("Question added successfully", "success")
     } catch (error) {
@@ -251,7 +251,7 @@ const CompetitionDetails = () => {
         },
       })
       
-      fetchQuestions()
+      fetchQuestions() // Refresh the questions list
       showToast("Question updated successfully", "success")
     } catch (error) {
       console.error("Error updating question:", error)
@@ -264,7 +264,7 @@ const CompetitionDetails = () => {
     
     try {
       await axios.delete(`/api/admin/competitions/${id}/questions/${questionId}`)
-      fetchQuestions()
+      fetchQuestions() // Refresh the questions list
       fetchCompetitionDetails() // Update course question count
       showToast("Question deleted successfully", "success")
     } catch (error) {
@@ -273,70 +273,64 @@ const CompetitionDetails = () => {
     }
   }
 
-const handleBulkImport = async (e) => {
-  e.preventDefault();
-  try {
-    let questions;
-
+  const handleBulkImport = async (e) => {
+    e.preventDefault();
     try {
-      // First escape all single backslashes → double backslashes
-      const escaped = bulkQuestions.trim().replace(/\\/g, "\\\\");
-      questions = JSON.parse(escaped);
-    } catch (parseError) {
-      showToast(`Invalid JSON format: ${parseError.message}`, "error");
-      return;
-    }
-
-    if (!Array.isArray(questions)) {
-      showToast("Questions data must be an array.", "error");
-      return;
-    }
-
-    // Validate each question has required fields
-    const requiredFields = ["question", "options", "correctOption"];
-    for (let i = 0; i < questions.length; i++) {
-      const q = questions[i];
-      for (const field of requiredFields) {
-        if (!q[field]) {
-          showToast(`Question ${i + 1}: Missing '${field}' field.`, "error");
-          return;
+      let questions;
+      try {
+        // First escape all single backslashes → double backslashes
+        const escaped = bulkQuestions.trim().replace(/\\/g, "\\\\");
+        questions = JSON.parse(escaped);
+      } catch (parseError) {
+        showToast(`Invalid JSON format: ${parseError.message}`, "error");
+        return;
+      }
+      if (!Array.isArray(questions)) {
+        showToast("Questions data must be an array.", "error");
+        return;
+      }
+      // Validate each question has required fields
+      const requiredFields = ["question", "options", "correctOption"];
+      for (let i = 0; i < questions.length; i++) {
+        const q = questions[i];
+        for (const field of requiredFields) {
+          if (!q[field]) {
+            showToast(`Question ${i + 1}: Missing '${field}' field.`, "error");
+            return;
+          }
         }
       }
-    }
-
-    const response = await axios.post(
-      `/api/admin/competitions/${id}/questions/bulk`,
-      {
-        questions,
-        courseCode: selectedCourse,
+      const response = await axios.post(
+        `/api/admin/competitions/${id}/questions/bulk`,
+        {
+          questions,
+          courseCode: selectedCourse,
+        }
+      );
+      setShowBulkModal(false);
+      setBulkQuestions("");
+      fetchQuestions(); // Refresh the questions list
+      fetchCompetitionDetails(); // Update course question count
+      showToast(
+        `${response.data.questions.length} questions imported successfully`,
+        "success"
+      );
+    } catch (error) {
+      console.error("Error importing questions:", error);
+      if (error.response?.data?.errors) {
+        showToast(
+          `Validation errors: ${error.response.data.errors.join(", ")}`,
+          "error"
+        );
+      } else {
+        showToast(
+          error.response?.data?.message ||
+            "Failed to import questions. Check JSON format.",
+          "error"
+        );
       }
-    );
-
-    setShowBulkModal(false);
-    setBulkQuestions("");
-    fetchQuestions();
-    fetchCompetitionDetails(); // Update course question count
-    showToast(
-      `${response.data.questions.length} questions imported successfully`,
-      "success"
-    );
-  } catch (error) {
-    console.error("Error importing questions:", error);
-    if (error.response?.data?.errors) {
-      showToast(
-        `Validation errors: ${error.response.data.errors.join(", ")}`,
-        "error"
-      );
-    } else {
-      showToast(
-        error.response?.data?.message ||
-          "Failed to import questions. Check JSON format.",
-        "error"
-      );
     }
   }
-};
-
 
   // Form handlers
   const handleCompetitionChange = (e) => {
@@ -468,7 +462,7 @@ const handleBulkImport = async (e) => {
           <span>{toast.message}</span>
         </div>
       )}
-
+      
       <div className={styles.adminHeader}>
         <Link to="/admin/competitions" className={styles.backBtn}>
           <i className="fas fa-arrow-left"></i>
@@ -480,7 +474,7 @@ const handleBulkImport = async (e) => {
           </span>
         </div>
       </div>
-
+      
       <div className={styles.adminContent}>
         {/* Competition Stats */}
         <div className={styles.competitionStats}>
@@ -513,7 +507,7 @@ const handleBulkImport = async (e) => {
             </div>
           </div>
         </div>
-
+        
         {/* Tab Navigation */}
         <div className={styles.tabNavigation}>
           <button
@@ -538,7 +532,7 @@ const handleBulkImport = async (e) => {
             Questions
           </button>
         </div>
-
+        
         {/* Tab Content */}
         {activeTab === "details" && (
           <div className={styles.tabContent}>
@@ -645,7 +639,7 @@ const handleBulkImport = async (e) => {
             </form>
           </div>
         )}
-
+        
         {activeTab === "courses" && (
           <div className={styles.tabContent}>
             <div className={styles.sectionHeader}>
@@ -684,7 +678,7 @@ const handleBulkImport = async (e) => {
             )}
           </div>
         )}
-
+        
         {activeTab === "questions" && (
           <div className={styles.tabContent}>
             <div className={styles.sectionHeader}>
@@ -835,7 +829,7 @@ const handleBulkImport = async (e) => {
           </div>
         )}
       </div>
-
+      
       {/* Course Modal */}
       {showCourseModal && (
         <div className={styles.modalOverlay}>
@@ -905,7 +899,7 @@ const handleBulkImport = async (e) => {
           </div>
         </div>
       )}
-
+      
       {/* Question Modal */}
       {showQuestionModal && (
         <div className={styles.modalOverlay}>

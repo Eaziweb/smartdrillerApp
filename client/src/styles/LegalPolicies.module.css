@@ -1,0 +1,240 @@
+/* LegalPolicies.module.css */
+:root {
+  --legal-primary-color: darkblue;
+  --legal-secondary-color: #6c757d;
+  --legal-success-color: #28a745;
+  --legal-warning-color: #ffc107;
+  --legal-danger-color: #dc3545;
+  --legal-light-color: #f8f9fa;
+  --legal-dark-color: #0066ff;
+  --legal-border-radius: 8px;
+  --legal-box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  --legal-transition: all 0.3s ease;
+}
+
+.legalPage {
+  background-color: #f5f7fa;
+  color: #333;
+  line-height: 1.6;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.legalPage .container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.legalPage header {
+  background-color: white;
+  box-shadow: var(--legal-box-shadow);
+  padding: 20px 0;
+  margin-bottom: 30px;
+}
+
+.legalPage .headerContent {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.legalPage .logo {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--legal-primary-color);
+  text-decoration: none;
+}
+
+.legalPage .navTabs {
+  display: flex;
+  gap: 20px;
+}
+
+.legalPage .tabButton {
+  background: none;
+  border: none;
+  padding: 8px 16px;
+  cursor: pointer;
+  font-weight: 600;
+  color: var(--legal-secondary-color);
+  border-radius: var(--legal-border-radius);
+  transition: var(--legal-transition);
+}
+
+.legalPage .tabButton.active {
+  color: var(--legal-primary-color);
+  background-color: rgba(74, 107, 255, 0.1);
+}
+
+.legalPage .policyContainer {
+  background-color: white;
+  border-radius: var(--legal-border-radius);
+  box-shadow: var(--legal-box-shadow);
+  padding: 30px;
+  margin-bottom: 30px;
+}
+
+.legalPage h1 {
+  color: var(--legal-primary-color);
+  margin-bottom: 20px;
+  font-size: 32px;
+}
+
+.legalPage h2 {
+  color: var(--legal-dark-color);
+  margin: 25px 0 15px;
+  font-size: 24px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #eee;
+}
+
+.legalPage h3 {
+  color: var(--legal-dark-color);
+  margin: 20px 0 10px;
+  font-size: 20px;
+}
+
+.legalPage p {
+  margin-bottom: 15px;
+}
+
+.legalPage ul, .legalPage ol {
+  margin-bottom: 15px;
+  padding-left: 20px;
+}
+
+.legalPage li {
+  margin-bottom: 8px;
+}
+
+.legalPage .lastUpdated {
+  color: var(--legal-secondary-color);
+  font-style: italic;
+  margin-bottom: 20px;
+}
+
+.legalPage .contactInfo {
+  background-color: rgba(74, 107, 255, 0.05);
+  padding: 20px;
+  border-radius: var(--legal-border-radius);
+  margin-top: 30px;
+}
+
+.legalPage .hidden {
+  display: none;
+}
+
+.legalPage footer {
+  text-align: center;
+  padding: 20px;
+  color: var(--legal-secondary-color);
+  font-size: 14px;
+}
+
+.legalPage .cookieBanner {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: var(--legal-dark-color);
+  color: white;
+  padding: 15px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  z-index: 1000;
+}
+
+.legalPage .cookieBanner p {
+  margin: 0;
+  flex: 1;
+}
+
+.legalPage .cookieBanner button {
+  background: white;
+  color: var(--legal-dark-color);
+  border: none;
+  padding: 8px 16px;
+  border-radius: var(--legal-border-radius);
+  cursor: pointer;
+  font-weight: 600;
+  margin-left: 15px;
+}
+
+.legalPage .cookieBanner button:hover {
+  opacity: 0.9;
+}
+
+.legalPage .cookieTable {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 20px 0;
+}
+
+.legalPage .cookieTable th, .legalPage .cookieTable td {
+  border: 1px solid #ddd;
+  padding: 12px;
+  text-align: left;
+}
+
+.legalPage .cookieTable th {
+  background-color: rgba(74, 107, 255, 0.1);
+}
+
+.legalPage .cookieTable tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .legalPage .headerContent {
+    flex-direction: column;
+    gap: 15px;
+  }
+  
+  .legalPage .navTabs {
+    width: 100%;
+    overflow-x: auto;
+    padding-bottom: 10px;
+  }
+  
+  .legalPage .policyContainer {
+    padding: 20px;
+  }
+  
+  .legalPage h1 {
+    font-size: 28px;
+  }
+  
+  .legalPage .cookieBanner {
+    flex-direction: column;
+    gap: 10px;
+    text-align: center;
+  }
+  
+  .legalPage .cookieBanner button {
+    margin-left: 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .legalPage .policyContainer {
+    padding: 15px;
+  }
+  
+  .legalPage h1 {
+    font-size: 24px;
+  }
+  
+  .legalPage h2 {
+    font-size: 20px;
+  }
+  
+  .legalPage .cookieTable {
+    font-size: 14px;
+  }
+  
+  .legalPage .cookieTable th, .legalPage .cookieTable td {
+    padding: 8px;
+  }
+}

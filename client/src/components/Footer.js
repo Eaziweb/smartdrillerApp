@@ -35,14 +35,14 @@ const Footer = () => {
           <div className={styles.footerSection}>
             <h4>Legal</h4>
             <ul>
-              <li><Link to="/terms">Privacy Policy</Link></li>
-              <li><Link to="/terms">Terms of Service</Link></li>
-              <li><Link to="/terms">Cookie Policy</Link></li>
+              <li><Link to="/legal">Privacy Policy</Link></li>
+              <li><Link to="/legal">Terms of Service</Link></li>
+              <li><Link to="/legal">Cookie Policy</Link></li>
             </ul>
           </div>
         </div>
         <div className={styles.footerBottom}>
-          <p>&copy; 2025 SmartDrill. All Rights Reserved</p>
+       <p>&copy; {new Date().getFullYear()} SmartDriller. All Rights Reserved</p>
         </div>
       </div>
     </footer>

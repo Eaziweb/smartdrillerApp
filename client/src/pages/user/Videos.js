@@ -14,6 +14,7 @@ const Videos = () => {
   const [openCourse, setOpenCourse] = useState(null)
   const [openTopic, setOpenTopic] = useState(null)
   const [selectedVideo, setSelectedVideo] = useState(null)
+  const [error, setError] = useState(null)
 
   useEffect(() => {
     loadCourses()
@@ -24,6 +25,8 @@ const Videos = () => {
   }, [viewStyle])
 
   const loadCourses = async () => {
+    setLoading(true)
+    setError(null)
     try {
       const response = await axios.get("/api/videos/courses", {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
@@ -31,6 +34,7 @@ const Videos = () => {
       setCourses(response.data)
     } catch (error) {
       console.error("Failed to load courses:", error)
+      setError("Failed to load courses. Please try again later.")
     } finally {
       setLoading(false)
     }
@@ -89,7 +93,9 @@ const Videos = () => {
   const filteredCourses = courses.filter(
     (course) =>
       course.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      course.topics.some((topic) => topic.title.toLowerCase().includes(searchTerm.toLowerCase())),
+      (course.topics && course.topics.some((topic) => 
+        topic.title.toLowerCase().includes(searchTerm.toLowerCase())
+      )),
   )
 
   if (loading) {
@@ -98,6 +104,22 @@ const Videos = () => {
         <div className={styles.loadingSpinner}>
           <div className={styles.spinner}></div>
           <p>Loading videos...</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className={styles.videosPage}>
+        <div className={styles.errorContainer}>
+          <i className="fas fa-exclamation-triangle"></i>
+          <h2>Error Loading Videos</h2>
+          <p>{error}</p>
+          <button className={`${styles.btn} ${styles.btnPrimary}`} onClick={loadCourses}>
+            <i className="fas fa-redo"></i>
+            Try Again
+          </button>
         </div>
       </div>
     )
@@ -148,7 +170,13 @@ const Videos = () => {
       </div>
       
       <div className={`${styles.coursesContainer} ${viewStyle}`}>
-        {filteredCourses.length === 0 ? (
+        {courses.length === 0 ? (
+          <div className={styles.emptyState}>
+            <i className="fas fa-video"></i>
+            <h2>No courses available</h2>
+            <p>There are no video courses available at the moment.</p>
+          </div>
+        ) : filteredCourses.length === 0 ? (
           <div className={styles.noResults}>
             <i className="fas fa-search"></i>
             <p>No videos found matching your search</p>
@@ -161,7 +189,7 @@ const Videos = () => {
                   <h3>{course.title}</h3>
                   <span className={styles.topicCount}>
                     <i className="fas fa-folder"></i>
-                    {course.topics.length} topics
+                    {course.topics?.length || 0} topics
                   </span>
                 </div>
                 <i className={`${styles.courseChevron} fas fa-chevron-${openCourse === course._id ? "up" : "down"}`}></i>
@@ -169,59 +197,65 @@ const Videos = () => {
               
               {openCourse === course._id && (
                 <div className={styles.topicsContainer}>
-                  {course.topics.map((topic) => (
-                    <div key={topic._id} className={styles.topicItem}>
-                      <div className={styles.topicHeader} onClick={() => toggleTopic(topic._id)}>
-                        <div className={styles.topicInfo}>
-                          <h4>{topic.title}</h4>
-                          <span className={styles.videoCount}>
-                            <i className="fas fa-video"></i>
-                            {topic.videoCount || 0} videos
-                          </span>
+                  {course.topics && course.topics.length > 0 ? (
+                    course.topics.map((topic) => (
+                      <div key={topic._id} className={styles.topicItem}>
+                        <div className={styles.topicHeader} onClick={() => toggleTopic(topic._id)}>
+                          <div className={styles.topicInfo}>
+                            <h4>{topic.title}</h4>
+                            <span className={styles.videoCount}>
+                              <i className="fas fa-video"></i>
+                              {topic.videoCount || 0} videos
+                            </span>
+                          </div>
+                          <i className={`${styles.topicChevron} fas fa-chevron-${openTopic === topic._id ? "up" : "down"}`}></i>
                         </div>
-                        <i className={`${styles.topicChevron} fas fa-chevron-${openTopic === topic._id ? "up" : "down"}`}></i>
-                      </div>
-                      
-                      {openTopic === topic._id && topic.videos && (
-                        <div className={viewStyle === "grid" ? styles.videosGrid : styles.videosList}>
-                          {topic.videos.map((video) => (
-                            <div key={video._id} className={styles.videoCard} onClick={() => openVideoPlayer(video)}>
-                              <div className={styles.videoThumbnail}>
-                                <img
-                                  src={`https://img.youtube.com/vi/${getYouTubeVideoId(video.url)}/maxresdefault.jpg`}
-                                  alt={video.title}
-                                  onError={(e) => {
-                                    e.target.src = `https://img.youtube.com/vi/${getYouTubeVideoId(video.url)}/hqdefault.jpg`
-                                  }}
-                                />
-                                <div className={styles.playOverlay}>
-                                  <div className={styles.playButton}>
-                                    <i className="fas fa-play"></i>
+                        
+                        {openTopic === topic._id && topic.videos && (
+                          <div className={viewStyle === "grid" ? styles.videosGrid : styles.videosList}>
+                            {topic.videos.map((video) => (
+                              <div key={video._id} className={styles.videoCard} onClick={() => openVideoPlayer(video)}>
+                                <div className={styles.videoThumbnail}>
+                                  <img
+                                    src={`https://img.youtube.com/vi/${getYouTubeVideoId(video.url)}/maxresdefault.jpg`}
+                                    alt={video.title}
+                                    onError={(e) => {
+                                      e.target.src = `https://img.youtube.com/vi/${getYouTubeVideoId(video.url)}/hqdefault.jpg`
+                                    }}
+                                  />
+                                  <div className={styles.playOverlay}>
+                                    <div className={styles.playButton}>
+                                      <i className="fas fa-play"></i>
+                                    </div>
+                                  </div>
+                                  <div className={styles.videoDuration}>
+                                    <i className="fas fa-clock"></i>
+                                    <span>{video.duration || "0:00"}</span>
                                   </div>
                                 </div>
-                                <div className={styles.videoDuration}>
-                                  <i className="fas fa-clock"></i>
-                                  <span>{video.duration || "0:00"}</span>
+                                <div className={styles.videoInfo}>
+                                  <h5>{video.title}</h5>
+                                  <p>{video.description}</p>
+                                  <div className={styles.videoMeta}>
+                                    <span className={styles.videoViews}>
+                                      <i className="fas fa-eye"></i> {formatNumber(video.views || 0)} views
+                                    </span>
+                                    <span className={styles.videoDate}>
+                                      <i className="fas fa-calendar"></i> {new Date(video.createdAt).toLocaleDateString()}
+                                    </span>
+                                  </div>
                                 </div>
                               </div>
-                              <div className={styles.videoInfo}>
-                                <h5>{video.title}</h5>
-                                <p>{video.description}</p>
-                                <div className={styles.videoMeta}>
-                                  <span className={styles.videoViews}>
-                                    <i className="fas fa-eye"></i> {formatNumber(video.views || 0)} views
-                                  </span>
-                                  <span className={styles.videoDate}>
-                                    <i className="fas fa-calendar"></i> {new Date(video.createdAt).toLocaleDateString()}
-                                  </span>
-                                </div>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      )}
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    ))
+                  ) : (
+                    <div className={styles.emptySection}>
+                      <p>No topics in this course</p>
                     </div>
-                  ))}
+                  )}
                 </div>
               )}
             </div>

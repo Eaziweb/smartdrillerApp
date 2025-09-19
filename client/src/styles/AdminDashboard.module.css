@@ -457,3 +457,343 @@
     padding: 0.2rem 0.5rem;
   }
 }
+
+/* styles/AdminDashboard.module.css */
+/* Add these styles to the existing file */
+
+.universityTable {
+  overflow-x: auto;
+  margin-top: 1rem;
+}
+
+.adminTable {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 600px;
+}
+
+.editBtn {
+  background: none;
+  border: none;
+  color: var(--primary-light);
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 4px;
+  transition: all 0.3s ease;
+}
+
+.editBtn:hover {
+  background: rgba(0, 102, 255, 0.1);
+}
+
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(5px);
+  z-index: 1000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 1rem;
+  animation: fadeIn 0.3s ease;
+}
+
+.modalContent {
+  background: var(--bg-secondary);
+  border-radius: var(--radius-lg);
+  max-width: 600px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: var(--shadow-xl);
+  position: relative;
+  animation: slideUp 0.3s ease;
+  padding: 2rem;
+}
+
+.closeButton {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: rgba(0, 0, 0, 0.1);
+  border: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  z-index: 10;
+  transition: all 0.3s ease;
+  color: var(--text-primary);
+}
+
+.closeButton:hover {
+  background: rgba(0, 0, 0, 0.2);
+  transform: rotate(90deg);
+}
+
+.checkboxLabel {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+}
+
+.checkboxLabel input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--primary-light);
+}
+
+.emptyState {
+  text-align: center;
+  padding: 3rem 2rem;
+  color: var(--text-secondary);
+}
+
+.emptyState i {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  display: block;
+  color: var(--border-color);
+}
+
+.emptyState p {
+  font-size: 1.1rem;
+  margin: 0;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { 
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to { 
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Media Queries for Responsive Design */
+@media (max-width: 1024px) {
+  .statsGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .adminBtns {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .adminPage {
+    padding: 0.5rem;
+  }
+  
+  .adminContainer {
+    padding: 0.5rem;
+  }
+  
+  .adminHeader {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+  
+  .adminHeader h1 {
+    font-size: 1.5rem;
+  }
+  
+  .logoutBtn {
+    align-self: flex-end;
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+  }
+  
+  .statsGrid {
+    grid-template-columns: 1fr;
+  }
+  
+  .adminBtns {
+    grid-template-columns: 1fr;
+  }
+  
+  .adminSection {
+    padding: 1rem;
+  }
+  
+  .adminSection h2 {
+    font-size: 1.25rem;
+  }
+  
+  .adminTable {
+    font-size: 0.875rem;
+  }
+  
+  .adminTable th,
+  .adminTable td {
+    padding: 0.5rem;
+  }
+  
+  .modalContent {
+    padding: 1.5rem;
+  }
+  
+  .modalHeader h2 {
+    font-size: 1.5rem;
+  }
+  
+  .inputGroup label {
+    font-size: 0.9rem;
+  }
+  
+  .inputGroup input,
+  .inputGroup select {
+    padding: 0.65rem 0.9rem;
+    font-size: 0.9rem;
+  }
+  
+  .submitBtn {
+    padding: 0.65rem 0.9rem;
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .adminHeader h1 {
+    font-size: 1.25rem;
+  }
+  
+  .adminHeader p {
+    font-size: 0.875rem;
+  }
+  
+  .logoutBtn {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.8rem;
+  }
+  
+  .statCard {
+    padding: 1rem;
+  }
+  
+  .statIcon {
+    width: 50px;
+    height: 50px;
+    font-size: 1.25rem;
+  }
+  
+  .statValue {
+    font-size: 1.5rem;
+  }
+  
+  .statLabel {
+    font-size: 0.875rem;
+  }
+  
+  .adminSection {
+    padding: 0.75rem;
+  }
+  
+  .adminSection h2 {
+    font-size: 1.1rem;
+  }
+  
+  .adminTable {
+    font-size: 0.75rem;
+  }
+  
+  .adminTable th,
+  .adminTable td {
+    padding: 0.4rem;
+  }
+  
+  .statusBadge {
+    font-size: 0.65rem;
+    padding: 0.2rem 0.5rem;
+  }
+  
+  .modalContent {
+    padding: 1rem;
+  }
+  
+  .modalHeader h2 {
+    font-size: 1.25rem;
+  }
+  
+  .closeButton {
+    width: 36px;
+    height: 36px;
+  }
+  
+  .inputGroup label {
+    font-size: 0.85rem;
+  }
+  
+  .inputGroup input,
+  .inputGroup select {
+    padding: 0.6rem 0.8rem;
+    font-size: 0.85rem;
+  }
+  
+  .submitBtn {
+    padding: 0.6rem 0.8rem;
+    font-size: 0.85rem;
+  }
+  
+  .emptyState i {
+    font-size: 2rem;
+  }
+  
+  .emptyState p {
+    font-size: 1rem;
+  }
+}
+
+/* Add these styles to your AdminDashboard.module.css file */
+
+.backBtn {
+  background: var(--primary-light);
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.3s ease;
+  text-decoration: none;
+}
+
+.backBtn:hover {
+  background: var(--primary-dark);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.deleteBtn {
+  background: none;
+  border: none;
+  color: var(--danger-color);
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 4px;
+  transition: all 0.3s ease;
+}
+
+.deleteBtn:hover {
+  background: rgba(239, 68, 68, 0.1);
+}

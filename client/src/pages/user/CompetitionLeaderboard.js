@@ -5,7 +5,6 @@ import { useAuth } from "../../contexts/AuthContext"
 import axios from "axios"
 import styles from "../../styles/CompetitionLeaderboard.module.css"
 
-
 const CompetitionLeaderboard = () => {
   const { id } = useParams()
   const { user } = useAuth()
@@ -62,7 +61,7 @@ const CompetitionLeaderboard = () => {
         limit: filters.limit.toString(),
       })
       if (filters.course) params.append("course", filters.course)
-      if (filters.searchTerm) params.append("search", filters.searchTerm)
+      if (searchTerm) params.append("search", searchTerm)
       const response = await axios.get(`/api/competitions/${id}/leaderboard?${params}`)
       setLeaderboard(response.data.leaderboard)
       setStats(response.data.stats)
@@ -102,6 +101,34 @@ const CompetitionLeaderboard = () => {
     if (rank === 3) return "🥉"
     return `#${rank}`
   }
+
+// components/CompetitionLeaderboard.js
+
+const getCourseName = (user) => {
+  if (!user) return "N/A"
+  
+  // Use the populated courseName field from the backend
+  if (user.courseName) {
+    return user.courseName
+  }
+  
+  // If course is an object with a name property (fallback)
+  if (typeof user.course === 'object' && user.course !== null && user.course.name) {
+    return user.course.name
+  }
+  
+  // If course is a string (for admin/superadmin)
+  if (typeof user.course === 'string') {
+    return user.course
+  }
+  
+  // If course is an ObjectId (regular user)
+  if (user.course && typeof user.course === 'object' && user.course._id) {
+    return "Course data unavailable"
+  }
+  
+  return "N/A"
+}
 
   const showMessage = (message, type = "info") => {
     const messageEl = document.createElement("div")
@@ -245,7 +272,7 @@ const CompetitionLeaderboard = () => {
               <div className={styles.userInfo}>
                 <div className={styles.userName}>{leaderboard[1]?.user?.fullName || "Unknown"}</div>
                 <div className={styles.userScore}>{leaderboard[1]?.totalScore || 0}%</div>
-                <div className={styles.userCourse}>{leaderboard[1]?.user?.course || ""}</div>
+                <div className={styles.userCourse}>{getCourseName(leaderboard[1]?.user)}</div>
               </div>
             </div>
           </div>
@@ -256,7 +283,7 @@ const CompetitionLeaderboard = () => {
               <div className={styles.userInfo}>
                 <div className={styles.userName}>{leaderboard[0]?.user?.fullName || "Unknown"}</div>
                 <div className={styles.userScore}>{leaderboard[0]?.totalScore || 0}%</div>
-                <div className={styles.userCourse}>{leaderboard[0]?.user?.course || ""}</div>
+                <div className={styles.userCourse}>{getCourseName(leaderboard[0]?.user)}</div>
               </div>
             </div>
           </div>
@@ -267,7 +294,7 @@ const CompetitionLeaderboard = () => {
               <div className={styles.userInfo}>
                 <div className={styles.userName}>{leaderboard[2]?.user?.fullName || "Unknown"}</div>
                 <div className={styles.userScore}>{leaderboard[2]?.totalScore || 0}%</div>
-                <div className={styles.userCourse}>{leaderboard[2]?.user?.course || ""}</div>
+                <div className={styles.userCourse}>{getCourseName(leaderboard[2]?.user)}</div>
               </div>
             </div>
           </div>
@@ -303,7 +330,7 @@ const CompetitionLeaderboard = () => {
                       {entry.user?.fullName || "Unknown"}
                     </div>
                     <div className={styles.participantCourse}>
-                      {entry.user?.course || ""}
+                      {getCourseName(entry.user)}
                     </div>
                   </div>
                 </div>

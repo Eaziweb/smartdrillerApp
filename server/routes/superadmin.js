@@ -1,50 +1,66 @@
+// routes/superadmin.js
 const express = require("express")
 const jwt = require("jsonwebtoken")
 const User = require("../models/User")
 const Payment = require("../models/Payment")
 const Settings = require("../models/Settings")
-const { superAdminAuth } = require("../middleware/auth")
+const CourseofStudy = require("../models/CourseofStudy")
+const bcrypt = require("bcryptjs")
 const router = express.Router()
 
 // SuperAdmin Login
 router.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body
-    // Check if it's superadmin credentials
-    if (email === process.env.SUPERADMIN_EMAIL && password === process.env.SUPERADMIN_PASSWORD) {
-      // Find or create superadmin user
-      let superadmin = await User.findOne({ email, role: "superadmin" })
-      if (!superadmin) {
-        superadmin = new User({
-          fullName: "SuperAdmin",
-          email,
-          password,
-          course: "Super Administration",
-          role: "superadmin",
-          isEmailVerified: true,
-        })
-        await superadmin.save()
-      }
-      const token = jwt.sign({ userId: superadmin._id }, process.env.JWT_SECRET, { expiresIn: "7d" })
-      return res.json({
-        token,
-        user: {
-          id: superadmin._id,
-          fullName: superadmin.fullName,
-          email: superadmin.email,
-          role: superadmin.role,
-        },
-      })
+    
+    // First, check if the provided credentials match the environment variables
+    if (email !== process.env.SUPERADMIN_EMAIL || password !== process.env.SUPERADMIN_PASSWORD) {
+      return res.status(400).json({ message: "Invalid superadmin credentials" })
     }
-    res.status(400).json({ message: "Invalid superadmin credentials" })
+    
+    // Find or create superadmin user
+    let superadmin = await User.findOne({ email, role: "superadmin" })
+    
+    if (!superadmin) {
+      // Create superadmin without course (since it's optional for superadmin role)
+      superadmin = new User({
+        fullName: "SuperAdmin",
+        email,
+        password,
+        role: "superadmin",
+        isEmailVerified: true,
+      })
+      await superadmin.save()
+      console.log("SuperAdmin user created")
+    }
+    
+    // Check password
+    const isMatch = await superadmin.comparePassword(password)
+    if (!isMatch) {
+      // If password doesn't match, update it with the correct one
+      superadmin.password = password
+      await superadmin.save()
+      console.log("SuperAdmin password updated")
+    }
+    
+    const token = jwt.sign({ userId: superadmin._id }, process.env.JWT_SECRET, { expiresIn: "7d" })
+    return res.json({
+      token,
+      user: {
+        id: superadmin._id,
+        fullName: superadmin.fullName,
+        email: superadmin.email,
+        role: superadmin.role,
+      },
+    })
   } catch (error) {
-    console.error(error)
+    console.error("SuperAdmin login error:", error)
     res.status(500).json({ message: "Server error" })
   }
 })
 
 // Create Admin
-router.post("/admins", superAdminAuth, async (req, res) => {
+router.post("/admins", async (req, res) => {
   try {
     const { fullName, email, password } = req.body
     // Check if admin already exists
@@ -52,12 +68,12 @@ router.post("/admins", superAdminAuth, async (req, res) => {
     if (existingAdmin) {
       return res.status(400).json({ message: "Admin with this email already exists" })
     }
-    // Create admin
+    
+    // Create admin without course (since it's optional for admin role)
     const admin = new User({
       fullName,
       email,
       password,
-      course: "Administration",
       role: "admin",
       isEmailVerified: true,
     })
@@ -78,9 +94,15 @@ router.post("/admins", superAdminAuth, async (req, res) => {
 })
 
 // Get all Admins
-router.get("/admins", superAdminAuth, async (req, res) => {
+router.get("/admins", async (req, res) => {
   try {
-    const admins = await User.find({ role: "admin" }).select("-password")
+    const admins = await User.find({ role: "admin" })
+      .select("-password")
+      // Only populate course if it exists
+      .populate({
+        path: "course",
+        select: "name"
+      })
     res.json(admins)
   } catch (error) {
     console.error(error)
@@ -89,7 +111,7 @@ router.get("/admins", superAdminAuth, async (req, res) => {
 })
 
 // Delete Admin
-router.delete("/admins/:id", superAdminAuth, async (req, res) => {
+router.delete("/admins/:id", async (req, res) => {
   try {
     const admin = await User.findByIdAndDelete(req.params.id)
     if (!admin) {
@@ -103,7 +125,7 @@ router.delete("/admins/:id", superAdminAuth, async (req, res) => {
 })
 
 // Get Revenue
-router.get("/revenue", superAdminAuth, async (req, res) => {
+router.get("/revenue", async (req, res) => {
   try {
     const payments = await Payment.find({ status: "successful" })
     const totalRevenue = payments.reduce((sum, payment) => sum + payment.amount, 0)
@@ -115,41 +137,6 @@ router.get("/revenue", superAdminAuth, async (req, res) => {
     console.error(error)
     res.status(500).json({ message: "Server error" })
   }
-})
-
-// Update Subscription Price
-router.put("/subscription-price", superAdminAuth, async (req, res) => {
-  try {
-    const { subscriptionPrice } = req.body
-    let settings = await Settings.findOne()
-    if (!settings) {
-      settings = new Settings()
-    }
-    settings.subscriptionPrice = subscriptionPrice
-    await settings.save()
-    res.json({
-      message: "Subscription price updated successfully",
-      settings,
-    })
-  } catch (error) {
-    console.error(error)
-    res.status(500).json({ message: "Server error" })
-  }
-})
-
-// Get Subscription Settings
-router.get("/subscription-settings", superAdminAuth, async (req, res) => {
-  try {
-    let settings = await Settings.findOne()
-    if (!settings) {
-      settings = new Settings()
-      await settings.save()
-    }
-    res.json(settings)
-  } catch (error) {
-    console.error(error)
-    res.status(500).json({ message: "Server error" })
-  }
-})
+});
 
 module.exports = router

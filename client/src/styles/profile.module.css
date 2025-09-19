@@ -291,7 +291,50 @@
   text-align: center;
   border-left: 4px solid var(--error-color);
 }
+/* Add to profile.module.css */
 
+.profileUniversity {
+  color: var(--text-secondary);
+  font-size: 1rem;
+  margin: 0.5rem 0;
+}
+
+.subscriptionType {
+  color: var(--primary-color);
+  font-weight: 500;
+  margin: 0.5rem 0;
+}
+
+.recurringInfo {
+  color: var(--info-color);
+  font-size: 0.9rem;
+  margin: 0.25rem 0;
+}
+
+.nextPaymentDate {
+  color: var(--warning-color);
+  font-size: 0.9rem;
+  margin: 0.25rem 0;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .profileUniversity,
+  .subscriptionType,
+  .recurringInfo,
+  .nextPaymentDate {
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .profileUniversity,
+  .subscriptionType,
+  .recurringInfo,
+  .nextPaymentDate {
+    font-size: 0.85rem;
+  }
+}
 /* Responsive adjustments */
 @media (max-width: 768px) {
   .profilePage {
@@ -409,3 +452,5 @@
     font-size: 0.8rem;
   }
 }
+
+

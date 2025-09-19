@@ -10,7 +10,7 @@ import 'katex/dist/katex.min.css'
 const QuestionSearch = () => {
   const navigate = useNavigate()
   const { user } = useAuth()
-  const [courses, setCourses] = useState({})
+  const [courses, setCourses] = useState([]) // Changed to array of objects
   const [selectedCourse, setSelectedCourse] = useState("")
   const [searchQuery, setSearchQuery] = useState("")
   const [searchType, setSearchType] = useState("question")
@@ -40,9 +40,7 @@ const QuestionSearch = () => {
         }
         
         setKatexLoaded(true)
-        console.log("KaTeX loaded successfully")
       } catch (error) {
-        console.error("Failed to load KaTeX:", error)
       }
     }
     
@@ -124,11 +122,37 @@ const QuestionSearch = () => {
         },
       })
       const data = await response.json()
-      setCourses(data)
+      
+      // Transform the data to include course names
+      const coursesWithNames = await Promise.all(
+        Object.keys(data).map(async (courseCode) => {
+          try {
+            const courseResponse = await fetch(`/api/courses/${courseCode}`, {
+              headers: {
+                Authorization: `Bearer ${localStorage.getItem("token")}`,
+              },
+            })
+            const courseData = await courseResponse.json()
+            return {
+              code: courseCode,
+              name: courseData.courseName || courseCode.toUpperCase(),
+              years: data[courseCode]
+            }
+          } catch (error) {
+            console.error(`Error fetching course name for ${courseCode}:`, error)
+            return {
+              code: courseCode,
+              name: courseCode.toUpperCase(),
+              years: data[courseCode]
+            }
+          }
+        })
+      )
+      
+      setCourses(coursesWithNames)
       // Set first course as default
-      const firstCourse = Object.keys(data)[0]
-      if (firstCourse) {
-        setSelectedCourse(firstCourse)
+      if (coursesWithNames.length > 0) {
+        setSelectedCourse(coursesWithNames[0].code)
       }
     } catch (error) {
       console.error("Error fetching courses:", error)
@@ -228,6 +252,40 @@ const QuestionSearch = () => {
     return <div className={styles.pagination}>{pages}</div>
   }
 
+  // Improved image URL handling with better fallback
+  const getImageUrl = (imagePath) => {
+    if (!imagePath) return null // Return null if no image path provided
+    if (imagePath.startsWith('http')) {
+      return imagePath
+    }
+    if (imagePath.startsWith('/uploads')) {
+      return imagePath
+    }
+    return `/uploads/${imagePath}`
+  }
+  
+  // Handle image error with better fallback
+  const handleImageError = (e) => {
+    // Prevent infinite loop by removing the error handler
+    e.target.onerror = null;
+    
+    // Hide the broken image
+    e.target.style.display = 'none';
+    
+    // If there's a container, we could show a placeholder text or icon
+    const container = e.target.parentElement;
+    if (container && container.classList.contains(styles.questionImage)) {
+      // Create a fallback element if it doesn't exist
+      if (!container.querySelector('.image-fallback')) {
+        const fallback = document.createElement('div');
+        fallback.className = 'image-fallback';
+        fallback.innerHTML = '<i class="fas fa-image"></i><span>Image not available</span>';
+        fallback.style.cssText = 'display: flex; flex-direction: column; align-items: center; justify-content: center; height: 200px; color: #666;';
+        container.appendChild(fallback);
+      }
+    }
+  }
+
   return (
     <div className={styles.questionSearch} ref={contentRef}>
       <div className={styles.searchHeader}>
@@ -252,9 +310,9 @@ const QuestionSearch = () => {
               className={styles.formSelect}
             >
               <option value="">Select Course</option>
-              {Object.keys(courses).map((course) => (
-                <option key={course} value={course}>
-                  {course.toUpperCase()}
+              {courses.map((course) => (
+                <option key={course.code} value={course.code}>
+                  {course.name} ({course.code.toUpperCase()})
                 </option>
               ))}
             </select>
@@ -340,9 +398,13 @@ const QuestionSearch = () => {
                         {renderContentWithMath(question.question)}
                       </h3>
                       
-                      {question.image && (
+                      {question.image && getImageUrl(question.image) && (
                         <div className={styles.questionImage}>
-                          <img src={question.image || "/placeholder.svg"} alt="Question" />
+                          <img 
+                            src={getImageUrl(question.image)} 
+                            alt="Question" 
+                            onError={handleImageError}
+                          />
                         </div>
                       )}
                       

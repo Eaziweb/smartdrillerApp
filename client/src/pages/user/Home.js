@@ -4,7 +4,8 @@ import { Link } from "react-router-dom"
 import { useAuth } from "../../contexts/AuthContext"
 import axios from "axios"
 import styles from "../../styles/home.module.css"
-import AboutSmartDriller from "./AboutSmartDriller" // Import the modal component
+import AboutSmartDriller from "./AboutSmartDriller"
+import SubscriptionModal from "./SubscriptionModal"
 
 const Home = () => {
   const { user, logout, updateUser } = useAuth()
@@ -12,19 +13,61 @@ const Home = () => {
   const [notificationPanelOpen, setNotificationPanelOpen] = useState(false)
   const [contactPopupOpen, setContactPopupOpen] = useState(false)
   const [aboutModalOpen, setAboutModalOpen] = useState(false)
+  const [showSubscriptionModal, setShowSubscriptionModal] = useState(false)
   const [notifications, setNotifications] = useState([])
+  const [unreadCount, setUnreadCount] = useState(0)
   const [loading, setLoading] = useState(false)
   
   useEffect(() => {
     loadNotifications()
-  }, [])
+  }, [user])
   
   const loadNotifications = async () => {
     try {
       const response = await axios.get("/api/notifications")
       setNotifications(response.data)
+      
+      // Calculate unread notifications (notifications created after user's last view)
+      if (user?.lastNotificationView) {
+        const lastView = new Date(user.lastNotificationView)
+        const unread = response.data.filter(
+          notif => new Date(notif.createdAt) > lastView
+        ).length
+        setUnreadCount(unread)
+      } else {
+        // If user has never viewed notifications, all are unread
+        setUnreadCount(response.data.length)
+      }
     } catch (error) {
       console.error("Failed to load notifications:", error)
+    }
+  }
+  
+  const markNotificationsAsRead = async () => {
+    try {
+      // Update user's last notification view time
+      await axios.put("/api/users/last-notification-view")
+      
+      // Update user in context
+      updateUser({
+        ...user,
+        lastNotificationView: new Date()
+      })
+      
+      // Reset unread count
+      setUnreadCount(0)
+    } catch (error) {
+      console.error("Failed to mark notifications as read:", error)
+    }
+  }
+  
+  const toggleNotificationPanel = async () => {
+    const isOpening = !notificationPanelOpen
+    setNotificationPanelOpen(isOpening)
+    
+    // If opening the panel, mark notifications as read
+    if (isOpening) {
+      await markNotificationsAsRead()
     }
   }
   
@@ -33,17 +76,46 @@ const Home = () => {
       showMessage("You are already subscribed!", "info")
       return
     }
+    
+    // Check if user's university has semester plan available
+    try {
+      const response = await axios.get("/api/payments/subscription-options")
+      const { semester } = response.data.options
+      
+      if (semester) {
+        // Show subscription modal if semester is available
+        setShowSubscriptionModal(true)
+      } else {
+        // Directly initialize monthly payment
+        initializePayment("monthly", false, 1)
+      }
+    } catch (error) {
+      console.error("Failed to check subscription options:", error)
+      showMessage("Failed to check subscription options", "error")
+    }
+  }
+  
+  const initializePayment = async (subscriptionType, isRecurring, recurringMonths) => {
     setLoading(true)
     try {
-      const response = await axios.post("/api/payments/initialize")
+      const response = await axios.post("/api/payments/initialize", {
+        subscriptionType,
+        isRecurring,
+        recurringMonths,
+      })
+      
       if (response.data.status === "success") {
+        // Redirect to Flutterwave payment link
         window.location.href = response.data.data.link
+      } else {
+        showMessage("Failed to initialize payment", "error")
       }
     } catch (error) {
       console.error("Payment initialization failed:", error)
-      showMessage("Failed to initialize payment", "error")
+      showMessage(error.response?.data?.message || "Failed to initialize payment", "error")
+    } finally {
+      setLoading(false)
     }
-    setLoading(false)
   }
   
   const showMessage = (message, type = "info") => {
@@ -64,16 +136,32 @@ const Home = () => {
     setSidebarOpen(!sidebarOpen)
   }
   
-  const toggleNotificationPanel = () => {
-    setNotificationPanelOpen(!notificationPanelOpen)
-  }
-  
   const toggleContactPopup = () => {
     setContactPopupOpen(!contactPopupOpen)
   }
   
   const toggleAboutModal = () => {
     setAboutModalOpen(!aboutModalOpen)
+  }
+  
+  // Function to get notification icon based on type
+  const getNotificationIcon = (type) => {
+    switch (type) {
+      case "success":
+        return "fa-check-circle"
+      case "error":
+        return "fa-exclamation-circle"
+      case "warning":
+        return "fa-exclamation-triangle"
+      default:
+        return "fa-info-circle"
+    }
+  }
+  
+  // Function to check if notification is new (unread)
+  const isNotificationNew = (notification) => {
+    if (!user?.lastNotificationView) return true
+    return new Date(notification.createdAt) > new Date(user.lastNotificationView)
   }
   
   return (
@@ -98,17 +186,21 @@ const Home = () => {
           <h1 className={styles.appLogo}>SmartDriller</h1>
         </div>
         <div className={styles.navRight}>
-          <Link to ="/AI-assistant">
-          <button className={`${styles.iconBtn} ${styles.aiIcon}`}>
-            <i className="fas fa-robot"></i>
-          </button>
+          <Link to="/AI-assistant">
+            <button className={`${styles.iconBtn} ${styles.aiIcon}`}>
+              <i className="fas fa-robot"></i>
+            </button>
           </Link>
           <button className={`${styles.iconBtn} ${styles.navContactIcon}`} onClick={toggleContactPopup}>
             <i className="fas fa-question-circle"></i>
           </button>
           <button className={`${styles.iconBtn} ${styles.notificationBtn}`} onClick={toggleNotificationPanel}>
             <i className="fas fa-bell"></i>
-            {notifications.length > 0 && <span className={`${styles.notificationBadge} ${styles.active}`}></span>}
+            {unreadCount > 0 && (
+              <span className={`${styles.notificationBadge} ${styles.active}`}>
+                {unreadCount > 99 ? "99+" : unreadCount}
+              </span>
+            )}
           </button>
         </div>
       </nav>
@@ -189,7 +281,7 @@ const Home = () => {
             <i className="fas fa-arrow-left"></i>
           </button>
           <h2>Notifications</h2>
-          <button className={styles.deleteAllBtn}>Delete All</button>
+          <button className={styles.deleteAllBtn}>Clear</button>
         </div>
         <div className={styles.notificationContent}>
           {notifications.length === 0 ? (
@@ -199,9 +291,12 @@ const Home = () => {
             </div>
           ) : (
             notifications.map((notification) => (
-              <div key={notification._id} className={styles.notificationItem}>
-                <div className={styles.notificationIcon}>
-                  <i className="fas fa-bell"></i>
+              <div 
+                key={notification._id} 
+                className={`${styles.notificationItem} ${styles[`type${notification.type.charAt(0).toUpperCase() + notification.type.slice(1)}`]} ${isNotificationNew(notification) ? styles.newNotification : ''}`}
+              >
+                <div className={`${styles.notificationIcon} ${styles[`icon${notification.type.charAt(0).toUpperCase() + notification.type.slice(1)}`]}`}>
+                  <i className={`fas ${getNotificationIcon(notification.type)}`}></i>
                 </div>
                 <div className={styles.notificationText}>
                   <h3>{notification.title}</h3>
@@ -349,7 +444,15 @@ const Home = () => {
         isOpen={aboutModalOpen} 
         onClose={toggleAboutModal} 
       />
+      
+      {/* Subscription Modal */}
+      <SubscriptionModal
+        isOpen={showSubscriptionModal}
+        onClose={() => setShowSubscriptionModal(false)}
+        user={user}
+      />
     </div>
   )
 }
+
 export default Home

@@ -370,38 +370,48 @@ router.post("/:id/submit", auth, async (req, res) => {
     res.status(500).json({ message: "Server error" })
   }
 })
+// routes/competitions.js
 
-// Get competition leaderboard
+// Update the leaderboard route
+// routes/competitions.js
+
+// Update the leaderboard route
 router.get("/:id/leaderboard", auth, async (req, res) => {
   try {
     const { course, sortBy = "score", page = 1, limit = 50 } = req.query
     const competition = await Competition.findById(req.params.id)
-    
+
     if (!competition) {
       return res.status(404).json({ message: "Competition not found" })
     }
-    
-    // Check if leaderboard should be available
+
+    // Check if leaderboard is available
     const now = new Date()
-    const leaderboardAvailable = now >= new Date(competition.endDate.getTime() + competition.leaderboardDelay * 60000)
-    
+    const leaderboardAvailable = now >= new Date(
+      competition.endDate.getTime() + competition.leaderboardDelay * 60000
+    )
+
     if (!leaderboardAvailable && req.user.role !== "admin") {
-      const availableAt = new Date(competition.endDate.getTime() + competition.leaderboardDelay * 60000)
+      const availableAt = new Date(
+        competition.endDate.getTime() + competition.leaderboardDelay * 60000
+      )
       return res.status(400).json({
         message: "Leaderboard will be available after the competition ends",
         availableAt,
       })
     }
-    
+
     const matchStage = { competitionId: competition._id }
+
+    // Sorting
     let sortStage = {}
-    
     if (sortBy === "time") {
       sortStage = { timeUsed: 1, totalScore: -1 }
     } else {
       sortStage = { totalScore: -1, timeUsed: 1 }
     }
-    
+
+    // Fields common to all roles
     const baseProjection = {
       userId: 1,
       totalScore: 1,
@@ -413,19 +423,19 @@ router.get("/:id/leaderboard", auth, async (req, res) => {
       submittedAt: 1,
       isGraceSubmission: 1,
       "user.fullName": 1,
-      "user.course": 1,
+      "user.email": 1,
+      "user.phoneNumber": 1,
+      "user.accountNumber": 1,
+      "user.bankName": 1,
+      "user.courseName": 1, // ✅ course name only
     }
-    
+
     const adminProjection = {
       ...baseProjection,
-      "user.email": 1,
-      "user.accountNumber": 1,
-      "user.phoneNumber": 1,
-      "user.bankName": 1,
+      "user.role": 1,
     }
-    
-    const userProjection = baseProjection
-    
+
+    // Aggregation pipeline
     const pipeline = [
       { $match: matchStage },
       {
@@ -437,47 +447,90 @@ router.get("/:id/leaderboard", auth, async (req, res) => {
         },
       },
       { $unwind: "$user" },
+      {
+        $lookup: {
+          from: "courseofstudies",
+          localField: "user.course",
+          foreignField: "_id",
+          as: "user.courseDetails",
+        },
+      },
+      {
+        $unwind: {
+          path: "$user.courseDetails",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $addFields: {
+          "user.courseName": {
+            $ifNull: [
+              "$user.courseDetails.name",
+              {
+                $cond: {
+                  if: { $eq: ["$user.role", "admin"] },
+                  then: "Administration",
+                  else: {
+                    $cond: {
+                      if: { $eq: ["$user.role", "superadmin"] },
+                      then: "Super Administration",
+                      else: "Unknown Course",
+                    },
+                  },
+                },
+              },
+            ],
+          },
+        },
+      },
       { $sort: sortStage },
       {
-        $project: req.user.role === "admin" ? adminProjection : userProjection,
+        $project: req.user.role === "admin" ? adminProjection : baseProjection,
       },
     ]
-    
-    // Add course filtering if specified
+
+    // Optional course filter
     if (course) {
       pipeline.splice(1, 0, {
-        $match: {
-          "courseScores.courseCode": course,
-        },
+        $match: { "courseScores.courseCode": course },
       })
     }
-    
+
     const submissions = await CompetitionSubmission.aggregate(pipeline)
-    
+
     // Add ranking
-    const rankedSubmissions = submissions.map((submission, index) => ({
-      ...submission,
-      rank: index + 1,
+    const rankedSubmissions = submissions.map((s, i) => ({
+      ...s,
+      rank: i + 1,
     }))
-    
+
     // Pagination
     const startIndex = (page - 1) * limit
     const endIndex = startIndex + Number.parseInt(limit)
     const paginatedResults = rankedSubmissions.slice(startIndex, endIndex)
-    
-    // Calculate stats
+
+    // Stats
     const stats = {
       totalParticipants: submissions.length,
       averageScore:
         submissions.length > 0
-          ? Math.round(submissions.reduce((sum, s) => sum + s.totalScore, 0) / submissions.length)
+          ? Math.round(
+              submissions.reduce((sum, s) => sum + s.totalScore, 0) /
+                submissions.length
+            )
           : 0,
-      highestScore: submissions.length > 0 ? Math.max(...submissions.map((s) => s.totalScore)) : 0,
+      highestScore:
+        submissions.length > 0
+          ? Math.max(...submissions.map((s) => s.totalScore))
+          : 0,
     }
-    
-    // Find user's rank
-    const userRank = rankedSubmissions.findIndex((s) => s.userId.toString() === req.user._id.toString()) + 1
-    
+
+    // User’s rank
+    const userRank =
+      rankedSubmissions.findIndex(
+        (s) => s.userId.toString() === req.user._id.toString()
+      ) + 1
+
     res.json({
       leaderboard: paginatedResults,
       stats: {

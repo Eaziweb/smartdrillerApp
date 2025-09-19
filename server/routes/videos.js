@@ -7,17 +7,18 @@ const VideoTopic = require("../models/VideoTopic")
 const Video = require("../models/Video")
 const UserProgress = require("../models/UserProgress")
 
+// routes/videos.js
+
 // Get all courses with topics (for user)
 router.get("/courses", auth, subscriptionCheck, async (req, res) => {
   try {
-    const courses = await VideoCourse.find()
+    const courses = await VideoCourse.find({ isVisible: true })
       .populate({
         path: "topics",
         select: "title description videoCount",
         options: { sort: { createdAt: 1 } },
       })
       .sort({ createdAt: 1 })
-
     res.json(courses)
   } catch (error) {
     console.error("Error fetching video courses:", error)

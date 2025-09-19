@@ -44,20 +44,46 @@ router.post("/courses", adminAuth, async (req, res) => {
 })
 
 // Update course
+// routes/admin/videos.js
+
+// Update course
 router.put("/courses/:courseId", adminAuth, async (req, res) => {
   try {
     const { courseId } = req.params
-    const { title, description } = req.body
-
-    const course = await VideoCourse.findByIdAndUpdate(courseId, { title, description }, { new: true })
-
+    const { title, description, isVisible } = req.body
+    const course = await VideoCourse.findByIdAndUpdate(
+      courseId, 
+      { title, description, isVisible }, 
+      { new: true }
+    )
     if (!course) {
       return res.status(404).json({ message: "Course not found" })
     }
-
     res.json(course)
   } catch (error) {
     console.error("Error updating video course:", error)
+    res.status(500).json({ message: "Server error" })
+  }
+})
+
+// Toggle course visibility
+router.put("/courses/:courseId/visibility", adminAuth, async (req, res) => {
+  try {
+    const { courseId } = req.params
+    const course = await VideoCourse.findById(courseId)
+    if (!course) {
+      return res.status(404).json({ message: "Course not found" })
+    }
+    
+    course.isVisible = !course.isVisible
+    await course.save()
+    
+    res.json({ 
+      message: `Course ${course.isVisible ? 'shown' : 'hidden'} successfully`,
+      isVisible: course.isVisible
+    })
+  } catch (error) {
+    console.error("Error toggling course visibility:", error)
     res.status(500).json({ message: "Server error" })
   }
 })

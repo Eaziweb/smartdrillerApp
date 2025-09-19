@@ -8,16 +8,34 @@ const { adminAuth } = require("../middleware/auth")
 const router = express.Router()
 
 // Get dashboard stats
+// Get dashboard stats - Only counting verified users
 router.get("/dashboard", adminAuth, async (req, res) => {
   try {
-    const totalUsers = await User.countDocuments({ role: "user" })
+    // Only count verified users (isEmailVerified: true)
+    const totalUsers = await User.countDocuments({ 
+      role: "user", 
+      isEmailVerified: true 
+    })
+    
     const subscribedUsers = await User.countDocuments({
       role: "user",
       isSubscribed: true,
+      isEmailVerified: true, // Only count verified users
     })
+    
     const subscriptionPercentage = totalUsers > 0 ? (subscribedUsers / totalUsers) * 100 : 0
 
-    const payments = await Payment.find({ status: "successful" })
+    // Only count payments from verified users
+    const verifiedUserIds = await User.find({
+      role: "user",
+      isEmailVerified: true
+    }).select('_id');
+    
+    const payments = await Payment.find({ 
+      status: "successful",
+      user: { $in: verifiedUserIds.map(u => u._id) }
+    })
+    
     const totalRevenue = payments.reduce((sum, payment) => sum + payment.amount, 0)
 
     res.json({
@@ -32,17 +50,24 @@ router.get("/dashboard", adminAuth, async (req, res) => {
   }
 })
 
-// Get all users
+// Get all users - Only showing verified users
 router.get("/users", adminAuth, async (req, res) => {
   try {
-    const users = await User.find({ role: "user" }).select("-password").sort({ createdAt: -1 })
+    const users = await User.find({ 
+      role: "user",
+      isEmailVerified: true // Only show verified users
+    })
+      .select("-password")
+      .populate('university')
+      .populate('course')
+      .sort({ createdAt: -1 });
 
-    res.json(users)
+    res.json(users);
   } catch (error) {
-    console.error(error)
-    res.status(500).json({ message: "Server error" })
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
   }
-})
+});
 
 // Create notification
 router.post("/notifications", adminAuth, async (req, res) => {
@@ -161,5 +186,7 @@ router.put("/users/:id/subscription", adminAuth, async (req, res) => {
     res.status(500).json({ message: "Server error" })
   }
 })
+
+
 
 module.exports = router

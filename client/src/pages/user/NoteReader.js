@@ -66,9 +66,7 @@ const NoteReader = () => {
     if (window.MathJax && window.MathJax.typesetPromise) {
       window.MathJax.typesetPromise()
         .then(() => {
-          console.log('MathJax rendering complete')
         })
-        .catch((err) => console.log('MathJax rendering error:', err.message))
     }
   }
 

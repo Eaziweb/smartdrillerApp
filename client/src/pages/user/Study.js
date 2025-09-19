@@ -489,12 +489,38 @@ const Study = () => {
   const userAnswer = userAnswers[currentQuestion._id]
   const showExp = showExplanation[currentQuestion._id]
   
+  // Improved image URL handling with better fallback
   const getImageUrl = (imagePath) => {
-    if (!imagePath) return "/placeholder.svg"
-    if (imagePath.startsWith('http') || imagePath.startsWith('/uploads')) {
+    if (!imagePath) return null // Return null if no image path provided
+    if (imagePath.startsWith('http')) {
+      return imagePath
+    }
+    if (imagePath.startsWith('/uploads')) {
       return imagePath
     }
     return `/uploads/${imagePath}`
+  }
+  
+  // Handle image error with better fallback
+  const handleImageError = (e) => {
+    // Prevent infinite loop by removing the error handler
+    e.target.onerror = null;
+    
+    // Hide the broken image
+    e.target.style.display = 'none';
+    
+    // If there's a container, we could show a placeholder text or icon
+    const container = e.target.parentElement;
+    if (container && container.classList.contains(styles.questionImage)) {
+      // Create a fallback element if it doesn't exist
+      if (!container.querySelector('.image-fallback')) {
+        const fallback = document.createElement('div');
+        fallback.className = 'image-fallback';
+        fallback.innerHTML = '<i class="fas fa-image"></i><span>Image not available</span>';
+        fallback.style.cssText = 'display: flex; flex-direction: column; align-items: center; justify-content: center; height: 200px; color: #666;';
+        container.appendChild(fallback);
+      }
+    }
   }
   
   return (
@@ -544,15 +570,12 @@ const Study = () => {
       </div>
       
       <div className={styles.questionContainer}>
-        {currentQuestion.image && (
+        {currentQuestion.image && getImageUrl(currentQuestion.image) && (
           <div className={styles.questionImage}>
             <img 
               src={getImageUrl(currentQuestion.image)} 
               alt="Question illustration" 
-              onError={(e) => {
-                e.target.onerror = null
-                e.target.src = "/placeholder.svg"
-              }}
+              onError={handleImageError}
             />
           </div>
         )}

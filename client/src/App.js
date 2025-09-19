@@ -8,6 +8,11 @@ import SuperAdminRoute from "./components/SuperAdminRoute"
 import SubscriptionProtectedRoute from "./components/SubscriptionProtectedRoute"
 
 import LandingPage from './pages/LandingPage';
+// In your App.js file, add these routes
+
+import Company from './pages/Company';
+import Resources from './pages/Resources';
+import LegalPolicies from './pages/LegalPolicies'
 import Features from './components/Features';
    import NotFound from './pages/NotFound';
 // Auth Pages
@@ -41,13 +46,12 @@ import Bookmarks from "./pages/user/Bookmarks"
 // Admin Pages
 import AdminLogin from "./pages/admin/AdminLogin"
 import AdminDashboard from "./pages/admin/AdminDashboard"
+import CourseOfStudyManagement from './pages/admin/CourseOfStudyManagement';
 
+// Add this route to your router configuration
 //SuperAdmin
 import SuperAdminLogin from './pages/superadmin/SuperAdminLogin';
 import SuperAdminDashboard from './pages/superadmin/SuperAdminDashboard';
-
-import PrivacyPolicy from './pages/user/PrivacyPolicy';
-import TermsConditions from './pages/user/TermsConditions';
 
 
 
@@ -136,6 +140,11 @@ useEffect(() => {
                 </AdminRoute>
               }
             />
+
+<Route path="/admin/courseofstudy" element={ <AdminRoute>
+                  <CourseOfStudyManagement/>
+                </AdminRoute>} />
+
             <Route
               path="/admin/videos"
               element={
@@ -422,11 +431,13 @@ useEffect(() => {
             />
 
                
-        <Route path="/privacy" element={ <ProtectedRoute><PrivacyPolicy />  </ProtectedRoute>} />
-        <Route path="/terms" element={ <ProtectedRoute><TermsConditions /> </ProtectedRoute>} />
+
 
              <Route path="/" element={<LandingPage />} />
-              
+                 {/* Your existing routes */}
+        <Route path="/company" element={<Company />} />
+        <Route path="/resources" element={<Resources />} />
+        <Route path="/legal" element={<LegalPolicies />} />
               {/* Fallback route - redirect to landing page */}
                    {/* 404 Not Found Route */}
               <Route path="*" element={<NotFound />} />

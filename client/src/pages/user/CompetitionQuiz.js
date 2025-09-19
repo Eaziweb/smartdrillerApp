@@ -4,7 +4,6 @@ import { useNavigate } from "react-router-dom"
 import { useAuth } from "../../contexts/AuthContext"
 import axios from "axios"
 import styles from "../../styles/CompetitionQuiz.module.css"
-
 // Import KaTeX CSS
 import 'katex/dist/katex.min.css'
 
@@ -25,8 +24,12 @@ const CompetitionQuiz = () => {
   const [courseQuestions, setCourseQuestions] = useState({})
   const [courseTabs, setCourseTabs] = useState([])
   const [katexLoaded, setKatexLoaded] = useState(false)
+  const [showBackModal, setShowBackModal] = useState(false)
+  const [isSubmitted, setIsSubmitted] = useState(false)
+  
   const timerRef = useRef(null)
   const contentRef = useRef(null)
+  const isInitialMount = useRef(true)
 
   useEffect(() => {
     // Check subscription
@@ -36,23 +39,19 @@ const CompetitionQuiz = () => {
     }
     
     loadCompetitionData()
-    loadProgress()
     
     // Load KaTeX dynamically
     const loadKaTeX = async () => {
       try {
-        // Import KaTeX components
         const katexModule = await import('katex')
         const { render, renderToString } = katexModule
         
-        // Store KaTeX functions globally for easy access
         window.katex = {
           render,
           renderToString
         }
         
         setKatexLoaded(true)
-        console.log("KaTeX loaded successfully")
       } catch (error) {
         console.error("Failed to load KaTeX:", error)
       }
@@ -60,12 +59,89 @@ const CompetitionQuiz = () => {
     
     loadKaTeX()
     
+    // Prevent cheating measures
+    const preventCheating = () => {
+      // Prevent right-click
+      document.addEventListener('contextmenu', (e) => e.preventDefault())
+      
+      // Prevent text selection
+      document.addEventListener('selectstart', (e) => {
+        // Allow selection in report modal textarea
+        if (e.target.tagName !== 'TEXTAREA' || !e.target.closest(`.${styles.modal}`)) {
+          e.preventDefault()
+        }
+      })
+      
+      // Prevent copy, cut, paste
+      document.addEventListener('copy', (e) => {
+        if (e.target.tagName !== 'TEXTAREA' || !e.target.closest(`.${styles.modal}`)) {
+          e.preventDefault()
+        }
+      })
+      document.addEventListener('cut', (e) => {
+        if (e.target.tagName !== 'TEXTAREA' || !e.target.closest(`.${styles.modal}`)) {
+          e.preventDefault()
+        }
+      })
+      document.addEventListener('paste', (e) => {
+        if (e.target.tagName !== 'TEXTAREA' || !e.target.closest(`.${styles.modal}`)) {
+          e.preventDefault()
+        }
+      })
+      
+      // Prevent keyboard shortcuts (Ctrl+C, Ctrl+V, etc.)
+      document.addEventListener('keydown', (e) => {
+        if (
+          (e.ctrlKey || e.metaKey) && 
+          (e.key === 'c' || e.key === 'v' || e.key === 'x' || e.key === 'a') &&
+          (e.target.tagName !== 'TEXTAREA' || !e.target.closest(`.${styles.modal}`))
+        ) {
+          e.preventDefault()
+        }
+      })
+    }
+    
+    preventCheating()
+    
+    // Handle browser back button and mobile back gestures
+    const handlePopState = (e) => {
+      e.preventDefault()
+      if (!isSubmitted) {
+        setShowBackModal(true)
+        // Push a new state to prevent the user from going back without our modal
+        window.history.pushState({ noBack: true }, '')
+      }
+    }
+    
+    // Initial push state to enable popstate detection
+    window.history.pushState({ noBack: true }, '')
+    window.addEventListener('popstate', handlePopState)
+    
+    // Handle beforeunload (refresh, close tab)
+    const handleBeforeUnload = (e) => {
+      if (isSubmitted) return
+      e.preventDefault()
+      e.returnValue = 'Your quiz progress will be lost. Are you sure you want to leave?'
+    }
+    
+    window.addEventListener('beforeunload', handleBeforeUnload)
+    
     return () => {
       if (timerRef.current) {
         clearInterval(timerRef.current)
       }
+      window.removeEventListener('popstate', handlePopState)
+      window.removeEventListener('beforeunload', handleBeforeUnload)
     }
   }, [user, navigate])
+
+  // Load progress after competition data is available
+  useEffect(() => {
+    if (competitionData && isInitialMount.current) {
+      loadProgress()
+      isInitialMount.current = false
+    }
+  }, [competitionData])
 
   // Process content with KaTeX when it changes
   useEffect(() => {
@@ -73,66 +149,6 @@ const CompetitionQuiz = () => {
       processMathContent()
     }
   }, [katexLoaded, currentQuestionIndex, currentCourseIndex, competitionData])
-
-  const processMathContent = () => {
-    if (!window.katex) return
-    
-    // Find all elements with math content
-    const mathElements = contentRef.current.querySelectorAll('.math-content')
-    
-    mathElements.forEach(element => {
-      const content = element.getAttribute('data-math')
-      if (content) {
-        try {
-          // Render the math content
-          const renderedMath = window.katex.renderToString(content, {
-            throwOnError: false,
-            displayMode: element.classList.contains('display-math')
-          })
-          element.innerHTML = renderedMath
-        } catch (e) {
-          console.error("KaTeX rendering error:", e)
-          element.innerHTML = content // Fallback to raw content
-        }
-      }
-    })
-  }
-
-  // Helper function to render content with math
-  const renderContentWithMath = (content, isDisplayMode = false) => {
-    if (!content) return null
-    
-    // Simple regex to find LaTeX patterns
-    const latexPattern = /(\\\(.*?\\\)|\\\[.*?\\\]|\$\$.*?\$\$|\$.*?\$)/g
-    
-    // Split content by LaTeX patterns
-    const parts = content.split(latexPattern)
-    
-    return parts.map((part, index) => {
-      if (index % 2 === 1) { // This is a LaTeX expression
-        // Determine if it's display mode
-        const isDisplay = part.startsWith('\\[') || part.startsWith('$$')
-        
-        // Extract the actual LaTeX content
-        let latexContent = part
-        if (part.startsWith('\\(')) latexContent = part.slice(2, -2)
-        if (part.startsWith('\\[')) latexContent = part.slice(2, -2)
-        if (part.startsWith('$') && !part.startsWith('$$')) latexContent = part.slice(1, -1)
-        if (part.startsWith('$$')) latexContent = part.slice(2, -2)
-        
-        return (
-          <span 
-            key={index} 
-            className={`math-content ${isDisplay ? 'display-math' : 'inline-math'}`}
-            data-math={latexContent}
-          />
-        )
-      } else {
-        // Regular HTML content
-        return <span key={index} dangerouslySetInnerHTML={{ __html: part }} />
-      }
-    })
-  }
 
   useEffect(() => {
     if (timeRemaining > 0) {
@@ -153,6 +169,57 @@ const CompetitionQuiz = () => {
     }
   }, [timeRemaining])
 
+  const processMathContent = () => {
+    if (!window.katex) return
+    
+    const mathElements = contentRef.current.querySelectorAll('.math-content')
+    
+    mathElements.forEach(element => {
+      const content = element.getAttribute('data-math')
+      if (content) {
+        try {
+          const renderedMath = window.katex.renderToString(content, {
+            throwOnError: false,
+            displayMode: element.classList.contains('display-math')
+          })
+          element.innerHTML = renderedMath
+        } catch (e) {
+          console.error("KaTeX rendering error:", e)
+          element.innerHTML = content
+        }
+      }
+    })
+  }
+
+  const renderContentWithMath = (content, isDisplayMode = false) => {
+    if (!content) return null
+    
+    const latexPattern = /(\\\(.*?\\\)|\\\[.*?\\\]|\$\$.*?\$\$|\$.*?\$)/g
+    const parts = content.split(latexPattern)
+    
+    return parts.map((part, index) => {
+      if (index % 2 === 1) {
+        const isDisplay = part.startsWith('\\[') || part.startsWith('$$')
+        
+        let latexContent = part
+        if (part.startsWith('\\(')) latexContent = part.slice(2, -2)
+        if (part.startsWith('\\[')) latexContent = part.slice(2, -2)
+        if (part.startsWith('$') && !part.startsWith('$$')) latexContent = part.slice(1, -1)
+        if (part.startsWith('$$')) latexContent = part.slice(2, -2)
+        
+        return (
+          <span 
+            key={index} 
+            className={`math-content ${isDisplay ? 'display-math' : 'inline-math'}`}
+            data-math={latexContent}
+          />
+        )
+      } else {
+        return <span key={index} dangerouslySetInnerHTML={{ __html: part }} />
+      }
+    })
+  }
+
   const loadCompetitionData = () => {
     try {
       const storedData = localStorage.getItem("currentCompetition")
@@ -166,9 +233,8 @@ const CompetitionQuiz = () => {
         return
       }
       setCompetitionData(data)
-      setTimeRemaining(data.totalTime * 60) // Convert minutes to seconds
+      setTimeRemaining(data.totalTime * 60)
       
-      // Organize questions by course
       const questionsByCourse = {}
       const tabs = []
       data.selectedCourses.forEach((courseCode) => {
@@ -176,7 +242,7 @@ const CompetitionQuiz = () => {
         questionsByCourse[courseCode] = courseQuestions
         tabs.push({
           courseCode,
-          courseName: courseCode, // You might want to get the full name from competition data
+          courseName: courseCode,
           questionCount: courseQuestions.length,
         })
       })
@@ -261,7 +327,6 @@ const CompetitionQuiz = () => {
   }
 
   const handleQuit = () => {
-    // Clear progress
     const progressKey = `competition_progress_${competitionData?.competitionId}`
     localStorage.removeItem(progressKey)
     navigate("/competitions")
@@ -278,7 +343,6 @@ const CompetitionQuiz = () => {
     if (submitting) return
     setSubmitting(true)
     try {
-      // Prepare answers for all questions
       const allAnswers = competitionData.questions.map((question) => ({
         questionId: question._id,
         selectedOption: userAnswers[question._id] || 0,
@@ -292,13 +356,11 @@ const CompetitionQuiz = () => {
       }
       const response = await axios.post(`/api/competitions/${competitionData.competitionId}/submit`, submissionData)
       if (response.data.submission) {
-        // Store result for completion page
         localStorage.setItem("competitionResult", JSON.stringify(response.data.submission))
-        // Clear competition progress
         const progressKey = `competition_progress_${competitionData.competitionId}`
         localStorage.removeItem(progressKey)
         localStorage.removeItem("currentCompetition")
-        // Navigate to completion page
+        setIsSubmitted(true)
         navigate("/competition-completion")
       }
     } catch (error) {
@@ -327,7 +389,7 @@ const CompetitionQuiz = () => {
   const navigateToCourse = (courseIndex) => {
     if (courseIndex >= 0 && courseIndex < courseTabs.length) {
       setCurrentCourseIndex(courseIndex)
-      setCurrentQuestionIndex(0) // Reset to first question of the course
+      setCurrentQuestionIndex(0)
     }
   }
 
@@ -343,10 +405,8 @@ const CompetitionQuiz = () => {
     const currentCourse = courseTabs[currentCourseIndex]
     const questions = courseQuestions[currentCourse.courseCode]
     if (currentQuestionIndex < questions.length - 1) {
-      // Move to next question in current course
       setCurrentQuestionIndex(currentQuestionIndex + 1)
     } else if (currentCourseIndex < courseTabs.length - 1) {
-      // Move to first question of next course
       setCurrentCourseIndex(currentCourseIndex + 1)
       setCurrentQuestionIndex(0)
     }
@@ -354,10 +414,8 @@ const CompetitionQuiz = () => {
 
   const goToPreviousQuestion = () => {
     if (currentQuestionIndex > 0) {
-      // Move to previous question in current course
       setCurrentQuestionIndex(currentQuestionIndex - 1)
     } else if (currentCourseIndex > 0) {
-      // Move to last question of previous course
       const prevCourseIndex = currentCourseIndex - 1
       const prevCourse = courseTabs[prevCourseIndex]
       const prevQuestions = courseQuestions[prevCourse.courseCode]
@@ -424,7 +482,7 @@ const CompetitionQuiz = () => {
   }
 
   return (
-    <div className={styles.competitionQuizPage} ref={contentRef}>
+    <div className={`${styles.competitionQuizPage} ${styles.noSelect}`} ref={contentRef}>
       {/* Header */}
       <div className={styles.quizHeader}>
         <div className={styles.headerLeft}>
@@ -486,8 +544,13 @@ const CompetitionQuiz = () => {
       {/* Question Content */}
       <div className={styles.questionContainer}>
         {currentQuestion.image && (
-          <div className={styles.questionImage}>
-            <img src={currentQuestion.image || "/placeholder.svg"} alt="Question illustration" />
+          <div className={styles.questionImageContainer}>
+            <img 
+              src={currentQuestion.image} 
+              alt="Question illustration" 
+              className={styles.questionImage}
+              draggable="false"
+            />
           </div>
         )}
         <div className={styles.questionText}>
@@ -579,6 +642,30 @@ const CompetitionQuiz = () => {
         </div>
       )}
       
+      {/* Back Navigation Modal */}
+      {showBackModal && (
+        <div className={styles.modalOverlay} key="backModal">
+          <div className={styles.modal}>
+            <div className={styles.modalHeader}>
+              <h3>Leave Quiz</h3>
+            </div>
+            <div className={styles.modalBody}>
+              <p>
+                If you go back, your test will be submitted.
+              </p>
+            </div>
+            <div className={styles.modalFooter}>
+              <button className={`${styles.btn} ${styles.btnSecondary}`} onClick={() => setShowBackModal(false)}>
+                Cancel
+              </button>
+              <button className={`${styles.btn} ${styles.btnPrimary}`} onClick={submitCompetition}>
+                Yes, Submit
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      
       {/* Report Modal */}
       {showReportModal && (
         <div className={styles.modalOverlay}>
@@ -595,6 +682,7 @@ const CompetitionQuiz = () => {
                 onChange={(e) => setReportDescription(e.target.value)}
                 placeholder="Describe the problem with this question..."
                 rows="4"
+                className={styles.reportTextarea}
               />
             </div>
             <div className={styles.modalFooter}>

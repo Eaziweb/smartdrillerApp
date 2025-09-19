@@ -53,6 +53,8 @@ const PremiumPlans = () => {
                 <span className={styles.currency}>₦</span>
                 <span className={styles.amount}>3000</span>
                 <span className={styles.period}>/semester</span>
+                <span className={styles.amount}>1000</span>
+                <span className={styles.period}>/month</span>
               </div>
               <p className={styles.planDescription}>Everything you need to excel</p>
             </div>

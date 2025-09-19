@@ -1,0 +1,416 @@
+/* styles/subscriptionModal.module.css */
+:root {
+  --primary-color: #002060;
+  --primary-light: #0066ff;
+  --bg-primary: #ffffff;
+  --bg-secondary: #f8fafc;
+  --text-primary: #1e293b;
+  --text-secondary: #64748b;
+  --border-color: #e2e8f0;
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  --radius-md: 12px;
+  --radius-lg: 16px;
+}
+
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(5px);
+  z-index: 1000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 1rem;
+  animation: fadeIn 0.3s ease;
+}
+
+.modalContent {
+  background: var(--bg-primary);
+  border-radius: var(--radius-lg);
+  max-width: 600px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: var(--shadow-lg);
+  position: relative;
+  animation: slideUp 0.3s ease;
+  padding: 2rem;
+}
+
+.closeButton {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: rgba(0, 0, 0, 0.1);
+  border: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  z-index: 10;
+  transition: all 0.3s ease;
+  color: var(--text-primary);
+}
+
+.closeButton:hover {
+  background: rgba(0, 0, 0, 0.2);
+  transform: rotate(90deg);
+}
+
+.modalHeader {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.modalHeader h2 {
+  font-size: 1.8rem;
+  color: var(--primary-color);
+  margin-bottom: 0.5rem;
+}
+
+.modalHeader p {
+  color: var(--text-secondary);
+  font-size: 1rem;
+}
+
+.errorMessage {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  text-align: center;
+  border-left: 4px solid #ef4444;
+}
+
+.plansContainer {
+  display: flex;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.planCard {
+  flex: 1;
+  border: 2px solid var(--border-color);
+  border-radius: 16px;
+  padding: 1.5rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: var(--bg-primary);
+}
+
+.planCard:hover {
+  border-color: var(--primary-light);
+  transform: translateY(-5px);
+  box-shadow: var(--shadow-md);
+}
+
+.planCard.selected {
+  border-color: var(--primary-light);
+  background: rgba(0, 102, 255, 0.05);
+}
+
+.planHeader {
+  margin-bottom: 1rem;
+}
+
+.planHeader h3 {
+  font-size: 1.3rem;
+  color: var(--text-primary);
+  margin-bottom: 0.5rem;
+}
+
+.planPrice {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--primary-color);
+}
+
+.planPrice span {
+  font-size: 1rem;
+  font-weight: 400;
+  color: var(--text-secondary);
+}
+
+.planFeatures {
+  color: var(--text-secondary);
+}
+
+.planFeatures p {
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+}
+
+.planFeatures p:before {
+  content: "✓";
+  color: #10b981;
+  font-weight: bold;
+  margin-right: 0.5rem;
+}
+
+.recurringOptions {
+  background: var(--bg-secondary);
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.recurringToggle {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 60px;
+  height: 34px;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  transition: .4s;
+  border-radius: 34px;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 26px;
+  width: 26px;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  transition: .4s;
+  border-radius: 50%;
+}
+
+input:checked + .slider {
+  background-color: var(--primary-light);
+}
+
+input:checked + .slider:before {
+  transform: translateX(26px);
+}
+
+.recurringMonths {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.recurringMonths label {
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.recurringMonths select {
+  padding: 0.75rem;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-size: 1rem;
+}
+
+.recurringInfo {
+  background: rgba(0, 102, 255, 0.05);
+  border-radius: 8px;
+  padding: 1rem;
+  border-left: 3px solid var(--primary-light);
+}
+
+.recurringInfo p {
+  margin: 0 0 0.5rem 0;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+
+.totalPrice {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--primary-color);
+  text-align: right;
+  margin-top: 0.5rem;
+}
+
+.subscribeButton {
+  width: 100%;
+  padding: 1rem;
+  background: var(--primary-color);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.subscribeButton:hover {
+  background: var(--primary-light);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.subscribeButton:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { 
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to { 
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Media Queries for Responsive Design */
+@media (max-width: 768px) {
+  .modalContent {
+    padding: 1.5rem;
+  }
+  
+  .modalHeader h2 {
+    font-size: 1.5rem;
+  }
+  
+  .modalHeader p {
+    font-size: 0.9rem;
+  }
+  
+  .plansContainer {
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .planCard {
+    padding: 1.25rem;
+  }
+  
+  .planHeader h3 {
+    font-size: 1.1rem;
+  }
+  
+  .planPrice {
+    font-size: 1.5rem;
+  }
+  
+  .recurringOptions {
+    padding: 1.25rem;
+  }
+  
+  .recurringInfo p {
+    font-size: 0.85rem;
+  }
+  
+  .subscribeButton {
+    font-size: 1rem;
+    padding: 0.875rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .modalContent {
+    padding: 1rem;
+  }
+  
+  .modalHeader h2 {
+    font-size: 1.3rem;
+  }
+  
+  .modalHeader p {
+    font-size: 0.85rem;
+  }
+  
+  .closeButton {
+    width: 36px;
+    height: 36px;
+  }
+  
+  .planCard {
+    padding: 1rem;
+  }
+  
+  .planHeader h3 {
+    font-size: 1rem;
+  }
+  
+  .planPrice {
+    font-size: 1.3rem;
+  }
+  
+  .planPrice span {
+    font-size: 0.9rem;
+  }
+  
+  .planFeatures p {
+    font-size: 0.85rem;
+  }
+  
+  .recurringOptions {
+    padding: 1rem;
+  }
+  
+  .recurringToggle {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+  
+  .recurringMonths label {
+    font-size: 0.9rem;
+  }
+  
+  .recurringMonths select {
+    padding: 0.6rem;
+    font-size: 0.9rem;
+  }
+  
+  .recurringInfo p {
+    font-size: 0.8rem;
+  }
+  
+  .totalPrice {
+    font-size: 1rem;
+  }
+  
+  .subscribeButton {
+    font-size: 0.9rem;
+    padding: 0.75rem;
+  }
+}

@@ -1,0 +1,318 @@
+/* AboutSmartDriller.module.css */
+:root {
+  --about-color-primary: #0066ff;
+  --about-color-secondary: #003366;
+  --about-color-light: #f8f9fa;
+  --about-color-dark: #212529;
+}
+
+.aboutModalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  overflow-y: auto;
+}
+
+.aboutModalContent {
+  background-color: white;
+  border-radius: 12px;
+  max-width: 1200px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
+
+.aboutCloseButton {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background: rgba(0, 0, 0, 0.1);
+  border: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  z-index: 10;
+  transition: all 0.3s ease;
+  color: var(--about-color-dark);
+}
+
+.aboutCloseButton:hover {
+  background: rgba(0, 0, 0, 0.2);
+  transform: rotate(90deg);
+}
+
+.aboutContainer {
+  width: 90%;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.aboutHeader {
+  background-color: var(--about-color-secondary);
+  color: white;
+  padding: 1rem 0;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.aboutAppLogo {
+  text-decoration: none;
+  font-size: 1.75rem;
+  font-weight: 700;
+  background: linear-gradient(45deg, #fff, #e2e8f0);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.aboutNavLinks {
+  display: flex;
+  list-style: none;
+}
+
+.aboutNavLinks li {
+  margin-left: 1.5rem;
+}
+
+.aboutNavLinks a {
+  color: white;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.3s;
+  display: inline-block;
+  padding: 0.5rem 0;
+}
+
+.aboutNavLinks a:hover {
+  color: var(--about-color-secondary);
+}
+
+.aboutHero {
+  background: linear-gradient(135deg, var(--about-color-secondary), var(--about-color-primary));
+  color: white;
+  padding: 5rem 0;
+  text-align: center;
+}
+
+.aboutHero h1 {
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+}
+
+.aboutHero p {
+  font-size: 1.1rem;
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+.aboutSection {
+  padding: 4rem 0;
+}
+
+.aboutSectionTitle {
+  text-align: center;
+  margin-bottom: 2rem;
+  color: var(--about-color-secondary);
+  position: relative;
+  padding-bottom: 10px;
+}
+
+.aboutSectionTitle::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80px;
+  height: 3px;
+  background-color: var(--about-color-secondary);
+}
+
+.aboutContent {
+  max-width: 800px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.aboutContent p {
+  margin-bottom: 1.5rem;
+}
+
+.aboutValues {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 2rem;
+  margin-top: 3rem;
+}
+
+.aboutValueCard {
+  background-color: white;
+  padding: 2rem;
+  border-radius: 8px;
+  text-align: center;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.aboutValueCard:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
+
+.aboutValueCard i {
+  font-size: 2.5rem;
+  color: var(--about-color-secondary);
+  margin-bottom: 1rem;
+}
+
+.aboutValueCard h3 {
+  color: var(--about-color-secondary);
+  margin-bottom: 1rem;
+}
+
+.aboutBlogSection {
+  background-color: white;
+}
+
+.aboutBlogPosts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+}
+
+.aboutBlogCard {
+  background-color: var(--about-color-light);
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+}
+
+.aboutBlogContent {
+  padding: 1.5rem;
+}
+
+.aboutBlogCard h3 {
+  color: var(--about-color-secondary);
+  margin-bottom: 0.5rem;
+}
+
+.aboutBlogMeta {
+  color: #666;
+  font-size: 0.9rem;
+  margin-bottom: 1rem;
+}
+
+.aboutReadMore {
+  color: var(--about-color-secondary);
+  text-decoration: none;
+  font-weight: 500;
+  display: inline-block;
+  margin-top: 1rem;
+}
+
+.aboutReadMore:hover {
+  text-decoration: underline;
+}
+
+.aboutFooter {
+  background-color: var(--about-color-secondary);
+  color: white;
+  padding: 3rem 0;
+  text-align: center;
+}
+
+.aboutFooterContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.aboutSocialLinks {
+  display: flex;
+  list-style: none;
+  margin: 1rem 0;
+}
+
+.aboutSocialLinks li {
+  margin: 0 0.5rem;
+}
+
+.aboutSocialLinks a {
+  color: white;
+  font-size: 1.2rem;
+  transition: color 0.3s;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .aboutNavLinks {
+    display: none;
+  }
+  
+  .aboutHero h1 {
+    font-size: 2rem;
+  }
+  
+  .aboutSection {
+    padding: 3rem 0;
+  }
+  
+  .aboutValues {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+  
+  .aboutBlogPosts {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .aboutModalContent {
+    padding: 0;
+  }
+  
+  .aboutHero {
+    padding: 3rem 0;
+  }
+  
+  .aboutHero h1 {
+    font-size: 1.8rem;
+  }
+  
+  .aboutHero p {
+    font-size: 1rem;
+  }
+  
+  .aboutSectionTitle {
+    font-size: 1.5rem;
+  }
+  
+  .aboutValueCard {
+    padding: 1.5rem;
+  }
+  
+  .aboutValueCard i {
+    font-size: 2rem;
+  }
+  
+  .aboutBlogContent {
+    padding: 1rem;
+  }
+}

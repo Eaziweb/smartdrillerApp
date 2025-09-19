@@ -1,6 +1,5 @@
 // models/CompetitionQuestion.js
 const mongoose = require("mongoose")
-
 const competitionQuestionSchema = new mongoose.Schema(
   {
     question: {
@@ -33,6 +32,11 @@ const competitionQuestionSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    // Add createdBy field
+    createdBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
     // Optional fields with defaults
     tags: {
       type: [String],
@@ -59,5 +63,4 @@ const competitionQuestionSchema = new mongoose.Schema(
     timestamps: true,
   },
 )
-
 module.exports = mongoose.model("CompetitionQuestion", competitionQuestionSchema)

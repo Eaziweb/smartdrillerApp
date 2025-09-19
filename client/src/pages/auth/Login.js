@@ -14,6 +14,7 @@ const Login = () => {
   const [otp, setOtp] = useState("");
   const [showOtpForm, setShowOtpForm] = useState(false);
   const [deviceName, setDeviceName] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const { login, verifyDeviceOTP } = useAuth();
   const navigate = useNavigate();
 
@@ -117,16 +118,29 @@ const Login = () => {
               
               <div className={styles.inputGroup}>
                 <label htmlFor="password">Password</label>
-                <input
-                  type="password"
-                  id="password"
-                  name="password"
-                  value={formData.password}
-                  onChange={handleChange}
-                  required
-                  placeholder="Enter your password"
-                  disabled={loading}
-                />
+                <div className={styles.passwordInputContainer}>
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    id="password"
+                    name="password"
+                    value={formData.password}
+                    onChange={handleChange}
+                    required
+                    placeholder="Enter your password"
+                    disabled={loading}
+                  />
+                  <button
+                    type="button"
+                    className={styles.passwordToggle}
+                    onClick={() => setShowPassword(!showPassword)}
+                  >
+                    {showPassword ? (
+                      <i className="fas fa-eye-slash"></i>
+                    ) : (
+                      <i className="fas fa-eye"></i>
+                    )}
+                  </button>
+                </div>
               </div>
               
               <button 

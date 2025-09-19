@@ -36,6 +36,7 @@ const ForgotPassword = () => {
           </Link>
           <h1 className={styles.appLogo}>SmartDrill</h1>
         </div>
+        
         <div className={styles.resetForm}>
           <div className={styles.formHeader}>
             <div style={{ textAlign: "center", marginBottom: "2rem" }}>
@@ -46,6 +47,7 @@ const ForgotPassword = () => {
             <h1>Forgot Password?</h1>
             <p>Enter your email address and we'll send you a link to reset your password</p>
           </div>
+          
           <form onSubmit={handleSubmit}>
             {error && (
               <div className={styles.errorMessage}>
@@ -57,6 +59,7 @@ const ForgotPassword = () => {
                 {message}
               </div>
             )}
+            
             <div className={styles.inputGroup}>
               <label htmlFor="email">Email Address</label>
               <input
@@ -68,6 +71,7 @@ const ForgotPassword = () => {
                 placeholder="Enter your email address"
               />
             </div>
+            
             <button 
               type="submit" 
               className={`${styles.submitBtn} ${loading ? styles.loading : ""}`} 
@@ -82,6 +86,7 @@ const ForgotPassword = () => {
               <i className={`fas fa-paper-plane ${styles.btnArrow}`}></i>
             </button>
           </form>
+          
           <div className={styles.formFooter}>
             <p>
               Remember your password?{" "}

@@ -8,10 +8,9 @@ const Note = require("../models/Note")
 const UserProgress = require("../models/UserProgress")
 const mongoose = require("mongoose")
 
-// Get all courses with notes (for user)
 router.get("/courses", auth, subscriptionCheck, async (req, res) => {
   try {
-    const courses = await NoteCourse.find()
+    const courses = await NoteCourse.find({ isVisible: true })
       .populate({
         path: "notes",
         select: "title description createdAt",

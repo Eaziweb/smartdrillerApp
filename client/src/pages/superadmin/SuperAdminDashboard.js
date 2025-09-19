@@ -13,9 +13,6 @@ const SuperAdminDashboard = () => {
   })
   const [admins, setAdmins] = useState([])
   const [payments, setPayments] = useState([])
-  const [settings, setSettings] = useState({
-    subscriptionPrice: 2000,
-  })
   const [newAdmin, setNewAdmin] = useState({
     fullName: "",
     email: "",
@@ -23,6 +20,7 @@ const SuperAdminDashboard = () => {
   })
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState("dashboard")
+  const [adminExists, setAdminExists] = useState(false)
 
   useEffect(() => {
     loadDashboardData()
@@ -30,10 +28,9 @@ const SuperAdminDashboard = () => {
 
   const loadDashboardData = async () => {
     try {
-      const [revenueRes, adminsRes, settingsRes] = await Promise.all([
+      const [revenueRes, adminsRes] = await Promise.all([
         axios.get("/api/superadmin/revenue"),
         axios.get("/api/superadmin/admins"),
-        axios.get("/api/superadmin/subscription-settings"),
       ])
       
       setStats({
@@ -41,10 +38,7 @@ const SuperAdminDashboard = () => {
         totalAdmins: adminsRes.data.length,
       })
       setAdmins(adminsRes.data)
-      setPayments(revenueRes.data.payments)
-      setSettings({
-        subscriptionPrice: settingsRes.data.subscriptionPrice || 2000,
-      })
+      setPayments(revenueRes.data.payments || [])
     } catch (error) {
       console.error("Failed to load dashboard data:", error);
       showMessage("Failed to load dashboard data", "error");
@@ -54,13 +48,29 @@ const SuperAdminDashboard = () => {
 
   const handleCreateAdmin = async (e) => {
     e.preventDefault()
+    
+    // Reset admin exists state
+    setAdminExists(false)
+    
     try {
+      // First check if admin already exists
+      const existingAdmin = admins.find(admin => admin.email === newAdmin.email)
+      if (existingAdmin) {
+        setAdminExists(true)
+        return
+      }
+      
       await axios.post("/api/superadmin/admins", newAdmin)
       setNewAdmin({ fullName: "", email: "", password: "" })
       loadDashboardData()
       showMessage("Admin created successfully!", "success")
     } catch (error) {
-      showMessage("Failed to create admin", "error")
+      // Handle case where admin already exists (backend check)
+      if (error.response && error.response.status === 400) {
+        setAdminExists(true)
+      } else {
+        showMessage("Failed to create admin", "error")
+      }
     }
   }
 
@@ -73,19 +83,6 @@ const SuperAdminDashboard = () => {
       } catch (error) {
         showMessage("Failed to delete admin", "error")
       }
-    }
-  }
-
-  const handleUpdateSubscriptionPrice = async (e) => {
-    e.preventDefault()
-    try {
-      const { data } = await axios.put("/api/superadmin/subscription-price", {
-        subscriptionPrice: settings.subscriptionPrice,
-      })
-      setSettings(data.settings)
-      showMessage("Subscription price updated successfully!", "success")
-    } catch (error) {
-      showMessage("Failed to update subscription price", "error")
     }
   }
 
@@ -174,12 +171,6 @@ const SuperAdminDashboard = () => {
           >
             Revenue
           </button>
-          <button 
-            className={`${styles.adminTab} ${activeTab === "settings" ? styles.active : ""}`}
-            onClick={() => setActiveTab("settings")}
-          >
-            Settings
-          </button>
         </div>
         
         {/* Dashboard Tab */}
@@ -249,6 +240,14 @@ const SuperAdminDashboard = () => {
                     placeholder="Admin password"
                   />
                 </div>
+                
+                {/* Show error if admin already exists */}
+                {adminExists && (
+                  <div className={styles.errorMessage}>
+                    Admin with email "{newAdmin.email}" already exists
+                  </div>
+                )}
+                
                 <button type="submit" className={styles.submitBtn}>
                   <span>Create Admin</span>
                   <i className="fas fa-plus"></i>
@@ -370,34 +369,6 @@ const SuperAdminDashboard = () => {
                   </table>
                 </div>
               )}
-            </div>
-          </div>
-        )}
-        
-        {/* Settings Tab */}
-        {activeTab === "settings" && (
-          <div className={styles.adminSection}>
-            <h2>Global Settings</h2>
-            
-            <div className={styles.adminFormContainer}>
-              <h3>Subscription Price</h3>
-              <form onSubmit={handleUpdateSubscriptionPrice} className={styles.adminForm}>
-                <div className={styles.inputGroup}>
-                  <label htmlFor="subscriptionPrice">Subscription Price (₦)</label>
-                  <input
-                    type="number"
-                    id="subscriptionPrice"
-                    value={settings.subscriptionPrice}
-                    onChange={(e) => setSettings({ ...settings, subscriptionPrice: parseInt(e.target.value) })}
-                    required
-                    min="0"
-                  />
-                </div>
-                <button type="submit" className={styles.submitBtn}>
-                  <span>Update Price</span>
-                  <i className="fas fa-save"></i>
-                </button>
-              </form>
             </div>
           </div>
         )}

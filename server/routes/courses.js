@@ -146,5 +146,25 @@ router.get("/", async (req, res) => {
     res.status(500).json({ message: "Server error" })
   }
 })
+// In your courses router (routes/courses.js)
 
+// Get course by code
+router.get("/:courseCode", async (req, res) => {
+  try {
+    const { courseCode } = req.params;
+    const course = await Course.findOne({ 
+      courseCode: courseCode.toLowerCase(),
+      isActive: true 
+    });
+    
+    if (!course) {
+      return res.status(404).json({ message: "Course not found" });
+    }
+    
+    res.json(course);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
 module.exports = router

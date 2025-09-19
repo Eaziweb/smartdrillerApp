@@ -47,7 +47,6 @@ const upload = multer({
 
 const router = express.Router();
 
-// Get questions for study/mock (protected route)
 router.post("/fetch", auth, subscriptionCheck, async (req, res) => {
   try {
     const { course, year, topics, questionCount, examType } = req.body;
@@ -66,10 +65,12 @@ router.post("/fetch", auth, subscriptionCheck, async (req, res) => {
     let questions = await Question.find(query).select("-createdBy");
     // Shuffle questions for randomness
     questions = questions.sort(() => Math.random() - 0.5);
-    // Limit to requested count
-    if (questionCount && questionCount > 0) {
+    
+    // Only limit to requested count if it's not "all"
+    if (questionCount && questionCount !== "all") {
       questions = questions.slice(0, Number.parseInt(questionCount));
     }
+    
     res.json({
       success: true,
       questions,
@@ -238,9 +239,19 @@ router.delete("/study-progress/:course/:year", auth, subscriptionCheck, async (r
   }
 });
 
+// Get available course years (only for active courses)
 router.get("/course-years", auth, subscriptionCheck, async (req, res) => {
   try {
-    const courseYears = await CourseYear.find({ isActive: true }).select("course year").sort({ course: 1, year: -1 });
+    // Get active courses first
+    const activeCourses = await Course.find({ isActive: true }).select('courseCode');
+    const activeCourseCodes = activeCourses.map(course => course.courseCode);
+    
+    // Then get courseYears for active courses only
+    const courseYears = await CourseYear.find({ 
+      course: { $in: activeCourseCodes },
+      isActive: true 
+    }).select("course year").sort({ course: 1, year: -1 });
+    
     // Group by course
     const groupedYears = {};
     courseYears.forEach((cy) => {
@@ -249,6 +260,7 @@ router.get("/course-years", auth, subscriptionCheck, async (req, res) => {
       }
       groupedYears[cy.course].push(cy.year);
     });
+    
     res.json(groupedYears);
   } catch (error) {
     console.error(error);

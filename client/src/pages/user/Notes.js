@@ -1,5 +1,5 @@
 "use client"
-import { useState, useEffect } from "react"
+import { useState, useEffect, useMemo } from "react"
 import { Link } from "react-router-dom"
 import axios from "axios"
 import styles from "../../styles/Notes.module.css"
@@ -10,7 +10,6 @@ const Notes = () => {
   const [searchTerm, setSearchTerm] = useState("")
   const [openCourse, setOpenCourse] = useState(null)
   const [completedNotes, setCompletedNotes] = useState([])
-  const [totalNotes, setTotalNotes] = useState(0)
   const [progressLoading, setProgressLoading] = useState(true)
 
   useEffect(() => {
@@ -24,9 +23,6 @@ const Notes = () => {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       })
       setCourses(response.data)
-      // Calculate total notes
-      const total = response.data.reduce((sum, course) => sum + course.notes.length, 0)
-      setTotalNotes(total)
     } catch (error) {
       console.error("Failed to load courses:", error)
     } finally {
@@ -51,6 +47,25 @@ const Notes = () => {
   const toggleCourse = (courseId) => {
     setOpenCourse(openCourse === courseId ? null : courseId)
   }
+
+  // Calculate total notes and completed notes from visible courses only
+  const { totalVisibleNotes, completedVisibleCount } = useMemo(() => {
+    let total = 0
+    const visibleNoteIds = new Set()
+    
+    courses.forEach(course => {
+      total += course.notes.length
+      course.notes.forEach(note => {
+        visibleNoteIds.add(note._id.toString())
+      })
+    })
+    
+    const completedCount = completedNotes.filter(id => 
+      visibleNoteIds.has(id.toString())
+    ).length
+    
+    return { totalVisibleNotes: total, completedVisibleCount: completedCount }
+  }, [courses, completedNotes])
 
   const filteredCourses = courses.filter(
     (course) =>
@@ -85,10 +100,10 @@ const Notes = () => {
           <div className={styles.progressInfo}>
             <div className={styles.progressStats}>
               <span className={styles.statNumber} id="completedNotes">
-                {completedNotes.length}
+                {completedVisibleCount}
               </span>
               <span className={styles.statTotal}>
-                / <span id="totalNotes">{totalNotes}</span>
+                / <span id="totalNotes">{totalVisibleNotes}</span>
               </span>
             </div>
             <div className={styles.progressLabel}>Notes Completed</div>
@@ -96,7 +111,7 @@ const Notes = () => {
           <div className={styles.progressBar}>
             <div
               className={styles.progressFill}
-              style={{ width: `${totalNotes > 0 ? (completedNotes.length / totalNotes) * 100 : 0}%` }}
+              style={{ width: `${totalVisibleNotes > 0 ? (completedVisibleCount / totalVisibleNotes) * 100 : 0}%` }}
             ></div>
           </div>
         </div>

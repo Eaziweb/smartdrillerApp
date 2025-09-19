@@ -39,6 +39,18 @@ const UsersPage = () => {
     }, 3000)
   }
 
+  // Function to get course name
+  const getCourseName = (user) => {
+    if (user.course) {
+      if (typeof user.course === 'object' && user.course.name) {
+        return user.course.name
+      } else if (typeof user.course === 'string') {
+        return user.course
+      }
+    }
+    return "N/A"
+  }
+
   if (loading) {
     return (
       <div className={styles.loading}>
@@ -90,7 +102,7 @@ const UsersPage = () => {
                     <tr key={user._id}>
                       <td>{user.fullName}</td>
                       <td>{user.email}</td>
-                      <td>{user.course}</td>
+                      <td>{getCourseName(user)}</td>
                       <td>{user.phoneNumber || "N/A"}</td>
                       <td>{user.accountNumber || "N/A"}</td>
                       <td>{user.bankName || "N/A"}</td>

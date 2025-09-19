@@ -11,13 +11,17 @@ const NoteManagement = () => {
   const [showNoteModal, setShowNoteModal] = useState(false)
   const [selectedCourse, setSelectedCourse] = useState(null)
   const [editingItem, setEditingItem] = useState(null)
-  const [courseForm, setCourseForm] = useState({ title: "", description: "" })
+  const [courseForm, setCourseForm] = useState({ 
+    title: "", 
+    description: "",
+    isVisible: true 
+  })
   const [noteForm, setNoteForm] = useState({
     title: "",
     description: "",
     content: "",
   })
-
+  
   // Get authorization token
   const getAuthHeader = () => {
     const token = localStorage.getItem("token")
@@ -54,7 +58,7 @@ const NoteManagement = () => {
           headers: getAuthHeader(),
         })
       }
-      setCourseForm({ title: "", description: "" })
+      setCourseForm({ title: "", description: "", isVisible: true })
       setShowCourseModal(false)
       setEditingItem(null)
       loadCourses()
@@ -116,32 +120,49 @@ const NoteManagement = () => {
     }
   }
 
+  const toggleCourseVisibility = async (course) => {
+    try {
+      await axios.put(`/api/admin/notes/courses/${course._id}/visibility`, {}, {
+        headers: getAuthHeader(),
+      })
+      loadCourses()
+      showToast(`Course ${course.isVisible ? 'hidden' : 'shown'} successfully!`)
+    } catch (error) {
+      console.error("Failed to toggle course visibility:", error)
+      showToast(error.response?.data?.message || "Failed to toggle course visibility", "error")
+    }
+  }
+
   const openEditCourse = (course) => {
     setEditingItem(course)
-    setCourseForm({ title: course.title, description: course.description })
+    setCourseForm({ 
+      title: course.title, 
+      description: course.description,
+      isVisible: course.isVisible
+    })
     setShowCourseModal(true)
   }
 
-const openEditNote = async (note) => {
-  try {
-    // Fetch the full note data including content
-    const response = await axios.get(`/api/admin/notes/${note._id}`, {
-      headers: getAuthHeader(),
-    })
-    const fullNote = response.data
-    
-    setEditingItem(fullNote)
-    setNoteForm({ 
-      title: fullNote.title, 
-      description: fullNote.description, 
-      content: fullNote.content 
-    })
-    setShowNoteModal(true)
-  } catch (error) {
-    console.error("Failed to load note for editing:", error)
-    showToast("Failed to load note data", "error")
+  const openEditNote = async (note) => {
+    try {
+      // Fetch the full note data including content
+      const response = await axios.get(`/api/admin/notes/${note._id}`, {
+        headers: getAuthHeader(),
+      })
+      const fullNote = response.data
+      
+      setEditingItem(fullNote)
+      setNoteForm({ 
+        title: fullNote.title, 
+        description: fullNote.description, 
+        content: fullNote.content 
+      })
+      setShowNoteModal(true)
+    } catch (error) {
+      console.error("Failed to load note for editing:", error)
+      showToast("Failed to load note data", "error")
+    }
   }
-}
 
   const formatText = (type) => {
     const textarea = document.getElementById("noteContent")
@@ -232,7 +253,13 @@ const openEditNote = async (note) => {
               <div className={styles.courseInfo}>
                 <h3>{course.title}</h3>
                 <p>{course.description}</p>
-                <span className={styles.itemCount}>{course.notes?.length || 0} notes</span>
+                <div className={styles.courseMeta}>
+                  <span className={styles.itemCount}>{course.notes?.length || 0} notes</span>
+                  <span className={`${styles.visibilityBadge} ${course.isVisible ? styles.visible : styles.hidden}`}>
+                    <i className={`fas ${course.isVisible ? "fa-eye" : "fa-eye-slash"}`}></i>
+                    {course.isVisible ? "Visible" : "Hidden"}
+                  </span>
+                </div>
               </div>
               <div className={styles.courseActions}>
                 <button
@@ -244,6 +271,13 @@ const openEditNote = async (note) => {
                 >
                   <i className="fas fa-plus"></i>
                   Add Note
+                </button>
+                <button 
+                  className={`${styles.btn} ${styles.btnSm} ${course.isVisible ? styles.btnSuccess : styles.btnWarning}`}
+                  onClick={() => toggleCourseVisibility(course)}
+                  title={course.isVisible ? "Hide from users" : "Show to users"}
+                >
+                  <i className={`fas ${course.isVisible ? "fa-eye-slash" : "fa-eye"}`}></i>
                 </button>
                 <button className={`${styles.btn} ${styles.btnSm} ${styles.btnOutline}`} onClick={() => openEditCourse(course)}>
                   <i className="fas fa-edit"></i>
@@ -289,7 +323,7 @@ const openEditNote = async (note) => {
             onClick={() => {
               setShowCourseModal(false)
               setEditingItem(null)
-              setCourseForm({ title: "", description: "" })
+              setCourseForm({ title: "", description: "", isVisible: true })
             }}
           ></div>
           <div className={styles.modalContent}>
@@ -300,7 +334,7 @@ const openEditNote = async (note) => {
                 onClick={() => {
                   setShowCourseModal(false)
                   setEditingItem(null)
-                  setCourseForm({ title: "", description: "" })
+                  setCourseForm({ title: "", description: "", isVisible: true })
                 }}
               >
                 <i className="fas fa-times"></i>
@@ -323,6 +357,16 @@ const openEditNote = async (note) => {
                   onChange={(e) => setCourseForm({ ...courseForm, description: e.target.value })}
                   rows="3"
                 />
+              </div>
+              <div className={styles.formGroup}>
+                <label className={styles.checkboxLabel}>
+                  <input
+                    type="checkbox"
+                    checked={courseForm.isVisible}
+                    onChange={(e) => setCourseForm({ ...courseForm, isVisible: e.target.checked })}
+                  />
+                  <span>Visible to users</span>
+                </label>
               </div>
               <div className={styles.formActions}>
                 <button type="submit" className={`${styles.btn} ${styles.btnPrimary}`}>

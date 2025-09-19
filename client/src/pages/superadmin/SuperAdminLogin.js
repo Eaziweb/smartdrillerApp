@@ -47,7 +47,7 @@ const SuperAdminLogin = () => {
           <Link to="/login" className={styles.backBtn}>
             <i className="fas fa-arrow-left"></i>
           </Link>
-          <h1 className={styles.appLogo}>SmartDrill SuperAdmin</h1>
+          <h1 className={styles.appLogo}>SmartDriller SuperAdmin</h1>
         </div>
         <div className={styles.signinForm}>
           <div className={styles.formHeader}>

@@ -1,4 +1,5 @@
-const mongoose = require("mongoose")
+const mongoose = require("mongoose");
+
 const paymentSchema = new mongoose.Schema(
   {
     user: {
@@ -24,11 +25,34 @@ const paymentSchema = new mongoose.Schema(
       required: true,
     },
     flutterwaveRef: String,
-    subscriptionExpiry: Date,
+    subscriptionType: {
+      type: String,
+      enum: ["monthly", "semester"],
+      required: true,
+    },
+    meta: {
+      isRecurring: {
+        type: Boolean,
+        default: false,
+      },
+      recurringMonths: {
+        type: Number,
+        default: 1,
+      },
+      paymentPlan: {
+        type: String,
+        enum: ["one-time", "recurring"],
+        default: "one-time",
+      },
+      recurringPayment: {
+        type: Boolean,
+        default: false,
+      },
+    },
   },
   {
     timestamps: true,
-  },
-)
+  }
+);
 
-module.exports = mongoose.model("Payment", paymentSchema)
+module.exports = mongoose.model("Payment", paymentSchema);

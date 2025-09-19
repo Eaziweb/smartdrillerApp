@@ -55,6 +55,19 @@ const VerifyEmail = () => {
     }
   }
 
+  const handlePaste = (e) => {
+    e.preventDefault()
+    const pastedData = e.clipboardData.getData('text')
+    if (pastedData.length === 6 && /^\d+$/.test(pastedData)) {
+      const newCode = pastedData.split('')
+      setCode(newCode)
+      // Focus the last input
+      setTimeout(() => {
+        inputRefs.current[5]?.focus()
+      }, 0)
+    }
+  }
+
   const handleSubmit = async (e) => {
     e.preventDefault()
     const verificationCode = code.join("")
@@ -116,6 +129,7 @@ const VerifyEmail = () => {
           </Link>
           <h1 className={styles.appLogo}>SmartDrill</h1>
         </div>
+        
         <div className={`${styles.formContainer} ${styles.verifyForm}`}>
           <div className={styles.verifyIcon}>
             <div className={styles.emailAnimation}>
@@ -123,11 +137,13 @@ const VerifyEmail = () => {
               <div className={styles.pulseRing}></div>
             </div>
           </div>
+          
           <div className={styles.formHeader}>
             <h1>Check Your Email</h1>
             <p>We've sent a 6-digit verification code to</p>
             <div className={styles.emailDisplay}>{email}</div>
           </div>
+          
           <form onSubmit={handleSubmit} className={styles.modernForm}>
             <div className={styles.codeSection}>
               <label>Enter Verification Code</label>
@@ -142,6 +158,7 @@ const VerifyEmail = () => {
                     value={digit}
                     onChange={(e) => handleCodeChange(index, e.target.value)}
                     onKeyDown={(e) => handleKeyDown(index, e)}
+                    onPaste={index === 0 ? handlePaste : undefined}
                     autoComplete="off"
                   />
                 ))}
@@ -150,6 +167,7 @@ const VerifyEmail = () => {
                 <span className={styles.errorMsg} id="codeError"></span>
               </div>
             </div>
+            
             <button type="submit" className={`${styles.submitBtn} ${loading ? styles.loading : ""}`} disabled={loading}>
               <span className={styles.btnContent}>
                 <span className={styles.btnText}>Verify Email</span>
@@ -160,6 +178,7 @@ const VerifyEmail = () => {
               <div className={styles.btnArrow}>→</div>
             </button>
           </form>
+          
           <div className={styles.resendSection}>
             <p>Didn't receive the code?</p>
             {countdown > 0 ? (

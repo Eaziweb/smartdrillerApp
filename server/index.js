@@ -1,8 +1,9 @@
+require("dotenv").config()
 const express = require("express")
 const mongoose = require("mongoose")
 const cors = require("cors")
 const path = require("path")
-require("dotenv").config()
+
 const cookieParser = require('cookie-parser');
 const app = express()
 
@@ -15,14 +16,10 @@ app.use(cookieParser());
 // Serve static files from React build
 app.use(express.static(path.join(__dirname, "build")))
 
-// Database connection
-mongoose
-  .connect(process.env.MONGODB_URI || "mongodb://localhost:27017/smartdrill", {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  })
-  .then(() => console.log("MongoDB connected"))
-  .catch((err) => console.error("MongoDB connection error:", err))
+mongoose.connect(process.env.MONGODB_URI)
+  .then(() => console.log("✅ MongoDB connected"))
+  .catch((err) => console.error("❌ MongoDB connection error:", err));
+
 
 // Routes
 app.use("/api/auth", require("./routes/auth"))
@@ -46,12 +43,17 @@ app.use("/api/competitions", require("./routes/competitions"))
 app.use("/api/admin/competitions", require("./routes/admin-competitions"))
 app.use("/api/users", require("./routes/users"))
 app.use("/api/courses", require("./routes/courses"))
-// ... other imports
+app.use("/api/courseofstudy", require("./routes/courseofstudy"))
+
+// server.js or app.js
+// server.js or app.js
+const universityRoutes = require("./routes/universities");
+app.use("/api/universities", universityRoutes);
 require('./utils/updateVideoMetadata');
 
-// ... rest of your server setup
-// Route
-// Serve React app for all other routes
+const errorLogger = require('./middleware/errorLogger');
+
+app.use(errorLogger);
 
 
 // Serve static files from uploads directory
@@ -72,3 +74,5 @@ const PORT = process.env.PORT || 5000
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`)
 })
+console.log("Connecting to MongoDB:", process.env.MONGODB_URI);
+

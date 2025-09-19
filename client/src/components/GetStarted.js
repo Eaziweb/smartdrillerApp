@@ -33,7 +33,7 @@ const GetStarted = () => {
                 <div className={`${styles.stepIcon} ${styles.signupIcon}`}>
                   <i className="fas fa-user-plus"></i>
                 </div>
-                <h3>Sign Up & Get Started</h3>
+                <h3>Sign Up & Verify Device</h3>
                 <p>Create your free account in seconds and join thousands of successful smart students on their academic journey.</p>
                 <div className={styles.stepFeatures}>
                   <div className={styles.featureItem}>

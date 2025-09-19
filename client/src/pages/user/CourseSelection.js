@@ -6,6 +6,28 @@ import { useNotification } from "../../contexts/NotificationContext"
 import ProgressRing from '../../components/ProgressRing'
 import styles from "../../styles/course-selection.module.css"
 
+// Portal component for rendering dropdowns outside the main DOM hierarchy
+const Portal = ({ children, className }) => {
+  const [portalElement, setPortalElement] = useState(null);
+
+  useEffect(() => {
+    const element = document.createElement('div');
+    element.className = className || 'dropdown-portal';
+    document.body.appendChild(element);
+    setPortalElement(element);
+
+    return () => {
+      if (element && document.body.contains(element)) {
+        document.body.removeChild(element);
+      }
+    };
+  }, [className]);
+
+  if (!portalElement) return null;
+
+  return require('react-dom').createPortal(children, portalElement);
+};
+
 const CourseSelection = () => {
   const { user } = useAuth()
   const navigate = useNavigate()
@@ -22,12 +44,15 @@ const CourseSelection = () => {
   const [currentTopicDropdown, setCurrentTopicDropdown] = useState(null)
   const [searchTerm, setSearchTerm] = useState("")
   const [formData, setFormData] = useState({})
-  const [showDropdown, setShowDropdown] = useState({ show: false, type: null, options: [], courseCode: null })
   const [studyProgress, setStudyProgress] = useState({})
   const [fetchingQuestions, setFetchingQuestions] = useState(false)
   const [fetchingYears, setFetchingYears] = useState(false)
   const [fetchingTopics, setFetchingTopics] = useState(false)
   const [fetchingCourses, setFetchingCourses] = useState(false)
+  
+  // Simplified dropdown state - track which dropdown is open for which course
+  const [openDropdown, setOpenDropdown] = useState({ courseCode: null, type: null })
+  const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0, width: 0 })
   
   // Get exam type from URL params
   const urlParams = new URLSearchParams(location.search)
@@ -36,6 +61,7 @@ const CourseSelection = () => {
   
   // Refs for dropdown containers
   const dropdownRefs = useRef({})
+  const dropdownTriggerRefs = useRef({})
   
   // Fetch study progress for all courses
   const loadAllStudyProgress = async () => {
@@ -153,154 +179,88 @@ const CourseSelection = () => {
       setFetchingTopics(false)
     }
   }
-  
-// Updated handleCourseSelect function
-const handleCourseSelect = (courseCode, isSelected) => {
-  if (isSelected) {
-    // If selecting a new course and another is already selected, deselect the previous one
-    if (selectedCourse && selectedCourse !== courseCode) {
-      // Clear the previous course's data
+
+  const handleCourseSelect = (courseCode, isSelected) => {
+    if (isSelected) {
+      // If selecting a new course and another is already selected, deselect the previous one
+      if (selectedCourse && selectedCourse !== courseCode) {
+        // Clear the previous course's data
+        setFormData((prev) => {
+          const newData = { ...prev };
+          delete newData[selectedCourse];
+          return newData;
+        });
+        setCourseTopics((prev) => {
+          const newTopics = { ...prev };
+          delete newTopics[selectedCourse];
+          return newTopics;
+        });
+      }
+      
+      // Check if there are any years available for this course
+      if (!courseYears[courseCode] || courseYears[courseCode].length === 0) {
+        showNotification(`No questions available for ${courseCode}. Please select another course.`, "error")
+        return false;
+      }
+      
+      setSelectedCourse(courseCode);
+      fetchTopics(courseCode);
+      
+      // Initialize form data for this course
+      setFormData((prev) => ({
+        ...prev,
+        [courseCode]: {
+          year: "",
+          yearLabel: "",
+          questions: "",
+          questionsLabel: "",
+          time: isMockMode ? "" : undefined,
+          timeLabel: isMockMode ? "" : undefined,
+          topics: "all",
+        },
+      }));
+    } else {
+      setSelectedCourse(null);
       setFormData((prev) => {
         const newData = { ...prev };
-        delete newData[selectedCourse];
+        delete newData[courseCode];
         return newData;
       });
       setCourseTopics((prev) => {
         const newTopics = { ...prev };
-        delete newTopics[selectedCourse];
+        delete newTopics[courseCode];
         return newTopics;
       });
+      setSelectedTopics(new Set());
+    }
+    return true;
+  };
+  
+  const calculateDropdownPosition = (courseCode, type) => {
+    const triggerElement = dropdownTriggerRefs.current[`${courseCode}-${type}`];
+    if (triggerElement) {
+      const rect = triggerElement.getBoundingClientRect();
+      return {
+        top: rect.bottom + window.scrollY,
+        left: rect.left + window.scrollX,
+        width: rect.width
+      };
+    }
+    return { top: 0, left: 0, width: 0 };
+  };
+  
+  const handleDropdownClick = (courseCode, type) => {
+    // If clicking on the same dropdown that's already open, close it
+    if (openDropdown.courseCode === courseCode && openDropdown.type === type) {
+      setOpenDropdown({ courseCode: null, type: null });
+      return;
     }
     
-    // Check if there are any years available for this course
-    if (!courseYears[courseCode] || courseYears[courseCode].length === 0) {
-      showNotification(`No questions available for ${courseCode}. Please select another course.`, "error")
-      return false;
-    }
+    // Close any open dropdown first
+    setOpenDropdown({ courseCode: null, type: null });
     
-    setSelectedCourse(courseCode);
-    fetchTopics(courseCode);
-    
-    // Initialize form data for this course
-    setFormData((prev) => ({
-      ...prev,
-      [courseCode]: {
-        year: "",
-        yearLabel: "",
-        questions: "",
-        questionsLabel: "",
-        time: isMockMode ? "" : undefined,
-        timeLabel: isMockMode ? "" : undefined,
-        topics: "all",
-      },
-    }));
-  } else {
-    setSelectedCourse(null);
-    setFormData((prev) => {
-      const newData = { ...prev };
-      delete newData[courseCode];
-      return newData;
-    });
-    setCourseTopics((prev) => {
-      const newTopics = { ...prev };
-      delete newTopics[courseCode];
-      return newTopics;
-    });
-    setSelectedTopics(new Set());
-  }
-  return true;
-};
-  
-// Updated handleDropdownClick function
-const handleDropdownClick = (courseCode, type) => {
-  // Close any open dropdown first
-  if (showDropdown.show && (showDropdown.courseCode !== courseCode || showDropdown.type !== type)) {
-    setShowDropdown({ show: false, type: null, options: [], courseCode: null })
-    // Use setTimeout to allow the dropdown to close before opening a new one
-    setTimeout(() => {
-      let options = []
-      switch (type) {
-        case "year":
-          const years = courseYears[courseCode] || []
-          if (years.length === 0) {
-            showNotification(`No years available for ${courseCode}. Please select another course.`, "error")
-            return
-          }
-          options = years.map((year) => ({ value: year, label: year }))
-          break
-        case "questions":
-          options = [
-            { value: "10", label: "10 Questions" },
-            { value: "20", label: "20 Questions" },
-            { value: "30", label: "30 Questions" },
-            { value: "50", label: "50 Questions" },
-            { value: "100", label: "100 Questions" },
-          ]
-          break
-        case "time":
-          options = [
-            { value: "1", label: "1 minutes" },
-            { value: "10", label: "10 minutes" },
-            { value: "20", label: "20 minutes" },
-            { value: "30", label: "30 minutes" },
-            { value: "45", label: "45 minutes" },
-            { value: "60", label: "60 minutes" },
-            { value: "90", label: "90 minutes" },
-            { value: "120", label: "120 minutes" },
-          ]
-          break
-        case "topics":
-          if (!courseTopics[courseCode] || courseTopics[courseCode].length === 0) {
-            showNotification(`No topics available for ${courseCode}. Please select another course.`, "error")
-            return
-          }
-          setCurrentTopicDropdown(courseCode)
-          setShowTopicPopup(true)
-          return
-      }
-      setShowDropdown({ show: true, type, options, courseCode })
-    }, 200)
-    return
-  }
-  
-  // Toggle current dropdown
-  if (showDropdown.show && showDropdown.courseCode === courseCode && showDropdown.type === type) {
-    setShowDropdown({ show: false, type: null, options: [], courseCode: null })
-    return
-  }
-  
-  let options = []
-  switch (type) {
-    case "year":
-      const years = courseYears[courseCode] || []
-      if (years.length === 0) {
-        showNotification(`No years available for ${courseCode}. Please select another course.`, "error")
-        return
-      }
-      options = years.map((year) => ({ value: year, label: year }))
-      break
-    case "questions":
-      options = [
-        { value: "10", label: "10 Questions" },
-        { value: "20", label: "20 Questions" },
-        { value: "30", label: "30 Questions" },
-        { value: "50", label: "50 Questions" },
-        { value: "100", label: "100 Questions" },
-      ]
-      break
-    case "time":
-      options = [
-    { value: "1", label: "1 minutes" },
-            { value: "10", label: "10 minutes" },
-            { value: "20", label: "20 minutes" },
-            { value: "30", label: "30 minutes" },
-            { value: "45", label: "45 minutes" },
-            { value: "60", label: "60 minutes" },
-            { value: "90", label: "90 minutes" },
-            { value: "120", label: "120 minutes" },
-      ]
-      break
-    case "topics":
+    // For topics, show the popup instead
+    if (type === "topics") {
       if (!courseTopics[courseCode] || courseTopics[courseCode].length === 0) {
         showNotification(`No topics available for ${courseCode}. Please select another course.`, "error")
         return
@@ -308,23 +268,31 @@ const handleDropdownClick = (courseCode, type) => {
       setCurrentTopicDropdown(courseCode)
       setShowTopicPopup(true)
       return
+    }
+    
+    // Set the position and open the new dropdown
+    const position = calculateDropdownPosition(courseCode, type);
+    setDropdownPosition(position);
+    
+    // Use timeout to ensure the previous dropdown is closed before opening the new one
+    setTimeout(() => {
+      setOpenDropdown({ courseCode, type });
+    }, 10);
   }
-  setShowDropdown({ show: true, type, options, courseCode })
-}
   
-  const handleOptionSelect = (courseCode, value, label) => {
+  const handleOptionSelect = (courseCode, type, value, label) => {
     // Update form data with both value and label
     setFormData((prev) => ({
       ...prev,
       [courseCode]: {
         ...prev[courseCode],
-        [showDropdown.type]: value,
-        [`${showDropdown.type}Label`]: label,
+        [type]: value,
+        [`${type}Label`]: label,
       },
     }))
     
     // Close the dropdown
-    setShowDropdown({ show: false, type: null, options: [], courseCode: null })
+    setOpenDropdown({ courseCode: null, type: null });
   }
   
   const handleTopicSelection = (topic, isSelected) => {
@@ -456,20 +424,29 @@ const handleDropdownClick = (courseCode, type) => {
       // Check if click is outside any dropdown
       let clickedOutside = true;
       
-      Object.keys(dropdownRefs.current).forEach(key => {
-        if (dropdownRefs.current[key] && dropdownRefs.current[key].contains(event.target)) {
+      // Check if the click is inside any dropdown trigger
+      Object.keys(dropdownTriggerRefs.current).forEach(key => {
+        if (dropdownTriggerRefs.current[key] && dropdownTriggerRefs.current[key].contains(event.target)) {
           clickedOutside = false;
         }
       });
       
-      if (clickedOutside) {
-        setShowDropdown({ show: false, type: null, options: [], courseCode: null })
+      // Check if the click is inside any dropdown
+      const dropdowns = document.querySelectorAll(`.${styles.dropdownOptions}`);
+      dropdowns.forEach(dropdown => {
+        if (dropdown.contains(event.target)) {
+          clickedOutside = false;
+        }
+      });
+      
+      if (clickedOutside && (openDropdown.courseCode || openDropdown.type)) {
+        setOpenDropdown({ courseCode: null, type: null });
       }
     }
     
     document.addEventListener("mousedown", handleClickOutside)
     return () => document.removeEventListener("mousedown", handleClickOutside)
-  }, [])
+  }, [openDropdown])
   
   // Filter courses based on search term
   const filteredCourses = (semesterCourses) => {
@@ -479,6 +456,41 @@ const handleDropdownClick = (courseCode, type) => {
         course.courseName.toLowerCase().includes(searchTerm.toLowerCase()) ||
         course.courseCode.toLowerCase().includes(searchTerm.toLowerCase())
     )
+  }
+  
+  // Get dropdown options based on type
+  const getDropdownOptions = (courseCode, type) => {
+    switch (type) {
+      case "year":
+        const years = courseYears[courseCode] || []
+        if (years.length === 0) {
+          showNotification(`No years available for ${courseCode}. Please select another course.`, "error")
+          return []
+        }
+        return years.map((year) => ({ value: year, label: year }))
+      case "questions":
+        return [
+          { value: "all", label: "All Questions" }, 
+          { value: "10", label: "10 Questions" },
+          { value: "20", label: "20 Questions" },
+          { value: "30", label: "30 Questions" },
+          { value: "50", label: "50 Questions" },
+          { value: "100", label: "100 Questions" },
+          { value: "120", label: "120 Questions" },
+        ]
+      case "time":
+        return [
+          { value: "5", label: "5 minutes" },
+          { value: "10", label: "10 minutes" },
+          { value: "20", label: "20 minutes" },
+          { value: "25", label: "25 minutes" },
+          { value: "30", label: "30 minutes" },
+          { value: "45", label: "45 minutes" },
+          { value: "60", label: "60 minutes" },
+        ]
+      default:
+        return []
+    }
   }
   
   if (loading) {
@@ -511,7 +523,7 @@ const handleDropdownClick = (courseCode, type) => {
     <div className={styles.courseSelectionPage}>
       {/* Continue Button */}
       <button 
-        className={styles.startBtn} 
+        className={styles.continueBtn} 
         onClick={handleStartExam} 
         disabled={fetchingQuestions || fetchingTopics}
       >
@@ -585,36 +597,14 @@ const handleDropdownClick = (courseCode, type) => {
                           Year
                         </div>
                         <div className={styles.dropdownContainer}>
-                          <div className={styles.dropdownSelected} onClick={() => handleDropdownClick(course.courseCode, "year")}>
+                          <div 
+                            className={styles.dropdownSelected} 
+                            onClick={() => handleDropdownClick(course.courseCode, "year")}
+                            ref={el => dropdownTriggerRefs.current[`${course.courseCode}-year`] = el}
+                          >
                             {formData[course.courseCode]?.yearLabel || "Select Year"}
                             <i className="fas fa-chevron-down"></i>
                           </div>
-                          {showDropdown.show && showDropdown.type === "year" && showDropdown.courseCode === course.courseCode && (
-                            <div className={`${styles.dropdownOptions} ${styles.show}`}>
-                              {showDropdown.options.map((option) => {
-                                const progressData = studyProgress[course.courseCode]?.[option.value] || {
-                                  percentage: 0,
-                                  studiedCount: 0,
-                                  totalQuestions: 0
-                                };
-                                
-                                return (
-                                  <div
-                                    key={option.value}
-                                    className={styles.dropdownOption}
-                                    onClick={() => handleOptionSelect(course.courseCode, option.value, option.label)}
-                                  >
-                                    <span>{option.label}</span>
-                                    {!isMockMode && (
-                                   <div className={styles.progressIndicator}>
-  <ProgressRing percentage={progressData.percentage} radius={12} stroke={2} />
-</div>
-                                    )}
-                                  </div>
-                                );
-                              })}
-                            </div>
-                          )}
                         </div>
                       </div>
                       
@@ -627,23 +617,14 @@ const handleDropdownClick = (courseCode, type) => {
                           Questions
                         </div>
                         <div className={styles.dropdownContainer}>
-                          <div className={styles.dropdownSelected} onClick={() => handleDropdownClick(course.courseCode, "questions")}>
+                          <div 
+                            className={styles.dropdownSelected} 
+                            onClick={() => handleDropdownClick(course.courseCode, "questions")}
+                            ref={el => dropdownTriggerRefs.current[`${course.courseCode}-questions`] = el}
+                          >
                             {formData[course.courseCode]?.questionsLabel || "Select Questions"}
                             <i className="fas fa-chevron-down"></i>
                           </div>
-                          {showDropdown.show && showDropdown.type === "questions" && showDropdown.courseCode === course.courseCode && (
-                            <div className={`${styles.dropdownOptions} ${styles.show}`}>
-                              {showDropdown.options.map((option) => (
-                                <div
-                                  key={option.value}
-                                  className={styles.dropdownOption}
-                                  onClick={() => handleOptionSelect(course.courseCode, option.value, option.label)}
-                                >
-                                  {option.label}
-                                </div>
-                              ))}
-                            </div>
-                          )}
                         </div>
                       </div>
                       
@@ -657,23 +638,14 @@ const handleDropdownClick = (courseCode, type) => {
                             Time (minutes)
                           </div>
                           <div className={styles.dropdownContainer}>
-                            <div className={styles.dropdownSelected} onClick={() => handleDropdownClick(course.courseCode, "time")}>
+                            <div 
+                              className={styles.dropdownSelected} 
+                              onClick={() => handleDropdownClick(course.courseCode, "time")}
+                              ref={el => dropdownTriggerRefs.current[`${course.courseCode}-time`] = el}
+                            >
                               {formData[course.courseCode]?.timeLabel || "Select Time"}
                               <i className="fas fa-chevron-down"></i>
                             </div>
-                            {showDropdown.show && showDropdown.type === "time" && showDropdown.courseCode === course.courseCode && (
-                              <div className={`${styles.dropdownOptions} ${styles.show}`}>
-                                {showDropdown.options.map((option) => (
-                                  <div
-                                    key={option.value}
-                                    className={styles.dropdownOption}
-                                    onClick={() => handleOptionSelect(course.courseCode, option.value, option.label)}
-                                  >
-                                    {option.label}
-                                  </div>
-                                ))}
-                              </div>
-                            )}
                           </div>
                         </div>
                       )}
@@ -686,7 +658,11 @@ const handleDropdownClick = (courseCode, type) => {
                           </span>
                           Topics
                         </div>
-                        <div className={styles.dropdownSelected} onClick={() => handleDropdownClick(course.courseCode, "topics")}>
+                        <div 
+                          className={styles.dropdownSelected} 
+                          onClick={() => handleDropdownClick(course.courseCode, "topics")}
+                          ref={el => dropdownTriggerRefs.current[`${course.courseCode}-topics`] = el}
+                        >
                           {formData[course.courseCode]?.topics === "all" || !formData[course.courseCode]?.topics ? "All Topics" : formData[course.courseCode].topics}
                           <i className="fas fa-chevron-down"></i>
                         </div>
@@ -745,36 +721,14 @@ const handleDropdownClick = (courseCode, type) => {
                           Year
                         </div>
                         <div className={styles.dropdownContainer}>
-                          <div className={styles.dropdownSelected} onClick={() => handleDropdownClick(course.courseCode, "year")}>
+                          <div 
+                            className={styles.dropdownSelected} 
+                            onClick={() => handleDropdownClick(course.courseCode, "year")}
+                            ref={el => dropdownTriggerRefs.current[`${course.courseCode}-year`] = el}
+                          >
                             {formData[course.courseCode]?.yearLabel || "Select Year"}
                             <i className="fas fa-chevron-down"></i>
                           </div>
-                          {showDropdown.show && showDropdown.type === "year" && showDropdown.courseCode === course.courseCode && (
-                            <div className={`${styles.dropdownOptions} ${styles.show}`}>
-                              {showDropdown.options.map((option) => {
-                                const progressData = studyProgress[course.courseCode]?.[option.value] || {
-                                  percentage: 0,
-                                  studiedCount: 0,
-                                  totalQuestions: 0
-                                };
-                                
-                                return (
-                                  <div
-                                    key={option.value}
-                                    className={styles.dropdownOption}
-                                    onClick={() => handleOptionSelect(course.courseCode, option.value, option.label)}
-                                  >
-                                    <span>{option.label}</span>
-                                    {!isMockMode && (
-                                      <div className={styles.progressIndicator}>
-                                        <ProgressRing percentage={progressData.percentage} />
-                                      </div>
-                                    )}
-                                  </div>
-                                );
-                              })}
-                            </div>
-                          )}
                         </div>
                       </div>
                       
@@ -787,23 +741,14 @@ const handleDropdownClick = (courseCode, type) => {
                           Questions
                         </div>
                         <div className={styles.dropdownContainer}>
-                          <div className={styles.dropdownSelected} onClick={() => handleDropdownClick(course.courseCode, "questions")}>
+                          <div 
+                            className={styles.dropdownSelected} 
+                            onClick={() => handleDropdownClick(course.courseCode, "questions")}
+                            ref={el => dropdownTriggerRefs.current[`${course.courseCode}-questions`] = el}
+                          >
                             {formData[course.courseCode]?.questionsLabel || "Select Questions"}
                             <i className="fas fa-chevron-down"></i>
                           </div>
-                          {showDropdown.show && showDropdown.type === "questions" && showDropdown.courseCode === course.courseCode && (
-                            <div className={`${styles.dropdownOptions} ${styles.show}`}>
-                              {showDropdown.options.map((option) => (
-                                <div
-                                  key={option.value}
-                                  className={styles.dropdownOption}
-                                  onClick={() => handleOptionSelect(course.courseCode, option.value, option.label)}
-                                >
-                                  {option.label}
-                                </div>
-                              ))}
-                            </div>
-                          )}
                         </div>
                       </div>
                       
@@ -817,23 +762,14 @@ const handleDropdownClick = (courseCode, type) => {
                             Time (minutes)
                           </div>
                           <div className={styles.dropdownContainer}>
-                            <div className={styles.dropdownSelected} onClick={() => handleDropdownClick(course.courseCode, "time")}>
+                            <div 
+                              className={styles.dropdownSelected} 
+                              onClick={() => handleDropdownClick(course.courseCode, "time")}
+                              ref={el => dropdownTriggerRefs.current[`${course.courseCode}-time`] = el}
+                            >
                               {formData[course.courseCode]?.timeLabel || "Select Time"}
                               <i className="fas fa-chevron-down"></i>
                             </div>
-                            {showDropdown.show && showDropdown.type === "time" && showDropdown.courseCode === course.courseCode && (
-                              <div className={`${styles.dropdownOptions} ${styles.show}`}>
-                                {showDropdown.options.map((option) => (
-                                  <div
-                                    key={option.value}
-                                    className={styles.dropdownOption}
-                                    onClick={() => handleOptionSelect(course.courseCode, option.value, option.label)}
-                                  >
-                                    {option.label}
-                                  </div>
-                                ))}
-                              </div>
-                            )}
                           </div>
                         </div>
                       )}
@@ -846,7 +782,11 @@ const handleDropdownClick = (courseCode, type) => {
                           </span>
                           Topics
                         </div>
-                        <div className={styles.dropdownSelected} onClick={() => handleDropdownClick(course.courseCode, "topics")}>
+                        <div 
+                          className={styles.dropdownSelected} 
+                          onClick={() => handleDropdownClick(course.courseCode, "topics")}
+                          ref={el => dropdownTriggerRefs.current[`${course.courseCode}-topics`] = el}
+                        >
                           {formData[course.courseCode]?.topics === "all" || !formData[course.courseCode]?.topics ? "All Topics" : formData[course.courseCode].topics}
                           <i className="fas fa-chevron-down"></i>
                         </div>
@@ -859,6 +799,57 @@ const handleDropdownClick = (courseCode, type) => {
           ))}
         </div>
       </section>
+      
+      {/* Dropdown Portal - Renders outside the main component hierarchy */}
+      {openDropdown.courseCode && openDropdown.type && (
+        <Portal className={styles.dropdownPortal}>
+          <div 
+            className={`${styles.dropdownOptions} ${styles.show}`}
+            style={{
+              position: 'absolute',
+              top: `${dropdownPosition.top}px`,
+              left: `${dropdownPosition.left}px`,
+              width: `${dropdownPosition.width}px`,
+              zIndex: 1000
+            }}
+          >
+            {getDropdownOptions(openDropdown.courseCode, openDropdown.type).map((option) => {
+              if (openDropdown.type === "year") {
+                const progressData = studyProgress[openDropdown.courseCode]?.[option.value] || {
+                  percentage: 0,
+                  studiedCount: 0,
+                  totalQuestions: 0
+                };
+                
+                return (
+                  <div
+                    key={option.value}
+                    className={styles.dropdownOption}
+                    onClick={() => handleOptionSelect(openDropdown.courseCode, openDropdown.type, option.value, option.label)}
+                  >
+                    <span>{option.label}</span>
+                    {!isMockMode && (
+                      <div className={styles.progressIndicator}>
+                        <ProgressRing percentage={progressData.percentage} radius={12} stroke={2} />
+                      </div>
+                    )}
+                  </div>
+                );
+              } else {
+                return (
+                  <div
+                    key={option.value}
+                    className={styles.dropdownOption}
+                    onClick={() => handleOptionSelect(openDropdown.courseCode, openDropdown.type, option.value, option.label)}
+                  >
+                    {option.label}
+                  </div>
+                );
+              }
+            })}
+          </div>
+        </Portal>
+      )}
       
       {/* Topic Selection Popup */}
       {showTopicPopup && (

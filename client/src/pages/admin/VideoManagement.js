@@ -13,14 +13,18 @@ const VideoManagement = () => {
   const [selectedCourse, setSelectedCourse] = useState(null)
   const [selectedTopic, setSelectedTopic] = useState(null)
   const [editingItem, setEditingItem] = useState(null)
-  const [courseForm, setCourseForm] = useState({ title: "", description: "" })
+  const [courseForm, setCourseForm] = useState({ 
+    title: "", 
+    description: "",
+    isVisible: true 
+  })
   const [topicForm, setTopicForm] = useState({ title: "", description: "" })
   const [videoForm, setVideoForm] = useState({
     title: "",
     description: "",
     url: "",
   })
-
+  
   // Get authorization token
   const getAuthHeader = () => {
     const token = localStorage.getItem("token")
@@ -57,7 +61,7 @@ const VideoManagement = () => {
           headers: getAuthHeader(),
         })
       }
-      setCourseForm({ title: "", description: "" })
+      setCourseForm({ title: "", description: "", isVisible: true })
       setShowCourseModal(false)
       setEditingItem(null)
       loadCourses()
@@ -156,6 +160,19 @@ const VideoManagement = () => {
     }
   }
 
+  const toggleCourseVisibility = async (course) => {
+    try {
+      await axios.put(`/api/admin/videos/courses/${course._id}/visibility`, {}, {
+        headers: getAuthHeader(),
+      })
+      loadCourses()
+      showToast(`Course ${course.isVisible ? 'hidden' : 'shown'} successfully!`)
+    } catch (error) {
+      console.error("Failed to toggle course visibility:", error)
+      showToast(error.response?.data?.message || "Failed to toggle course visibility", "error")
+    }
+  }
+
   const refreshVideoMetadata = async (videoId) => {
     try {
       await axios.post(`/api/admin/videos/${videoId}/refresh-metadata`, {}, {
@@ -171,7 +188,11 @@ const VideoManagement = () => {
 
   const openEditCourse = (course) => {
     setEditingItem(course)
-    setCourseForm({ title: course.title, description: course.description })
+    setCourseForm({ 
+      title: course.title, 
+      description: course.description,
+      isVisible: course.isVisible
+    })
     setShowCourseModal(true)
   }
 
@@ -265,7 +286,13 @@ const VideoManagement = () => {
                 <div className={styles.courseInfo}>
                   <h3>{course.title}</h3>
                   <p>{course.description}</p>
-                  <span className={styles.itemCount}>{course.topics?.length || 0} topics</span>
+                  <div className={styles.courseMeta}>
+                    <span className={styles.itemCount}>{course.topics?.length || 0} topics</span>
+                    <span className={`${styles.visibilityBadge} ${course.isVisible ? styles.visible : styles.hidden}`}>
+                      <i className={`fas ${course.isVisible ? "fa-eye" : "fa-eye-slash"}`}></i>
+                      {course.isVisible ? "Visible" : "Hidden"}
+                    </span>
+                  </div>
                 </div>
                 <div className={styles.courseActions}>
                   <button
@@ -277,6 +304,13 @@ const VideoManagement = () => {
                   >
                     <i className="fas fa-plus"></i>
                     Add Topic
+                  </button>
+                  <button 
+                    className={`${styles.btn} ${styles.btnSm} ${course.isVisible ? styles.btnSuccess : styles.btnWarning}`}
+                    onClick={() => toggleCourseVisibility(course)}
+                    title={course.isVisible ? "Hide from users" : "Show to users"}
+                  >
+                    <i className={`fas ${course.isVisible ? "fa-eye-slash" : "fa-eye"}`}></i>
                   </button>
                   <button className={`${styles.btn} ${styles.btnSm} ${styles.btnOutline}`} onClick={() => openEditCourse(course)}>
                     <i className="fas fa-edit"></i>
@@ -401,7 +435,7 @@ const VideoManagement = () => {
             onClick={() => {
               setShowCourseModal(false)
               setEditingItem(null)
-              setCourseForm({ title: "", description: "" })
+              setCourseForm({ title: "", description: "", isVisible: true })
             }}
           ></div>
           <div className={styles.modalContent}>
@@ -412,7 +446,7 @@ const VideoManagement = () => {
                 onClick={() => {
                   setShowCourseModal(false)
                   setEditingItem(null)
-                  setCourseForm({ title: "", description: "" })
+                  setCourseForm({ title: "", description: "", isVisible: true })
                 }}
               >
                 <i className="fas fa-times"></i>
@@ -435,6 +469,16 @@ const VideoManagement = () => {
                   onChange={(e) => setCourseForm({ ...courseForm, description: e.target.value })}
                   rows="3"
                 />
+              </div>
+              <div className={styles.formGroup}>
+                <label className={styles.checkboxLabel}>
+                  <input
+                    type="checkbox"
+                    checked={courseForm.isVisible}
+                    onChange={(e) => setCourseForm({ ...courseForm, isVisible: e.target.checked })}
+                  />
+                  <span>Visible to users</span>
+                </label>
               </div>
               <div className={styles.formActions}>
                 <button type="submit" className={`${styles.btn} ${styles.btnPrimary}`}>

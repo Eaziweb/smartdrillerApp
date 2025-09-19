@@ -40,9 +40,7 @@ const Correction = () => {
         }
         
         setKatexLoaded(true)
-        console.log("KaTeX loaded successfully")
       } catch (error) {
-        console.error("Failed to load KaTeX:", error)
       }
     }
     

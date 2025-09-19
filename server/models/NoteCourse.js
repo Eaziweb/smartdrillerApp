@@ -1,5 +1,5 @@
+// models/NoteCourse.js
 const mongoose = require("mongoose")
-
 const noteCourseSchema = new mongoose.Schema({
   title: {
     type: String,
@@ -16,6 +16,10 @@ const noteCourseSchema = new mongoose.Schema({
       ref: "Note",
     },
   ],
+  isVisible: {
+    type: Boolean,
+    default: true,
+  },
   createdAt: {
     type: Date,
     default: Date.now,
