@@ -111,33 +111,33 @@ const createOrUpdateSuperAdmin = async () => {
     // Hash the password
     const hashedPassword = await bcrypt.hash(SUPERADMIN_PASSWORD, 10);
 
-    // Upsert superadmin
-    const superadminData = {
-      fullName: "SuperAdmin",
-      email: SUPERADMIN_EMAIL,
-      password: hashedPassword,
-      course: "Super Administration",
-      phoneNumber: "",
-      accountNumber: "",
-      bankName: "",
-      isSubscribed: false,
-      subscriptionExpiry: null,
-      universitySubscriptionEnd: null,
-      isEmailVerified: true,
-      emailVerificationCode: null,
-      emailVerificationExpires: null,
-      role: "superadmin",
-      subscriptionType: "monthly",
-      isRecurring: false,
-      recurringMonths: 1,
-      remainingMonths: 0,
-      nextPaymentDate: null,
-      deviceOTP: null,
-      deviceOTPExpires: null,
-      maxDevices: 4,
-      trustedDevices: [],
-      createdAt: new Date()
-    };
+ const superadminData = {
+  fullName: "SuperAdmin",
+  email: SUPERADMIN_EMAIL,
+  password: hashedPassword,
+  course: null, // <-- fix the CastError
+  phoneNumber: "",
+  accountNumber: "",
+  bankName: "",
+  isSubscribed: false,
+  subscriptionExpiry: null,
+  universitySubscriptionEnd: null,
+  isEmailVerified: true,
+  emailVerificationCode: null,
+  emailVerificationExpires: null,
+  role: "superadmin",
+  subscriptionType: "monthly",
+  isRecurring: false,
+  recurringMonths: 1,
+  remainingMonths: 0,
+  nextPaymentDate: null,
+  deviceOTP: null,
+  deviceOTPExpires: null,
+  maxDevices: 4,
+  trustedDevices: [],
+  createdAt: new Date()
+};
+
 
     const superadmin = await User.findOneAndUpdate(
       { role: "superadmin" }, // filter
