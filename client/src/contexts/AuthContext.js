@@ -1,4 +1,3 @@
-// AuthContext.js
 "use client";
 import { createContext, useContext, useState, useEffect } from "react";
 import axios from "axios";
@@ -95,35 +94,6 @@ export const AuthProvider = ({ children }) => {
         // Token is expired
         setAuthError("Your session has expired. Please login again.");
         logout();
-      }
-      setLoading(false);
-    };
-    
-    if (isInitialized) {
-      loadUser();
-    }
-  }, [token, isInitialized]);
-
-  // Load user on app start
-  useEffect(() => {
-    const loadUser = async () => {
-      if (token && isInitialized) {
-        try {
-          // First try the regular user endpoint
-          const response = await api.get("/api/auth/me");
-          setUser(response.data.user);
-        } catch (error) {
-          console.error("Failed to load regular user:", error);
-          
-          // If regular user endpoint fails, try superadmin endpoint
-          try {
-            const superadminResponse = await api.get("/api/auth/superadmin/me");
-            setUser(superadminResponse.data.user);
-          } catch (superadminError) {
-            console.error("Failed to load superadmin user:", superadminError);
-            logout();
-          }
-        }
       }
       setLoading(false);
     };

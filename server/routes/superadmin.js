@@ -1,4 +1,3 @@
-// routes/superadmin.js
 const express = require("express")
 const jwt = require("jsonwebtoken")
 const User = require("../models/User")
@@ -9,7 +8,6 @@ const bcrypt = require("bcryptjs")
 const router = express.Router()
 
 // SuperAdmin Login
-// routes/superadmin.js
 router.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body
@@ -24,32 +22,34 @@ router.post("/login", async (req, res) => {
     
     if (!superadmin) {
       // Find the superadmin course
-      const superadminCourse = await CourseofStudy.findOne({ name: "Super Administration" });
+      const superadminCourse = await CourseofStudy.findOne({ name: "SuperAdministration" });
       
       if (!superadminCourse) {
         return res.status(500).json({ message: "Superadmin course not found" });
       }
       
       // Create superadmin with course
+      const hashedPassword = await bcrypt.hash(password, 10);
       superadmin = new User({
         fullName: "SuperAdmin",
         email,
-        password,
+        password: hashedPassword,
         course: superadminCourse._id,
         role: "superadmin",
         isEmailVerified: true,
       })
       await superadmin.save()
       console.log("SuperAdmin user created")
-    }
-    
-    // Check password
-    const isMatch = await superadmin.comparePassword(password)
-    if (!isMatch) {
-      // If password doesn't match, update it with the correct one
-      superadmin.password = password
-      await superadmin.save()
-      console.log("SuperAdmin password updated")
+    } else {
+      // Check password
+      const isMatch = await superadmin.comparePassword(password)
+      if (!isMatch) {
+        // If password doesn't match, update it with the correct one
+        const hashedPassword = await bcrypt.hash(password, 10);
+        superadmin.password = hashedPassword;
+        await superadmin.save()
+        console.log("SuperAdmin password updated")
+      }
     }
     
     const token = jwt.sign({ userId: superadmin._id }, process.env.JWT_SECRET, { expiresIn: "7d" })
@@ -148,7 +148,5 @@ router.get("/revenue", async (req, res) => {
     res.status(500).json({ message: "Server error" })
   }
 });
-
-// routes/auth.js
 
 module.exports = router

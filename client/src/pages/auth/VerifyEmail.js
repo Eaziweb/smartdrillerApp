@@ -127,7 +127,7 @@ const VerifyEmail = () => {
               <path d="m15 18-6-6 6-6" />
             </svg>
           </Link>
-          <h1 className={styles.appLogo}>SmartDrill</h1>
+          <h1 className={styles.appLogo}>SmartDriller</h1>
         </div>
         
         <div className={`${styles.formContainer} ${styles.verifyForm}`}>

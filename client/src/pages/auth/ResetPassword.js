@@ -125,7 +125,7 @@ const ResetPassword = () => {
             <Link to="/login" className={styles.backBtn}>
               <i className="fas fa-arrow-left"></i>
             </Link>
-            <h1 className={styles.appLogo}>SmartDrill</h1>
+            <h1 className={styles.appLogo}>SmartDriller</h1>
           </div>
           
           <div className={styles.successForm}>
@@ -153,7 +153,7 @@ const ResetPassword = () => {
             <Link to="/login" className={styles.backBtn}>
               <i className="fas fa-arrow-left"></i>
             </Link>
-            <h1 className={styles.appLogo}>SmartDrill</h1>
+            <h1 className={styles.appLogo}>SmartDriller</h1>
           </div>
           
           <div className={styles.resetForm}>
@@ -178,7 +178,7 @@ const ResetPassword = () => {
             <Link to="/login" className={styles.backBtn}>
               <i className="fas fa-arrow-left"></i>
             </Link>
-            <h1 className={styles.appLogo}>SmartDrill</h1>
+            <h1 className={styles.appLogo}>SmartDriller</h1>
           </div>
           
           <div className={styles.resetForm}>
@@ -199,7 +199,7 @@ const ResetPassword = () => {
           <Link to="/login" className={styles.backBtn}>
             <i className="fas fa-arrow-left"></i>
           </Link>
-          <h1 className={styles.appLogo}>SmartDrill</h1>
+          <h1 className={styles.appLogo}>SmartDriller</h1>
         </div>
         
         <div className={styles.resetForm}>

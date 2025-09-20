@@ -178,36 +178,14 @@ const defaultCourses = {
     "Commercial Law",
     "International Law & Jurisprudence",
   ],
+  Administration: [
+    "Administration",
+    "Super-Administration"
+
+  ]
 };
 
-// Helper function to populate courses in the database
-const populateCourses = async () => {
-  try {
-    // Check if courses already exist in the database
-    const courseCount = await CourseofStudy.countDocuments();
-    
-    if (courseCount === 0) {
-      // Prepare courses for insertion
-      const coursesToInsert = [];
-      
-      for (const category in defaultCourses) {
-        defaultCourses[category].forEach((name) => {
-          coursesToInsert.push({ name, category });
-        });
-      }
-      
-      // Insert all courses
-      await CourseofStudy.insertMany(coursesToInsert);
-      console.log("Courses populated successfully");
-      return { success: true, message: "Courses populated successfully" };
-    } else {
-      return { success: false, message: "Courses already exist in the database" };
-    }
-  } catch (error) {
-    console.error("Error populating courses:", error);
-    return { success: false, message: "Failed to populate courses" };
-  }
-};
+
 
 // 📌 Route: get all courses (public)
 router.get("/", async (req, res) => {

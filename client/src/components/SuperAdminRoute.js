@@ -4,7 +4,7 @@ import { Navigate } from "react-router-dom"
 import { useEffect, useState } from "react"
 
 const SuperAdminRoute = ({ children }) => {
-  const { user, loading } = useAuth()
+  const { user, loading, isInitialized } = useAuth()
   const [isChecking, setIsChecking] = useState(true)
 
   useEffect(() => {
@@ -16,7 +16,7 @@ const SuperAdminRoute = ({ children }) => {
     return () => clearTimeout(timer)
   }, [])
 
-  if (loading || isChecking) {
+  if (loading || isChecking || !isInitialized) {
     return (
       <div className="loading">
         <i className="fas fa-spinner fa-spin"></i>

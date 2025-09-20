@@ -6,7 +6,7 @@ const Features = () => {
     <section className={styles.features} id="features">
       <div className="container">
         <div className={styles.sectionHeader}>
-          <h2 className={styles.sectionTitle}>Why Choose SmartDrill?</h2>
+          <h2 className={styles.sectionTitle}>Why Choose SmartDriller?</h2>
           <p className={styles.sectionSubtitle}>Everything you need to excel in your studies</p>
         </div>
         

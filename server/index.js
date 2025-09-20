@@ -7,7 +7,7 @@ const cookieParser = require("cookie-parser");
 const bcrypt = require("bcryptjs");
 const User = require("./models/User");
 const CourseofStudy = require("./models/CourseofStudy");
-
+const { initializeData } = require("./utils/initialData");
 const app = express();
 
 // ----------------------
@@ -38,8 +38,7 @@ app.use(cookieParser());
 mongoose.connect(process.env.MONGODB_URI)
   .then(() => {
     console.log("✅ MongoDB connected");
-    // Create superadmin after successful connection
-    createOrUpdateSuperAdmin();
+    initializeData();
   })
   .catch(err => console.error("❌ MongoDB connection error:", err));
 
@@ -95,85 +94,6 @@ app.get("/", (req, res) => {
   res.json({ status: "Backend running 🚀", time: new Date() });
 });
 
-// ----------------------
-// Superadmin Creation Function
-// ----------------------
-const createOrUpdateSuperAdmin = async () => {
-  try {
-    const { SUPERADMIN_EMAIL, SUPERADMIN_PASSWORD } = process.env;
-
-    if (!SUPERADMIN_EMAIL || !SUPERADMIN_PASSWORD) {
-      console.log("⚠️ Superadmin credentials not set in environment variables");
-      return;
-    }
-
-    // Check if superadmin already exists
-    let superadmin = await User.findOne({ role: "superadmin" });
-
-    if (superadmin) {
-      // Update existing superadmin password if needed
-      const isMatch = await bcrypt.compare(SUPERADMIN_PASSWORD, superadmin.password);
-      if (!isMatch) {
-        const hashedPassword = await bcrypt.hash(SUPERADMIN_PASSWORD, 10);
-        superadmin.password = hashedPassword;
-        await superadmin.save();
-        console.log("✅ Superadmin password updated");
-      } else {
-        console.log("✅ Superadmin already exists with correct password");
-      }
-      return;
-    }
-
-    // Create a special course for superadmin if it doesn't exist
-    let superadminCourse = await CourseofStudy.findOne({ name: "Super Administration" });
-    if (!superadminCourse) {
-      superadminCourse = new CourseofStudy({
-        name: "Super Administration",
-        category: "Administration"
-      });
-      await superadminCourse.save();
-      console.log("✅ Superadmin course created");
-    }
-
-    // Hash the password
-    const hashedPassword = await bcrypt.hash(SUPERADMIN_PASSWORD, 10);
-
-    // Create superadmin with all required fields
-    const superadminData = {
-      fullName: "SuperAdmin",
-      email: SUPERADMIN_EMAIL,
-      password: hashedPassword,
-      course: superadminCourse._id,
-      university: null, // Superadmin doesn't need a university
-      phoneNumber: "",
-      accountNumber: "",
-      bankName: "",
-      isSubscribed: false,
-      subscriptionExpiry: null,
-      universitySubscriptionEnd: null,
-      isEmailVerified: true,
-      emailVerificationCode: null,
-      emailVerificationExpires: null,
-      role: "superadmin",
-      subscriptionType: "monthly",
-      isRecurring: false,
-      recurringMonths: 1,
-      remainingMonths: 0,
-      nextPaymentDate: null,
-      deviceOTP: null,
-      deviceOTPExpires: null,
-      maxDevices: 4,
-      trustedDevices: []
-    };
-
-    superadmin = new User(superadminData);
-    await superadmin.save();
-    console.log("✅ Superadmin created successfully:", superadmin.email);
-
-  } catch (error) {
-    console.error("❌ Error creating/updating superadmin:", error);
-  }
-};
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {

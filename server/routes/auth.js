@@ -554,12 +554,9 @@ router.get("/verify-reset-token/:token", async (req, res) => {
   }
 });
 
-// Get user profile
-// routes/auth.js
-// Add this endpoint for superadmin users
 router.get("/superadmin/me", auth, async (req, res) => {
   try {
-    // For superadmin, we don't need to populate course and university
+    
     const user = await User.findById(req.user._id).select("-password");
 
     res.json({
@@ -569,11 +566,6 @@ router.get("/superadmin/me", auth, async (req, res) => {
         email: user.email,
         role: user.role,
         isSubscribed: user.isSubscribed,
-        subscriptionExpiry: user.subscriptionExpiry,
-        subscriptionType: user.subscriptionType,
-        isRecurring: user.isRecurring,
-        remainingMonths: user.remainingMonths,
-        nextPaymentDate: user.nextPaymentDate,
       },
     });
   } catch (error) {
@@ -582,13 +574,11 @@ router.get("/superadmin/me", auth, async (req, res) => {
   }
 });
 
-// Update the regular /me endpoint to handle superadmin differently
 router.get("/me", auth, async (req, res) => {
   try {
-    // Get the user without population first
+
     const user = await User.findById(req.user._id).select("-password");
 
-    // If the user is a superadmin, we don't need to populate course and university
     if (user.role === "superadmin") {
       return res.json({
         user: {
@@ -606,7 +596,6 @@ router.get("/me", auth, async (req, res) => {
       });
     }
 
-    // For regular users and admins, populate course and university
     const populatedUser = await User.findById(req.user._id)
       .populate('university')
       .populate('course')

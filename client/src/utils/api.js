@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: process.env.REACT_APP_API_URL || "https://smartdrillerapp.onrender.com/api",
+  baseURL: process.env.REACT_APP_API_URL || "https://smartdrillerapp.onrender.com",
   withCredentials: true,
   timeout: 10000, // 10 second timeout
 });
