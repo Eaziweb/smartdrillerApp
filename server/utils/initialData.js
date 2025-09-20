@@ -181,43 +181,34 @@ const defaultCourses = {
   Administration: [
     "Administration",
     "SuperAdministration"
-
   ]
 };
-// Populate courses in the database
 const populateCourses = async () => {
   try {
-    const courseCount = await CourseofStudy.countDocuments();
-    
-    if (courseCount === 0) {
-      console.log("🔄 Populating courses...");
-      
-      // Use bulkWrite with upsert to handle duplicates
-      const bulkOps = [];
-      
-      for (const category in defaultCourses) {
-        defaultCourses[category].forEach((name) => {
-          bulkOps.push({
-            updateOne: {
-              filter: { name, category },
-              update: { $set: { name, category } },
-              upsert: true
-            }
-          });
+    console.log("🔄 Ensuring courses exist...");
+
+    const bulkOps = [];
+    for (const category in defaultCourses) {
+      defaultCourses[category].forEach((name) => {
+        bulkOps.push({
+          updateOne: {
+            filter: { name, category },
+            update: { $set: { name, category } },
+            upsert: true
+          }
         });
-      }
-      
-      if (bulkOps.length > 0) {
-        await CourseofStudy.bulkWrite(bulkOps);
-        console.log("✅ Courses populated successfully");
-      }
-    } else {
-      console.log("ℹ️ Courses already exist in the database");
+      });
+    }
+
+    if (bulkOps.length > 0) {
+      await CourseofStudy.bulkWrite(bulkOps);
+      console.log("✅ Courses ensured in database");
     }
   } catch (error) {
     console.error("❌ Error populating courses:", error);
   }
 };
+
 
 // Fetch and populate Nigerian universities
 const populateUniversities = async () => {
