@@ -104,7 +104,24 @@ mongoose.connect(process.env.MONGODB_URI)
     console.log("✅ MongoDB connected");
 
     await fixDuplicates();   // run cleanup once
-    await initializeData();  // seed data if needed
+    
+    // Ensure SuperAdministration course exists
+    const CourseofStudy = require("./models/CourseofStudy");
+    let superAdminCourse = await CourseofStudy.findOne({ 
+      name: "SuperAdministration", 
+      category: "Administration" 
+    });
+    
+    if (!superAdminCourse) {
+      console.log("Creating SuperAdministration course...");
+      superAdminCourse = new CourseofStudy({
+        name: "SuperAdministration",
+        category: "Administration"
+      });
+      await superAdminCourse.save();
+      console.log("✅ SuperAdministration course created");
+    } 
+     await initializeData();  
   })
   .catch(err => console.error("❌ MongoDB connection error:", err));
 

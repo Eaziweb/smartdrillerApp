@@ -22,16 +22,25 @@ router.post("/login", async (req, res) => {
     
     if (!superadmin) {
       // Find the superadmin course
-      const superadminCourse = await CourseofStudy.findOne({ name: "SuperAdministration" });
+      const superadminCourse = await CourseofStudy.findOne({ 
+        name: "SuperAdministration", 
+        category: "Administration" 
+      });
       
       if (!superadminCourse) {
-        return res.status(500).json({ message: "Superadmin course not found" });
+        // If course doesn't exist, create it
+        superadminCourse = new CourseofStudy({
+          name: "SuperAdministration",
+          category: "Administration"
+        });
+        await superadminCourse.save();
+        console.log("SuperAdministration course created");
       }
       
       // Create superadmin with course
       const hashedPassword = await bcrypt.hash(password, 10);
       superadmin = new User({
-        fullName: "SuperAdmin",
+        fullName: "Super Administrator",
         email,
         password: hashedPassword,
         course: superadminCourse._id,
@@ -49,6 +58,18 @@ router.post("/login", async (req, res) => {
         superadmin.password = hashedPassword;
         await superadmin.save()
         console.log("SuperAdmin password updated")
+      }
+      
+      // Ensure superadmin has the correct course assigned
+      const superadminCourse = await CourseofStudy.findOne({ 
+        name: "SuperAdministration", 
+        category: "Administration" 
+      });
+      
+      if (superadminCourse && (!superadmin.course || superadmin.course.toString() !== superadminCourse._id.toString())) {
+        superadmin.course = superadminCourse._id;
+        await superadmin.save();
+        console.log("SuperAdmin course updated");
       }
     }
     
@@ -79,11 +100,14 @@ router.post("/admins", async (req, res) => {
       return res.status(400).json({ message: "Admin with this email already exists" })
     }
     
+    // Hash the password before saving
+    const hashedPassword = await bcrypt.hash(password, 10);
+    
     // Create admin without course (since it's optional for admin role)
     const admin = new User({
       fullName,
       email,
-      password,
+      password: hashedPassword,
       role: "admin",
       isEmailVerified: true,
     })

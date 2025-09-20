@@ -104,7 +104,6 @@ const defaultCourses = {
   ],
   "Science & Technology": [
     "Architecture",
-    "Biochemistry",
     "Bio-Informatics",
     "Biology",
     "Botany",
@@ -181,15 +180,36 @@ const defaultCourses = {
   Administration: [
     "Administration",
     "SuperAdministration"
-  ]
+  ],
 };
 const populateCourses = async () => {
   try {
     console.log("🔄 Ensuring courses exist...");
 
+    // First, check if SuperAdministration course exists
+    const superAdminCourse = await CourseofStudy.findOne({ 
+      name: "SuperAdministration", 
+      category: "Administration" 
+    });
+    
+    if (!superAdminCourse) {
+      console.log("Creating SuperAdministration course...");
+      await CourseofStudy.create({
+        name: "SuperAdministration",
+        category: "Administration"
+      });
+      console.log("✅ SuperAdministration course created");
+    }
+
+    // Process all other courses
     const bulkOps = [];
     for (const category in defaultCourses) {
       defaultCourses[category].forEach((name) => {
+        // Skip SuperAdministration since we already handled it
+        if (name === "SuperAdministration" && category === "Administration") {
+          return;
+        }
+        
         bulkOps.push({
           updateOne: {
             filter: { name, category },
@@ -209,7 +229,32 @@ const populateCourses = async () => {
   }
 };
 
-
+const ensureSuperAdminCourse = async () => {
+  try {
+    console.log("🔄 Ensuring SuperAdministration course exists...");
+    
+    let superAdminCourse = await CourseofStudy.findOne({ 
+      name: "SuperAdministration", 
+      category: "Administration" 
+    });
+    
+    if (!superAdminCourse) {
+      superAdminCourse = new CourseofStudy({
+        name: "SuperAdministration",
+        category: "Administration"
+      });
+      await superAdminCourse.save();
+      console.log("✅ SuperAdministration course created");
+    } else {
+      console.log("ℹ️ SuperAdministration course already exists");
+    }
+    
+    return superAdminCourse;
+  } catch (error) {
+    console.error("❌ Error ensuring SuperAdministration course:", error);
+    return null;
+  }
+};
 // Fetch and populate Nigerian universities
 const populateUniversities = async () => {
   try {
@@ -243,17 +288,24 @@ const populateUniversities = async () => {
 };
 
 // Create or update superadmin user
+// Create or update superadmin user
 const createOrUpdateSuperAdmin = async () => {
   try {
     // Find the SuperAdministration course
-    const superAdminCourse = await CourseofStudy.findOne({ 
+    let superAdminCourse = await CourseofStudy.findOne({ 
       name: "SuperAdministration", 
       category: "Administration" 
     });
     
+    // If course doesn't exist, create it
     if (!superAdminCourse) {
-      console.error("❌ SuperAdministration course not found");
-      return;
+      console.log("Creating SuperAdministration course...");
+      superAdminCourse = new CourseofStudy({
+        name: "SuperAdministration",
+        category: "Administration"
+      });
+      await superAdminCourse.save();
+      console.log("✅ SuperAdministration course created");
     }
     
     // Check if superadmin exists
@@ -279,12 +331,17 @@ const createOrUpdateSuperAdmin = async () => {
       console.log("✅ Superadmin created successfully");
     } else {
       // Update existing superadmin's course if needed
-      if (superadmin.course.toString() !== superAdminCourse._id.toString()) {
+      if (superadmin.course && superadmin.course.toString() !== superAdminCourse._id.toString()) {
         superadmin.course = superAdminCourse._id;
         await superadmin.save();
         console.log("✅ Superadmin course updated");
+      } else if (!superadmin.course) {
+        // If superadmin exists but has no course assigned
+        superadmin.course = superAdminCourse._id;
+        await superadmin.save();
+        console.log("✅ Superadmin course assigned");
       } else {
-        console.log("ℹ️ Superadmin already exists");
+        console.log("ℹ️ Superadmin already exists with correct course");
       }
     }
   } catch (error) {
@@ -295,9 +352,19 @@ const createOrUpdateSuperAdmin = async () => {
 // Initialize all data
 const initializeData = async () => {
   console.log("🚀 Initializing database data...");
+  
+  // First ensure SuperAdministration course exists
+  await ensureSuperAdminCourse();
+  
+  // Then populate all other courses
   await populateCourses();
+  
+  // Populate universities
   await populateUniversities();
+  
+  // Finally create/update superadmin
   await createOrUpdateSuperAdmin();
+  
   console.log("✅ Database initialization completed");
 };
 
