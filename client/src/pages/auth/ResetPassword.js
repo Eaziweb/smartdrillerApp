@@ -1,9 +1,8 @@
 "use client"
 import { useState, useEffect } from "react"
 import { Link, useParams, useNavigate } from "react-router-dom"
-import axios from "axios"
 import styles from "../../styles/auth.module.css"
-
+import api from "../../utils/api";
 const ResetPassword = () => {
   const [formData, setFormData] = useState({
     password: "",
@@ -52,7 +51,7 @@ const ResetPassword = () => {
         return
       }
       try {
-        const response = await axios.get(`/api/auth/verify-reset-token/${token}`)
+        const response = await api.get(`/api/auth/verify-reset-token/${token}`)
         setTokenValid(response.data.valid)
         if (!response.data.valid) {
           setError(response.data.message)
@@ -94,7 +93,7 @@ const ResetPassword = () => {
     setError("")
     
     try {
-      const response = await axios.post(`/api/auth/reset-password/${token}`, {
+      const response = await api.post(`/api/auth/reset-password/${token}`, {
         password: formData.password,
       })
       

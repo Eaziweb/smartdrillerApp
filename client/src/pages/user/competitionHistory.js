@@ -2,8 +2,8 @@
 import { useState, useEffect } from "react"
 import { Link, useNavigate } from "react-router-dom"
 import { useAuth } from "../../contexts/AuthContext"
-import axios from "axios"
 import styles from "../../styles/EndedCompetitions.module.css"
+import api from "../../utils/api";
 
 const EndedCompetitions = () => {
   const { user } = useAuth()
@@ -17,7 +17,7 @@ const EndedCompetitions = () => {
 
   const fetchCompetitions = async () => {
     try {
-      const response = await axios.get("/api/competitions")
+      const response = await api.get("/api/competitions")
       // Filter competitions to only include ended ones
       const endedCompetitions = response.data.filter(comp => comp.status === "ended")
       setCompetitions(endedCompetitions)

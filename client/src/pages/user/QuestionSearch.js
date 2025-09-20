@@ -3,6 +3,7 @@ import { useState, useEffect, useRef } from "react"
 import { useNavigate } from "react-router-dom"
 import { useAuth } from "../../contexts/AuthContext"
 import styles from "../../styles/QuestionSearch.module.css"
+import api from "../../utils/api";
 
 // Import KaTeX CSS
 import 'katex/dist/katex.min.css'
@@ -41,6 +42,7 @@ const QuestionSearch = () => {
         
         setKatexLoaded(true)
       } catch (error) {
+        console.error("Error loading KaTeX:", error)
       }
     }
     
@@ -116,23 +118,25 @@ const QuestionSearch = () => {
 
   const fetchCourses = async () => {
     try {
-      const response = await fetch("/api/questions/course-years", {
+      const token = localStorage.getItem("token")
+      const response = await api.get("/questions/course-years", {
         headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
+          Authorization: `Bearer ${token}`,
         },
       })
-      const data = await response.json()
+      
+      const data = response.data
       
       // Transform the data to include course names
       const coursesWithNames = await Promise.all(
         Object.keys(data).map(async (courseCode) => {
           try {
-            const courseResponse = await fetch(`/api/courses/${courseCode}`, {
+            const courseResponse = await api.get(`/courses/${courseCode}`, {
               headers: {
-                Authorization: `Bearer ${localStorage.getItem("token")}`,
+                Authorization: `Bearer ${token}`,
               },
             })
-            const courseData = await courseResponse.json()
+            const courseData = courseResponse.data
             return {
               code: courseCode,
               name: courseData.courseName || courseCode.toUpperCase(),
@@ -168,15 +172,17 @@ const QuestionSearch = () => {
     setLoading(true)
     setError("")
     try {
-      const response = await fetch(
-        `/api/questions/search?q=${encodeURIComponent(searchQuery)}&course=${selectedCourse}&searchType=${searchType}&page=${page}&limit=10`,
+      const token = localStorage.getItem("token")
+      const response = await api.get(
+        `/questions/search?q=${encodeURIComponent(searchQuery)}&course=${selectedCourse}&searchType=${searchType}&page=${page}&limit=10`,
         {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
+            Authorization: `Bearer ${token}`,
           },
-        },
+        }
       )
-      const data = await response.json()
+      
+      const data = response.data
       if (data.success) {
         setQuestions(data.questions)
         setPagination(data.pagination)
@@ -187,7 +193,7 @@ const QuestionSearch = () => {
       }
     } catch (error) {
       console.error("Error searching questions:", error)
-      setError("Failed to search questions")
+      setError(error.response?.data?.message || "Failed to search questions")
     } finally {
       setLoading(false)
     }

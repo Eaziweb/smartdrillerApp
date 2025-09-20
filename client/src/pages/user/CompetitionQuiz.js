@@ -2,10 +2,11 @@
 import { useState, useEffect, useRef } from "react"
 import { useNavigate } from "react-router-dom"
 import { useAuth } from "../../contexts/AuthContext"
-import axios from "axios"
 import styles from "../../styles/CompetitionQuiz.module.css"
 // Import KaTeX CSS
 import 'katex/dist/katex.min.css'
+import api from "../../utils/api";
+
 
 const CompetitionQuiz = () => {
   const { user } = useAuth()
@@ -307,7 +308,7 @@ const CompetitionQuiz = () => {
     setSubmittingReport(true)
     try {
       const currentQuestion = getCurrentQuestion()
-      await axios.post("/api/reports/submit", {
+      await api.post("/api/reports/submit", {
         questionId: currentQuestion._id,
         description: reportDescription,
       })
@@ -354,7 +355,7 @@ const CompetitionQuiz = () => {
         timeUsed: Math.max(timeUsed, 0),
         totalTime: competitionData.totalTime,
       }
-      const response = await axios.post(`/api/competitions/${competitionData.competitionId}/submit`, submissionData)
+      const response = await api.post(`/api/competitions/${competitionData.competitionId}/submit`, submissionData)
       if (response.data.submission) {
         localStorage.setItem("competitionResult", JSON.stringify(response.data.submission))
         const progressKey = `competition_progress_${competitionData.competitionId}`

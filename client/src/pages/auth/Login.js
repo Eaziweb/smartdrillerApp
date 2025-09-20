@@ -170,15 +170,7 @@ const Login = () => {
                   Sign up
                 </Link>
               </p>
-              <p>
-                <Link to="/admin/login" className={styles.link}>
-                  Admin Login
-                </Link>
-                {" | "}
-                <Link to="/superadmin/login" className={styles.link}>
-                  SuperAdmin Login
-                </Link>
-              </p>
+            
             </div>
           </div>
         ) : (

@@ -3,8 +3,8 @@
 import { useState, useEffect } from "react"
 import { useParams, Link } from "react-router-dom"
 import { useAuth } from "../../contexts/AuthContext"
-import axios from "axios"
 import styles from "../../styles/NoteReader.module.css"
+import api from "../../utils/api";
 
 const NoteReader = () => {
   const { noteId } = useParams()
@@ -72,7 +72,7 @@ const NoteReader = () => {
 
   const loadNote = async () => {
     try {
-      const response = await axios.get(`/api/notes/${noteId}`, {
+      const response = await api.get(`/api/notes/${noteId}`, {
         headers: getAuthHeaders()
       })
       setNote(response.data)
@@ -91,7 +91,7 @@ const NoteReader = () => {
   const checkCompletion = async () => {
     setProgressLoading(true)
     try {
-      const response = await axios.get("/api/notes/progress", {
+      const response = await api.get("/api/notes/progress", {
         headers: getAuthHeaders()
       })
       // Convert both to strings for comparison
@@ -106,7 +106,7 @@ const NoteReader = () => {
 
   const markAsCompleted = async () => {
     try {
-      await axios.post(
+      await api.post(
         `/api/notes/${noteId}/complete`,
         {},
         {

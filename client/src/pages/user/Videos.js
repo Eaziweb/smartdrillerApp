@@ -1,7 +1,7 @@
 "use client"
 import { useState, useEffect } from "react"
 import { Link } from "react-router-dom"
-import axios from "axios"
+import api from "../../utils/api";
 import styles from "../../styles/Videos.module.css"
 
 const Videos = () => {
@@ -28,7 +28,7 @@ const Videos = () => {
     setLoading(true)
     setError(null)
     try {
-      const response = await axios.get("/api/videos/courses", {
+      const response = await api.get("/api/videos/courses", {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       })
       setCourses(response.data)
@@ -53,7 +53,7 @@ const Videos = () => {
     setOpenTopic(topicId)
     // Lazy load videos for this topic
     try {
-      const response = await axios.get(`/api/videos/topic/${topicId}`, {
+      const response = await api.get(`/api/videos/topic/${topicId}`, {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       })
       setCourses((prevCourses) =>

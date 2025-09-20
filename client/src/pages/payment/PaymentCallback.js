@@ -2,8 +2,8 @@
 import { useEffect, useState } from "react"
 import { useNavigate, useSearchParams } from "react-router-dom"
 import { useAuth } from "../../contexts/AuthContext"
-import axios from "axios"
 import styles from "../../styles/payment.module.css"
+import api from "../../utils/api";
 
 const PaymentCallback = () => {
   const [searchParams] = useSearchParams()
@@ -35,7 +35,7 @@ const PaymentCallback = () => {
         return
       }
 
-      const response = await axios.post(`/api/payments/verify/${txRef}`)
+      const response = await api.post(`/api/payments/verify/${txRef}`)
 
       if (response.data.status === "success") {
         setStatus("success")

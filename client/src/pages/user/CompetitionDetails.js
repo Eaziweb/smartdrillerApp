@@ -2,8 +2,8 @@
 import { useState, useEffect } from "react"
 import { Link, useParams, useNavigate } from "react-router-dom"
 import { useAuth } from "../../contexts/AuthContext"
-import axios from "axios"
 import styles from "../../styles/CompetitionDetails.module.css"
+import api from "../../utils/api";
 
 const CompetitionDetails = () => {
   const { id } = useParams()
@@ -24,7 +24,7 @@ const CompetitionDetails = () => {
 
   const fetchCompetitionDetails = async () => {
     try {
-      const response = await axios.get(`/api/competitions/${id}`)
+      const response = await api.get(`/api/competitions/${id}`)
       setCompetition(response.data)
     } catch (error) {
       console.error("Error fetching competition:", error)
@@ -38,7 +38,7 @@ const CompetitionDetails = () => {
 
   const checkParticipation = async () => {
     try {
-      const response = await axios.get(`/api/competitions/${id}/participation`)
+      const response = await api.get(`/api/competitions/${id}/participation`)
       setParticipation(response.data)
     } catch (error) {
       console.error("Error checking participation:", error)
@@ -90,7 +90,7 @@ const CompetitionDetails = () => {
     
     setSubmitting(true)
     try {
-      const response = await axios.post(`/api/competitions/${id}/questions`, {
+      const response = await api.post(`/api/competitions/${id}/questions`, {
         selectedCourses,
       })
       

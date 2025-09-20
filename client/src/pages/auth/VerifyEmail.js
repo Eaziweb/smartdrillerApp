@@ -2,8 +2,8 @@
 import { useState, useEffect, useRef } from "react"
 import { Link, useNavigate, useLocation } from "react-router-dom"
 import { useNotification } from "../../contexts/NotificationContext"
-import axios from "axios"
 import styles from "../../styles/auth.module.css"
+import api from "../../utils/api";
 
 const VerifyEmail = () => {
   const [code, setCode] = useState(["", "", "", "", "", ""])
@@ -77,7 +77,7 @@ const VerifyEmail = () => {
     }
     setLoading(true)
     try {
-      const response = await axios.post("/api/auth/verify-email", {
+      const response = await api.post("/api/auth/verify-email", {
         email,
         code: verificationCode,
       })
@@ -104,7 +104,7 @@ const VerifyEmail = () => {
     if (countdown > 0) return
     setResendLoading(true)
     try {
-      const response = await axios.post("/api/auth/resend-verification", { email })
+      const response = await api.post("/api/auth/resend-verification", { email })
       if (response.data.success) {
         showNotification("Verification code resent successfully!", "success")
         setCountdown(60)

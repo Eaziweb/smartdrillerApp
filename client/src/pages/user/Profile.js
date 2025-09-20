@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react"
 import { Link } from "react-router-dom"
 import { useAuth } from "../../contexts/AuthContext"
-import axios from "axios"
+import api from "../../utils/api";
 import styles from "../../styles/profile.module.css"
 
 const Profile = () => {
@@ -62,7 +62,7 @@ const Profile = () => {
   // Fetch course name by ID
   const fetchCourseName = async (courseId) => {
     try {
-      const response = await axios.get(`/api/courseofstudy/id/${courseId}`)
+      const response = await api.get(`/api/courseofstudy/id/${courseId}`)
       setCourseName(response.data.course.name)
     } catch (error) {
       console.error("Failed to fetch course name:", error)
@@ -85,7 +85,7 @@ const Profile = () => {
     setMessage("")
     
     try {
-      const response = await axios.put("/api/users/profile", formData)
+      const response = await api.put("/api/users/profile", formData)
       updateUser(response.data.user)
       setMessage("Profile updated successfully!")
     } catch (error) {

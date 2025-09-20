@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react"
 import { useAuth } from "../../contexts/AuthContext"
 import styles from "../../styles/Materials.module.css"
+import api from "../../utils/api";
 
 const Materials = () => {
   const { user } = useAuth()
@@ -30,14 +31,14 @@ const Materials = () => {
 
   const loadCourses = async () => {
     try {
-      const response = await fetch("/api/materials/courses", {
+      const token = localStorage.getItem("token")
+      const response = await api.get("/materials/courses", {
         headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
+          Authorization: `Bearer ${token}`,
         },
       })
-      const data = await response.json()
-      if (data.success) {
-        setCourses(data.courses)
+      if (response.data.success) {
+        setCourses(response.data.courses)
       }
     } catch (error) {
       console.error("Error loading courses:", error)
@@ -52,15 +53,17 @@ const Materials = () => {
         limit: 12,
         ...filters,
       })
-      const response = await fetch(`/api/materials?${queryParams}`, {
+      
+      const token = localStorage.getItem("token")
+      const response = await api.get(`/materials?${queryParams}`, {
         headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
+          Authorization: `Bearer ${token}`,
         },
       })
-      const data = await response.json()
-      if (data.success) {
-        setMaterials(data.materials)
-        setTotalPages(data.totalPages)
+      
+      if (response.data.success) {
+        setMaterials(response.data.materials)
+        setTotalPages(response.data.totalPages)
       }
     } catch (error) {
       console.error("Error loading materials:", error)
@@ -76,43 +79,47 @@ const Materials = () => {
       showNotification("Please select a file", "error")
       return
     }
+    
     const formData = new FormData()
     formData.append("title", uploadForm.title)
     formData.append("description", uploadForm.description)
     formData.append("course", uploadForm.course)
     formData.append("file", uploadForm.file)
+    
     try {
-      const response = await fetch("/api/materials/upload", {
-        method: "POST",
+      const token = localStorage.getItem("token")
+      const response = await api.post("/materials/upload", formData, {
         headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
+          Authorization: `Bearer ${token}`,
         },
-        body: formData,
       })
-      const data = await response.json()
-      if (data.success) {
+      
+      if (response.data.success) {
         showNotification("Material uploaded successfully!", "success")
         setUploadModalOpen(false)
         setUploadForm({ title: "", description: "", course: "", file: null })
         loadMaterials()
       } else {
-        throw new Error(data.message)
+        throw new Error(response.data.message)
       }
     } catch (error) {
       console.error("Error uploading material:", error)
-      showNotification("Error uploading material", "error")
+      showNotification(error.response?.data?.message || "Error uploading material", "error")
     }
   }
 
   const downloadMaterial = async (materialId, title) => {
     try {
-      const response = await fetch(`/api/materials/${materialId}/download`, {
+      const token = localStorage.getItem("token")
+      const response = await api.get(`/materials/${materialId}/download`, {
         headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
+          Authorization: `Bearer ${token}`,
         },
+        responseType: 'blob', // Important for file downloads
       })
-      if (response.ok) {
-        const blob = await response.blob()
+      
+      if (response.status === 200) {
+        const blob = new Blob([response.data])
         const url = window.URL.createObjectURL(blob)
         const a = document.createElement("a")
         a.href = url

@@ -2,6 +2,7 @@
 import { useState, useEffect, useRef } from "react"
 import { useAuth } from "../../contexts/AuthContext"
 import styles from "../../styles/AIAssistant.module.css"
+import api from "../../utils/api"
 
 const AIAssistant = () => {
   const { user } = useAuth()
@@ -49,29 +50,31 @@ const AIAssistant = () => {
     setIsLoading(true)
 
     try {
-      const response = await fetch("/api/ai/chat", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-        body: JSON.stringify({
+      const token = localStorage.getItem("token")
+      const response = await api.post(
+        "/ai/chat",
+        {
           message: inputMessage,
           userName: user?.fullName,
-        }),
-      })
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      )
 
-      const data = await response.json()
-      if (data.success) {
+      if (response.data.success) {
         const aiMessage = {
           id: Date.now() + 1,
-          text: data.response,
+          text: response.data.response,
           sender: "ai",
           timestamp: new Date(),
         }
         setMessages((prev) => [...prev, aiMessage])
       } else {
-        throw new Error(data.message || "Failed to get AI response")
+        throw new Error(response.data.message || "Failed to get AI response")
       }
     } catch (error) {
       console.error("Error sending message:", error)

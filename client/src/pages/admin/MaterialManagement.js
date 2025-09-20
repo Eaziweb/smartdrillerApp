@@ -1,6 +1,7 @@
 "use client"
 import { useState, useEffect } from "react"
 import styles from "../../styles/MaterialManagement.module.css"
+import api from "../../utils/api";
 
 const MaterialManagement = () => {
   const [materials, setMaterials] = useState([])
@@ -26,15 +27,17 @@ const MaterialManagement = () => {
         limit: 20,
         ...filters,
       })
-      const response = await fetch(`/api/admin/materials?${queryParams}`, {
+      
+      const token = localStorage.getItem("token")
+      const response = await api.get(`/admin/materials?${queryParams}`, {
         headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
+          Authorization: `Bearer ${token}`,
         },
       })
-      const data = await response.json()
-      if (data.success) {
-        setMaterials(data.materials)
-        setTotalPages(data.totalPages)
+      
+      if (response.data.success) {
+        setMaterials(response.data.materials)
+        setTotalPages(response.data.totalPages)
       }
     } catch (error) {
       console.error("Error loading materials:", error)
@@ -52,18 +55,18 @@ const MaterialManagement = () => {
     const materialId = confirmModal.id
     setConfirmModal({ open: false, id: null })
     try {
-      const response = await fetch(`/api/admin/materials/${materialId}`, {
-        method: "DELETE",
+      const token = localStorage.getItem("token")
+      const response = await api.delete(`/admin/materials/${materialId}`, {
         headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
+          Authorization: `Bearer ${token}`,
         },
       })
-      const data = await response.json()
-      if (data.success) {
+      
+      if (response.data.success) {
         showNotification("Material deleted successfully", "success")
         loadMaterials()
       } else {
-        throw new Error(data.message)
+        throw new Error(response.data.message)
       }
     } catch (error) {
       console.error("Error deleting material:", error)
@@ -73,13 +76,16 @@ const MaterialManagement = () => {
 
   const downloadMaterial = async (materialId, filename) => {
     try {
-      const response = await fetch(`/api/admin/materials/${materialId}/download`, {
+      const token = localStorage.getItem("token")
+      const response = await api.get(`/admin/materials/${materialId}/download`, {
         headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
+          Authorization: `Bearer ${token}`,
         },
+        responseType: 'blob', // Important for file downloads
       })
-      if (response.ok) {
-        const blob = await response.blob()
+      
+      if (response.status === 200) {
+        const blob = new Blob([response.data])
         const url = window.URL.createObjectURL(blob)
         const a = document.createElement("a")
         a.href = url

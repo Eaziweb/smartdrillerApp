@@ -434,12 +434,10 @@ useEffect(() => {
 
 
              <Route path="/" element={<LandingPage />} />
-                 {/* Your existing routes */}
         <Route path="/company" element={<Company />} />
         <Route path="/resources" element={<Resources />} />
         <Route path="/legal" element={<LegalPolicies />} />
-              {/* Fallback route - redirect to landing page */}
-                   {/* 404 Not Found Route */}
+      
               <Route path="*" element={<NotFound />} />
           </Routes>
         </div>

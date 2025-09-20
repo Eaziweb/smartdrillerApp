@@ -5,6 +5,7 @@ import { useAuth } from "../../contexts/AuthContext"
 import { useNotification } from "../../contexts/NotificationContext"
 import ProgressRing from '../../components/ProgressRing'
 import styles from "../../styles/course-selection.module.css"
+import api from "../../utils/api";
 
 // Portal component for rendering dropdowns outside the main DOM hierarchy
 const Portal = ({ children, className }) => {
@@ -68,21 +69,17 @@ const CourseSelection = () => {
     if (isMockMode) return;
     
     try {
-      const response = await fetch("/api/questions/study-progress", {
+      const token = localStorage.getItem("token")
+      const response = await api.get("/questions/study-progress", {
         headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
+          Authorization: `Bearer ${token}`,
         },
       });
       
-      if (!response.ok) {
-        throw new Error(`Server responded with status: ${response.status}`);
-      }
-      
-      const data = await response.json();
-      if (data.success) {
-        setStudyProgress(data.progress);
+      if (response.data.success) {
+        setStudyProgress(response.data.progress);
       } else {
-        throw new Error(data.message || "Failed to load study progress");
+        throw new Error(response.data.message || "Failed to load study progress");
       }
     } catch (error) {
       console.error("Failed to load study progress:", error);
@@ -93,18 +90,14 @@ const CourseSelection = () => {
   const fetchCourses = async () => {
     setFetchingCourses(true)
     try {
-      const response = await fetch("/api/courses", {
+      const token = localStorage.getItem("token")
+      const response = await api.get("/courses", {
         headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
+          Authorization: `Bearer ${token}`,
         },
       })
       
-      if (!response.ok) {
-        throw new Error(`Server responded with status: ${response.status}`)
-      }
-      
-      const data = await response.json()
-      setCourses(data)
+      setCourses(response.data)
     } catch (error) {
       console.error("Failed to fetch courses:", error)
       setError("Failed to load courses. Please check your connection and try again.")
@@ -117,24 +110,19 @@ const CourseSelection = () => {
     setFetchingYears(true)
     setError(null)
     try {
-      const response = await fetch("/api/questions/course-years", {
+      const token = localStorage.getItem("token")
+      const response = await api.get("/questions/course-years", {
         headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
+          Authorization: `Bearer ${token}`,
         },
       })
       
-      if (!response.ok) {
-        throw new Error(`Server responded with status: ${response.status}`)
-      }
-      
-      const data = await response.json()
-      
-      if (!data || Object.keys(data).length === 0) {
+      if (!response.data || Object.keys(response.data).length === 0) {
         setError("No course data available. Please contact support.")
         return
       }
       
-      setCourseYears(data)
+      setCourseYears(response.data)
     } catch (error) {
       console.error("Failed to fetch course years:", error)
       setError("Failed to load course data. Please check your connection and try again.")
@@ -147,17 +135,14 @@ const CourseSelection = () => {
   const fetchTopics = async (courseCode) => {
     setFetchingTopics(true)
     try {
-      const response = await fetch(`/api/questions/topics/${courseCode}`, {
+      const token = localStorage.getItem("token")
+      const response = await api.get(`/questions/topics/${courseCode}`, {
         headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
+          Authorization: `Bearer ${token}`,
         },
       })
       
-      if (!response.ok) {
-        throw new Error(`Server responded with status: ${response.status}`)
-      }
-      
-      const topics = await response.json()
+      const topics = response.data
       
       if (!topics || topics.length === 0) {
         showNotification(`No topics available for ${courseCode}. Please select another course.`, "error")
@@ -362,26 +347,20 @@ const CourseSelection = () => {
         examType: examType,
         ...(isMockMode && { timeAllowed: Number.parseInt(courseDataObj.time) }),
       }
-      const response = await fetch("/api/questions/fetch", {
-        method: "POST",
+      
+      const token = localStorage.getItem("token")
+      const response = await api.post("/questions/fetch", requestData, {
         headers: {
+          Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
-        body: JSON.stringify(requestData),
       })
       
-      const data = await response.json()
-      
-      if (!response.ok) {
-        throw new Error(data.message || `Server responded with status: ${response.status}`)
+      if (!response.data.success) {
+        throw new Error(response.data.message || "Failed to fetch questions")
       }
       
-      if (!data.success) {
-        throw new Error(data.message || "Failed to fetch questions")
-      }
-      
-      if (!data.questions || data.questions.length === 0) {
+      if (!response.data.questions || response.data.questions.length === 0) {
         throw new Error("No questions found for the selected criteria. Please try different options.")
       }
       
@@ -390,7 +369,7 @@ const CourseSelection = () => {
         "currentExam",
         JSON.stringify({
           ...requestData,
-          questions: data.questions,
+          questions: response.data.questions,
           examType: examType,
         }),
       )
@@ -398,7 +377,7 @@ const CourseSelection = () => {
       navigate(isMockMode ? "/mock" : "/study")
     } catch (error) {
       console.error("Failed to start exam:", error)
-      showNotification(error.message || "Failed to start exam", "error")
+      showNotification(error.response?.data?.message || error.message || "Failed to start exam", "error")
     } finally {
       setFetchingQuestions(false)
     }

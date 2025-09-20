@@ -2,10 +2,10 @@
 import { useState, useEffect, useRef } from "react"
 import { useNavigate } from "react-router-dom"
 import { useAuth } from "../../contexts/AuthContext"
-import axios from "axios"
 import styles from "../../styles/mock.module.css"
 // Import KaTeX CSS
 import 'katex/dist/katex.min.css'
+import api from "../../utils/api";
 
 const Mock = () => {
   const { user } = useAuth()
@@ -360,7 +360,7 @@ const Mock = () => {
     setSubmittingReport(true)
     try {
       const currentQuestion = examData.questions[currentQuestionIndex]
-      await axios.post("/api/reports/submit", {
+      await api.post("/api/reports/submit", {
         questionId: currentQuestion._id,
         description: reportDescription,
       })
@@ -423,7 +423,7 @@ const Mock = () => {
         questions,
       }
       
-      const response = await axios.post("/api/results/submit", resultData)
+      const response = await api.post("/api/results/submit", resultData)
       if (response.data.result) {
         localStorage.setItem("latestResult", JSON.stringify(response.data.result))
         const progressKey = `mock_progress_${examData.course}_${examData.year}`

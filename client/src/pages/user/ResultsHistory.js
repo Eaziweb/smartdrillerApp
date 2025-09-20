@@ -3,6 +3,7 @@ import { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
 import { useAuth } from "../../contexts/AuthContext"
 import styles from "../../styles/ResultsHistory.module.css"
+import api from "../../utils/api";
 
 const ResultsHistory = () => {
   const [results, setResults] = useState([])
@@ -25,21 +26,19 @@ const ResultsHistory = () => {
         setError("Authentication required")
         return
       }
-      const response = await fetch("/api/results/history", {
+      
+      const response = await api.get("/results/history", {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       })
-      if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.message || "Failed to fetch results")
-      }
-      const data = await response.json()
+      
+      const data = response.data
       setResults(data.results || [])
       setStats(data.stats || {})
     } catch (error) {
       console.error("Error fetching results:", error)
-      setError(error.message || "Failed to load results history")
+      setError(error.response?.data?.message || error.message || "Failed to load results history")
     } finally {
       setLoading(false)
     }
@@ -52,14 +51,14 @@ const ResultsHistory = () => {
   }, [currentPage])
 
   const getScoreColor = (percentage) => {
-    if (percentage >= 80) return "#10b981"
-    if (percentage >= 60) return "#f59e0b"
+    if (percentage >= 70) return "#10b981"
+    if (percentage >= 50) return "#f59e0b"
     return "#ef4444"
   }
 
   const getGrade = (percentage) => {
     if (percentage >= 90) return "A+"
-    if (percentage >= 80) return "A"
+    if (percentage >= 70) return "A"
     if (percentage >= 70) return "B"
     if (percentage >= 60) return "C"
     if (percentage >= 50) return "D"

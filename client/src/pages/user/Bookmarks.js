@@ -2,8 +2,8 @@
 import { useState, useEffect, useRef } from "react"
 import { useNavigate } from "react-router-dom"
 import { useAuth } from "../../contexts/AuthContext"
-import axios from "axios"
 import styles from "../../styles/bookmarks.module.css"
+import api from "../../utils/api";
 
 // Import KaTeX CSS
 import 'katex/dist/katex.min.css'
@@ -123,7 +123,7 @@ const Bookmarks = () => {
   const loadBookmarks = async () => {
     try {
       setLoading(true)
-      const response = await axios.get("/api/bookmarks")
+      const response = await api.get("/api/bookmarks")
       // Group bookmarks by course and count them
       const groupedBookmarks = response.data.bookmarks
       let total = 0
@@ -143,7 +143,7 @@ const Bookmarks = () => {
   const loadCourseQuestions = async (courseCode, page = 1) => {
     try {
       setLoadingQuestions(true)
-      const response = await axios.get(`/api/bookmarks?course=${courseCode}&page=${page}&limit=10`)
+      const response = await api.get(`/api/bookmarks?course=${courseCode}&page=${page}&limit=10`)
       setCourseQuestions(response.data.bookmarks)
       setTotalPages(response.data.pagination.pages)
       setCurrentPage(page)
@@ -169,7 +169,7 @@ const Bookmarks = () => {
 
   const handleRemoveBookmark = async (questionId) => {
     try {
-      await axios.delete(`/api/bookmarks/${questionId}`)
+      await api.delete(`/api/bookmarks/${questionId}`)
       // Refresh the current view
       if (selectedCourse) {
         loadCourseQuestions(selectedCourse, currentPage)

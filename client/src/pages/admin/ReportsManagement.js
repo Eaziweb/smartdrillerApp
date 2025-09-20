@@ -1,6 +1,7 @@
 "use client"
 import { useState, useEffect } from "react"
 import styles from "../../styles/ReportsManagement.module.css"
+import api from "../../utils/api";
 
 const ReportsManagement = () => {
   const [reports, setReports] = useState([])
@@ -21,15 +22,15 @@ const ReportsManagement = () => {
         limit: reportsPerPage,
         status: statusFilter,
       })
-      const response = await fetch(`/api/reports?${params}`, {
+      
+      const token = localStorage.getItem("token")
+      const response = await api.get(`/reports?${params}`, {
         headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
+          Authorization: `Bearer ${token}`,
         },
       })
-      if (response.ok) {
-        const data = await response.json()
-        setReports(data.reports || [])
-      }
+      
+      setReports(response.data.reports || [])
     } catch (error) {
       console.error("Error fetching reports:", error)
       showToast("Error fetching reports", "error")
@@ -40,15 +41,19 @@ const ReportsManagement = () => {
 
   const handleStatusUpdate = async (reportId, newStatus) => {
     try {
-      const response = await fetch(`/api/reports/${reportId}/status`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-        body: JSON.stringify({ status: newStatus }),
-      })
-      if (response.ok) {
+      const token = localStorage.getItem("token")
+      const response = await api.put(
+        `/reports/${reportId}/status`,
+        { status: newStatus },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      )
+      
+      if (response.status === 200) {
         showToast("Report status updated successfully!", "success")
         fetchReports()
       } else {
@@ -63,13 +68,14 @@ const ReportsManagement = () => {
   const handleDeleteReport = async (reportId) => {
     if (window.confirm("Are you sure you want to delete this report?")) {
       try {
-        const response = await fetch(`/api/reports/${reportId}`, {
-          method: "DELETE",
+        const token = localStorage.getItem("token")
+        const response = await api.delete(`/reports/${reportId}`, {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
+            Authorization: `Bearer ${token}`,
           },
         })
-        if (response.ok) {
+        
+        if (response.status === 200) {
           showToast("Report deleted successfully!", "success")
           fetchReports()
         } else {

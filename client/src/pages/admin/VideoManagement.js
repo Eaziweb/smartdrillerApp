@@ -3,6 +3,7 @@ import { useState, useEffect } from "react"
 import { Link } from "react-router-dom"
 import axios from "axios"
 import styles from "../../styles/VideoManagement.module.css"
+import api from "../../utils/api";
 
 const VideoManagement = () => {
   const [courses, setCourses] = useState([])
@@ -37,7 +38,7 @@ const VideoManagement = () => {
 
   const loadCourses = async () => {
     try {
-      const response = await axios.get("/api/admin/videos/courses", {
+      const response = await api.get("/api/admin/videos/courses", {
         headers: getAuthHeader(),
       })
       setCourses(response.data)
@@ -53,11 +54,11 @@ const VideoManagement = () => {
     e.preventDefault()
     try {
       if (editingItem) {
-        await axios.put(`/api/admin/videos/courses/${editingItem._id}`, courseForm, {
+        await api.put(`/api/admin/videos/courses/${editingItem._id}`, courseForm, {
           headers: getAuthHeader(),
         })
       } else {
-        await axios.post("/api/admin/videos/courses", courseForm, {
+        await api.post("/api/admin/videos/courses", courseForm, {
           headers: getAuthHeader(),
         })
       }
@@ -76,11 +77,11 @@ const VideoManagement = () => {
     e.preventDefault()
     try {
       if (editingItem) {
-        await axios.put(`/api/admin/videos/topics/${editingItem._id}`, topicForm, {
+        await api.put(`/api/admin/videos/topics/${editingItem._id}`, topicForm, {
           headers: getAuthHeader(),
         })
       } else {
-        await axios.post(`/api/admin/videos/courses/${selectedCourse._id}/topics`, topicForm, {
+        await api.post(`/api/admin/videos/courses/${selectedCourse._id}/topics`, topicForm, {
           headers: getAuthHeader(),
         })
       }
@@ -99,11 +100,11 @@ const VideoManagement = () => {
     e.preventDefault()
     try {
       if (editingItem) {
-        await axios.put(`/api/admin/videos/${editingItem._id}`, videoForm, {
+        await api.put(`/api/admin/videos/${editingItem._id}`, videoForm, {
           headers: getAuthHeader(),
         })
       } else {
-        await axios.post(`/api/admin/videos/topics/${selectedTopic._id}/videos`, videoForm, {
+        await api.post(`/api/admin/videos/topics/${selectedTopic._id}/videos`, videoForm, {
           headers: getAuthHeader(),
         })
       }
@@ -121,7 +122,7 @@ const VideoManagement = () => {
   const handleDeleteVideo = async (videoId) => {
     if (!window.confirm("Are you sure you want to delete this video?")) return
     try {
-      await axios.delete(`/api/admin/videos/${videoId}`, {
+      await api.delete(`/api/admin/videos/${videoId}`, {
         headers: getAuthHeader(),
       })
       loadCourses()
@@ -135,7 +136,7 @@ const VideoManagement = () => {
   const handleDeleteTopic = async (topicId) => {
     if (!window.confirm("Are you sure you want to delete this topic and all its videos?")) return
     try {
-      await axios.delete(`/api/admin/videos/topics/${topicId}`, {
+      await api.delete(`/api/admin/videos/topics/${topicId}`, {
         headers: getAuthHeader(),
       })
       loadCourses()
@@ -149,7 +150,7 @@ const VideoManagement = () => {
   const handleDeleteCourse = async (courseId) => {
     if (!window.confirm("Are you sure you want to delete this course and all its content?")) return
     try {
-      await axios.delete(`/api/admin/videos/courses/${courseId}`, {
+      await api.delete(`/api/admin/videos/courses/${courseId}`, {
         headers: getAuthHeader(),
       })
       loadCourses()
@@ -162,7 +163,7 @@ const VideoManagement = () => {
 
   const toggleCourseVisibility = async (course) => {
     try {
-      await axios.put(`/api/admin/videos/courses/${course._id}/visibility`, {}, {
+      await api.put(`/api/admin/videos/courses/${course._id}/visibility`, {}, {
         headers: getAuthHeader(),
       })
       loadCourses()
@@ -175,7 +176,7 @@ const VideoManagement = () => {
 
   const refreshVideoMetadata = async (videoId) => {
     try {
-      await axios.post(`/api/admin/videos/${videoId}/refresh-metadata`, {}, {
+      await api.post(`/api/admin/videos/${videoId}/refresh-metadata`, {}, {
         headers: getAuthHeader(),
       })
       loadCourses()

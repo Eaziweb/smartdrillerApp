@@ -1,9 +1,8 @@
 "use client"
 import { useState, useEffect } from "react"
 import { Link, useParams } from "react-router-dom"
-import axios from "axios"
 import styles from "../../styles/AdminCompetitionLeaderboard.module.css"
-
+import api from "../../utils/api";
 const AdminCompetitionLeaderboard = () => {
   const { id } = useParams()
   const [competition, setCompetition] = useState(null)
@@ -37,7 +36,7 @@ const AdminCompetitionLeaderboard = () => {
 
   const fetchCompetition = async () => {
     try {
-      const response = await axios.get(`/api/admin/competitions/${id}`)
+      const response = await api.get(`/api/admin/competitions/${id}`)
       setCompetition(response.data)
       // Extract available courses for filtering
       const courses =
@@ -61,7 +60,7 @@ const AdminCompetitionLeaderboard = () => {
       })
       if (filters.course) params.append("course", filters.course)
       if (searchTerm) params.append("search", searchTerm)
-      const response = await axios.get(`/api/competitions/${id}/leaderboard?${params}`)
+      const response = await api.get(`/api/competitions/${id}/leaderboard?${params}`)
       setLeaderboard(response.data.leaderboard)
       setStats(response.data.stats)
       setPagination(response.data.pagination)
@@ -97,7 +96,7 @@ const handleExport = async () => {
     })
     if (filters.course) params.append("course", filters.course)
     if (searchTerm) params.append("search", searchTerm)
-    const response = await axios.get(`/api/competitions/${id}/leaderboard?${params}`)
+    const response = await api.get(`/api/competitions/${id}/leaderboard?${params}`)
     const allResults = response.data.leaderboard
     // Create CSV content
     const csvHeaders = [

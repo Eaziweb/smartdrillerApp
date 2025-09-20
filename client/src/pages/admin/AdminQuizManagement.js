@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react"
 import { useAuth } from "../../contexts/AuthContext"
 import styles from "../../styles/AdminQuizManagement.module.css"
+import api from "../../utils/api";
 
 const AdminQuizManagement = () => {
   const { user } = useAuth()
@@ -22,7 +23,7 @@ const AdminQuizManagement = () => {
   const [questionForm, setQuestionForm] = useState({
     question: "",
     options: ["", "", "", ""],
-    correctOption: 1, // Default to option 1
+    correctOption: 1,
     explanation: "",
     tags: "",
     course: "",
@@ -72,13 +73,13 @@ const AdminQuizManagement = () => {
   
   const fetchCourses = async () => {
     try {
-      const response = await fetch("/api/courses/admin", {
+      const token = localStorage.getItem("token")
+      const response = await api.get("/courses/admin", {
         headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
+          Authorization: `Bearer ${token}`,
         },
       })
-      const data = await response.json()
-      setCourses(Array.isArray(data) ? data : [])
+      setCourses(Array.isArray(response.data) ? response.data : [])
     } catch (error) {
       console.error("Error fetching courses:", error)
       setCourses([])
@@ -88,17 +89,19 @@ const AdminQuizManagement = () => {
   const fetchQuestions = async () => {
     setLoading(true)
     try {
+      const token = localStorage.getItem("token")
       const queryParams = new URLSearchParams({
         q: searchTerm,
         ...filters,
       }).toString()
-      const response = await fetch(`/api/questions/admin/search?${queryParams}`, {
+      
+      const response = await api.get(`/questions/admin/search?${queryParams}`, {
         headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
+          Authorization: `Bearer ${token}`,
         },
       })
-      const data = await response.json()
-      setQuestions(data.questions || [])
+      
+      setQuestions(response.data.questions || [])
     } catch (error) {
       console.error("Error fetching questions:", error)
       showToast("Failed to fetch questions", "error")
@@ -108,13 +111,13 @@ const AdminQuizManagement = () => {
   
   const fetchCourseYears = async () => {
     try {
-      const response = await fetch("/api/courseYears/admin", {
+      const token = localStorage.getItem("token")
+      const response = await api.get("/courseYears/admin", {
         headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
+          Authorization: `Bearer ${token}`,
         },
       })
-      const data = await response.json()
-      setCourseYears(data.courseYears || {})
+      setCourseYears(response.data.courseYears || {})
     } catch (error) {
       console.error("Error fetching course years:", error)
     }
@@ -132,13 +135,11 @@ const AdminQuizManagement = () => {
   const handleImageUpload = (e) => {
     const file = e.target.files[0]
     if (file) {
-      // Check if file is an image
       if (!file.type.match('image.*')) {
         showToast("Please select an image file", "error")
         return
       }
       
-      // Check file size (limit to 5MB)
       if (file.size > 5 * 1024 * 1024) {
         showToast("Image size should be less than 5MB", "error")
         return
@@ -167,7 +168,6 @@ const AdminQuizManagement = () => {
   const handleAddQuestion = async (e) => {
     e.preventDefault()
     
-    // Validate correct option is between 1-4
     if (questionForm.correctOption < 1 || questionForm.correctOption > 4) {
       showToast("Correct option must be between 1 and 4", "error")
       return
@@ -175,7 +175,6 @@ const AdminQuizManagement = () => {
     
     const formData = new FormData()
     
-    // Append all form fields
     formData.append("question", questionForm.question)
     questionForm.options.forEach((option, index) => {
       formData.append(`options[${index}]`, option)
@@ -186,7 +185,6 @@ const AdminQuizManagement = () => {
     formData.append("year", questionForm.year)
     formData.append("topic", questionForm.topic)
     
-    // Append tags
     const tags = questionForm.tags
       .split(",")
       .map((tag) => tag.trim())
@@ -195,49 +193,43 @@ const AdminQuizManagement = () => {
       formData.append(`tags[${index}]`, tag)
     })
     
-    // Append image if exists
     if (questionForm.image) {
       formData.append("image", questionForm.image)
     }
     
     try {
-      const response = await fetch("/api/questions/admin/add", {
-        method: "POST",
+      const token = localStorage.getItem("token")
+      const response = await api.post("/questions/admin/add", formData, {
         headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "multipart/form-data",
         },
-        body: formData,
       })
-      const data = await response.json()
-      if (response.ok) {
-        showToast(data.message || "Question added successfully")
-        setQuestionForm({
-          question: "",
-          options: ["", "", "", ""],
-          correctOption: 1,
-          explanation: "",
-          tags: "",
-          course: "",
-          year: "",
-          topic: "",
-          image: null,
-          imagePreview: null,
-        })
-        fetchQuestions()
-        fetchCourseYears()
-      } else {
-        showToast(data.message || "Failed to add question", "error")
-      }
+      
+      showToast(response.data.message || "Question added successfully")
+      setQuestionForm({
+        question: "",
+        options: ["", "", "", ""],
+        correctOption: 1,
+        explanation: "",
+        tags: "",
+        course: "",
+        year: "",
+        topic: "",
+        image: null,
+        imagePreview: null,
+      })
+      fetchQuestions()
+      fetchCourseYears()
     } catch (error) {
       console.error("Error adding question:", error)
-      showToast("Failed to add question", "error")
+      showToast(error.response?.data?.message || "Failed to add question", "error")
     }
   }
   
   const handleUpdateQuestion = async (e) => {
     e.preventDefault()
     
-    // Validate correct option is between 1-4
     if (questionForm.correctOption < 1 || questionForm.correctOption > 4) {
       showToast("Correct option must be between 1 and 4", "error")
       return
@@ -245,7 +237,6 @@ const AdminQuizManagement = () => {
     
     const formData = new FormData()
     
-    // Append all form fields
     formData.append("question", questionForm.question)
     questionForm.options.forEach((option, index) => {
       formData.append(`options[${index}]`, option)
@@ -256,7 +247,6 @@ const AdminQuizManagement = () => {
     formData.append("year", questionForm.year)
     formData.append("topic", questionForm.topic)
     
-    // Append tags
     const tags = questionForm.tags
       .split(",")
       .map((tag) => tag.trim())
@@ -265,59 +255,51 @@ const AdminQuizManagement = () => {
       formData.append(`tags[${index}]`, tag)
     })
     
-    // Append image if exists
     if (questionForm.image) {
       formData.append("image", questionForm.image)
     }
     
     try {
-      const response = await fetch(`/api/questions/admin/${editingQuestion._id}`, {
-        method: "PUT",
+      const token = localStorage.getItem("token")
+      const response = await api.put(`/questions/admin/${editingQuestion._id}`, formData, {
         headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "multipart/form-data",
         },
-        body: formData,
       })
-      const data = await response.json()
-      if (response.ok) {
-        showToast("Question updated successfully")
-        setEditingQuestion(null)
-        setQuestionForm({
-          question: "",
-          options: ["", "", "", ""],
-          correctOption: 1,
-          explanation: "",
-          tags: "",
-          course: "",
-          year: "",
-          topic: "",
-          image: null,
-          imagePreview: null,
-        })
-        fetchQuestions()
-      } else {
-        showToast(data.message || "Failed to update question", "error")
-      }
+      
+      showToast("Question updated successfully")
+      setEditingQuestion(null)
+      setQuestionForm({
+        question: "",
+        options: ["", "", "", ""],
+        correctOption: 1,
+        explanation: "",
+        tags: "",
+        course: "",
+        year: "",
+        topic: "",
+        image: null,
+        imagePreview: null,
+      })
+      fetchQuestions()
     } catch (error) {
       console.error("Error updating question:", error)
-      showToast("Failed to update question", "error")
+      showToast(error.response?.data?.message || "Failed to update question", "error")
     }
   }
   
   const deleteQuestion = async (questionId) => {
     try {
-      const response = await fetch(`/api/questions/admin/${questionId}`, {
-        method: "DELETE",
+      const token = localStorage.getItem("token")
+      await api.delete(`/questions/admin/${questionId}`, {
         headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
+          Authorization: `Bearer ${token}`,
         },
       })
-      if (response.ok) {
-        showToast("Question deleted successfully")
-        fetchQuestions()
-      } else {
-        showToast("Failed to delete question", "error")
-      }
+      
+      showToast("Question deleted successfully")
+      fetchQuestions()
     } catch (error) {
       console.error("Error deleting question:", error)
       showToast("Failed to delete question", "error")
@@ -335,10 +317,8 @@ const AdminQuizManagement = () => {
   const handleBulkImport = async (e) => {
     e.preventDefault();
     try {
-      // Function to try parsing JSON after escaping backslashes
       const tryParse = (data) => {
         try {
-          // Escape all single backslashes → double backslashes
           const escaped = data.replace(/\\/g, '\\\\');
           return JSON.parse(escaped);
         } catch (err) {
@@ -346,16 +326,13 @@ const AdminQuizManagement = () => {
         }
       };
       
-      // First attempt: parse with backslash escaping
       let parsedQuestions = tryParse(bulkImportData);
       
-      // Validate that we have an array
       if (!parsedQuestions || !Array.isArray(parsedQuestions)) {
         showToast("Invalid JSON format. Must be an array of questions.", "error");
         return;
       }
       
-      // Validate each question
       const validatedQuestions = parsedQuestions.map((q, index) => {
         if (!q.question || !q.options || q.correctOption === undefined || 
             !q.explanation || !q.course || !q.year || !q.topic) {
@@ -377,25 +354,18 @@ const AdminQuizManagement = () => {
         };
       });
       
-      // Send to server
-      const response = await fetch("/api/questions/admin/bulk-import", {
-        method: "POST",
+      const token = localStorage.getItem("token")
+      const response = await api.post("/questions/admin/bulk-import", { questions: validatedQuestions }, {
         headers: {
+          Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
-        body: JSON.stringify({ questions: validatedQuestions }),
       });
       
-      const data = await response.json();
-      if (response.ok) {
-        showToast(data.message);
-        setBulkImportData("");
-        fetchQuestions();
-        fetchCourseYears();
-      } else {
-        showToast(data.message || "Failed to import questions", "error");
-      }
+      showToast(response.data.message);
+      setBulkImportData("");
+      fetchQuestions();
+      fetchCourseYears();
     } catch (error) {
       console.error("Error importing questions:", error);
       showToast(`Import failed: ${error.message}`, "error");
@@ -405,42 +375,34 @@ const AdminQuizManagement = () => {
   const handleAddCourseYear = async (e) => {
     e.preventDefault()
     try {
-      const response = await fetch("/api/courseYears/admin/add", {
-        method: "POST",
+      const token = localStorage.getItem("token")
+      const response = await api.post("/courseYears/admin/add", courseYearForm, {
         headers: {
+          Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
-        body: JSON.stringify(courseYearForm),
       })
-      const data = await response.json()
-      if (response.ok) {
-        showToast("Course year added successfully")
-        setCourseYearForm({ course: "", year: "" })
-        fetchCourseYears()
-      } else {
-        showToast(data.message || "Failed to add course year", "error")
-      }
+      
+      showToast("Course year added successfully")
+      setCourseYearForm({ course: "", year: "" })
+      fetchCourseYears()
     } catch (error) {
       console.error("Error adding course year:", error)
-      showToast("Failed to add course year", "error")
+      showToast(error.response?.data?.message || "Failed to add course year", "error")
     }
   }
   
   const deleteCourseYear = async (courseYearId) => {
     try {
-      const response = await fetch(`/api/courseYears/admin/${courseYearId}`, {
-        method: "DELETE",
+      const token = localStorage.getItem("token")
+      await api.delete(`/courseYears/admin/${courseYearId}`, {
         headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
+          Authorization: `Bearer ${token}`,
         },
       })
-      if (response.ok) {
-        showToast("Course year deleted successfully")
-        fetchCourseYears()
-      } else {
-        showToast("Failed to delete course year", "error")
-      }
+      
+      showToast("Course year deleted successfully")
+      fetchCourseYears()
     } catch (error) {
       console.error("Error deleting course year:", error)
       showToast("Failed to delete course year", "error")
@@ -455,83 +417,67 @@ const AdminQuizManagement = () => {
     })
   }
   
-  // Course management functions
   const handleAddCourse = async (e) => {
     e.preventDefault()
     try {
-      const response = await fetch("/api/courses/admin/add", {
-        method: "POST",
+      const token = localStorage.getItem("token")
+      const response = await api.post("/courses/admin/add", courseForm, {
         headers: {
+          Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
-        body: JSON.stringify(courseForm),
       })
-      const data = await response.json()
-      if (response.ok) {
-        showToast(data.message)
-        setCourseForm({
-          courseCode: "",
-          courseName: "",
-          semester: "first",
-        })
-        fetchCourses()
-      } else {
-        showToast(data.message || "Failed to add course", "error")
-      }
+      
+      showToast(response.data.message)
+      setCourseForm({
+        courseCode: "",
+        courseName: "",
+        semester: "first",
+      })
+      fetchCourses()
     } catch (error) {
       console.error("Error adding course:", error)
-      showToast("Failed to add course", "error")
+      showToast(error.response?.data?.message || "Failed to add course", "error")
     }
   }
   
   const handleUpdateCourse = async (e) => {
     e.preventDefault()
     try {
-      const response = await fetch(`/api/courses/admin/${editingCourse._id}`, {
-        method: "PUT",
+      const token = localStorage.getItem("token")
+      const response = await api.put(`/courses/admin/${editingCourse._id}`, courseForm, {
         headers: {
+          Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
-        body: JSON.stringify(courseForm),
       })
-      const data = await response.json()
-      if (response.ok) {
-        showToast("Course updated successfully")
-        setEditingCourse(null)
-        setCourseForm({
-          courseCode: "",
-          courseName: "",
-          semester: "first",
-        })
-        fetchCourses()
-      } else {
-        showToast(data.message || "Failed to update course", "error")
-      }
+      
+      showToast("Course updated successfully")
+      setEditingCourse(null)
+      setCourseForm({
+        courseCode: "",
+        courseName: "",
+        semester: "first",
+      })
+      fetchCourses()
     } catch (error) {
       console.error("Error updating course:", error)
-      showToast("Failed to update course", "error")
+      showToast(error.response?.data?.message || "Failed to update course", "error")
     }
   }
   
   const toggleCourseStatus = async (courseId, currentStatus) => {
     try {
-      const response = await fetch(`/api/courses/admin/${courseId}`, {
-        method: "PUT",
+      const token = localStorage.getItem("token")
+      const response = await api.put(`/courses/admin/${courseId}`, { isActive: !currentStatus }, {
         headers: {
+          Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
-        body: JSON.stringify({ isActive: !currentStatus }),
       })
-      const data = await response.json()
-      if (response.ok) {
-        showToast(`Course ${!currentStatus ? 'activated' : 'deactivated'} successfully`)
-        fetchCourses()
-      } else {
-        showToast(data.message || `Failed to ${!currentStatus ? 'activate' : 'deactivate'} course`, "error")
-      }
+      
+      showToast(`Course ${!currentStatus ? 'activated' : 'deactivated'} successfully`)
+      fetchCourses()
     } catch (error) {
       console.error(`Error ${!currentStatus ? 'activating' : 'deactivating'} course:`, error)
       showToast(`Failed to ${!currentStatus ? 'activate' : 'deactivate'} course`, "error")
@@ -548,21 +494,16 @@ const AdminQuizManagement = () => {
   
   const handleDeactivateSemester = async (semester) => {
     try {
-      const response = await fetch("/api/courses/admin/deactivate-semester", {
-        method: "POST",
+      const token = localStorage.getItem("token")
+      const response = await api.post("/courses/admin/deactivate-semester", { semester }, {
         headers: {
+          Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
-        body: JSON.stringify({ semester }),
       })
-      const data = await response.json()
-      if (response.ok) {
-        showToast(data.message)
-        fetchCourses()
-      } else {
-        showToast(data.message || "Failed to deactivate semester", "error")
-      }
+      
+      showToast(response.data.message)
+      fetchCourses()
     } catch (error) {
       console.error("Error deactivating semester:", error)
       showToast("Failed to deactivate semester", "error")
@@ -574,7 +515,7 @@ const AdminQuizManagement = () => {
     setQuestionForm({
       question: question.question,
       options: [...question.options],
-      correctOption: question.correctOption, // FIXED: Use as-is (1-4)
+      correctOption: question.correctOption,
       explanation: question.explanation,
       tags: question.tags.join(", "),
       course: question.course,

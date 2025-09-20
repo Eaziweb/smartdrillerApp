@@ -2,8 +2,8 @@
 import { useState, useEffect } from "react"
 import { useAuth } from "../../contexts/AuthContext"
 import { Link } from "react-router-dom"
-import axios from "axios"
 import styles from "../../styles/UsersPage.module.css"
+import api from "../../utils/api";
 
 const UsersPage = () => {
   const { user } = useAuth()
@@ -16,7 +16,7 @@ const UsersPage = () => {
 
   const loadUsers = async () => {
     try {
-      const response = await axios.get("/api/admin/users")
+      const response = await api.get("/api/admin/users")
       setUsers(response.data)
     } catch (error) {
       console.error("Failed to load users:", error)

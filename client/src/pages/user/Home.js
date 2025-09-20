@@ -2,10 +2,10 @@
 import { useState, useEffect } from "react"
 import { Link } from "react-router-dom"
 import { useAuth } from "../../contexts/AuthContext"
-import axios from "axios"
 import styles from "../../styles/home.module.css"
 import AboutSmartDriller from "./AboutSmartDriller"
 import SubscriptionModal from "./SubscriptionModal"
+import api from "../../utils/api";
 
 const Home = () => {
   const { user, logout, updateUser } = useAuth()
@@ -24,7 +24,7 @@ const Home = () => {
   
   const loadNotifications = async () => {
     try {
-      const response = await axios.get("/api/notifications")
+      const response = await api.get("/api/notifications")
       setNotifications(response.data)
       
       // Calculate unread notifications (notifications created after user's last view)
@@ -46,7 +46,7 @@ const Home = () => {
   const markNotificationsAsRead = async () => {
     try {
       // Update user's last notification view time
-      await axios.put("/api/users/last-notification-view")
+      await api.put("/api/users/last-notification-view")
       
       // Update user in context
       updateUser({
@@ -79,7 +79,7 @@ const Home = () => {
     
     // Check if user's university has semester plan available
     try {
-      const response = await axios.get("/api/payments/subscription-options")
+      const response = await api.get("/api/payments/subscription-options")
       const { semester } = response.data.options
       
       if (semester) {
@@ -98,7 +98,7 @@ const Home = () => {
   const initializePayment = async (subscriptionType, isRecurring, recurringMonths) => {
     setLoading(true)
     try {
-      const response = await axios.post("/api/payments/initialize", {
+      const response = await api.post("/api/payments/initialize", {
         subscriptionType,
         isRecurring,
         recurringMonths,

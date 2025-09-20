@@ -1,8 +1,8 @@
 "use client"
 import { useState } from "react"
 import { Link } from "react-router-dom"
-import axios from "axios"
 import styles from "../../styles/auth.module.css"
+import api from "../../utils/api";
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState("")
@@ -17,7 +17,7 @@ const ForgotPassword = () => {
     setMessage("")
     
     try {
-      const response = await axios.post("/api/auth/forgot-password", { email })
+      const response = await api.post("/api/auth/forgot-password", { email })
       setMessage(response.data.message)
     } catch (error) {
       console.error("Forgot password error:", error)

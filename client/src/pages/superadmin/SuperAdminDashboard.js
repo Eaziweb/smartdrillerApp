@@ -2,8 +2,8 @@
 import { useState, useEffect } from "react"
 import { useAuth } from "../../contexts/AuthContext"
 import { Link } from "react-router-dom"
-import axios from "axios"
 import styles from "../../styles/SuperAdminDashboard.module.css"
+import api from "../../utils/api";
 
 const SuperAdminDashboard = () => {
   const { user, logout } = useAuth()
@@ -29,8 +29,8 @@ const SuperAdminDashboard = () => {
   const loadDashboardData = async () => {
     try {
       const [revenueRes, adminsRes] = await Promise.all([
-        axios.get("/api/superadmin/revenue"),
-        axios.get("/api/superadmin/admins"),
+        api.get("/api/superadmin/revenue"),
+        api.get("/api/superadmin/admins"),
       ])
       
       setStats({
@@ -60,7 +60,7 @@ const SuperAdminDashboard = () => {
         return
       }
       
-      await axios.post("/api/superadmin/admins", newAdmin)
+      await api.post("/api/superadmin/admins", newAdmin)
       setNewAdmin({ fullName: "", email: "", password: "" })
       loadDashboardData()
       showMessage("Admin created successfully!", "success")
@@ -77,7 +77,7 @@ const SuperAdminDashboard = () => {
   const handleDeleteAdmin = async (id) => {
     if (window.confirm("Are you sure you want to delete this admin?")) {
       try {
-        await axios.delete(`/api/superadmin/admins/${id}`)
+        await api.delete(`/api/superadmin/admins/${id}`)
         loadDashboardData()
         showMessage("Admin deleted successfully!", "success")
       } catch (error) {
@@ -88,7 +88,7 @@ const SuperAdminDashboard = () => {
 
   const handleManualVerify = async (transactionId) => {
     try {
-      const response = await axios.post("/api/payments/manual-verify", { transactionId });
+      const response = await api.post("/api/payments/manual-verify", { transactionId });
       
       if (response.data.status === "success") {
         showMessage("Payment verified successfully!", "success");

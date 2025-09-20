@@ -2,8 +2,8 @@
 import { useState, useEffect } from "react"
 import { Link, useNavigate } from "react-router-dom"
 import { useAuth } from "../../contexts/AuthContext"
-import axios from "axios"
 import styles from "../../styles/Competitions.module.css"
+import api from "../../utils/api";
 
 const Competitions = () => {
   const { user } = useAuth()
@@ -18,7 +18,7 @@ const Competitions = () => {
 
   const fetchCompetitions = async () => {
     try {
-      const response = await axios.get("/api/competitions")
+      const response = await api.get("/api/competitions")
       setCompetitions(response.data)
     } catch (error) {
       console.error("Error fetching competitions:", error)

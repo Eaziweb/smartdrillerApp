@@ -2,7 +2,7 @@
 import { useState, useEffect, useRef } from "react"
 import { useNavigate } from "react-router-dom"
 import { useAuth } from "../../contexts/AuthContext"
-import axios from "axios"
+import api from "../../utils/api";
 import styles from "../../styles/correction.module.css"
 
 // Import KaTeX CSS
@@ -123,7 +123,7 @@ const Correction = () => {
       }
       const result = JSON.parse(storedResult)
       // Fetch the full result with questions
-      const response = await axios.get(`/api/results/${result._id}`)
+      const response = await api.get(`/api/results/${result._id}`)
       setCorrectionData(response.data)
       setLoading(false)
     } catch (error) {

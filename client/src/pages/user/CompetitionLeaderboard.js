@@ -2,8 +2,8 @@
 import { useState, useEffect } from "react"
 import { Link, useParams } from "react-router-dom"
 import { useAuth } from "../../contexts/AuthContext"
-import axios from "axios"
 import styles from "../../styles/CompetitionLeaderboard.module.css"
+import api from "../../utils/api";
 
 const CompetitionLeaderboard = () => {
   const { id } = useParams()
@@ -38,7 +38,7 @@ const CompetitionLeaderboard = () => {
 
   const fetchCompetition = async () => {
     try {
-      const response = await axios.get(`/api/competitions/${id}`)
+      const response = await api.get(`/api/competitions/${id}`)
       setCompetition(response.data)
       // Extract available courses for filtering
       const courses =
@@ -62,7 +62,7 @@ const CompetitionLeaderboard = () => {
       })
       if (filters.course) params.append("course", filters.course)
       if (searchTerm) params.append("search", searchTerm)
-      const response = await axios.get(`/api/competitions/${id}/leaderboard?${params}`)
+      const response = await api.get(`/api/competitions/${id}/leaderboard?${params}`)
       setLeaderboard(response.data.leaderboard)
       setStats(response.data.stats)
       setPagination(response.data.pagination)

@@ -2,7 +2,7 @@
 import { useState, useEffect, useRef } from "react"
 import { useNavigate } from "react-router-dom"
 import { useAuth } from "../../contexts/AuthContext"
-import axios from "axios"
+import api from "../../utils/api";
 import styles from "../../styles/study.module.css"
 // Import KaTeX CSS
 import 'katex/dist/katex.min.css'
@@ -378,7 +378,7 @@ const Study = () => {
   
   const loadBookmarks = async () => {
     try {
-      const response = await axios.get("/api/bookmarks")
+      const response = await api.get("/api/bookmarks")
       const bookmarks = new Set()
       Object.values(response.data.bookmarks).forEach((courseBookmarks) => {
         courseBookmarks.forEach((bookmark) => {
@@ -442,14 +442,14 @@ const Study = () => {
   const handleBookmark = async (questionId) => {
     try {
       if (bookmarkedQuestions.has(questionId)) {
-        await axios.delete(`/api/bookmarks/${questionId}`)
+        await api.delete(`/api/bookmarks/${questionId}`)
         setBookmarkedQuestions((prev) => {
           const newSet = new Set(prev)
           newSet.delete(questionId)
           return newSet
         })
       } else {
-        await axios.post("/api/bookmarks/add", { questionId })
+        await api.post("/api/bookmarks/add", { questionId })
         setBookmarkedQuestions((prev) => new Set([...prev, questionId]))
       }
     } catch (error) {
@@ -462,7 +462,7 @@ const Study = () => {
     setSubmittingReport(true)
     try {
       const currentQuestion = examData.questions[currentQuestionIndex]
-      await axios.post("/api/reports/submit", {
+      await api.post("/api/reports/submit", {
         questionId: currentQuestion._id,
         description: reportDescription,
       })

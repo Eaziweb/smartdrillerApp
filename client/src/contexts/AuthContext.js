@@ -1,7 +1,7 @@
 "use client";
 import { createContext, useContext, useState, useEffect } from "react";
 import axios from "axios";
-
+import api from "../utils/api";
 const AuthContext = createContext();
 
 export const useAuth = () => {
@@ -47,7 +47,7 @@ export const AuthProvider = ({ children }) => {
     const loadUser = async () => {
       if (token && isInitialized) {
         try {
-          const response = await axios.get("/api/auth/me");
+          const response = await api.get("/api/auth/me");
           setUser(response.data.user);
         } catch (error) {
           console.error("Failed to load user:", error);
@@ -95,7 +95,7 @@ export const AuthProvider = ({ children }) => {
         };
       }
       
-      const response = await axios.post("/api/auth/login", {
+      const response = await api.post("/api/auth/login", {
         email,
         password,
         deviceId
@@ -150,7 +150,7 @@ export const AuthProvider = ({ children }) => {
         };
       }
       
-      const response = await axios.post("/api/auth/verify-device-otp", {
+      const response = await api.post("/api/auth/verify-device-otp", {
         email,
         otp,
         deviceName,
@@ -183,7 +183,7 @@ export const AuthProvider = ({ children }) => {
 
   const adminLogin = async (email, password) => {
     try {
-      const response = await axios.post("/api/auth/admin-login", { email, password });
+      const response = await api.post("/api/auth/admin-login", { email, password });
       const { token: newToken, user: userData } = response.data;
       setToken(newToken);
       setUser(userData);
@@ -202,7 +202,7 @@ export const AuthProvider = ({ children }) => {
 
   const superAdminLogin = async (email, password) => {
     try {
-      const response = await axios.post("/api/superadmin/login", { email, password });
+      const response = await api.post("/api/superadmin/login", { email, password });
       const { token: newToken, user: userData } = response.data;
       setToken(newToken);
       setUser(userData);
@@ -221,7 +221,7 @@ export const AuthProvider = ({ children }) => {
 
   const register = async (userData) => {
     try {
-      const response = await axios.post("/api/auth/register", userData);
+      const response = await api.post("/api/auth/register", userData);
       return { success: true, message: response.data.message };
     } catch (error) {
       return {
@@ -246,7 +246,7 @@ export const AuthProvider = ({ children }) => {
 
   const getTrustedDevices = async () => {
     try {
-      const response = await axios.get("/api/auth/devices");
+      const response = await api.get("/api/auth/devices");
       return { success: true, devices: response.data.devices };
     } catch (error) {
       return {
@@ -258,7 +258,7 @@ export const AuthProvider = ({ children }) => {
 
   const removeTrustedDevice = async (deviceId) => {
     try {
-      await axios.delete(`/api/auth/devices/${deviceId}`);
+      await api.delete(`/api/auth/devices/${deviceId}`);
       return { success: true };
     } catch (error) {
       return {

@@ -1,9 +1,8 @@
 "use client"
 import { useState, useEffect, useMemo } from "react"
 import { Link } from "react-router-dom"
-import axios from "axios"
 import styles from "../../styles/Notes.module.css"
-
+import api from "../../utils/api";
 const Notes = () => {
   const [courses, setCourses] = useState([])
   const [loading, setLoading] = useState(true)
@@ -19,7 +18,7 @@ const Notes = () => {
 
   const loadCourses = async () => {
     try {
-      const response = await axios.get("/api/notes/courses", {
+      const response = await api.get("/api/notes/courses", {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       })
       setCourses(response.data)
@@ -33,7 +32,7 @@ const Notes = () => {
   const loadProgress = async () => {
     setProgressLoading(true)
     try {
-      const response = await axios.get("/api/notes/progress", {
+      const response = await api.get("/api/notes/progress", {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       })
       setCompletedNotes(response.data.completedNotes || [])

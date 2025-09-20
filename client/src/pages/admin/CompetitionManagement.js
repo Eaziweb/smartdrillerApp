@@ -1,8 +1,8 @@
 "use client"
 import { useState, useEffect } from "react"
 import { Link } from "react-router-dom"
-import axios from "axios"
 import styles from "../../styles/CompetitionManagement.module.css"
+import api from "../../utils/api";
 
 const CompetitionManagement = () => {
   const [competitions, setCompetitions] = useState([])
@@ -26,7 +26,7 @@ const CompetitionManagement = () => {
 
   const fetchCompetitions = async () => {
     try {
-      const response = await axios.get("/api/admin/competitions")
+      const response = await api.get("/api/admin/competitions")
       setCompetitions(response.data)
     } catch (error) {
       console.error("Error fetching competitions:", error)
@@ -41,10 +41,10 @@ const CompetitionManagement = () => {
     setLoading(true)
     try {
       if (editingCompetition) {
-        await axios.put(`/api/admin/competitions/${editingCompetition._id}`, formData)
+        await api.put(`/api/admin/competitions/${editingCompetition._id}`, formData)
         showMessage("Competition updated successfully", "success")
       } else {
-        await axios.post("/api/admin/competitions", formData)
+        await api.post("/api/admin/competitions", formData)
         showMessage("Competition created successfully", "success")
       }
       setShowCreateModal(false)
@@ -83,7 +83,7 @@ const CompetitionManagement = () => {
       return
     }
     try {
-      await axios.delete(`/api/admin/competitions/${competitionId}`)
+      await api.delete(`/api/admin/competitions/${competitionId}`)
       showMessage("Competition deleted successfully", "success")
       fetchCompetitions()
     } catch (error) {

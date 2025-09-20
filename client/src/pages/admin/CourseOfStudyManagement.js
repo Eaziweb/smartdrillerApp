@@ -2,8 +2,8 @@
 import { useState, useEffect } from "react"
 import { Link } from "react-router-dom"
 import { useAuth } from "../../contexts/AuthContext"
-import axios from "axios"
 import styles from "../../styles/AdminDashboard.module.css"
+import api from "../../utils/api";
 
 const CourseOfStudyManagement = () => {
   const { user } = useAuth()
@@ -22,7 +22,7 @@ const CourseOfStudyManagement = () => {
 
   const loadCourses = async () => {
     try {
-      const response = await axios.get("/api/courseofstudy")
+      const response = await api.get("/api/courseofstudy")
       setCourses(response.data.courses)
     } catch (error) {
       console.error("Failed to load courses:", error)
@@ -32,7 +32,7 @@ const CourseOfStudyManagement = () => {
 
   const loadCategories = async () => {
     try {
-      const response = await axios.get("/api/courseofstudy/categories/list")
+      const response = await api.get("/api/courseofstudy/categories/list")
       setCategories(response.data.categories)
     } catch (error) {
       console.error("Failed to load categories:", error)
@@ -42,10 +42,10 @@ const CourseOfStudyManagement = () => {
   const handleSaveCourse = async (courseData) => {
     try {
       if (editingCourse) {
-        await axios.put(`/api/courseofstudy/${editingCourse._id}`, courseData)
+        await api.put(`/api/courseofstudy/${editingCourse._id}`, courseData)
         showMessage("Course updated successfully!", "success")
       } else {
-        await axios.post("/api/courseofstudy", courseData)
+        await api.post("/api/courseofstudy", courseData)
         showMessage("Course added successfully!", "success")
       }
       loadCourses()
@@ -59,7 +59,7 @@ const CourseOfStudyManagement = () => {
   const handleDeleteCourse = async (courseId) => {
     if (window.confirm("Are you sure you want to delete this course?")) {
       try {
-        await axios.delete(`/api/courseofstudy/${courseId}`)
+        await api.delete(`/api/courseofstudy/${courseId}`)
         showMessage("Course deleted successfully!", "success")
         loadCourses()
       } catch (error) {

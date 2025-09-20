@@ -1,6 +1,6 @@
 "use client"
 import { useState, useEffect } from "react"
-import axios from "axios"
+import api from "../../utils/api";
 import styles from "../../styles/subscriptionModal.module.css"
 
 const SubscriptionModal = ({ isOpen, onClose, user }) => {
@@ -22,7 +22,7 @@ const SubscriptionModal = ({ isOpen, onClose, user }) => {
 
   const fetchSubscriptionOptions = async () => {
     try {
-      const response = await axios.get("/api/payments/subscription-options")
+      const response = await api.get("/api/payments/subscription-options")
       setSubscriptionOptions(response.data.options)
     } catch (error) {
       console.error("Failed to fetch subscription options:", error)
@@ -47,7 +47,7 @@ const SubscriptionModal = ({ isOpen, onClose, user }) => {
       }
       
       
-      const response = await axios.post("/api/payments/initialize", subscriptionData)
+      const response = await api.post("/api/payments/initialize", subscriptionData)
       
       
       if (response.data.status === "success") {

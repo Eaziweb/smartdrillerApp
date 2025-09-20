@@ -2,8 +2,8 @@
 import { useState, useEffect } from "react"
 import { useAuth } from "../../contexts/AuthContext"
 import { Link } from "react-router-dom"
-import axios from "axios"
 import styles from "../../styles/NotificationsPage.module.css"
+import api from "../../utils/api";
 
 const NotificationsPage = () => {
   const { user } = useAuth()
@@ -21,7 +21,7 @@ const NotificationsPage = () => {
 
   const loadNotifications = async () => {
     try {
-      const response = await axios.get("/api/admin/notifications")
+      const response = await api.get("/api/admin/notifications")
       setNotifications(response.data)
     } catch (error) {
       console.error("Failed to load notifications:", error)
@@ -33,7 +33,7 @@ const NotificationsPage = () => {
   const handleCreateNotification = async (e) => {
     e.preventDefault()
     try {
-      await axios.post("/api/admin/notifications", newNotification)
+      await api.post("/api/admin/notifications", newNotification)
       setNewNotification({ title: "", message: "", type: "info" })
       loadNotifications()
       showMessage("Notification created successfully!", "success")
@@ -44,7 +44,7 @@ const NotificationsPage = () => {
 
   const handleDeleteNotification = async (id) => {
     try {
-      await axios.delete(`/api/admin/notifications/${id}`)
+      await api.delete(`/api/admin/notifications/${id}`)
       loadNotifications()
       showMessage("Notification deleted successfully!", "success")
     } catch (error) {

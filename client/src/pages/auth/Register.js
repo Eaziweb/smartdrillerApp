@@ -4,6 +4,7 @@ import { Link, useNavigate } from "react-router-dom"
 import { useAuth } from "../../contexts/AuthContext"
 import axios from "axios"
 import styles from "../../styles/auth.module.css"
+import api from "../../utils/api";
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -45,7 +46,7 @@ const Register = () => {
     const fetchData = async () => {
       try {
         // Fetch universities
-        const uniResponse = await axios.get("/api/universities")
+        const uniResponse = await api.get("/api/universities")
         if (uniResponse.data && Array.isArray(uniResponse.data.universities)) {
           setUniversities(uniResponse.data.universities)
         } else {
@@ -61,7 +62,7 @@ const Register = () => {
       
       try {
         // Fetch courses
-        const courseResponse = await axios.get("/api/courseofstudy")
+        const courseResponse = await api.get("/api/courseofstudy")
         if (courseResponse.data && Array.isArray(courseResponse.data.courses)) {
           // Filter out courses from the "Administration" category
           const nonAdminCourses = courseResponse.data.courses.filter(

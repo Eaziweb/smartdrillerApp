@@ -2,9 +2,8 @@
 import { useState, useEffect } from "react"
 import { Link } from "react-router-dom"
 import { useAuth } from "../../contexts/AuthContext"
-import axios from "axios"
 import styles from "../../styles/AdminDashboard.module.css"
-
+import api from "../../utils/api";
 const AdminDashboard = () => {
   const { user, logout } = useAuth()
   const [stats, setStats] = useState({
@@ -25,7 +24,7 @@ const AdminDashboard = () => {
 
   const loadDashboardData = async () => {
     try {
-      const response = await axios.get("/api/admin/dashboard")
+      const response = await api.get("/api/admin/dashboard")
       setStats(response.data)
     } catch (error) {
       console.error("Failed to load dashboard data:", error)
@@ -35,7 +34,7 @@ const AdminDashboard = () => {
 
   const loadUniversities = async () => {
     try {
-      const response = await axios.get("/api/universities")
+      const response = await api.get("/api/universities")
       setUniversities(response.data.universities)
     } catch (error) {
       console.error("Failed to load universities:", error)
@@ -45,10 +44,10 @@ const AdminDashboard = () => {
   const handleSaveUniversity = async (universityData) => {
     try {
       if (editingUniversity) {
-        await axios.put(`/api/universities/${editingUniversity._id}`, universityData)
+        await api.put(`/api/universities/${editingUniversity._id}`, universityData)
         showMessage("University updated successfully!", "success")
       } else {
-        await axios.post("/api/universities", universityData)
+        await api.post("/api/universities", universityData)
         showMessage("University added successfully!", "success")
       }
       loadUniversities()
@@ -61,7 +60,7 @@ const AdminDashboard = () => {
 
   const handleFetchUniversities = async () => {
     try {
-      await axios.get("/api/universities/fetch-nigerian")
+      await api.get("/api/universities/fetch-nigerian")
       showMessage("Universities fetched successfully!", "success")
       loadUniversities()
     } catch (error) {

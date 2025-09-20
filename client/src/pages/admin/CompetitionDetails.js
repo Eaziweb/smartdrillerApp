@@ -1,8 +1,8 @@
 "use client"
 import { useState, useEffect } from "react"
 import { Link, useParams } from "react-router-dom"
-import axios from "axios"
 import styles from "../../styles/AdminCompetitionDetails.module.css"
+import api from "../../utils/api";
 
 const CompetitionDetails = () => {
   const { id } = useParams()
@@ -89,7 +89,7 @@ const CompetitionDetails = () => {
 
   const fetchCompetitionDetails = async () => {
     try {
-      const response = await axios.get(`/api/admin/competitions/${id}`)
+      const response = await api.get(`/api/admin/competitions/${id}`)
       setCompetition(response.data)
     } catch (error) {
       console.error("Error fetching competition:", error)
@@ -99,7 +99,7 @@ const CompetitionDetails = () => {
 
   const fetchStats = async () => {
     try {
-      const response = await axios.get(`/api/admin/competitions/${id}/stats`)
+      const response = await api.get(`/api/admin/competitions/${id}/stats`)
       setStats(response.data)
     } catch (error) {
       console.error("Error fetching stats:", error)
@@ -113,7 +113,7 @@ const CompetitionDetails = () => {
     
     try {
       setQuestionsLoading(true)
-      const response = await axios.get(`/api/admin/competitions/${id}/questions?courseCode=${selectedCourse}`)
+      const response = await api.get(`/api/admin/competitions/${id}/questions?courseCode=${selectedCourse}`)
       setQuestions(response.data.questions || [])
     } catch (error) {
       console.error("Error fetching questions:", error)
@@ -127,7 +127,7 @@ const CompetitionDetails = () => {
   const handleUpdateCompetition = async (e) => {
     e.preventDefault()
     try {
-      await axios.put(`/api/admin/competitions/${id}`, competitionForm)
+      await api.put(`/api/admin/competitions/${id}`, competitionForm)
       await fetchCompetitionDetails()
       showToast("Competition updated successfully", "success")
     } catch (error) {
@@ -140,7 +140,7 @@ const CompetitionDetails = () => {
   const handleAddCourse = async (e) => {
     e.preventDefault()
     try {
-      const response = await axios.post(`/api/admin/competitions/${id}/courses`, courseForm)
+      const response = await api.post(`/api/admin/competitions/${id}/courses`, courseForm)
       
       setCompetition(prev => ({
         ...prev,
@@ -163,7 +163,7 @@ const CompetitionDetails = () => {
     if (!window.confirm("Are you sure you want to remove this course? All questions for this course will also be deleted.")) return
     
     try {
-      await axios.delete(`/api/admin/competitions/${id}/courses/${courseCode}`)
+      await api.delete(`/api/admin/competitions/${id}/courses/${courseCode}`)
       
       setCompetition(prev => ({
         ...prev,
@@ -208,7 +208,7 @@ const CompetitionDetails = () => {
         formData.append("image", questionForm.image)
       }
       
-      await axios.post(`/api/admin/competitions/${id}/questions`, formData, {
+      await api.post(`/api/admin/competitions/${id}/questions`, formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
@@ -245,7 +245,7 @@ const CompetitionDetails = () => {
         formData.append("image", question.imageFile)
       }
       
-      await axios.put(`/api/admin/competitions/${id}/questions/${questionId}`, formData, {
+      await api.put(`/api/admin/competitions/${id}/questions/${questionId}`, formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
@@ -263,7 +263,7 @@ const CompetitionDetails = () => {
     if (!window.confirm("Are you sure you want to delete this question?")) return
     
     try {
-      await axios.delete(`/api/admin/competitions/${id}/questions/${questionId}`)
+      await api.delete(`/api/admin/competitions/${id}/questions/${questionId}`)
       fetchQuestions() // Refresh the questions list
       fetchCompetitionDetails() // Update course question count
       showToast("Question deleted successfully", "success")
@@ -300,7 +300,7 @@ const CompetitionDetails = () => {
           }
         }
       }
-      const response = await axios.post(
+      const response = await api.post(
         `/api/admin/competitions/${id}/questions/bulk`,
         {
           questions,
