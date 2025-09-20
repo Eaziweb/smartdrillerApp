@@ -555,36 +555,86 @@ router.get("/verify-reset-token/:token", async (req, res) => {
 });
 
 // Get user profile
-  router.get("/me", auth, async (req, res) => {
-    try {
-      // Populate university and course details
-      const user = await User.findById(req.user._id)
-        .populate('university')
-        .populate('course')
+// routes/auth.js
+// Add this endpoint for superadmin users
+router.get("/superadmin/me", auth, async (req, res) => {
+  try {
+    // For superadmin, we don't need to populate course and university
+    const user = await User.findById(req.user._id).select("-password");
 
-      res.json({
+    res.json({
+      user: {
+        id: user._id,
+        fullName: user.fullName,
+        email: user.email,
+        role: user.role,
+        isSubscribed: user.isSubscribed,
+        subscriptionExpiry: user.subscriptionExpiry,
+        subscriptionType: user.subscriptionType,
+        isRecurring: user.isRecurring,
+        remainingMonths: user.remainingMonths,
+        nextPaymentDate: user.nextPaymentDate,
+      },
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Failed to fetch superadmin data" });
+  }
+});
+
+// Update the regular /me endpoint to handle superadmin differently
+router.get("/me", auth, async (req, res) => {
+  try {
+    // Get the user without population first
+    const user = await User.findById(req.user._id).select("-password");
+
+    // If the user is a superadmin, we don't need to populate course and university
+    if (user.role === "superadmin") {
+      return res.json({
         user: {
           id: user._id,
           fullName: user.fullName,
           email: user.email,
-          course: user.course,
-          university: user.university,
-          phoneNumber: user.phoneNumber,
-          accountNumber: user.accountNumber,
-          bankName: user.bankName,
+          role: user.role,
           isSubscribed: user.isSubscribed,
           subscriptionExpiry: user.subscriptionExpiry,
           subscriptionType: user.subscriptionType,
           isRecurring: user.isRecurring,
           remainingMonths: user.remainingMonths,
           nextPaymentDate: user.nextPaymentDate,
-          role: user.role,
         },
       });
-    } catch (error) {
-      console.error(error)
-      res.status(500).json({ message: "Failed to fetch user data" })
     }
-  });
+
+    // For regular users and admins, populate course and university
+    const populatedUser = await User.findById(req.user._id)
+      .populate('university')
+      .populate('course')
+      .select("-password");
+
+    res.json({
+      user: {
+        id: populatedUser._id,
+        fullName: populatedUser.fullName,
+        email: populatedUser.email,
+        course: populatedUser.course,
+        university: populatedUser.university,
+        phoneNumber: populatedUser.phoneNumber,
+        accountNumber: populatedUser.accountNumber,
+        bankName: populatedUser.bankName,
+        isSubscribed: populatedUser.isSubscribed,
+        subscriptionExpiry: populatedUser.subscriptionExpiry,
+        subscriptionType: populatedUser.subscriptionType,
+        isRecurring: populatedUser.isRecurring,
+        remainingMonths: populatedUser.remainingMonths,
+        nextPaymentDate: populatedUser.nextPaymentDate,
+        role: populatedUser.role,
+      },
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Failed to fetch user data" });
+  }
+});
   
 module.exports = router;

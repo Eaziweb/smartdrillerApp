@@ -9,6 +9,7 @@ const bcrypt = require("bcryptjs")
 const router = express.Router()
 
 // SuperAdmin Login
+// routes/superadmin.js
 router.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body
@@ -22,11 +23,19 @@ router.post("/login", async (req, res) => {
     let superadmin = await User.findOne({ email, role: "superadmin" })
     
     if (!superadmin) {
-      // Create superadmin without course (since it's optional for superadmin role)
+      // Find the superadmin course
+      const superadminCourse = await CourseofStudy.findOne({ name: "Super Administration" });
+      
+      if (!superadminCourse) {
+        return res.status(500).json({ message: "Superadmin course not found" });
+      }
+      
+      // Create superadmin with course
       superadmin = new User({
         fullName: "SuperAdmin",
         email,
         password,
+        course: superadminCourse._id,
         role: "superadmin",
         isEmailVerified: true,
       })
@@ -51,6 +60,7 @@ router.post("/login", async (req, res) => {
         fullName: superadmin.fullName,
         email: superadmin.email,
         role: superadmin.role,
+        course: superadmin.course,
       },
     })
   } catch (error) {
@@ -136,6 +146,33 @@ router.get("/revenue", async (req, res) => {
   } catch (error) {
     console.error(error)
     res.status(500).json({ message: "Server error" })
+  }
+});
+
+// routes/auth.js
+// Add this endpoint for superadmin users
+router.get("/superadmin/me", auth, async (req, res) => {
+  try {
+    // For superadmin, we don't need to populate course and university
+    const user = await User.findById(req.user._id).select("-password");
+
+    res.json({
+      user: {
+        id: user._id,
+        fullName: user.fullName,
+        email: user.email,
+        role: user.role,
+        isSubscribed: user.isSubscribed,
+        subscriptionExpiry: user.subscriptionExpiry,
+        subscriptionType: user.subscriptionType,
+        isRecurring: user.isRecurring,
+        remainingMonths: user.remainingMonths,
+        nextPaymentDate: user.nextPaymentDate,
+      },
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Failed to fetch superadmin data" });
   }
 });
 
