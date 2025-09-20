@@ -1,21 +1,17 @@
-require("dotenv").config();
-const express = require("express");
-const mongoose = require("mongoose");
-const cors = require("cors");
-const path = require("path");
-const cookieParser = require("cookie-parser");
-const bcrypt = require("bcryptjs");
-const User = require("./models/User");
-const CourseofStudy = require("./models/CourseofStudy");
-const { initializeData } = require("./utils/initialData");
-const app = express();
+  require("dotenv").config();
+  const express = require("express");
+  const mongoose = require("mongoose");
+  const cors = require("cors");
+  const path = require("path");
+  const cookieParser = require("cookie-parser");
+  const bcrypt = require("bcryptjs");
+  const User = require("./models/User");
+  const CourseofStudy = require("./models/CourseofStudy");
+  const { initializeData } = require("./utils/initialData");
+  const app = express();
 
-const fixDuplicates = async () => {
+ const fixDuplicates = async () => {
   try {
-    // Connect to MongoDB
-    await mongoose.connect(process.env.MONGODB_URI);
-    console.log("✅ Connected to MongoDB");
-    
     // Find all duplicate courses (same name but different categories)
     const duplicates = await CourseofStudy.aggregate([
       {
@@ -31,146 +27,142 @@ const fixDuplicates = async () => {
         }
       }
     ]);
-    
+
     console.log(`Found ${duplicates.length} duplicate course names`);
-    
+
     // Process each duplicate
     for (const duplicate of duplicates) {
       const courses = await CourseofStudy.find({ name: duplicate._id });
-      
+
       console.log(`Processing duplicate: ${duplicate._id} (${courses.length} entries)`);
-      
-      // Create a map to track which categories we've seen
+
+      // Track categories we've seen
       const categoryMap = new Map();
-      
+
       for (const course of courses) {
         const key = `${course.name}-${course.category}`;
-        
+
         if (categoryMap.has(key)) {
-          // This is a true duplicate (same name and category), delete it
           console.log(`  Deleting duplicate: ${course.name} in ${course.category}`);
           await CourseofStudy.deleteOne({ _id: course._id });
         } else {
-          // First time seeing this name-category combination
           categoryMap.set(key, true);
         }
       }
     }
-    
+
     console.log("✅ Duplicate cleanup completed");
-    
-    // Now create the compound index
-    await CourseofStudy.collection.createIndex({ name: 1, category: 1 }, { unique: true });
+
+    // Create the compound index
+    await CourseofStudy.collection.createIndex(
+      { name: 1, category: 1 },
+      { unique: true }
+    );
     console.log("✅ Compound index created");
-    
-    process.exit(0);
   } catch (error) {
     console.error("❌ Error fixing duplicates:", error);
-    process.exit(1);
   }
 };
-// ----------------------
-// CORS Setup
-// ----------------------
-// CORS Setup
-const allowedOrigins = [
-  process.env.FRONTEND_URL,         // production frontend (e.g. https://smartdriller.vercel.app)
-  "http://localhost:3000"           // local dev
-];
 
-app.use(cors({
-  origin: function (origin, callback) {
-    // Allow requests with no origin (e.g. mobile apps, curl)
-    if (!origin) return callback(null, true);
+  // ----------------------
+  // CORS Setup
+  // ----------------------
+  // CORS Setup
+  const allowedOrigins = [
+    process.env.FRONTEND_URL,         // production frontend (e.g. https://smartdriller.vercel.app)
+    "http://localhost:3000"           // local dev
+  ];
 
-    // Always allow explicitly whitelisted origins
-    if (allowedOrigins.includes(origin)) {
-      return callback(null, true);
-    }
+  app.use(cors({
+    origin: function (origin, callback) {
+      // Allow requests with no origin (e.g. mobile apps, curl)
+      if (!origin) return callback(null, true);
 
-    // Allow all *.vercel.app preview deployments
-    if (/\.vercel\.app$/.test(origin)) {
-      return callback(null, true);
-    }
+      // Always allow explicitly whitelisted origins
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
 
-    // Otherwise reject
-    return callback(new Error(`CORS not allowed: ${origin}`));
-  },
-  credentials: true
-}));
+      // Allow all *.vercel.app preview deployments
+      if (/\.vercel\.app$/.test(origin)) {
+        return callback(null, true);
+      }
 
-app.use(express.json({ limit: "10mb" }));
-app.use(express.urlencoded({ extended: true }));
-app.use(cookieParser());
+      // Otherwise reject
+      return callback(new Error(`CORS not allowed: ${origin}`));
+    },
+    credentials: true
+  }));
+
+  app.use(express.json({ limit: "10mb" }));
+  app.use(express.urlencoded({ extended: true }));
+  app.use(cookieParser());
 
 
-// ----------------------
-// MongoDB Connection
-// ----------------------
 mongoose.connect(process.env.MONGODB_URI)
-  .then(() => {
+  .then(async () => {
     console.log("✅ MongoDB connected");
 
-fixDuplicates();
-    initializeData();
-
+    await fixDuplicates();   // run cleanup once
+    await initializeData();  // seed data if needed
   })
   .catch(err => console.error("❌ MongoDB connection error:", err));
 
-// ----------------------
-// Routes
-// ----------------------
-app.use("/api/auth", require("./routes/auth"));
-app.use("/api/questions", require("./routes/questions"));
-app.use("/api/courseYears", require("./routes/courseYears"));
-app.use("/api/bookmarks", require("./routes/bookmarks"));
-app.use("/api/results", require("./routes/results"));
-app.use("/api/reports", require("./routes/reports"));
-app.use("/api/admin", require("./routes/admin"));
-app.use("/api/superadmin", require("./routes/superadmin"));
-app.use("/api/payments", require("./routes/payments"));
-app.use("/api/notifications", require("./routes/notifications"));
-app.use("/api/videos", require("./routes/videos"));
-app.use("/api/notes", require("./routes/notes"));
-app.use("/api/admin/videos", require("./routes/admin-videos"));
-app.use("/api/admin/notes", require("./routes/admin-notes"));
-app.use("/api/ai", require("./routes/ai"));
-app.use("/api/materials", require("./routes/materials"));
-app.use("/api/admin/materials", require("./routes/admin-materials"));
-app.use("/api/competitions", require("./routes/competitions"));
-app.use("/api/admin/competitions", require("./routes/admin-competitions"));
-app.use("/api/users", require("./routes/users"));
-app.use("/api/courses", require("./routes/courses"));
-app.use("/api/courseofstudy", require("./routes/courseofstudy"));
-app.use("/api/universities", require("./routes/universities"));
 
-// ----------------------
-// Static Files
-// ----------------------
-app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+  // ----------------------
+  // Routes
+  // ----------------------
+  app.use("/api/auth", require("./routes/auth"));
+  app.use("/api/questions", require("./routes/questions"));
+  app.use("/api/courseYears", require("./routes/courseYears"));
+  app.use("/api/bookmarks", require("./routes/bookmarks"));
+  app.use("/api/results", require("./routes/results"));
+  app.use("/api/reports", require("./routes/reports"));
+  app.use("/api/admin", require("./routes/admin"));
+  app.use("/api/superadmin", require("./routes/superadmin"));
+  app.use("/api/payments", require("./routes/payments"));
+  app.use("/api/notifications", require("./routes/notifications"));
+  app.use("/api/videos", require("./routes/videos"));
+  app.use("/api/notes", require("./routes/notes"));
+  app.use("/api/admin/videos", require("./routes/admin-videos"));
+  app.use("/api/admin/notes", require("./routes/admin-notes"));
+  app.use("/api/ai", require("./routes/ai"));
+  app.use("/api/materials", require("./routes/materials"));
+  app.use("/api/admin/materials", require("./routes/admin-materials"));
+  app.use("/api/competitions", require("./routes/competitions"));
+  app.use("/api/admin/competitions", require("./routes/admin-competitions"));
+  app.use("/api/users", require("./routes/users"));
+  app.use("/api/courses", require("./routes/courses"));
+  app.use("/api/courseofstudy", require("./routes/courseofstudy"));
+  app.use("/api/universities", require("./routes/universities"));
 
-// ----------------------
-// Utility jobs
-// ----------------------
-require("./utils/updateVideoMetadata");
+  // ----------------------
+  // Static Files
+  // ----------------------
+  app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
-// ----------------------
-// Error Handling
-// ----------------------
-app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).json({ message: "Something went wrong!", error: err.message });
-});
+  // ----------------------
+  // Utility jobs
+  // ----------------------
+  require("./utils/updateVideoMetadata");
 
-// ----------------------
-// Root Endpoint
-// ----------------------
-app.get("/", (req, res) => {
-  res.json({ status: "Backend running 🚀", time: new Date() });
-});
+  // ----------------------
+  // Error Handling
+  // ----------------------
+  app.use((err, req, res, next) => {
+    console.error(err.stack);
+    res.status(500).json({ message: "Something went wrong!", error: err.message });
+  });
+
+  // ----------------------
+  // Root Endpoint
+  // ----------------------
+  app.get("/", (req, res) => {
+    res.json({ status: "Backend running 🚀", time: new Date() });
+  });
 
 
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
-});
+  const PORT = process.env.PORT || 5000;
+  app.listen(PORT, () => {
+    console.log(`🚀 Server running on port ${PORT}`);
+  });
