@@ -4,7 +4,7 @@ const mongoose = require("mongoose");
 const cors = require("cors");
 const path = require("path");
 const cookieParser = require("cookie-parser");
-const User = require('../models/User');
+const User = require('./models/User');
 const app = express();
 
 // ----------------------
