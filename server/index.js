@@ -9,28 +9,25 @@ const app = express();
 
 // ----------------------
 // CORS Setup
-// ----------------------
 const allowedOrigins = [
-  process.env.FRONTEND_URL, // e.g., https://smartdriller.vercel.app
-  "http://localhost:3000"   // for local development
+  process.env.FRONTEND_URL,
+  "http://localhost:3000" 
 ];
 
 app.use(cors({
   origin: function(origin, callback) {
-    // Allow requests with no origin like Postman or server-to-server
     if (!origin) return callback(null, true);
+
     if (allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error("CORS not allowed"));
+      return callback(null, true);
     }
+
+    return callback(new Error("CORS not allowed"));
   },
-  credentials: true
+  credentials: true, 
 }));
 
-// ----------------------
-// Middleware
-// ----------------------
+
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
@@ -101,3 +98,36 @@ const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
 });
+
+
+// Add this after connecting to MongoDB but before starting the server
+const createSuperAdmin = async () => {
+  try {
+    const { SUPERADMIN_EMAIL, SUPERADMIN_PASSWORD } = process.env;
+    
+    if (!SUPERADMIN_EMAIL || !SUPERADMIN_PASSWORD) {
+      console.log("Superadmin credentials not set in environment variables");
+      return;
+    }
+    
+    const existingSuperadmin = await User.findOne({ role: "superadmin" });
+    
+    if (!existingSuperadmin) {
+      const superadmin = new User({
+        fullName: "SuperAdmin",
+        email: SUPERADMIN_EMAIL,
+        password: SUPERADMIN_PASSWORD,
+        role: "superadmin",
+        isEmailVerified: true,
+      });
+      
+      await superadmin.save();
+      console.log("Superadmin created successfully");
+    }
+  } catch (error) {
+    console.error("Error creating superadmin:", error);
+  }
+};
+
+// Call the function
+createSuperAdmin();
