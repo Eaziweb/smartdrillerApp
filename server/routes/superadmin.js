@@ -86,7 +86,7 @@ router.post("/login", async (req, res) => {
     })
   } catch (error) {
     console.error("SuperAdmin login error:", error)
-    res.status(500).json({ message: "Server error" })
+    res.status(500).json({ message: "Server error", error: error.message })
   }
 })
 
@@ -122,25 +122,45 @@ router.post("/admins", async (req, res) => {
       },
     })
   } catch (error) {
-    console.error(error)
-    res.status(500).json({ message: "Server error" })
+    console.error("Error creating admin:", error)
+    res.status(500).json({ message: "Server error", error: error.message })
   }
 })
 
 // Get all Admins
 router.get("/admins", async (req, res) => {
   try {
-    const admins = await User.find({ role: "admin" })
-      .select("-password")
-      // Only populate course if it exists
-      .populate({
-        path: "course",
-        select: "name"
-      })
-    res.json(admins)
+    // First get all admins without populating course
+    const admins = await User.find({ role: "admin" }).select("-password");
+    
+    // Then manually populate course for each admin that has one
+    const populatedAdmins = await Promise.all(admins.map(async (admin) => {
+      if (admin.course) {
+        try {
+          const course = await CourseofStudy.findById(admin.course).select('name');
+          return {
+            ...admin.toObject(),
+            course: course ? { name: course.name } : null
+          };
+        } catch (err) {
+          console.error(`Error populating course for admin ${admin._id}:`, err);
+          return {
+            ...admin.toObject(),
+            course: null
+          };
+        }
+      } else {
+        return {
+          ...admin.toObject(),
+          course: null
+        };
+      }
+    }));
+    
+    res.json(populatedAdmins);
   } catch (error) {
-    console.error(error)
-    res.status(500).json({ message: "Server error" })
+    console.error("Error fetching admins:", error)
+    res.status(500).json({ message: "Server error", error: error.message })
   }
 })
 
@@ -153,8 +173,8 @@ router.delete("/admins/:id", async (req, res) => {
     }
     res.json({ message: "Admin deleted successfully" })
   } catch (error) {
-    console.error(error)
-    res.status(500).json({ message: "Server error" })
+    console.error("Error deleting admin:", error)
+    res.status(500).json({ message: "Server error", error: error.message })
   }
 })
 
@@ -168,8 +188,8 @@ router.get("/revenue", async (req, res) => {
       payments,
     })
   } catch (error) {
-    console.error(error)
-    res.status(500).json({ message: "Server error" })
+    console.error("Error fetching revenue:", error)
+    res.status(500).json({ message: "Server error", error: error.message })
   }
 });
 
