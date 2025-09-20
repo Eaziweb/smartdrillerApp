@@ -150,30 +150,5 @@ router.get("/revenue", async (req, res) => {
 });
 
 // routes/auth.js
-// Add this endpoint for superadmin users
-router.get("/superadmin/me", auth, async (req, res) => {
-  try {
-    // For superadmin, we don't need to populate course and university
-    const user = await User.findById(req.user._id).select("-password");
-
-    res.json({
-      user: {
-        id: user._id,
-        fullName: user.fullName,
-        email: user.email,
-        role: user.role,
-        isSubscribed: user.isSubscribed,
-        subscriptionExpiry: user.subscriptionExpiry,
-        subscriptionType: user.subscriptionType,
-        isRecurring: user.isRecurring,
-        remainingMonths: user.remainingMonths,
-        nextPaymentDate: user.nextPaymentDate,
-      },
-    });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Failed to fetch superadmin data" });
-  }
-});
 
 module.exports = router
