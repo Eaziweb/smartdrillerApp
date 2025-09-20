@@ -4,7 +4,6 @@ const mongoose = require("mongoose");
 const cors = require("cors");
 const path = require("path");
 const cookieParser = require("cookie-parser");
-const User = require('./models/User');
 const app = express();
 
 // ----------------------
@@ -91,43 +90,68 @@ app.get("/", (req, res) => {
   res.json({ status: "Backend running 🚀", time: new Date() });
 });
 
-// ----------------------
-// Start Server
-// ----------------------
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
 });
 
 
-// Add this after connecting to MongoDB but before starting the server
+const bcrypt = require("bcryptjs");
+const User = require("./models/User"); // adjust path if needed
+
 const createSuperAdmin = async () => {
   try {
     const { SUPERADMIN_EMAIL, SUPERADMIN_PASSWORD } = process.env;
-    
+
     if (!SUPERADMIN_EMAIL || !SUPERADMIN_PASSWORD) {
-      console.log("Superadmin credentials not set in environment variables");
+      console.log("⚠️ Superadmin credentials not set in environment variables");
       return;
     }
-    
+
+    // Check if a superadmin already exists
     const existingSuperadmin = await User.findOne({ role: "superadmin" });
-    
-    if (!existingSuperadmin) {
-      const superadmin = new User({
-        fullName: "SuperAdmin",
-        email: SUPERADMIN_EMAIL,
-        password: SUPERADMIN_PASSWORD,
-        role: "superadmin",
-        isEmailVerified: true,
-      });
-      
-      await superadmin.save();
-      console.log("Superadmin created successfully");
+    if (existingSuperadmin) {
+      console.log("Superadmin already exists");
+      return;
     }
+
+    // Hash the password
+    const hashedPassword = await bcrypt.hash(SUPERADMIN_PASSWORD, 10);
+
+    const superadmin = new User({
+      fullName: "SuperAdmin",
+      email: SUPERADMIN_EMAIL,
+      password: hashedPassword,
+      course: "Super Administration",
+      phoneNumber: "",
+      accountNumber: "",
+      bankName: "",
+      isSubscribed: false,
+      subscriptionExpiry: null,
+      universitySubscriptionEnd: null,
+      isEmailVerified: true,
+      emailVerificationCode: null,
+      emailVerificationExpires: null,
+      role: "superadmin",
+      subscriptionType: "monthly",
+      isRecurring: false,
+      recurringMonths: 1,
+      remainingMonths: 0,
+      nextPaymentDate: null,
+      deviceOTP: null,
+      deviceOTPExpires: null,
+      maxDevices: 4,
+      trustedDevices: [],
+      createdAt: new Date()
+    });
+
+    await superadmin.save();
+    console.log("✅ Superadmin created successfully");
+
   } catch (error) {
-    console.error("Error creating superadmin:", error);
+    console.error("❌ Error creating superadmin:", error);
   }
 };
 
-// Call the function
 createSuperAdmin();
+
