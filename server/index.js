@@ -99,7 +99,7 @@ app.listen(PORT, () => {
 const bcrypt = require("bcryptjs");
 const User = require("./models/User"); // adjust path if needed
 
-const createSuperAdmin = async () => {
+const createOrUpdateSuperAdmin = async () => {
   try {
     const { SUPERADMIN_EMAIL, SUPERADMIN_PASSWORD } = process.env;
 
@@ -108,17 +108,11 @@ const createSuperAdmin = async () => {
       return;
     }
 
-    // Check if a superadmin already exists
-    const existingSuperadmin = await User.findOne({ role: "superadmin" });
-    if (existingSuperadmin) {
-      console.log("Superadmin already exists");
-      return;
-    }
-
     // Hash the password
     const hashedPassword = await bcrypt.hash(SUPERADMIN_PASSWORD, 10);
 
-    const superadmin = new User({
+    // Upsert superadmin
+    const superadminData = {
       fullName: "SuperAdmin",
       email: SUPERADMIN_EMAIL,
       password: hashedPassword,
@@ -143,15 +137,20 @@ const createSuperAdmin = async () => {
       maxDevices: 4,
       trustedDevices: [],
       createdAt: new Date()
-    });
+    };
 
-    await superadmin.save();
-    console.log("✅ Superadmin created successfully");
+    const superadmin = await User.findOneAndUpdate(
+      { role: "superadmin" }, // filter
+      { $set: superadminData }, // update data
+      { upsert: true, new: true, setDefaultsOnInsert: true } // options
+    );
+
+    console.log("✅ Superadmin created/updated successfully:", superadmin.email);
 
   } catch (error) {
-    console.error("❌ Error creating superadmin:", error);
+    console.error("❌ Error creating/updating superadmin:", error);
   }
 };
 
-createSuperAdmin();
+createOrUpdateSuperAdmin();
 
