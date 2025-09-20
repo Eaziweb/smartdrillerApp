@@ -184,23 +184,33 @@ const defaultCourses = {
 
   ]
 };
-
 // Populate courses in the database
 const populateCourses = async () => {
   try {
     const courseCount = await CourseofStudy.countDocuments();
     
     if (courseCount === 0) {
-      const coursesToInsert = [];
+      console.log("🔄 Populating courses...");
+      
+      // Use bulkWrite with upsert to handle duplicates
+      const bulkOps = [];
       
       for (const category in defaultCourses) {
         defaultCourses[category].forEach((name) => {
-          coursesToInsert.push({ name, category });
+          bulkOps.push({
+            updateOne: {
+              filter: { name, category },
+              update: { $set: { name, category } },
+              upsert: true
+            }
+          });
         });
       }
       
-      await CourseofStudy.insertMany(coursesToInsert);
-      console.log("✅ Courses populated successfully");
+      if (bulkOps.length > 0) {
+        await CourseofStudy.bulkWrite(bulkOps);
+        console.log("✅ Courses populated successfully");
+      }
     } else {
       console.log("ℹ️ Courses already exist in the database");
     }

@@ -10,27 +10,99 @@ const CourseofStudy = require("./models/CourseofStudy");
 const { initializeData } = require("./utils/initialData");
 const app = express();
 
+const fixDuplicates = async () => {
+  try {
+    // Connect to MongoDB
+    await mongoose.connect(process.env.MONGODB_URI);
+    console.log("✅ Connected to MongoDB");
+    
+    // Find all duplicate courses (same name but different categories)
+    const duplicates = await CourseofStudy.aggregate([
+      {
+        $group: {
+          _id: "$name",
+          count: { $sum: 1 },
+          categories: { $push: "$category" }
+        }
+      },
+      {
+        $match: {
+          count: { $gt: 1 }
+        }
+      }
+    ]);
+    
+    console.log(`Found ${duplicates.length} duplicate course names`);
+    
+    // Process each duplicate
+    for (const duplicate of duplicates) {
+      const courses = await CourseofStudy.find({ name: duplicate._id });
+      
+      console.log(`Processing duplicate: ${duplicate._id} (${courses.length} entries)`);
+      
+      // Create a map to track which categories we've seen
+      const categoryMap = new Map();
+      
+      for (const course of courses) {
+        const key = `${course.name}-${course.category}`;
+        
+        if (categoryMap.has(key)) {
+          // This is a true duplicate (same name and category), delete it
+          console.log(`  Deleting duplicate: ${course.name} in ${course.category}`);
+          await CourseofStudy.deleteOne({ _id: course._id });
+        } else {
+          // First time seeing this name-category combination
+          categoryMap.set(key, true);
+        }
+      }
+    }
+    
+    console.log("✅ Duplicate cleanup completed");
+    
+    // Now create the compound index
+    await CourseofStudy.collection.createIndex({ name: 1, category: 1 }, { unique: true });
+    console.log("✅ Compound index created");
+    
+    process.exit(0);
+  } catch (error) {
+    console.error("❌ Error fixing duplicates:", error);
+    process.exit(1);
+  }
+};
+// ----------------------
+// CORS Setup
 // ----------------------
 // CORS Setup
 const allowedOrigins = [
-  process.env.FRONTEND_URL,
-  "http://localhost:3000" 
+  process.env.FRONTEND_URL,         // production frontend (e.g. https://smartdriller.vercel.app)
+  "http://localhost:3000"           // local dev
 ];
 
 app.use(cors({
-  origin: function(origin, callback) {
+  origin: function (origin, callback) {
+    // Allow requests with no origin (e.g. mobile apps, curl)
     if (!origin) return callback(null, true);
+
+    // Always allow explicitly whitelisted origins
     if (allowedOrigins.includes(origin)) {
       return callback(null, true);
     }
-    return callback(new Error("CORS not allowed"));
+
+    // Allow all *.vercel.app preview deployments
+    if (/\.vercel\.app$/.test(origin)) {
+      return callback(null, true);
+    }
+
+    // Otherwise reject
+    return callback(new Error(`CORS not allowed: ${origin}`));
   },
-  credentials: true, 
+  credentials: true
 }));
 
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
+
 
 // ----------------------
 // MongoDB Connection
@@ -38,7 +110,10 @@ app.use(cookieParser());
 mongoose.connect(process.env.MONGODB_URI)
   .then(() => {
     console.log("✅ MongoDB connected");
+
+fixDuplicates();
     initializeData();
+
   })
   .catch(err => console.error("❌ MongoDB connection error:", err));
 
