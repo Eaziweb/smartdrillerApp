@@ -100,18 +100,39 @@ router.post("/admins", async (req, res) => {
       return res.status(400).json({ message: "Admin with this email already exists" })
     }
     
+    // Find or create the Administration course
+    let adminCourse = await CourseofStudy.findOne({ 
+      name: "Administration", 
+      category: "Administration" 
+    });
+    
+    if (!adminCourse) {
+      // If course doesn't exist, create it
+      adminCourse = new CourseofStudy({
+        name: "Administration",
+        category: "Administration"
+      });
+      await adminCourse.save();
+      console.log("Administration course created");
+    }
+    
     // Hash the password before saving
     const hashedPassword = await bcrypt.hash(password, 10);
     
-    // Create admin without course (since it's optional for admin role)
+    // Create admin with course
     const admin = new User({
       fullName,
       email,
       password: hashedPassword,
       role: "admin",
+      course: adminCourse._id,
       isEmailVerified: true,
     })
     await admin.save()
+    
+    // Populate the course for the response
+    await admin.populate('course', 'name');
+    
     res.status(201).json({
       message: "Admin created successfully",
       admin: {
@@ -119,6 +140,7 @@ router.post("/admins", async (req, res) => {
         fullName: admin.fullName,
         email: admin.email,
         role: admin.role,
+        course: admin.course,
       },
     })
   } catch (error) {

@@ -177,10 +177,10 @@ const defaultCourses = {
     "Commercial Law",
     "International Law & Jurisprudence",
   ],
-  Administration: [
-    "Administration",
-    "SuperAdministration"
-  ],
+ Administration: [
+  "Administration",
+  "SuperAdministration"
+],
 };
 const populateCourses = async () => {
   try {
