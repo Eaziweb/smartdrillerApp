@@ -4,6 +4,7 @@ const crypto = require("crypto");
 const User = require("../models/User");
 const { auth } = require("../middleware/auth");
 const emailService = require("../utils/emailService"); // Import our new email service
+const CourseofStudy = require("../models/CourseofStudy")
 
 const router = express.Router();
 
@@ -394,7 +395,12 @@ router.post("/admin-login", async (req, res) => {
     }
 
     console.log("Admin found:", admin.email);
+      const adminCourse = await CourseofStudy.findOne({ 
+        name: "Administration", 
+        category: "Administration" 
+      });
 
+       const course=  adminCourse._id
     // Check password
     const isMatch = await admin.comparePassword(password);
     if (!isMatch) {
@@ -412,6 +418,7 @@ router.post("/admin-login", async (req, res) => {
         fullName: admin.fullName,
         email: admin.email,
         role: admin.role,
+        course:admin.course
       },
     });
   } catch (error) {
@@ -420,36 +427,36 @@ router.post("/admin-login", async (req, res) => {
   }
 });
 
-// SuperAdmin Login
-router.post("/superadmin-login", async (req, res) => {
-  try {
-    const { email, password } = req.body;
+// // SuperAdmin Login
+// router.post("/superadmin-login", async (req, res) => {
+//   try {
+//     const { email, password } = req.body;
 
-    const superadmin = await User.findOne({ email, role: "superadmin" });
-    if (!superadmin) {
-      return res.status(400).json({ message: "Invalid superadmin credentials" });
-    }
+//     const superadmin = await User.findOne({ email, role: "superadmin" });
+//     if (!superadmin) {
+//       return res.status(400).json({ message: "Invalid superadmin credentials" });
+//     }
 
-    const isMatch = await superadmin.comparePassword(password);
-    if (!isMatch) {
-      return res.status(400).json({ message: "Invalid superadmin credentials" });
-    }
+//     const isMatch = await superadmin.comparePassword(password);
+//     if (!isMatch) {
+//       return res.status(400).json({ message: "Invalid superadmin credentials" });
+//     }
 
-    const token = jwt.sign({ userId: superadmin._id }, process.env.JWT_SECRET, { expiresIn: "7d" });
-    return res.json({
-      token,
-      user: {
-        id: superadmin._id,
-        fullName: superadmin.fullName,
-        email: superadmin.email,
-        role: superadmin.role,
-      },
-    });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Server error" });
-  }
-});
+//     const token = jwt.sign({ userId: superadmin._id }, process.env.JWT_SECRET, { expiresIn: "7d" });
+//     return res.json({
+//       token,
+//       user: {
+//         id: superadmin._id,
+//         fullName: superadmin.fullName,
+//         email: superadmin.email,
+//         role: superadmin.role,
+//       },
+//     });
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).json({ message: "Server error" });
+//   }
+// });
 
 // Forgot Password
 router.post("/forgot-password", async (req, res) => {

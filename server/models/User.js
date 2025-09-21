@@ -31,8 +31,8 @@ const userSchema = new mongoose.Schema(
     },
     course: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "CourseofStudy", // Reference to CourseofStudy model
-      // Make course optional for admin/superadmin
+      ref: "CourseofStudy", 
+    
       required: function() {
         return this.role === "user";
       },
