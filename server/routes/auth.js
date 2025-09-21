@@ -380,13 +380,13 @@ router.delete("/devices/:deviceId", auth, async (req, res) => {
   }
 });
 
-// Admin login
-// Admin login
+// routes/auth.js - Admin login route
 router.post("/admin-login", async (req, res) => {
   try {
     const { email, password } = req.body;
 
     console.log("Admin login attempt for:", email);
+    console.log("Password provided:", password ? "Yes" : "No");
 
     // Find admin user
     const admin = await User.findOne({ email, role: "admin" });
@@ -396,11 +396,24 @@ router.post("/admin-login", async (req, res) => {
     }
 
     console.log("Admin found:", admin.email);
-
+    console.log("Stored password hash:", admin.password);
+    console.log("Password provided length:", password.length);
+    
     // Check password
     const isMatch = await admin.comparePassword(password);
+    console.log("Password comparison result:", isMatch);
+    
     if (!isMatch) {
       console.log("Password mismatch for admin:", email);
+      
+      // For debugging: Let's try to manually compare
+      try {
+        const manualCompare = await bcrypt.compare(password, admin.password);
+        console.log("Manual bcrypt compare result:", manualCompare);
+      } catch (err) {
+        console.error("Manual bcrypt compare error:", err);
+      }
+      
       return res.status(400).json({ message: "Invalid admin credentials" });
     }
 
@@ -418,7 +431,7 @@ router.post("/admin-login", async (req, res) => {
         fullName: admin.fullName,
         email: admin.email,
         role: admin.role,
-        course: admin.course, // this will just be "Administration"
+        course: admin.course,
       },
     });
   } catch (error) {
