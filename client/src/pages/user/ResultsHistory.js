@@ -27,7 +27,7 @@ const ResultsHistory = () => {
         return
       }
       
-      const response = await api.get("/results/history", {
+      const response = await api.get("/api/results/history", {
         headers: {
           Authorization: `Bearer ${token}`,
         },

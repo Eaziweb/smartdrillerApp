@@ -24,7 +24,7 @@ const ReportsManagement = () => {
       })
       
       const token = localStorage.getItem("token")
-      const response = await api.get(`/reports?${params}`, {
+      const response = await api.get(`/api/reports?${params}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -43,7 +43,7 @@ const ReportsManagement = () => {
     try {
       const token = localStorage.getItem("token")
       const response = await api.put(
-        `/reports/${reportId}/status`,
+        `/api/reports/${reportId}/status`,
         { status: newStatus },
         {
           headers: {
@@ -69,7 +69,7 @@ const ReportsManagement = () => {
     if (window.confirm("Are you sure you want to delete this report?")) {
       try {
         const token = localStorage.getItem("token")
-        const response = await api.delete(`/reports/${reportId}`, {
+        const response = await api.delete(`/api/reports/${reportId}`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },

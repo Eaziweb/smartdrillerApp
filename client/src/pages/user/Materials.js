@@ -32,7 +32,7 @@ const Materials = () => {
   const loadCourses = async () => {
     try {
       const token = localStorage.getItem("token")
-      const response = await api.get("/materials/courses", {
+      const response = await api.get("/api/materials/courses", {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -55,7 +55,7 @@ const Materials = () => {
       })
       
       const token = localStorage.getItem("token")
-      const response = await api.get(`/materials?${queryParams}`, {
+      const response = await api.get(`/api/materials?${queryParams}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -88,7 +88,7 @@ const Materials = () => {
     
     try {
       const token = localStorage.getItem("token")
-      const response = await api.post("/materials/upload", formData, {
+      const response = await api.post("/api/materials/upload", formData, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -111,7 +111,7 @@ const Materials = () => {
   const downloadMaterial = async (materialId, title) => {
     try {
       const token = localStorage.getItem("token")
-      const response = await api.get(`/materials/${materialId}/download`, {
+      const response = await api.get(`/api/materials/${materialId}/download`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },

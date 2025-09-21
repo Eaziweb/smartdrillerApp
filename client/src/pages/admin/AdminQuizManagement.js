@@ -74,7 +74,7 @@ const AdminQuizManagement = () => {
   const fetchCourses = async () => {
     try {
       const token = localStorage.getItem("token")
-      const response = await api.get("/courses/admin", {
+      const response = await api.get("/api/courses/admin", {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -95,7 +95,7 @@ const AdminQuizManagement = () => {
         ...filters,
       }).toString()
       
-      const response = await api.get(`/questions/admin/search?${queryParams}`, {
+      const response = await api.get(`/api/questions/admin/search?${queryParams}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -112,7 +112,7 @@ const AdminQuizManagement = () => {
   const fetchCourseYears = async () => {
     try {
       const token = localStorage.getItem("token")
-      const response = await api.get("/courseYears/admin", {
+      const response = await api.get("/api/courseYears/admin", {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -199,7 +199,7 @@ const AdminQuizManagement = () => {
     
     try {
       const token = localStorage.getItem("token")
-      const response = await api.post("/questions/admin/add", formData, {
+      const response = await api.post("/api/questions/admin/add", formData, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "multipart/form-data",
@@ -261,7 +261,7 @@ const AdminQuizManagement = () => {
     
     try {
       const token = localStorage.getItem("token")
-      const response = await api.put(`/questions/admin/${editingQuestion._id}`, formData, {
+      const response = await api.put(`/api/questions/admin/${editingQuestion._id}`, formData, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "multipart/form-data",
@@ -292,7 +292,7 @@ const AdminQuizManagement = () => {
   const deleteQuestion = async (questionId) => {
     try {
       const token = localStorage.getItem("token")
-      await api.delete(`/questions/admin/${questionId}`, {
+      await api.delete(`/api/questions/admin/${questionId}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -355,7 +355,7 @@ const AdminQuizManagement = () => {
       });
       
       const token = localStorage.getItem("token")
-      const response = await api.post("/questions/admin/bulk-import", { questions: validatedQuestions }, {
+      const response = await api.post("/api/questions/admin/bulk-import", { questions: validatedQuestions }, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
@@ -376,7 +376,7 @@ const AdminQuizManagement = () => {
     e.preventDefault()
     try {
       const token = localStorage.getItem("token")
-      const response = await api.post("/courseYears/admin/add", courseYearForm, {
+      const response = await api.post("/api/courseYears/admin/add", courseYearForm, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
@@ -395,7 +395,7 @@ const AdminQuizManagement = () => {
   const deleteCourseYear = async (courseYearId) => {
     try {
       const token = localStorage.getItem("token")
-      await api.delete(`/courseYears/admin/${courseYearId}`, {
+      await api.delete(`/api/courseYears/admin/${courseYearId}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -421,7 +421,7 @@ const AdminQuizManagement = () => {
     e.preventDefault()
     try {
       const token = localStorage.getItem("token")
-      const response = await api.post("/courses/admin/add", courseForm, {
+      const response = await api.post("/api/courses/admin/add", courseForm, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
@@ -445,7 +445,7 @@ const AdminQuizManagement = () => {
     e.preventDefault()
     try {
       const token = localStorage.getItem("token")
-      const response = await api.put(`/courses/admin/${editingCourse._id}`, courseForm, {
+      const response = await api.put(`/api/courses/admin/${editingCourse._id}`, courseForm, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
@@ -469,7 +469,7 @@ const AdminQuizManagement = () => {
   const toggleCourseStatus = async (courseId, currentStatus) => {
     try {
       const token = localStorage.getItem("token")
-      const response = await api.put(`/courses/admin/${courseId}`, { isActive: !currentStatus }, {
+      const response = await api.put(`/api/courses/admin/${courseId}`, { isActive: !currentStatus }, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
@@ -495,7 +495,7 @@ const AdminQuizManagement = () => {
   const handleDeactivateSemester = async (semester) => {
     try {
       const token = localStorage.getItem("token")
-      const response = await api.post("/courses/admin/deactivate-semester", { semester }, {
+      const response = await api.post("/api/courses/admin/deactivate-semester", { semester }, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",

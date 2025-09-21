@@ -70,7 +70,7 @@ const CourseSelection = () => {
     
     try {
       const token = localStorage.getItem("token")
-      const response = await api.get("/questions/study-progress", {
+      const response = await api.get("/api/questions/study-progress", {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -91,7 +91,7 @@ const CourseSelection = () => {
     setFetchingCourses(true)
     try {
       const token = localStorage.getItem("token")
-      const response = await api.get("/courses", {
+      const response = await api.get("/api/courses", {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -111,7 +111,7 @@ const CourseSelection = () => {
     setError(null)
     try {
       const token = localStorage.getItem("token")
-      const response = await api.get("/questions/course-years", {
+      const response = await api.get("/api/questions/course-years", {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -136,7 +136,7 @@ const CourseSelection = () => {
     setFetchingTopics(true)
     try {
       const token = localStorage.getItem("token")
-      const response = await api.get(`/questions/topics/${courseCode}`, {
+      const response = await api.get(`/api/questions/topics/${courseCode}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -349,7 +349,7 @@ const CourseSelection = () => {
       }
       
       const token = localStorage.getItem("token")
-      const response = await api.post("/questions/fetch", requestData, {
+      const response = await api.post("/api/questions/fetch", requestData, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",

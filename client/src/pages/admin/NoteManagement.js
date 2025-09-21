@@ -29,7 +29,7 @@ const MaterialManagement = () => {
       })
       
       const token = localStorage.getItem("token")
-      const response = await api.get(`/admin/materials?${queryParams}`, {
+      const response = await api.get(`/api/admin/materials?${queryParams}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -56,7 +56,7 @@ const MaterialManagement = () => {
     setConfirmModal({ open: false, id: null })
     try {
       const token = localStorage.getItem("token")
-      const response = await api.delete(`/admin/materials/${materialId}`, {
+      const response = await api.delete(`/api/admin/materials/${materialId}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -77,7 +77,7 @@ const MaterialManagement = () => {
   const downloadMaterial = async (materialId, filename) => {
     try {
       const token = localStorage.getItem("token")
-      const response = await api.get(`/admin/materials/${materialId}/download`, {
+      const response = await api.get(`/api/admin/materials/${materialId}/download`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },

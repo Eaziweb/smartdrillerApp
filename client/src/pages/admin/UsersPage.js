@@ -90,6 +90,7 @@ const UsersPage = () => {
                     <th>Name</th>
                     <th>Email</th>
                     <th>Course</th>
+                    <th>University</th>
                     <th>Phone</th>
                     <th>Account No.</th>
                     <th>Bank Name</th>
@@ -103,6 +104,7 @@ const UsersPage = () => {
                       <td>{user.fullName}</td>
                       <td>{user.email}</td>
                       <td>{getCourseName(user)}</td>
+                      <td>{getUniversityName(user)}</td>
                       <td>{user.phoneNumber || "N/A"}</td>
                       <td>{user.accountNumber || "N/A"}</td>
                       <td>{user.bankName || "N/A"}</td>

@@ -52,7 +52,7 @@ const AIAssistant = () => {
     try {
       const token = localStorage.getItem("token")
       const response = await api.post(
-        "/ai/chat",
+        "/api/ai/chat",
         {
           message: inputMessage,
           userName: user?.fullName,

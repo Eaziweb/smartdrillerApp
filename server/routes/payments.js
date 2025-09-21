@@ -137,6 +137,28 @@ router.post("/verify/:txRef", async (req, res) => {
     
     console.log("Payment found:", payment);
     
+    // If payment is already successful, return the user data
+    if (payment.status === "successful") {
+      const user = await User.findById(payment.user).populate("university");
+      return res.json({
+        status: "success",
+        message: "Payment already verified",
+        user: {
+          id: user._id,
+          fullName: user.fullName,
+          email: user.email,
+          isSubscribed: user.isSubscribed,
+          subscriptionExpiry: user.subscriptionExpiry,
+          subscriptionType: user.subscriptionType,
+          isRecurring: user.isRecurring,
+          remainingMonths: user.remainingMonths,
+          nextPaymentDate: user.nextPaymentDate,
+          universitySubscriptionEnd: user.universitySubscriptionEnd,
+          university: user.university,
+        },
+      });
+    }
+    
     // Verify with Flutterwave
     const response = await axios.get(
       `https://api.flutterwave.com/v3/transactions/verify_by_reference?tx_ref=${txRef}`,
@@ -194,14 +216,26 @@ router.post("/verify/:txRef", async (req, res) => {
           nextPaymentDate: user.isRecurring ? subscriptionExpiry : null,
         },
         { new: true }
-      );
+      ).populate('university'); // Populate university for the response
       
       console.log("User subscription updated:", updatedUser);
       
       return res.json({
         status: "success",
         message: "Payment verified and subscription activated",
-        user: updatedUser,
+        user: {
+          id: updatedUser._id,
+          fullName: updatedUser.fullName,
+          email: updatedUser.email,
+          isSubscribed: updatedUser.isSubscribed,
+          subscriptionExpiry: updatedUser.subscriptionExpiry,
+          subscriptionType: updatedUser.subscriptionType,
+          isRecurring: updatedUser.isRecurring,
+          remainingMonths: updatedUser.remainingMonths,
+          nextPaymentDate: updatedUser.nextPaymentDate,
+          universitySubscriptionEnd: updatedUser.universitySubscriptionEnd,
+          university: updatedUser.university,
+        },
       });
     } else {
       // Mark payment as failed if verification fails

@@ -208,32 +208,26 @@ const Study = () => {
   }
 
   // Modified handleStudy to trigger voice reading
-  const handleStudy = async (questionId) => {
-    setStudiedQuestions(prev => new Set([...prev, questionId]))
-    setShowExplanation(prev => ({ ...prev, [questionId]: true }))
-    
-    // Trigger voice reading if enabled
-    if (voiceReaderOn && speechSupported && examData) {
-      const currentQuestion = examData.questions[currentQuestionIndex]
-      if (currentQuestion._id === questionId) {
-        stopSpeech()
-        readQuestionContent(currentQuestion, true)
-      }
-    }
-    
-    try {
-      await fetch("/api/questions/study-progress", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-        body: JSON.stringify({ questionId }),
-      })
-    } catch (error) {
-      console.error("Failed to record study progress:", error)
+ const handleStudy = async (questionId) => {
+  setStudiedQuestions((prev) => new Set([...prev, questionId]));
+  setShowExplanation((prev) => ({ ...prev, [questionId]: true }));
+
+  // Trigger voice reading if enabled
+  if (voiceReaderOn && speechSupported && examData) {
+    const currentQuestion = examData.questions[currentQuestionIndex];
+    if (currentQuestion._id === questionId) {
+      stopSpeech();
+      readQuestionContent(currentQuestion, true);
     }
   }
+
+  try {
+    await api.post("/api/questions/study-progress", { questionId });
+  } catch (error) {
+    console.error("Failed to record study progress:", error);
+  }
+};
+
 
   // Modified navigateToQuestion to stop speech
   const navigateToQuestion = (index) => {

@@ -3,7 +3,7 @@ import { useEffect, useState } from "react"
 import { useNavigate, useSearchParams } from "react-router-dom"
 import { useAuth } from "../../contexts/AuthContext"
 import styles from "../../styles/payment.module.css"
-import api from "../../utils/api";
+import api from "../../utils/api"
 
 const PaymentCallback = () => {
   const [searchParams] = useSearchParams()
@@ -11,6 +11,8 @@ const PaymentCallback = () => {
   const { user, updateUser } = useAuth()
   const [status, setStatus] = useState("verifying")
   const [message, setMessage] = useState("Verifying your payment...")
+  const [retryCount, setRetryCount] = useState(0)
+  const maxRetries = 3
 
   useEffect(() => {
     verifyPayment()
@@ -35,23 +37,42 @@ const PaymentCallback = () => {
         return
       }
 
+      console.log("Verifying payment with txRef:", txRef)
+      
       const response = await api.post(`/api/payments/verify/${txRef}`)
+      console.log("Payment verification response:", response.data)
 
       if (response.data.status === "success") {
         setStatus("success")
         setMessage("Payment successful! Your subscription has been activated.")
-        if (updateUser) {
+        
+        // Update user context with the latest user data
+        if (response.data.user && updateUser) {
+          console.log("Updating user context with:", response.data.user)
           updateUser(response.data.user)
         }
+        
+        // Redirect to home after a short delay
         setTimeout(() => navigate("/home"), 3000)
       } else {
         setStatus("error")
-        setMessage("Payment verification failed. Please contact support.")
+        setMessage(response.data.message || "Payment verification failed. Please contact support.")
       }
     } catch (error) {
       console.error("Payment verification error:", error)
-      setStatus("error")
-      setMessage("An error occurred while verifying payment. Please contact support.")
+      
+      // Implement retry logic
+      if (retryCount < maxRetries) {
+        setRetryCount(prevCount => prevCount + 1)
+        setMessage(`Verifying payment... (Attempt ${retryCount + 1} of ${maxRetries})`)
+        
+        // Exponential backoff for retries
+        const delay = Math.pow(2, retryCount) * 1000
+        setTimeout(verifyPayment, delay)
+      } else {
+        setStatus("error")
+        setMessage("An error occurred while verifying payment. Please contact support.")
+      }
     }
   }
 
@@ -81,6 +102,13 @@ const PaymentCallback = () => {
     }
   }
 
+  const handleRetry = () => {
+    setStatus("verifying")
+    setMessage("Retrying payment verification...")
+    setRetryCount(0)
+    verifyPayment()
+  }
+
   return (
     <div className={styles.paymentContainer}>
       <div className={styles.paymentCard}>
@@ -105,7 +133,35 @@ const PaymentCallback = () => {
           </h1>
           <p className={styles.statusMessage}>{message}</p>
 
-          {status !== "verifying" && (
+          {status === "error" && retryCount >= maxRetries && (
+            <div style={{ marginTop: "2rem" }}>
+              <button
+                onClick={handleRetry}
+                className={styles.payBtn}
+                style={{ marginRight: "1rem" }}
+              >
+                <span className="btn-content">
+                  <span className="btn-text">Retry Verification</span>
+                </span>
+                <div className="btn-arrow">
+                  <i className="fas fa-redo"></i>
+                </div>
+              </button>
+              <button
+                onClick={() => navigate("/home")}
+                className={styles.payBtn}
+              >
+                <span className="btn-content">
+                  <span className="btn-text">Continue to Dashboard</span>
+                </span>
+                <div className="btn-arrow">
+                  <i className="fas fa-arrow-right"></i>
+                </div>
+              </button>
+            </div>
+          )}
+
+          {status !== "verifying" && status !== "error" && (
             <div style={{ marginTop: "2rem" }}>
               <button
                 onClick={() => navigate("/home")}
@@ -124,7 +180,7 @@ const PaymentCallback = () => {
           {status === "error" && (
             <div style={{ marginTop: "1rem" }}>
               <p className={styles.errorNote}>
-                If you believe this is an error, please contact our support team.
+                If you believe this is an error, please contact our support team with your transaction reference: {searchParams.get("tx_ref")}
               </p>
             </div>
           )}

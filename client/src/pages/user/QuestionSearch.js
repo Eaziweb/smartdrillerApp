@@ -119,7 +119,7 @@ const QuestionSearch = () => {
   const fetchCourses = async () => {
     try {
       const token = localStorage.getItem("token")
-      const response = await api.get("/questions/course-years", {
+      const response = await api.get("/api/questions/course-years", {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -131,7 +131,7 @@ const QuestionSearch = () => {
       const coursesWithNames = await Promise.all(
         Object.keys(data).map(async (courseCode) => {
           try {
-            const courseResponse = await api.get(`/courses/${courseCode}`, {
+            const courseResponse = await api.get(`/api/courses/${courseCode}`, {
               headers: {
                 Authorization: `Bearer ${token}`,
               },
@@ -174,7 +174,7 @@ const QuestionSearch = () => {
     try {
       const token = localStorage.getItem("token")
       const response = await api.get(
-        `/questions/search?q=${encodeURIComponent(searchQuery)}&course=${selectedCourse}&searchType=${searchType}&page=${page}&limit=10`,
+        `/api/questions/search?q=${encodeURIComponent(searchQuery)}&course=${selectedCourse}&searchType=${searchType}&page=${page}&limit=10`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
