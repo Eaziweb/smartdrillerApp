@@ -115,20 +115,17 @@ router.post("/admins", async (req, res) => {
       await adminCourse.save();
       console.log("Administration course created");
     }
-    
-    // Hash the password before saving
-    const hashedPassword = await bcrypt.hash(password, 10);
-    
-    // Create admin with course
-    const admin = new User({
-      fullName,
-      email,
-      password: hashedPassword,
-      role: "admin",
-      course: adminCourse._id,
-      isEmailVerified: true,
-    })
-    await admin.save()
+  
+const admin = new User({
+  fullName,
+  email,
+  password, 
+  role: "admin",
+  course: adminCourse._id,
+  isEmailVerified: true,
+});
+await admin.save();
+
     
     // Populate the course for the response
     await admin.populate('course', 'name');
