@@ -381,6 +381,7 @@ router.delete("/devices/:deviceId", auth, async (req, res) => {
 });
 
 // Admin login
+// Admin login
 router.post("/admin-login", async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -395,12 +396,7 @@ router.post("/admin-login", async (req, res) => {
     }
 
     console.log("Admin found:", admin.email);
-      const adminCourse = await CourseofStudy.findOne({ 
-        name: "Administration", 
-        category: "Administration" 
-      });
 
-       const course=  adminCourse._id
     // Check password
     const isMatch = await admin.comparePassword(password);
     if (!isMatch) {
@@ -410,7 +406,11 @@ router.post("/admin-login", async (req, res) => {
 
     console.log("Password matched for admin:", email);
 
-    const token = jwt.sign({ userId: admin._id }, process.env.JWT_SECRET, { expiresIn: "7d" });
+    // Issue token (no trustedDevice / OTP for admins)
+    const token = jwt.sign({ userId: admin._id, role: admin.role }, process.env.JWT_SECRET, {
+      expiresIn: "7d",
+    });
+
     return res.json({
       token,
       user: {
@@ -418,7 +418,7 @@ router.post("/admin-login", async (req, res) => {
         fullName: admin.fullName,
         email: admin.email,
         role: admin.role,
-        course:admin.course
+        course: admin.course, // this will just be "Administration"
       },
     });
   } catch (error) {
@@ -426,6 +426,7 @@ router.post("/admin-login", async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 });
+
 
 // // SuperAdmin Login
 // router.post("/superadmin-login", async (req, res) => {
