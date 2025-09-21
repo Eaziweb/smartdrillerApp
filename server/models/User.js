@@ -105,17 +105,19 @@ const userSchema = new mongoose.Schema(
       type: Date,
       default: null,
     },
-    trustedDevices: [
-      {
-        deviceId: { 
-          type: String, 
-          required: true,
-          unique: true // Ensure device IDs are globally unique
-        },
-        deviceName: { type: String, default: "Unknown Device" },
-        lastUsed: { type: Date, default: Date.now() }
+trustedDevices: [
+  {
+    deviceId: { 
+      type: String,
+      required: function () {
+        return this.role === "user";
       }
-    ],
+    },
+    deviceName: { type: String, default: "Unknown Device" },
+    lastUsed: { type: Date, default: Date.now }
+  }
+],
+
     deviceOTP: { type: String, default: null },
     deviceOTPExpires: { type: Date, default: null },
     maxDevices: { type: Number, default: 4 }
