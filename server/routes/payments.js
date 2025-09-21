@@ -51,7 +51,7 @@ router.post("/initialize", auth, async (req, res) => {
       amount: amount,
       currency: "NGN",
       payment_options: "card, banktransfer, ussd",
-      redirect_url: `${process.env.CLIENT_URL || "http://localhost:3000"}/payment/callback`,
+      redirect_url: `${process.env.FRONTEND_URL}/payment/callback`,
       customer: {
         email: req.user.email,
         name: req.user.fullName,
