@@ -5,7 +5,7 @@ const User = require("../models/User");
 const { auth } = require("../middleware/auth");
 const emailService = require("../utils/emailService"); // Import our new email service
 const CourseofStudy = require("../models/CourseofStudy")
-
+const bcrypt = require("bcryptjs")
 const router = express.Router();
 
 // Helper function to generate 6-digit code
