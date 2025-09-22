@@ -51,6 +51,18 @@ const UsersPage = () => {
     return "N/A"
   }
 
+  // Function to get university name
+  const getUniversityName = (user) => {
+    if (user.university) {
+      if (typeof user.university === 'object' && user.university.name) {
+        return user.university.name
+      } else if (typeof user.university === 'string') {
+        return user.university
+      }
+    }
+    return "N/A"
+  }
+
   if (loading) {
     return (
       <div className={styles.loading}>
