@@ -1,4 +1,5 @@
 const express = require("express");
+const mongoose = require("mongoose"); 
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
@@ -8,8 +9,7 @@ const Course = require("../models/Course");
 const StudyProgress = require("../models/StudyProgress");
 const { ensureCourseYearExists } = require("../utils/courseYearUtils");
 const { auth, adminAuth } = require("../middleware/auth");
-const subscriptionCheck = require("../middleware/subscriptionCheck");
-const uploadMiddleware = require('../middleware/upload');
+const subscriptionCheck = require("../middleware/subscriptionCheck");;
 
 // Configure multer for image uploads
 const storage = multer.diskStorage({
