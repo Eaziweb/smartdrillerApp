@@ -8,7 +8,7 @@ const bcrypt = require("bcryptjs");
 const User = require("./models/User");
 const CourseofStudy = require("./models/CourseofStudy");
 const { initializeData } = require("./utils/initialData");
-const Question = require("./models/Question");
+
 const app = express();
 
 // ----------------------
@@ -99,14 +99,6 @@ mongoose.connect(process.env.MONGODB_URI)
       }
     } catch (err) {
       console.error("❌ Failed to drop trustedDevices index:", err.message);
-    }
-
-    // 🚨 Delete all Questions (run once, then remove this block)
-    try {
-      const result = await Question.deleteMany({});
-      console.log(`🗑️ Deleted ${result.deletedCount} questions`);
-    } catch (err) {
-      console.error("❌ Error deleting questions:", err.message);
     }
 
     // Run duplicate cleanup
