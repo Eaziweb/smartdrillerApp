@@ -1,7 +1,7 @@
 "use client"
 import { useState, useEffect } from "react"
 import styles from "../../styles/MaterialManagement.module.css"
-import api from "../../utils/api";
+import api from "../../utils/api"
 
 const MaterialManagement = () => {
   const [materials, setMaterials] = useState([])
@@ -10,10 +10,13 @@ const MaterialManagement = () => {
     search: "",
     course: "",
     type: "",
+    status: "",
   })
   const [currentPage, setCurrentPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
-  const [confirmModal, setConfirmModal] = useState({ open: false, id: null })
+  const [approveModal, setApproveModal] = useState({ open: false, id: null })
+  const [rejectModal, setRejectModal] = useState({ open: false, id: null, reason: "" })
+  const [deleteModal, setDeleteModal] = useState({ open: false, id: null })
 
   useEffect(() => {
     loadMaterials()
@@ -47,13 +50,68 @@ const MaterialManagement = () => {
     }
   }
 
+  const handleApproveClick = (id) => {
+    setApproveModal({ open: true, id })
+  }
+
+  const handleRejectClick = (id) => {
+    setRejectModal({ open: true, id, reason: "" })
+  }
+
   const handleDeleteClick = (id) => {
-    setConfirmModal({ open: true, id })
+    setDeleteModal({ open: true, id })
+  }
+
+  const confirmApprove = async () => {
+    const materialId = approveModal.id
+    setApproveModal({ open: false, id: null })
+    try {
+      const token = localStorage.getItem("token")
+      const response = await api.put(`/api/admin/materials/${materialId}/approve`, {}, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      
+      if (response.data.success) {
+        showNotification("Material approved successfully", "success")
+        loadMaterials()
+      } else {
+        throw new Error(response.data.message)
+      }
+    } catch (error) {
+      console.error("Error approving material:", error)
+      showNotification("Error approving material", "error")
+    }
+  }
+
+  const confirmReject = async () => {
+    const materialId = rejectModal.id
+    const reason = rejectModal.reason
+    setRejectModal({ open: false, id: null, reason: "" })
+    try {
+      const token = localStorage.getItem("token")
+      const response = await api.put(`/api/admin/materials/${materialId}/reject`, { reason }, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      
+      if (response.data.success) {
+        showNotification("Material rejected successfully", "success")
+        loadMaterials()
+      } else {
+        throw new Error(response.data.message)
+      }
+    } catch (error) {
+      console.error("Error rejecting material:", error)
+      showNotification("Error rejecting material", "error")
+    }
   }
 
   const confirmDelete = async () => {
-    const materialId = confirmModal.id
-    setConfirmModal({ open: false, id: null })
+    const materialId = deleteModal.id
+    setDeleteModal({ open: false, id: null })
     try {
       const token = localStorage.getItem("token")
       const response = await api.delete(`/api/admin/materials/${materialId}`, {
@@ -81,7 +139,7 @@ const MaterialManagement = () => {
         headers: {
           Authorization: `Bearer ${token}`,
         },
-        responseType: 'blob', // Important for file downloads
+        responseType: 'blob',
       })
       
       if (response.status === 200) {
@@ -108,7 +166,7 @@ const MaterialManagement = () => {
   }
 
   const clearFilters = () => {
-    setFilters({ search: "", course: "", type: "" })
+    setFilters({ search: "", course: "", type: "", status: "" })
     setCurrentPage(1)
   }
 
@@ -164,6 +222,15 @@ const MaterialManagement = () => {
         </div>
         <div className={styles.filterContainer}>
           <select
+            value={filters.status}
+            onChange={(e) => handleFilterChange("status", e.target.value)}
+            className={styles.filterSelect}
+          >
+            <option value="">All Status</option>
+            <option value="approved">Approved</option>
+            <option value="pending">Pending Approval</option>
+          </select>
+          <select
             value={filters.course}
             onChange={(e) => handleFilterChange("course", e.target.value)}
             className={styles.filterSelect}
@@ -202,6 +269,7 @@ const MaterialManagement = () => {
                 <th>Title</th>
                 <th>Course</th>
                 <th>Uploader</th>
+                <th>Status</th>
                 <th>Size</th>
                 <th>Upload Date</th>
                 <th>Downloads</th>
@@ -222,6 +290,11 @@ const MaterialManagement = () => {
                   </td>
                   <td>{material.courseName}</td>
                   <td>{material.uploaderName}</td>
+                  <td>
+                    <span className={`${styles.statusBadge} ${material.isApproved ? styles.approved : styles.pending}`}>
+                      {material.isApproved ? "Approved" : "Pending"}
+                    </span>
+                  </td>
                   <td>{formatFileSize(material.fileSize)}</td>
                   <td>{new Date(material.createdAt).toLocaleDateString()}</td>
                   <td>{material.downloadCount || 0}</td>
@@ -234,6 +307,24 @@ const MaterialManagement = () => {
                       >
                         <i className="fas fa-download"></i>
                       </button>
+                      {!material.isApproved && (
+                        <>
+                          <button
+                            onClick={() => handleApproveClick(material._id)}
+                            className={styles.approveBtn}
+                            title="Approve"
+                          >
+                            <i className="fas fa-check"></i>
+                          </button>
+                          <button
+                            onClick={() => handleRejectClick(material._id)}
+                            className={styles.rejectBtn}
+                            title="Reject"
+                          >
+                            <i className="fas fa-times"></i>
+                          </button>
+                        </>
+                      )}
                       <button
                         onClick={() => handleDeleteClick(material._id)}
                         className={styles.deleteBtn}
@@ -273,15 +364,50 @@ const MaterialManagement = () => {
         </div>
       )}
 
+      {/* Approve Confirmation Modal */}
+      {approveModal.open && (
+        <div className={styles.modalOverlay}>
+          <div className={styles.modal}>
+            <h2>Confirm Approval</h2>
+            <p>Are you sure you want to approve this material?</p>
+            <div className={styles.modalActions}>
+              <button onClick={confirmApprove} className={styles.confirmBtn}>Yes, Approve</button>
+              <button onClick={() => setApproveModal({ open: false, id: null })} className={styles.cancelBtn}>Cancel</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Reject Confirmation Modal */}
+      {rejectModal.open && (
+        <div className={styles.modalOverlay}>
+          <div className={styles.modal}>
+            <h2>Reject Material</h2>
+            <p>Please provide a reason for rejection:</p>
+            <textarea
+              value={rejectModal.reason}
+              onChange={(e) => setRejectModal({...rejectModal, reason: e.target.value})}
+              className={styles.reasonInput}
+              placeholder="Reason for rejection..."
+              rows={3}
+            />
+            <div className={styles.modalActions}>
+              <button onClick={confirmReject} className={styles.confirmBtn}>Reject</button>
+              <button onClick={() => setRejectModal({ open: false, id: null, reason: "" })} className={styles.cancelBtn}>Cancel</button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Delete Confirmation Modal */}
-      {confirmModal.open && (
+      {deleteModal.open && (
         <div className={styles.modalOverlay}>
           <div className={styles.modal}>
             <h2>Confirm Deletion</h2>
             <p>Are you sure you want to delete this material?</p>
             <div className={styles.modalActions}>
               <button onClick={confirmDelete} className={styles.confirmBtn}>Yes, Delete</button>
-              <button onClick={() => setConfirmModal({ open: false, id: null })} className={styles.cancelBtn}>Cancel</button>
+              <button onClick={() => setDeleteModal({ open: false, id: null })} className={styles.cancelBtn}>Cancel</button>
             </div>
           </div>
         </div>

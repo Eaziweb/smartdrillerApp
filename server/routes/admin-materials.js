@@ -1,13 +1,14 @@
+// routes/admin-materials.js
 const express = require("express")
 const router = express.Router()
 const fs = require("fs")
 const { adminAuth } = require("../middleware/auth")
 const Material = require("../models/Material")
 
-// Get all materials for admin
+// Get all materials for admin (including pending)
 router.get("/", adminAuth, async (req, res) => {
   try {
-    const { page = 1, limit = 20, search = "", course = "", type = "" } = req.query
+    const { page = 1, limit = 20, search = "", course = "", type = "", status = "" } = req.query
     const query = {}
     
     if (search) {
@@ -20,6 +21,10 @@ router.get("/", adminAuth, async (req, res) => {
     
     if (type) {
       query.fileType = type
+    }
+    
+    if (status) {
+      query.isApproved = status === "approved"
     }
     
     const materials = await Material.find(query)
@@ -42,6 +47,8 @@ router.get("/", adminAuth, async (req, res) => {
       courseName: material.course?.name || "Unknown",
       uploaderName: material.uploadedBy?.fullName || "Unknown",
       downloadCount: material.downloadCount,
+      isApproved: material.isApproved,
+      rejectionReason: material.rejectionReason,
       createdAt: material.createdAt,
     }))
     
@@ -57,6 +64,69 @@ router.get("/", adminAuth, async (req, res) => {
     res.status(500).json({
       success: false,
       message: "Failed to fetch materials",
+    })
+  }
+})
+
+// Approve material
+router.put("/:id/approve", adminAuth, async (req, res) => {
+  try {
+    const material = await Material.findById(req.params.id)
+    
+    if (!material) {
+      return res.status(404).json({
+        success: false,
+        message: "Material not found",
+      })
+    }
+    
+    material.isApproved = true
+    material.rejectionReason = ""
+    await material.save()
+    
+    res.json({
+      success: true,
+      message: "Material approved successfully",
+    })
+  } catch (error) {
+    console.error("Error approving material:", error)
+    res.status(500).json({
+      success: false,
+      message: "Failed to approve material",
+    })
+  }
+})
+
+// Reject material
+router.put("/:id/reject", adminAuth, async (req, res) => {
+  try {
+    const { reason } = req.body
+    const material = await Material.findById(req.params.id)
+    
+    if (!material) {
+      return res.status(404).json({
+        success: false,
+        message: "Material not found",
+      })
+    }
+    
+    // Delete file from filesystem
+    if (fs.existsSync(material.filePath)) {
+      fs.unlinkSync(material.filePath)
+    }
+    
+    // Delete from database
+    await Material.findByIdAndDelete(req.params.id)
+    
+    res.json({
+      success: true,
+      message: "Material rejected and deleted successfully",
+    })
+  } catch (error) {
+    console.error("Error rejecting material:", error)
+    res.status(500).json({
+      success: false,
+      message: "Failed to reject material",
     })
   }
 })

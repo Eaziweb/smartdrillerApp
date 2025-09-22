@@ -39,12 +39,11 @@ const upload = multer({
   },
 })
 
-// Get all materials with filtering and pagination
 router.get("/", auth, async (req, res) => {
   try {
     const { page = 1, limit = 12, search = "", course = "", type = "" } = req.query
 
-    const query = {}
+    const query = { isApproved: true } // Only show approved materials
 
     if (search) {
       query.$or = [{ title: { $regex: search, $options: "i" } }, { description: { $regex: search, $options: "i" } }]
@@ -57,33 +56,31 @@ router.get("/", auth, async (req, res) => {
     if (type) {
       query.fileType = type
     }
-   const materials = await Material.find(query)
-      .populate("course", "courseName courseCode") // Include courseCode
+
+    const materials = await Material.find(query)
+      .populate("course", "courseName courseCode")
       .populate("uploadedBy", "fullName")
       .sort({ createdAt: -1 })
       .limit(limit * 1)
       .skip((page - 1) * limit)
-    
 
     const total = await Material.countDocuments(query)
     const totalPages = Math.ceil(total / limit)
 
-     
-   const formattedMaterials = materials.map((material) => ({
+    const formattedMaterials = materials.map((material) => ({
       _id: material._id,
       title: material.title,
       description: material.description,
       filename: material.filename,
       fileSize: material.fileSize,
       fileType: material.fileType,
-      // Use courseCode if courseName is not available
       courseName: material.course?.courseName || material.course?.courseCode || "Unknown",
-      courseCode: material.course?.courseCode, // Add courseCode field
+      courseCode: material.course?.courseCode,
       uploaderName: material.uploadedBy?.fullName || "Unknown",
       downloadCount: material.downloadCount,
       createdAt: material.createdAt,
     }))
-    
+
     res.json({
       success: true,
       materials: formattedMaterials,
@@ -99,7 +96,6 @@ router.get("/", auth, async (req, res) => {
     })
   }
 })
-
 // Get courses for filter dropdown
 router.get("/courses", auth, async (req, res) => {
   try {
@@ -125,7 +121,7 @@ router.get("/courses", auth, async (req, res) => {
     })
   }
 })
-
+// routes/materials.js
 // Upload material
 router.post("/upload", auth, upload.single("file"), async (req, res) => {
   try {
@@ -149,13 +145,14 @@ router.post("/upload", auth, upload.single("file"), async (req, res) => {
       fileType: fileExtension,
       course,
       uploadedBy: req.user.id,
+      isApproved: false, // Explicitly set to false
     })
 
     await material.save()
 
     res.json({
       success: true,
-      message: "Material uploaded successfully",
+      message: "Material uploaded successfully and is pending admin approval",
       material,
     })
   } catch (error) {

@@ -1,3 +1,4 @@
+// models/Material.js
 const mongoose = require("mongoose")
 
 const materialSchema = new mongoose.Schema(
@@ -29,7 +30,7 @@ const materialSchema = new mongoose.Schema(
     },
     course: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "VideoCourse",
+      ref: "CourseofStudy", // Updated to match your course model
       required: true,
     },
     uploadedBy: {
@@ -43,7 +44,11 @@ const materialSchema = new mongoose.Schema(
     },
     isApproved: {
       type: Boolean,
-      default: true, // Auto-approve as requested
+      default: false, // Changed to false so materials need approval
+    },
+    rejectionReason: {
+      type: String,
+      default: "",
     },
   },
   {

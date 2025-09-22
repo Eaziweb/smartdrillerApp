@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react"
 import { useAuth } from "../../contexts/AuthContext"
 import styles from "../../styles/Materials.module.css"
-import api from "../../utils/api";
+import api from "../../utils/api"
 
 const Materials = () => {
   const { user } = useAuth()
@@ -95,7 +95,7 @@ const Materials = () => {
       })
       
       if (response.data.success) {
-        showNotification("Material uploaded successfully!", "success")
+        showNotification("Material uploaded successfully! It is now pending admin approval.", "success")
         setUploadModalOpen(false)
         setUploadForm({ title: "", description: "", course: "", file: null })
         loadMaterials()
@@ -115,7 +115,7 @@ const Materials = () => {
         headers: {
           Authorization: `Bearer ${token}`,
         },
-        responseType: 'blob', // Important for file downloads
+        responseType: 'blob',
       })
       
       if (response.status === 200) {
@@ -263,7 +263,6 @@ const Materials = () => {
                 <h3 className={styles.materialTitle}>{material.title}</h3>
                 <p className={styles.materialDescription}>{material.description}</p>
                 <div className={styles.materialMeta}>
-                  {/* Always show course code if available, otherwise show course name, otherwise show "Unknown" */}
                   <span className={styles.materialCourse}>
                     {material.courseCode || material.courseName || "Unknown"}
                   </span>
