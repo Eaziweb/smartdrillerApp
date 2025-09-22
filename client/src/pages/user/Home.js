@@ -1,5 +1,5 @@
 "use client"
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { Link } from "react-router-dom"
 import { useAuth } from "../../contexts/AuthContext"
 import styles from "../../styles/home.module.css"
@@ -17,6 +17,12 @@ const Home = () => {
   const [notifications, setNotifications] = useState([])
   const [unreadCount, setUnreadCount] = useState(0)
   const [loading, setLoading] = useState(false)
+  const [touchStartX, setTouchStartX] = useState(0)
+  const [touchEndX, setTouchEndX] = useState(0)
+  const sidebarRef = useRef(null)
+  
+  // Minimum swipe distance to close sidebar
+  const minSwipeDistance = 50
   
   useEffect(() => {
     loadNotifications()
@@ -144,6 +150,60 @@ const Home = () => {
     setAboutModalOpen(!aboutModalOpen)
   }
   
+  // Touch event handlers for swipe gestures
+  const onTouchStart = (e) => {
+    setTouchStartX(e.targetTouches[0].clientX)
+  }
+  
+  const onTouchMove = (e) => {
+    setTouchEndX(e.targetTouches[0].clientX)
+  }
+  
+  const onTouchEnd = () => {
+    if (!touchStartX || !touchEndX) return
+    
+    const distance = touchStartX - touchEndX
+    const isLeftSwipe = distance > minSwipeDistance
+    
+    if (isLeftSwipe && sidebarOpen) {
+      setSidebarOpen(false)
+    }
+    
+    // Reset touch positions
+    setTouchStartX(0)
+    setTouchEndX(0)
+  }
+  
+  // Function to handle share
+  const handleShare = async () => {
+    const shareData = {
+      title: 'SmartDriller',
+      text: 'Join SmartDriller - The ultimate educational platform for first year students in Nigeria! Access study materials, practice questions, and AI assistance to excel in your studies.',
+      url: window.location.href
+    };
+    
+    if (navigator.share) {
+      try {
+        await navigator.share(shareData);
+      } catch (err) {
+        console.error('Error sharing:', err);
+      }
+    } else {
+      // Fallback for browsers that don't support Web Share API
+      if (navigator.clipboard) {
+        try {
+          await navigator.clipboard.writeText(`${shareData.text} ${shareData.url}`);
+          showMessage('Link copied to clipboard!', 'success');
+        } catch (err) {
+          console.error('Error copying to clipboard:', err);
+          showMessage('Failed to copy link', 'error');
+        }
+      } else {
+        showMessage('Sharing not supported on this device', 'error');
+      }
+    }
+  }
+  
   // Function to get notification icon based on type
   const getNotificationIcon = (type) => {
     switch (type) {
@@ -206,7 +266,13 @@ const Home = () => {
       </nav>
       
       {/* Sidebar */}
-      <div className={`${styles.sidebar} ${sidebarOpen ? styles.active : ""}`}>
+      <div 
+        ref={sidebarRef}
+        className={`${styles.sidebar} ${sidebarOpen ? styles.active : ""}`}
+        onTouchStart={onTouchStart}
+        onTouchMove={onTouchMove}
+        onTouchEnd={onTouchEnd}
+      >
         <div className={styles.sidebarHeader}>
           <div className={styles.userProfile}>
             <Link to="/profile" style={{ textDecoration: "none", color: "white" }}>
@@ -249,7 +315,7 @@ const Home = () => {
                 </a>
               </li>
               <li>
-                <a href="#">
+                <a href="#" onClick={handleShare}>
                   <i className="fas fa-share-alt"></i> Share
                 </a>
               </li>
@@ -431,12 +497,14 @@ const Home = () => {
           disabled={loading}
         >
           <span className={styles.btnText}>
-            {loading ? "Processing..." : user?.isSubscribed ? "SUBSCRIBED" : "ACTIVATE"}
+            {loading ? (
+              <>
+                <span className={styles.loadingSpinner}></span>
+                Processing...
+              </>
+            ) : user?.isSubscribed ? "SUBSCRIBED" : "ACTIVATE"}
           </span>
         </button>
-        <div className={styles.admin}>
-          <i className="fas fa-headset"></i>
-        </div>
       </div>
       
       {/* About SmartDriller Modal */}
