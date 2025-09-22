@@ -519,21 +519,27 @@ router.put("/admin/:id", adminAuth, upload.single("image"), async (req, res) => 
     res.status(500).json({ message: "Server error: " + error.message });
   }
 });
-
-// Admin: Bulk import questions
+// Admin: Bulk import questions with transaction
 router.post("/admin/bulk-import", adminAuth, async (req, res) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+  
   try {
     let questions = req.body.questions;
     
     // Check if questions is an array
     if (!Array.isArray(questions)) {
+      await session.abortTransaction();
+      session.endSession();
       return res.status(400).json({ 
         message: "Invalid request format. 'questions' must be an array." 
       });
     }
     
-    const questionsToInsert = [];
+    // Validate all questions first
+    const validationErrors = [];
     const courseYearChecks = new Set();
+    const questionsToInsert = [];
     
     for (let i = 0; i < questions.length; i++) {
       const q = questions[i];
@@ -541,36 +547,32 @@ router.post("/admin/bulk-import", adminAuth, async (req, res) => {
       // Validate required fields
       if (!q.question || !q.options || q.correctOption === undefined || 
           !q.explanation || !q.course || !q.year || !q.topic) {
-        return res.status(400).json({ 
-          message: `Question ${i + 1}: Missing required fields` 
-        });
+        validationErrors.push(`Question ${i + 1}: Missing required fields`);
+        continue;
       }
       
       // Validate options
       if (!Array.isArray(q.options) || q.options.length !== 4) {
-        return res.status(400).json({ 
-          message: `Question ${i + 1}: Must have exactly 4 options` 
-        });
+        validationErrors.push(`Question ${i + 1}: Must have exactly 4 options`);
+        continue;
       }
       
-      // Validate correct option (must be 1-4)
+      // Validate correct option
       const correctOptionNumber = Number(q.correctOption);
       if (isNaN(correctOptionNumber) || correctOptionNumber < 1 || correctOptionNumber > 4) {
-        return res.status(400).json({ 
-          message: `Question ${i + 1}: Correct option must be between 1 and 4` 
-        });
+        validationErrors.push(`Question ${i + 1}: Correct option must be between 1 and 4`);
+        continue;
       }
       
       // Check if course exists and is active
       const courseExists = await Course.findOne({
         courseCode: q.course.toLowerCase(),
         isActive: true,
-      });
+      }).session(session);
       
       if (!courseExists) {
-        return res.status(400).json({
-          message: `Question ${i + 1}: Course ${q.course.toUpperCase()} does not exist or is not active. Please add the course first.`,
-        });
+        validationErrors.push(`Question ${i + 1}: Course ${q.course.toUpperCase()} does not exist or is not active`);
+        continue;
       }
       
       courseYearChecks.add(`${q.course.toLowerCase()}-${q.year.trim()}`);
@@ -579,7 +581,7 @@ router.post("/admin/bulk-import", adminAuth, async (req, res) => {
         question: q.question.trim(),
         image: q.image ? q.image.trim() : null,
         options: q.options.map((opt) => opt.trim()),
-        correctOption: correctOptionNumber, // FIXED: Store as 1-4 (no conversion)
+        correctOption: correctOptionNumber,
         explanation: q.explanation.trim(),
         tags: Array.isArray(q.tags) ? q.tags.map((tag) => tag.trim()) : [],
         course: q.course.toLowerCase(),
@@ -589,29 +591,50 @@ router.post("/admin/bulk-import", adminAuth, async (req, res) => {
       });
     }
     
+    // If there are validation errors, abort the transaction
+    if (validationErrors.length > 0) {
+      await session.abortTransaction();
+      session.endSession();
+      return res.status(400).json({ 
+        message: "Validation failed",
+        errors: validationErrors 
+      });
+    }
+    
     // Ensure course-year combinations exist
     for (const courseYear of courseYearChecks) {
-      const [course, year] = courseYear.split("-");
-      let exists = await CourseYear.findOne({ course, year });
+      const [course, year] = courseYear.split('-');
+      let exists = await CourseYear.findOne({ course, year }).session(session);
       if (!exists) {
-        await new CourseYear({
+        exists = new CourseYear({
           course,
           year,
           createdBy: req.user.id,
-        }).save();
+        });
+        await exists.save({ session });
       }
     }
     
-    const result = await Question.insertMany(questionsToInsert);
+    // Insert all questions in a single operation
+    const result = await Question.insertMany(questionsToInsert, { session });
+    
+    // Commit the transaction
+    await session.commitTransaction();
+    session.endSession();
+    
     res.json({
       message: `Successfully imported ${result.length} questions`,
       imported: result.length,
     });
   } catch (error) {
+    // Abort the transaction on any error
+    await session.abortTransaction();
+    session.endSession();
+    
     console.error("Bulk import error:", error);
     res.status(500).json({ message: "Server error: " + error.message });
   }
-});   
+});  
 
 
 // Admin: Search questions
