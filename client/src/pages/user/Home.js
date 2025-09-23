@@ -19,21 +19,30 @@ const Home = () => {
   const [loading, setLoading] = useState(false)
   const [touchStartX, setTouchStartX] = useState(0)
   const [touchEndX, setTouchEndX] = useState(0)
-  const sidebarRef = useRef(null)
-  
-  // Minimum swipe distance to close sidebar
-  const minSwipeDistance = 50
+  const contactPopupRef = useRef(null)
   
   useEffect(() => {
     loadNotifications()
-  }, [user])
+    
+    // Close contact popup when clicking outside
+    const handleClickOutside = (event) => {
+      if (contactPopupOpen && contactPopupRef.current && !contactPopupRef.current.contains(event.target)) {
+        setContactPopupOpen(false)
+      }
+    }
+    
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [user, contactPopupOpen])
   
   const loadNotifications = async () => {
     try {
       const response = await api.get("/api/notifications")
       setNotifications(response.data)
       
-      // Calculate unread notifications (notifications created after user's last view)
+      // Calculate unread notifications
       if (user?.lastNotificationView) {
         const lastView = new Date(user.lastNotificationView)
         const unread = response.data.filter(
@@ -41,7 +50,6 @@ const Home = () => {
         ).length
         setUnreadCount(unread)
       } else {
-        // If user has never viewed notifications, all are unread
         setUnreadCount(response.data.length)
       }
     } catch (error) {
@@ -51,16 +59,13 @@ const Home = () => {
   
   const markNotificationsAsRead = async () => {
     try {
-      // Update user's last notification view time
       await api.put("/api/users/last-notification-view")
       
-      // Update user in context
       updateUser({
         ...user,
         lastNotificationView: new Date()
       })
       
-      // Reset unread count
       setUnreadCount(0)
     } catch (error) {
       console.error("Failed to mark notifications as read:", error)
@@ -71,7 +76,6 @@ const Home = () => {
     const isOpening = !notificationPanelOpen
     setNotificationPanelOpen(isOpening)
     
-    // If opening the panel, mark notifications as read
     if (isOpening) {
       await markNotificationsAsRead()
     }
@@ -83,16 +87,13 @@ const Home = () => {
       return
     }
     
-    // Check if user's university has semester plan available
     try {
       const response = await api.get("/api/payments/subscription-options")
       const { semester } = response.data.options
       
       if (semester) {
-        // Show subscription modal if semester is available
         setShowSubscriptionModal(true)
       } else {
-        // Directly initialize monthly payment
         initializePayment("monthly", false, 1)
       }
     } catch (error) {
@@ -111,7 +112,6 @@ const Home = () => {
       })
       
       if (response.data.status === "success") {
-        // Redirect to Flutterwave payment link
         window.location.href = response.data.data.link
       } else {
         showMessage("Failed to initialize payment", "error")
@@ -150,61 +150,42 @@ const Home = () => {
     setAboutModalOpen(!aboutModalOpen)
   }
   
-  // Touch event handlers for swipe gestures
-  const onTouchStart = (e) => {
-    setTouchStartX(e.targetTouches[0].clientX)
+  // Touch handlers for swipe gestures
+  const handleTouchStart = (e) => {
+    setTouchStartX(e.touches[0].clientX)
   }
   
-  const onTouchMove = (e) => {
-    setTouchEndX(e.targetTouches[0].clientX)
+  const handleTouchMove = (e) => {
+    setTouchEndX(e.touches[0].clientX)
   }
   
-  const onTouchEnd = () => {
-    if (!touchStartX || !touchEndX) return
-    
-    const distance = touchStartX - touchEndX
-    const isLeftSwipe = distance > minSwipeDistance
-    
-    if (isLeftSwipe && sidebarOpen) {
+  const handleTouchEnd = () => {
+    if (touchStartX - touchEndX > 75) { // Swipe left to right
       setSidebarOpen(false)
     }
-    
-    // Reset touch positions
-    setTouchStartX(0)
-    setTouchEndX(0)
   }
   
-  // Function to handle share
   const handleShare = async () => {
     const shareData = {
       title: 'SmartDriller',
-      text: 'Join SmartDriller - The ultimate educational platform for first year students in Nigeria! Access study materials, practice questions, and AI assistance to excel in your studies.',
-      url: window.location.href
+      text: 'Join SmartDriller, an educational website for first year university students!',
+      url: 'https://smartdriller-mtvvrdqkt-fayeye1ezekiel1-gmailcoms-projects.vercel.app'
     };
-    
-    if (navigator.share) {
-      try {
+
+    try {
+      if (navigator.share) {
         await navigator.share(shareData);
-      } catch (err) {
-        console.error('Error sharing:', err);
-      }
-    } else {
-      // Fallback for browsers that don't support Web Share API
-      if (navigator.clipboard) {
-        try {
-          await navigator.clipboard.writeText(`${shareData.text} ${shareData.url}`);
-          showMessage('Link copied to clipboard!', 'success');
-        } catch (err) {
-          console.error('Error copying to clipboard:', err);
-          showMessage('Failed to copy link', 'error');
-        }
       } else {
-        showMessage('Sharing not supported on this device', 'error');
+        // Fallback: copy to clipboard
+        await navigator.clipboard.writeText(`${shareData.text} ${shareData.url}`);
+        showMessage('Link copied to clipboard!', 'success');
       }
+    } catch (err) {
+      console.error('Error sharing:', err);
+      showMessage('Failed to share', 'error');
     }
   }
   
-  // Function to get notification icon based on type
   const getNotificationIcon = (type) => {
     switch (type) {
       case "success":
@@ -218,7 +199,6 @@ const Home = () => {
     }
   }
   
-  // Function to check if notification is new (unread)
   const isNotificationNew = (notification) => {
     if (!user?.lastNotificationView) return true
     return new Date(notification.createdAt) > new Date(user.lastNotificationView)
@@ -226,6 +206,14 @@ const Home = () => {
   
   return (
     <div className={styles.homePage}>
+      {/* Loading Overlay */}
+      {loading && (
+        <div className={styles.loadingOverlay}>
+          <div className={styles.loadingSpinner}></div>
+          <p>Processing...</p>
+        </div>
+      )}
+      
       {/* Overlay */}
       <div
         className={`${styles.overlay} ${sidebarOpen || notificationPanelOpen || aboutModalOpen ? styles.active : ""}`}
@@ -267,11 +255,10 @@ const Home = () => {
       
       {/* Sidebar */}
       <div 
-        ref={sidebarRef}
         className={`${styles.sidebar} ${sidebarOpen ? styles.active : ""}`}
-        onTouchStart={onTouchStart}
-        onTouchMove={onTouchMove}
-        onTouchEnd={onTouchEnd}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
       >
         <div className={styles.sidebarHeader}>
           <div className={styles.userProfile}>
@@ -378,7 +365,10 @@ const Home = () => {
       </div>
       
       {/* Contact Popup */}
-      <div className={`${styles.contactPopUp} ${contactPopupOpen ? styles.showContact : ""}`}>
+      <div 
+        ref={contactPopupRef}
+        className={`${styles.contactPopUp} ${contactPopupOpen ? styles.showContact : ""}`}
+      >
         <div className={`${styles.contact} ${styles.contact1}`}>
           <div className={styles.contactIcon}>WhatsApp</div>
           <a href="tel:+2348103414050" className={styles.contactNo}>
@@ -387,8 +377,8 @@ const Home = () => {
         </div>
         <div className={`${styles.contact} ${styles.contact2}`}>
           <div className={styles.contactIcon}>Email</div>
-          <a href="mailto:support@smartdriller.com" className={styles.contactNo}>
-            support@smartdriller.com
+          <a href="mailto:smartdrillerhelp@gmail.com" className={styles.contactNo}>
+            smartdrillerhelp@gmail.com
           </a>
         </div>
       </div>
@@ -497,12 +487,7 @@ const Home = () => {
           disabled={loading}
         >
           <span className={styles.btnText}>
-            {loading ? (
-              <>
-                <span className={styles.loadingSpinner}></span>
-                Processing...
-              </>
-            ) : user?.isSubscribed ? "SUBSCRIBED" : "ACTIVATE"}
+            {loading ? "Processing..." : user?.isSubscribed ? "SUBSCRIBED" : "ACTIVATE"}
           </span>
         </button>
       </div>

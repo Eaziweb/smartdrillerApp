@@ -8,8 +8,7 @@ const bcrypt = require("bcryptjs");
 const defaultCourses = {
   Agriculture: [
     "Agricultural Economics",
-    "Agricultural Economics/Extension",
-    "Agricultural Education",
+    "Agricultural Extension",
     "Agricultural Engineering",
     "Agricultural Extension",
     "Agricultural Science",
@@ -36,7 +35,7 @@ const defaultCourses = {
     "Aerospace/Aeronautic Engineering",
     "Electrical Engineering",
     "Engineering Physics",
-    "Food Science and Engineering",
+    "Food Engineering",
     "Industrial and Production Engineering",
     "Information Communication Engineering",
     "Mechanical Engineering",
@@ -123,10 +122,8 @@ const defaultCourses = {
     "Mathematics",
     "Microbiology",
     "Physics",
-    "Plant Science",
     "Statistics",
     "Urban and Regional Planning",
-    "Veterinary Medicine",
     "Zoology",
   ],
   Education: [
