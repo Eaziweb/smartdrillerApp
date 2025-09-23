@@ -50,7 +50,6 @@ const defaultCourses = {
   "Medicine & Pharmacy": [
     "Anatomy",
     "Biochemistry",
-    "Human Nutrition and Dietetics",
     "Medical Laboratory Technology/Science",
     "Medicine & Surgery",
     "Nursing",
