@@ -758,7 +758,52 @@
   justify-content: flex-end;
   gap: 12px;
 }
+/* styles/AdminQuizManagement.module.css */
 
+/* Progress Indicator */
+.progressContainer {
+  margin-bottom: 20px;
+}
+
+.progressBar {
+  height: 10px;
+  background-color: #e9ecef;
+  border-radius: 5px;
+  overflow: hidden;
+  margin-bottom: 10px;
+}
+
+.progressFill {
+  height: 100%;
+  background: linear-gradient(90deg, #0066ff, #002060);
+  border-radius: 5px;
+  transition: width 0.3s ease;
+}
+
+.progressFill.error {
+  background: linear-gradient(90deg, #dc3545, #c82333);
+}
+
+.progressMessage {
+  font-size: 0.9rem;
+  color: #495057;
+  text-align: center;
+}
+
+/* Update form actions to handle multiple buttons */
+.formActions {
+  display: flex;
+  gap: 12px;
+  margin-top: 24px;
+  flex-wrap: wrap;
+}
+
+/* Add loading state for buttons */
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none !important;
+}
 /* Responsive Design */
 @media (max-width: 768px) {
   .adminDashboard {

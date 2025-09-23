@@ -1,6 +1,7 @@
 // models/Question.js
 const mongoose = require("mongoose")
 const questionSchema = new mongoose.Schema({
+  
   question: {
     type: String,
     required: true,
@@ -65,6 +66,15 @@ const questionSchema = new mongoose.Schema({
   updatedAt: {
     type: Date,
     default: Date.now,
+  },
+  importId: {
+    type: String,
+    index: true,
+  },
+  importStatus: {
+    type: String,
+    enum: ['pending', 'active'],
+    default: 'active',
   },
 })
 questionSchema.pre("save", function (next) {

@@ -18,6 +18,13 @@ const AdminQuizManagement = () => {
     year: "",
     topic: "",
   })
+const [cleanupLoading, setCleanupLoading] = useState(false);
+const [bulkImportProgress, setBulkImportProgress] = useState({
+  loading: false,
+  progress: 0,
+  message: "",
+  error: false
+});
   
   // Question form state
   const [questionForm, setQuestionForm] = useState({
@@ -313,64 +320,127 @@ const AdminQuizManagement = () => {
       onConfirm: () => deleteQuestion(questionId),
     })
   }
+  // components/AdminQuizManagement.js
+
+// Add these new state variables
+
+
+
+// Add cleanup function
+const handleCleanupPending = async () => {
+  setCleanupLoading(true);
+  try {
+    const token = localStorage.getItem("token");
+    const response = await api.post("/api/questions/admin/cleanup-pending", {}, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    
+    showToast(response.data.message);
+    fetchQuestions();
+  } catch (error) {
+    console.error("Error cleaning up pending questions:", error);
+    showToast(error.response?.data?.message || "Failed to clean up pending questions", "error");
+  } finally {
+    setCleanupLoading(false);
+  }
+};
+// Update handleBulkImport with progress indicators
+const handleBulkImport = async (e) => {
+  e.preventDefault();
+  setBulkImportProgress({
+    loading: true,
+    progress: 0,
+    message: "Validating questions...",
+    error: false
+  });
   
-  const handleBulkImport = async (e) => {
-    e.preventDefault();
-    try {
-      const tryParse = (data) => {
-        try {
-          const escaped = data.replace(/\\/g, '\\\\');
-          return JSON.parse(escaped);
-        } catch (err) {
-          return null;
-        }
-      };
+  try {
+    const tryParse = (data) => {
+      try {
+        const escaped = data.replace(/\\/g, '\\\\');
+        return JSON.parse(escaped);
+      } catch (err) {
+        return null;
+      }
+    };
+    
+    setBulkImportProgress(prev => ({...prev, message: "Parsing JSON data..."}));
+    let parsedQuestions = tryParse(bulkImportData);
+    
+    if (!parsedQuestions || !Array.isArray(parsedQuestions)) {
+      setBulkImportProgress({
+        loading: false,
+        progress: 0,
+        message: "",
+        error: true
+      });
+      showToast("Invalid JSON format. Must be an array of questions.", "error");
+      return;
+    }
+    
+    setBulkImportProgress(prev => ({...prev, message: "Validating questions..."}));
+    const validatedQuestions = parsedQuestions.map((q, index) => {
+      // Update progress based on validation
+      const progress = Math.round((index / parsedQuestions.length) * 40);
+      setBulkImportProgress(prev => ({...prev, progress}));
       
-      let parsedQuestions = tryParse(bulkImportData);
-      
-      if (!parsedQuestions || !Array.isArray(parsedQuestions)) {
-        showToast("Invalid JSON format. Must be an array of questions.", "error");
-        return;
+      if (!q.question || !q.options || q.correctOption === undefined || 
+          !q.explanation || !q.course || !q.year || !q.topic) {
+        throw new Error(`Question ${index + 1}: Missing required fields`);
       }
       
-      const validatedQuestions = parsedQuestions.map((q, index) => {
-        if (!q.question || !q.options || q.correctOption === undefined || 
-            !q.explanation || !q.course || !q.year || !q.topic) {
-          throw new Error(`Question ${index + 1}: Missing required fields`);
-        }
-        
-        if (!Array.isArray(q.options) || q.options.length !== 4) {
-          throw new Error(`Question ${index + 1}: Must have exactly 4 options`);
-        }
-        
-        const correctOption = Number(q.correctOption);
-        if (isNaN(correctOption) || correctOption < 1 || correctOption > 4) {
-          throw new Error(`Question ${index + 1}: Correct option must be between 1 and 4`);
-        }
-        
-        return {
-          ...q,
-          correctOption: correctOption
-        };
-      });
+      if (!Array.isArray(q.options) || q.options.length !== 4) {
+        throw new Error(`Question ${index + 1}: Must have exactly 4 options`);
+      }
       
-      const token = localStorage.getItem("token")
-      const response = await api.post("/api/questions/admin/bulk-import", { questions: validatedQuestions }, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      });
+      const correctOption = Number(q.correctOption);
+      if (isNaN(correctOption) || correctOption < 1 || correctOption > 4) {
+        throw new Error(`Question ${index + 1}: Correct option must be between 1 and 4`);
+      }
       
-      showToast(response.data.message);
-      setBulkImportData("");
-      fetchQuestions();
-      fetchCourseYears();
-    } catch (error) {
-      console.error("Error importing questions:", error);
-      showToast(`Import failed: ${error.message}`, "error");
-    }
-  };
+      return {
+        ...q,
+        correctOption: correctOption
+      };
+    });
+    
+    setBulkImportProgress(prev => ({...prev, message: "Sending questions to server...", progress: 50}));
+    
+    const token = localStorage.getItem("token");
+    const response = await api.post("/api/questions/admin/bulk-import", { questions: validatedQuestions }, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      onUploadProgress: (progressEvent) => {
+        const progress = Math.round((progressEvent.loaded / progressEvent.total) * 40) + 50;
+        setBulkImportProgress(prev => ({...prev, progress, message: "Uploading questions..."}));
+      }
+    });
+    
+    setBulkImportProgress(prev => ({...prev, progress: 100, message: "Import complete!"}));
+    showToast(response.data.message);
+    setBulkImportData("");
+    fetchQuestions();
+    fetchCourseYears();
+  } catch (error) {
+    console.error("Error importing questions:", error);
+    setBulkImportProgress({
+      loading: false,
+      progress: 0,
+      message: "",
+      error: true
+    });
+    showToast(`Import failed: ${error.message}`, "error");
+  } finally {
+    // Reset progress after a delay to show completion
+    setTimeout(() => {
+      setBulkImportProgress(prev => ({...prev, loading: false, progress: 0}));
+    }, 2000);
+  }
+};
 
   const handleAddCourseYear = async (e) => {
     e.preventDefault()
@@ -766,20 +836,20 @@ const AdminQuizManagement = () => {
             </form>
           </div>
           
-          {/* Bulk Import Section */}
-          <div className={styles.formSection}>
-            <h3>Bulk Import Questions</h3>
-            <div className={styles.bulkImportInstructions}>
-              <p><strong>Important:</strong> Please ensure your JSON follows these requirements:</p>
-              <ul>
-                <li>Must be a valid JSON array of question objects</li>
-                <li>Each question must have: question, options (array of 4), correctOption (1-4), explanation, course, year, topic</li>
-                <li>Correct option must be a number between 1 and 4 (1 = first option, 2 = second option, etc.)</li>
-                <li>Tags field is optional and should be an array of strings</li>
-                <li>Image field is optional and should be a URL string</li>
-              </ul>
-              <p><strong>Example:</strong></p>
-              <pre className={styles.jsonExample}>
+         {/* Bulk Import Section */}
+<div className={styles.formSection}>
+  <h3>Bulk Import Questions</h3>
+  <div className={styles.bulkImportInstructions}>
+    <p><strong>Important:</strong> Please ensure your JSON follows these requirements:</p>
+    <ul>
+      <li>Must be a valid JSON array of question objects</li>
+      <li>Each question must have: question, options (array of 4), correctOption (1-4), explanation, course, year, topic</li>
+      <li>Correct option must be a number between 1 and 4 (1 = first option, 2 = second option, etc.)</li>
+      <li>Tags field is optional and should be an array of strings</li>
+      <li>Image field is optional and should be a URL string</li>
+    </ul>
+    <p><strong>Example:</strong></p>
+    <pre className={styles.jsonExample}>
 {`[
   {
     "question": "What is 2+2?",
@@ -792,23 +862,55 @@ const AdminQuizManagement = () => {
     "tags": ["addition", "basic"]
   }
 ]`}
-              </pre>
-            </div>
-            <form onSubmit={handleBulkImport}>
-              <div className={styles.formGroup}>
-                <label>JSON Data</label>
-                <textarea
-                  value={bulkImportData}
-                  onChange={(e) => setBulkImportData(e.target.value)}
-                  placeholder="Paste JSON array of questions here..."
-                  rows="10"
-                />
-              </div>
-              <button type="submit" className={`${styles.btn} ${styles.btnPrimary}`}>
-                Import Questions
-              </button>
-            </form>
-          </div>
+    </pre>
+  </div>
+  
+  {/* Progress Indicator */}
+  {bulkImportProgress.loading && (
+    <div className={styles.progressContainer}>
+      <div className={styles.progressBar}>
+        <div 
+          className={`${styles.progressFill} ${bulkImportProgress.error ? styles.error : ''}`}
+          style={{ width: `${bulkImportProgress.progress}%` }}
+        ></div>
+      </div>
+      <div className={styles.progressMessage}>
+        {bulkImportProgress.message}
+      </div>
+    </div>
+  )}
+  
+  <form onSubmit={handleBulkImport}>
+    <div className={styles.formGroup}>
+      <label>JSON Data</label>
+      <textarea
+        value={bulkImportData}
+        onChange={(e) => setBulkImportData(e.target.value)}
+        placeholder="Paste JSON array of questions here..."
+        rows="10"
+        disabled={bulkImportProgress.loading}
+      />
+    </div>
+    <div className={styles.formActions}>
+      <button 
+        type="submit" 
+        className={`${styles.btn} ${styles.btnPrimary}`}
+        disabled={bulkImportProgress.loading}
+      >
+        {bulkImportProgress.loading ? 'Importing...' : 'Import Questions'}
+      </button>
+      
+      <button 
+        type="button" 
+        className={`${styles.btn} ${styles.btnSecondary}`}
+        onClick={handleCleanupPending}
+        disabled={cleanupLoading || bulkImportProgress.loading}
+      >
+        {cleanupLoading ? 'Cleaning up...' : 'Cleanup Pending Questions'}
+      </button>
+    </div>
+  </form>
+</div>
           
           {/* Search and Filter */}
           <div className={styles.searchSection}>

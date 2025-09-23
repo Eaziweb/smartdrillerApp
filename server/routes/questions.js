@@ -10,7 +10,7 @@ const StudyProgress = require("../models/StudyProgress");
 const { ensureCourseYearExists } = require("../utils/courseYearUtils");
 const { auth, adminAuth } = require("../middleware/auth");
 const subscriptionCheck = require("../middleware/subscriptionCheck");;
-
+const { v4: uuidv4 } = require('uuid');
 // Configure multer for image uploads
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -520,23 +520,22 @@ router.put("/admin/:id", adminAuth, upload.single("image"), async (req, res) => 
   }
 });
 // Admin: Bulk import questions with transaction
+// Admin: Bulk import questions with two-phase commit
 router.post("/admin/bulk-import", adminAuth, async (req, res) => {
-  const session = await mongoose.startSession();
-  session.startTransaction();
+  // Generate a unique import ID for this operation
+  const importId = require('uuid').v4();
+  let insertedCount = 0;
   
   try {
     let questions = req.body.questions;
     
-    // Check if questions is an array
     if (!Array.isArray(questions)) {
-      await session.abortTransaction();
-      session.endSession();
       return res.status(400).json({ 
         message: "Invalid request format. 'questions' must be an array." 
       });
     }
     
-    // Validate all questions first
+    // Phase 1: Validate all questions
     const validationErrors = [];
     const courseYearChecks = new Set();
     const questionsToInsert = [];
@@ -568,7 +567,7 @@ router.post("/admin/bulk-import", adminAuth, async (req, res) => {
       const courseExists = await Course.findOne({
         courseCode: q.course.toLowerCase(),
         isActive: true,
-      }).session(session);
+      });
       
       if (!courseExists) {
         validationErrors.push(`Question ${i + 1}: Course ${q.course.toUpperCase()} does not exist or is not active`);
@@ -588,13 +587,13 @@ router.post("/admin/bulk-import", adminAuth, async (req, res) => {
         year: q.year.trim(),
         topic: q.topic.trim(),
         createdBy: req.user.id,
+        importId: importId, // Mark with import ID
+        importStatus: 'pending', // Mark as pending
       });
     }
     
-    // If there are validation errors, abort the transaction
+    // If there are validation errors, return them without inserting anything
     if (validationErrors.length > 0) {
-      await session.abortTransaction();
-      session.endSession();
       return res.status(400).json({ 
         message: "Validation failed",
         errors: validationErrors 
@@ -604,38 +603,69 @@ router.post("/admin/bulk-import", adminAuth, async (req, res) => {
     // Ensure course-year combinations exist
     for (const courseYear of courseYearChecks) {
       const [course, year] = courseYear.split('-');
-      let exists = await CourseYear.findOne({ course, year }).session(session);
+      let exists = await CourseYear.findOne({ course, year });
       if (!exists) {
         exists = new CourseYear({
           course,
           year,
           createdBy: req.user.id,
         });
-        await exists.save({ session });
+        await exists.save();
       }
     }
     
-    // Insert all questions in a single operation
-    const result = await Question.insertMany(questionsToInsert, { session });
+    // Phase 2: Insert all questions with pending status
+    const result = await Question.insertMany(questionsToInsert);
+    insertedCount = result.length;
     
-    // Commit the transaction
-    await session.commitTransaction();
-    session.endSession();
+    // Phase 3: Activate all questions in a single atomic operation
+    const activationResult = await Question.updateMany(
+      { importId: importId, importStatus: 'pending' },
+      { $set: { importStatus: 'active' }, $unset: { importId: 1 } }
+    );
+    
+    // Verify activation was successful
+    if (activationResult.modifiedCount !== insertedCount) {
+      // If activation failed, clean up the pending questions
+      await Question.deleteMany({ importId: importId });
+      throw new Error(`Activation failed. Expected to activate ${insertedCount} questions, but only activated ${activationResult.modifiedCount}`);
+    }
     
     res.json({
-      message: `Successfully imported ${result.length} questions`,
-      imported: result.length,
+      message: `Successfully imported ${insertedCount} questions`,
+      imported: insertedCount,
     });
   } catch (error) {
-    // Abort the transaction on any error
-    await session.abortTransaction();
-    session.endSession();
-    
     console.error("Bulk import error:", error);
+    
+    // Clean up any pending questions if import failed
+    if (insertedCount > 0) {
+      try {
+        const deleteResult = await Question.deleteMany({ importId: importId });
+        console.log(`Cleaned up ${deleteResult.deletedCount} pending questions`);
+      } catch (cleanupError) {
+        console.error("Cleanup failed:", cleanupError);
+      }
+    }
+    
     res.status(500).json({ message: "Server error: " + error.message });
   }
-});  
-
+}); 
+// Admin: Clean up pending imports
+router.post("/admin/cleanup-pending", adminAuth, async (req, res) => {
+  try {
+    // Delete all questions that are still in pending state
+    const result = await Question.deleteMany({ importStatus: 'pending' });
+    
+    res.json({
+      message: `Cleaned up ${result.deletedCount} pending questions`,
+      deleted: result.deletedCount,
+    });
+  } catch (error) {
+    console.error("Cleanup error:", error);
+    res.status(500).json({ message: "Server error: " + error.message });
+  }
+});
 
 // Admin: Search questions
 router.get("/admin/search", adminAuth, async (req, res) => {
