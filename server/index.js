@@ -7,7 +7,7 @@ const cookieParser = require("cookie-parser");
 const bcrypt = require("bcryptjs");
 const User = require("./models/User");
 const CourseofStudy = require("./models/CourseofStudy");
-const { initializeData } = require("./utils/initialData");
+
 
 const app = express();
 
@@ -85,26 +85,6 @@ app.use(cookieParser());
 mongoose.connect(process.env.MONGODB_URI)
   .then(async () => {
     console.log("✅ MongoDB connected");
-
-    // 🔥 Drop the bad trustedDevices index if it exists
-    try {
-      const indexes = await mongoose.connection.db.collection("users").indexes();
-      const hasTrustedDeviceIndex = indexes.some(idx => idx.name === "trustedDevices.deviceId_1");
-
-      if (hasTrustedDeviceIndex) {
-        await mongoose.connection.db.collection("users").dropIndex("trustedDevices.deviceId_1");
-        console.log("✅ Dropped trustedDevices.deviceId_1 index");
-      } else {
-        console.log("ℹ️ No trustedDevices index found — nothing to drop");
-      }
-    } catch (err) {
-      console.error("❌ Failed to drop trustedDevices index:", err.message);
-    }
-
-    // Run duplicate cleanup
-    await fixDuplicates();
-
-    // Ensure SuperAdministration course exists
     let superAdminCourse = await CourseofStudy.findOne({
       name: "SuperAdministration",
       category: "Administration"
@@ -118,21 +98,6 @@ mongoose.connect(process.env.MONGODB_URI)
       console.log("✅ SuperAdministration course created");
     }
 
-    // Ensure Administration course exists
-    let adminCourse = await CourseofStudy.findOne({
-      name: "Administration",
-      category: "Administration"
-    });
-    if (!adminCourse) {
-      adminCourse = new CourseofStudy({
-        name: "Administration",
-        category: "Administration"
-      });
-      await adminCourse.save();
-      console.log("✅ Administration course created");
-    }
-
-    await initializeData();
   })
   .catch(err => console.error("❌ MongoDB connection error:", err));
 

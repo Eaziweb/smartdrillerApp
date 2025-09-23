@@ -347,6 +347,7 @@ const handleCleanupPending = async () => {
   }
 };
 // Update handleBulkImport with progress indicators
+// Update handleBulkImport with better error handling
 const handleBulkImport = async (e) => {
   e.preventDefault();
   setBulkImportProgress({
@@ -380,7 +381,9 @@ const handleBulkImport = async (e) => {
       return;
     }
     
-    setBulkImportProgress(prev => ({...prev, message: "Validating questions..."}));
+    const expectedCount = parsedQuestions.length;
+    setBulkImportProgress(prev => ({...prev, message: `Validating ${expectedCount} questions...`}));
+    
     const validatedQuestions = parsedQuestions.map((q, index) => {
       // Update progress based on validation
       const progress = Math.round((index / parsedQuestions.length) * 40);
@@ -392,7 +395,7 @@ const handleBulkImport = async (e) => {
       }
       
       if (!Array.isArray(q.options) || q.options.length !== 4) {
-        throw new Error(`Question ${index + 1}: Must have exactly 4 options`);
+        throw new Error(`Question ${i + 1}: Must have exactly 4 options`);
       }
       
       const correctOption = Number(q.correctOption);
@@ -409,22 +412,47 @@ const handleBulkImport = async (e) => {
     setBulkImportProgress(prev => ({...prev, message: "Sending questions to server...", progress: 50}));
     
     const token = localStorage.getItem("token");
-    const response = await api.post("/api/questions/admin/bulk-import", { questions: validatedQuestions }, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-      onUploadProgress: (progressEvent) => {
-        const progress = Math.round((progressEvent.loaded / progressEvent.total) * 40) + 50;
-        setBulkImportProgress(prev => ({...prev, progress, message: "Uploading questions..."}));
-      }
-    });
     
-    setBulkImportProgress(prev => ({...prev, progress: 100, message: "Import complete!"}));
-    showToast(response.data.message);
-    setBulkImportData("");
-    fetchQuestions();
-    fetchCourseYears();
+    // Create an AbortController for timeout handling
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10 * 60 * 1000); // 10 minutes timeout
+    
+    try {
+      const response = await api.post("/api/questions/admin/bulk-import", { questions: validatedQuestions }, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        signal: controller.signal,
+        onUploadProgress: (progressEvent) => {
+          const progress = Math.round((progressEvent.loaded / progressEvent.total) * 40) + 50;
+          setBulkImportProgress(prev => ({...prev, progress, message: "Uploading questions..."}));
+        }
+      });
+      
+      clearTimeout(timeoutId);
+      
+      const { imported } = response.data;
+      if (imported !== expectedCount) {
+        throw new Error(`Import incomplete. Expected ${expectedCount} questions, but only ${imported} were imported.`);
+      }
+      
+      setBulkImportProgress(prev => ({...prev, progress: 100, message: "Import complete!"}));
+      showToast(response.data.message);
+      setBulkImportData("");
+      fetchQuestions();
+      fetchCourseYears();
+    } catch (error) {
+      clearTimeout(timeoutId);
+      
+      if (error.name === 'AbortError') {
+        showToast("Import timed out. Please try again with a smaller batch.", "error");
+        // Automatically trigger cleanup after timeout
+        handleCleanupPending();
+      } else {
+        throw error;
+      }
+    }
   } catch (error) {
     console.error("Error importing questions:", error);
     setBulkImportProgress({
@@ -440,7 +468,7 @@ const handleBulkImport = async (e) => {
       setBulkImportProgress(prev => ({...prev, loading: false, progress: 0}));
     }, 2000);
   }
-};
+}
 
   const handleAddCourseYear = async (e) => {
     e.preventDefault()
@@ -910,6 +938,11 @@ const handleBulkImport = async (e) => {
       </button>
     </div>
   </form>
+</div>
+<div className={styles.cleanupInfo}>
+    <p><strong>All-or-Nothing Import:</strong> This import process ensures that either all questions are successfully imported or none are imported. If any part of the import fails, all questions from that batch are automatically removed.</p>
+    <p><strong>Cleanup Pending Questions:</strong> This will remove any questions that were partially imported due to timeouts or errors. Use this if you suspect incomplete imports.</p>
+  </div>
 </div>
           
           {/* Search and Filter */}

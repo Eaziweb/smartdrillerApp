@@ -520,11 +520,14 @@ router.put("/admin/:id", adminAuth, upload.single("image"), async (req, res) => 
   }
 });
 // Admin: Bulk import questions with transaction
-// Admin: Bulk import questions with two-phase commit
+// Admin: Bulk import questions with all-or-nothing approach
 router.post("/admin/bulk-import", adminAuth, async (req, res) => {
   // Generate a unique import ID for this operation
   const importId = require('uuid').v4();
-  let insertedCount = 0;
+  let expectedCount = 0;
+  
+  // Set a longer timeout for this route
+  req.setTimeout(10 * 60 * 1000); // 10 minutes
   
   try {
     let questions = req.body.questions;
@@ -534,6 +537,8 @@ router.post("/admin/bulk-import", adminAuth, async (req, res) => {
         message: "Invalid request format. 'questions' must be an array." 
       });
     }
+    
+    expectedCount = questions.length;
     
     // Phase 1: Validate all questions
     const validationErrors = [];
@@ -587,8 +592,8 @@ router.post("/admin/bulk-import", adminAuth, async (req, res) => {
         year: q.year.trim(),
         topic: q.topic.trim(),
         createdBy: req.user.id,
-        importId: importId, // Mark with import ID
-        importStatus: 'pending', // Mark as pending
+        importId: importId,
+        importStatus: 'pending',
       });
     }
     
@@ -616,41 +621,46 @@ router.post("/admin/bulk-import", adminAuth, async (req, res) => {
     
     // Phase 2: Insert all questions with pending status
     const result = await Question.insertMany(questionsToInsert);
-    insertedCount = result.length;
+    const actualCount = result.length;
     
-    // Phase 3: Activate all questions in a single atomic operation
+    // Phase 3: Verify all questions were inserted
+    if (actualCount !== expectedCount) {
+      // If counts don't match, clean up the pending questions
+      await Question.deleteMany({ importId: importId });
+      throw new Error(`Import incomplete. Expected ${expectedCount} questions, but only inserted ${actualCount}.`);
+    }
+    
+    // Phase 4: Activate all questions in a single atomic operation
     const activationResult = await Question.updateMany(
       { importId: importId, importStatus: 'pending' },
       { $set: { importStatus: 'active' }, $unset: { importId: 1 } }
     );
     
     // Verify activation was successful
-    if (activationResult.modifiedCount !== insertedCount) {
+    if (activationResult.modifiedCount !== actualCount) {
       // If activation failed, clean up the pending questions
       await Question.deleteMany({ importId: importId });
-      throw new Error(`Activation failed. Expected to activate ${insertedCount} questions, but only activated ${activationResult.modifiedCount}`);
+      throw new Error(`Activation failed. Expected to activate ${actualCount} questions, but only activated ${activationResult.modifiedCount}.`);
     }
     
     res.json({
-      message: `Successfully imported ${insertedCount} questions`,
-      imported: insertedCount,
+      message: `Successfully imported ${actualCount} questions`,
+      imported: actualCount,
     });
   } catch (error) {
     console.error("Bulk import error:", error);
     
     // Clean up any pending questions if import failed
-    if (insertedCount > 0) {
-      try {
-        const deleteResult = await Question.deleteMany({ importId: importId });
-        console.log(`Cleaned up ${deleteResult.deletedCount} pending questions`);
-      } catch (cleanupError) {
-        console.error("Cleanup failed:", cleanupError);
-      }
+    try {
+      const deleteResult = await Question.deleteMany({ importId: importId });
+      console.log(`Cleaned up ${deleteResult.deletedCount} pending questions`);
+    } catch (cleanupError) {
+      console.error("Cleanup failed:", cleanupError);
     }
     
     res.status(500).json({ message: "Server error: " + error.message });
   }
-}); 
+});
 // Admin: Clean up pending imports
 router.post("/admin/cleanup-pending", adminAuth, async (req, res) => {
   try {
