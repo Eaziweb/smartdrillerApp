@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import axios from "axios";
+import api from "../../utils/api";
 import styles from "../../styles/NoteManagement.module.css";
 
 const NoteManagement = () => {
@@ -31,7 +32,7 @@ const NoteManagement = () => {
 
 const loadCourses = async () => {
   try {
-    const response = await axios.get("/api/admin/notes/courses", {
+    const response = await api.get("/api/admin/notes/courses", {
       headers: getAuthHeader(),
     });
     
@@ -55,7 +56,7 @@ const loadCourses = async () => {
     e.preventDefault();
     try {
       if (editingItem) {
-        await axios.put(
+        await api.put(
           `/api/admin/notes/courses/${editingItem._id}`,
           courseForm,
           {
@@ -63,7 +64,7 @@ const loadCourses = async () => {
           }
         );
       } else {
-        await axios.post("/api/admin/notes/courses", courseForm, {
+        await api.post("/api/admin/notes/courses", courseForm, {
           headers: getAuthHeader(),
         });
       }
@@ -89,11 +90,11 @@ const loadCourses = async () => {
     e.preventDefault();
     try {
       if (editingItem) {
-        await axios.put(`/api/admin/notes/${editingItem._id}`, noteForm, {
+        await api.put(`/api/admin/notes/${editingItem._id}`, noteForm, {
           headers: getAuthHeader(),
         });
       } else {
-        await axios.post(
+        await api.post(
           `/api/admin/notes/courses/${selectedCourse._id}/notes`,
           noteForm,
           {
@@ -122,7 +123,7 @@ const loadCourses = async () => {
   const handleDeleteNote = async (noteId) => {
     if (!window.confirm("Are you sure you want to delete this note?")) return;
     try {
-      await axios.delete(`/api/admin/notes/${noteId}`, {
+      await api.delete(`/api/admin/notes/${noteId}`, {
         headers: getAuthHeader(),
       });
       loadCourses();
@@ -144,7 +145,7 @@ const loadCourses = async () => {
     )
       return;
     try {
-      await axios.delete(`/api/admin/notes/courses/${courseId}`, {
+      await api.delete(`/api/admin/notes/courses/${courseId}`, {
         headers: getAuthHeader(),
       });
       loadCourses();
