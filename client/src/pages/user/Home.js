@@ -1,3 +1,12 @@
+"use client"
+import { useState, useEffect, useRef } from "react"
+import { Link } from "react-router-dom"
+import { useAuth } from "../../contexts/AuthContext"
+import styles from "../../styles/home.module.css"
+import AboutSmartDriller from "./AboutSmartDriller"
+import SubscriptionModal from "./SubscriptionModal"
+import api from "../../utils/api";
+
 const Home = () => {
   const { user, logout, updateUser } = useAuth()
   const [sidebarOpen, setSidebarOpen] = useState(false)
@@ -12,188 +21,184 @@ const Home = () => {
   const [touchEndX, setTouchEndX] = useState(0)
   const contactPopupRef = useRef(null)
   const sidebarRef = useRef(null)
-  const isInitialized = useRef(false)
+  const initializedRef = useRef(false)
   
+  // Initialize component - fetch user data and notifications
   useEffect(() => {
+    if (initializedRef.current) return;
+    
     const initializeData = async () => {
-      if (isInitialized.current) return
-      isInitialized.current = true
-      
       try {
-        // Fetch the latest user data
-        const userResponse = await api.get("/api/users/profile")
-        const updatedUser = userResponse.data.user
-        updateUser(updatedUser)
+        // Fetch latest user data to get current lastNotificationView
+        const userResponse = await api.get("/api/users/profile");
+        const updatedUser = userResponse.data.user;
+        updateUser(updatedUser);
         
-        // Fetch notifications and calculate unread count
-        await loadNotifications(updatedUser)
+        // Load notifications with the latest user data
+        await loadNotifications(updatedUser);
       } catch (error) {
-        console.error("Failed to initialize data:", error)
-        // If fetching user data fails, try to load notifications with the current user data
+        console.error("Initialization error:", error);
+        // Fallback to current user data if available
         if (user) {
-          await loadNotifications(user)
+          await loadNotifications(user);
         }
       }
-    }
+    };
     
-    initializeData()
+    initializeData();
+    initializedRef.current = true;
     
-    // Close contact popup when clicking outside
+    // Set up event listeners
     const handleClickOutside = (event) => {
-      // Handle contact popup
       if (contactPopupOpen && contactPopupRef.current && !contactPopupRef.current.contains(event.target)) {
-        setContactPopupOpen(false)
-        return; // Prevent further processing
+        setContactPopupOpen(false);
+        return;
       }
       
-      // Handle sidebar close when clicking outside
       if (sidebarOpen && sidebarRef.current && !sidebarRef.current.contains(event.target)) {
-        setSidebarOpen(false)
-        return; // Prevent further processing
+        setSidebarOpen(false);
+        return;
       }
-    }
+    };
     
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside)
-    }
-  }, []) // Empty dependency array means this runs once when the component mounts
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
   
-  // Load notifications when the user data changes, but not on initial mount
+  // Update notifications when user data changes
   useEffect(() => {
-    if (user && isInitialized.current) {
-      loadNotifications(user)
+    if (user && initializedRef.current) {
+      loadNotifications(user);
     }
-  }, [user]) // This effect runs when the user data changes
+  }, [user]);
   
   const loadNotifications = async (userData) => {
     try {
-      // Fetch notifications
-      const notificationsResponse = await api.get("/api/notifications")
-      setNotifications(notificationsResponse.data)
+      const response = await api.get("/api/notifications");
+      setNotifications(response.data);
       
-      // Calculate unread notifications based on the provided user data
+      // Calculate unread count based on user's lastNotificationView
       if (userData?.lastNotificationView) {
-        const lastView = new Date(userData.lastNotificationView)
-        const unread = notificationsResponse.data.filter(
+        const lastView = new Date(userData.lastNotificationView);
+        const unread = response.data.filter(
           notif => new Date(notif.createdAt) > lastView
-        ).length
-        setUnreadCount(unread)
+        ).length;
+        setUnreadCount(unread);
       } else {
-        setUnreadCount(notificationsResponse.data.length)
+        setUnreadCount(response.data.length);
       }
     } catch (error) {
-      console.error("Failed to load notifications:", error)
+      console.error("Failed to load notifications:", error);
     }
-  }
+  };
   
   const markNotificationsAsRead = async () => {
     try {
-      // Update the lastNotificationView on the backend and get the updated user data
-      const response = await api.put("/api/users/last-notification-view")
-      const updatedUser = response.data.user
-      updateUser(updatedUser)
+      // Update lastNotificationView on server
+      const response = await api.put("/api/users/last-notification-view");
+      const updatedUser = response.data.user;
       
-      setUnreadCount(0)
+      // Update user context with new timestamp
+      updateUser(updatedUser);
+      
+      // Reset unread count
+      setUnreadCount(0);
     } catch (error) {
-      console.error("Failed to mark notifications as read:", error)
+      console.error("Failed to mark notifications as read:", error);
     }
-  }
+  };
   
   const toggleNotificationPanel = async () => {
-    const isOpening = !notificationPanelOpen
-    setNotificationPanelOpen(isOpening)
+    const isOpening = !notificationPanelOpen;
+    setNotificationPanelOpen(isOpening);
     
     if (isOpening) {
-      await markNotificationsAsRead()
+      await markNotificationsAsRead();
     }
-  }
-  
-
+  };
   
   const handleActivate = async () => {
     if (user?.isSubscribed) {
-      showMessage("You are already subscribed!", "info")
-      return
+      showMessage("You are already subscribed!", "info");
+      return;
     }
     
     try {
-      const response = await api.get("/api/payments/subscription-options")
-      const { semester } = response.data.options
+      const response = await api.get("/api/payments/subscription-options");
+      const { semester } = response.data.options;
       
       if (semester) {
-        setShowSubscriptionModal(true)
+        setShowSubscriptionModal(true);
       } else {
-        initializePayment("monthly", false, 1)
+        initializePayment("monthly", false, 1);
       }
     } catch (error) {
-      console.error("Failed to check subscription options:", error)
-      showMessage("Failed to check subscription options", "error")
+      console.error("Failed to check subscription options:", error);
+      showMessage("Failed to check subscription options", "error");
     }
-  }
+  };
   
   const initializePayment = async (subscriptionType, isRecurring, recurringMonths) => {
-    setLoading(true)
+    setLoading(true);
     try {
       const response = await api.post("/api/payments/initialize", {
         subscriptionType,
         isRecurring,
         recurringMonths,
-      })
+      });
       
       if (response.data.status === "success") {
-        window.location.href = response.data.data.link
+        window.location.href = response.data.data.link;
       } else {
-        showMessage("Failed to initialize payment", "error")
+        showMessage("Failed to initialize payment", "error");
       }
     } catch (error) {
-      console.error("Payment initialization failed:", error)
-      showMessage(error.response?.data?.message || "Failed to initialize payment", "error")
+      console.error("Payment initialization failed:", error);
+      showMessage(error.response?.data?.message || "Failed to initialize payment", "error");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
   
   const showMessage = (message, type = "info") => {
-    const messageEl = document.createElement("div")
-    messageEl.className = `${styles.messageToast} ${styles[type]}`
+    const messageEl = document.createElement("div");
+    messageEl.className = `${styles.messageToast} ${styles[type]}`;
     messageEl.innerHTML = `
       <i className="fas ${type === "success" ? "fa-check-circle" : type === "error" ? "fa-exclamation-triangle" : "fa-info-circle"}"></i>
       <span>${message}</span>
-    `
-    document.body.appendChild(messageEl)
+    `;
+    document.body.appendChild(messageEl);
     setTimeout(() => {
-      messageEl.style.animation = "slideOutRight 0.3s ease forwards"
-      setTimeout(() => messageEl.remove(), 300)
-    }, 3000)
-  }
+      messageEl.style.animation = "slideOutRight 0.3s ease forwards";
+      setTimeout(() => messageEl.remove(), 300);
+    }, 3000);
+  };
   
   const toggleSidebar = () => {
-    setSidebarOpen(!sidebarOpen)
-  }
+    setSidebarOpen(!sidebarOpen);
+  };
   
   const toggleContactPopup = () => {
-    setContactPopupOpen(!contactPopupOpen)
-  }
+    setContactPopupOpen(!contactPopupOpen);
+  };
   
   const toggleAboutModal = () => {
-    setAboutModalOpen(!aboutModalOpen)
-  }
+    setAboutModalOpen(!aboutModalOpen);
+  };
   
-  // Touch handlers for swipe gestures
   const handleTouchStart = (e) => {
-    setTouchStartX(e.touches[0].clientX)
-  }
+    setTouchStartX(e.touches[0].clientX);
+  };
   
   const handleTouchMove = (e) => {
-    setTouchEndX(e.touches[0].clientX)
-  }
+    setTouchEndX(e.touches[0].clientX);
+  };
   
   const handleTouchEnd = () => {
-    if (touchStartX - touchEndX > 75) { // Swipe left to right
-      setSidebarOpen(false)
+    if (touchStartX - touchEndX > 75) {
+      setSidebarOpen(false);
     }
-  }
+  };
   
   const handleShare = async () => {
     const shareData = {
@@ -206,7 +211,6 @@ const Home = () => {
       if (navigator.share) {
         await navigator.share(shareData);
       } else {
-        // Fallback: copy to clipboard
         await navigator.clipboard.writeText(`${shareData.text} ${shareData.url}`);
         showMessage('Link copied to clipboard!', 'success');
       }
@@ -214,49 +218,45 @@ const Home = () => {
       console.error('Error sharing:', err);
       showMessage('Failed to share', 'error');
     }
-  }
+  };
   
   const getNotificationIcon = (type) => {
     switch (type) {
       case "success":
-        return "fa-check-circle"
+        return "fa-check-circle";
       case "error":
-        return "fa-exclamation-circle"
+        return "fa-exclamation-circle";
       case "warning":
-        return "fa-exclamation-triangle"
+        return "fa-exclamation-triangle";
       default:
-        return "fa-info-circle"
+        return "fa-info-circle";
     }
-  }
+  };
   
   const isNotificationNew = (notification) => {
-    if (!user?.lastNotificationView) return true
-    return new Date(notification.createdAt) > new Date(user.lastNotificationView)
-  }
+    if (!user?.lastNotificationView) return true;
+    return new Date(notification.createdAt) > new Date(user.lastNotificationView);
+  };
   
   return (
     <div className={styles.homePage}>
-      {/* Loading Overlay */}
       {loading && (
         <div className={styles.loadingOverlay}>
           <div className={styles.loadingSpinner}></div>
         </div>
       )}
       
-      {/* Overlay */}
       <div
         className={`${styles.overlay} ${sidebarOpen || notificationPanelOpen || aboutModalOpen ? styles.active : ""}`}
         onClick={(e) => {
-          // Only close overlays if not clicking on a contact popup link
           if (!contactPopupRef.current?.contains(e.target)) {
-            setSidebarOpen(false)
-            setNotificationPanelOpen(false)
-            setAboutModalOpen(false)
+            setSidebarOpen(false);
+            setNotificationPanelOpen(false);
+            setAboutModalOpen(false);
           }
         }}
       ></div>
       
-      {/* Navbar */}
       <nav className={styles.navbar}>
         <div className={styles.navLeft}>
           <button className={styles.menuBtn} onClick={toggleSidebar}>
@@ -284,7 +284,6 @@ const Home = () => {
         </div>
       </nav>
       
-      {/* Sidebar */}
       <div 
         ref={sidebarRef}
         className={`${styles.sidebar} ${sidebarOpen ? styles.active : ""}`}
@@ -303,14 +302,13 @@ const Home = () => {
             </Link>
           </div>
           <button className={styles.closeBtn} onClick={(e) => {
-            e.stopPropagation(); // Prevent event from bubbling up
-            setSidebarOpen(false)
+            e.stopPropagation();
+            setSidebarOpen(false);
           }}>
             <i className="fas fa-times"></i>
           </button>
         </div>
         <div className={styles.sidebarContent}>
-          {/* --- Quick Access --- */}
           <div className={styles.sidebarSection}>
             <h3>Quick Access</h3>
             <ul>
@@ -331,7 +329,6 @@ const Home = () => {
               </li>
             </ul>
           </div>
-          {/* --- Community & Contact --- */}
           <div className={styles.sidebarSection}>
             <h3>Community & Contact</h3>
             <ul>
@@ -352,7 +349,6 @@ const Home = () => {
               </li>
             </ul>
           </div>
-          {/* --- Account --- */}
           <div className={styles.sidebarSection}>
             <h3>Account</h3>
             <ul>
@@ -366,7 +362,6 @@ const Home = () => {
         </div>
       </div>
       
-      {/* Notification Panel */}
       <div className={`${styles.notificationPanel} ${notificationPanelOpen ? styles.active : ""}`}>
         <div className={styles.header}>
           <button className={styles.backBtn} onClick={toggleNotificationPanel}>
@@ -403,7 +398,6 @@ const Home = () => {
         </div>
       </div>
       
-      {/* Contact Popup */}
       <div 
         ref={contactPopupRef}
         className={`${styles.contactPopUp} ${contactPopupOpen ? styles.showContact : ""}`}
@@ -422,7 +416,6 @@ const Home = () => {
         </div>
       </div>
       
-      {/* Main Content */}
       <main className={styles.main}>
         <div className={styles.featureGrid}>
           <Link to="/course-selection?type=study" className={styles.featureCard}>
@@ -518,7 +511,6 @@ const Home = () => {
         </div>
       </main>
       
-      {/* Bottom Section */}
       <div className={styles.bottom}>
         <button
           className={`${styles.activateBtn} ${user?.isSubscribed ? styles.subscribed : ""}`}
@@ -531,13 +523,11 @@ const Home = () => {
         </button>
       </div>
       
-      {/* About SmartDriller Modal */}
       <AboutSmartDriller 
         isOpen={aboutModalOpen} 
         onClose={toggleAboutModal} 
       />
       
-      {/* Subscription Modal */}
       <SubscriptionModal
         isOpen={showSubscriptionModal}
         onClose={() => setShowSubscriptionModal(false)}
