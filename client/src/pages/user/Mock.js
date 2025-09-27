@@ -151,86 +151,64 @@ const Mock = () => {
     })
   }
   
-  // Helper function to render content with math
-  const renderContentWithMath = (content, isDisplayMode = false) => {
-    if (!content) return null
-    
-    // First, preprocess the content to add delimiters around common LaTeX patterns
-    let processedContent = content
-    
-    // Wrap fractions without delimiters
-    processedContent = processedContent.replace(/\\frac{[^{}]*}{[^{}]*}/g, '\\($&\\)')
-    
-    // Wrap Greek letters without delimiters
-    processedContent = processedContent.replace(/\\(alpha|beta|gamma|delta|epsilon|zeta|eta|theta|iota|kappa|lambda|mu|nu|xi|omicron|pi|rho|sigma|tau|upsilon|phi|chi|psi|omega)\s*/g, '\\($&\\)')
-    
-    // Wrap exponents: simple case like x^2
-    processedContent = processedContent.replace(/([a-zA-Z])\^([0-9]+|\{[^}]*\})/g, '\\($1^$2\\)')
-    
-    // Wrap set notation like {x: x < 3}
-    processedContent = processedContent.replace(/\{[^}]*:[^}]*\}/g, '\\($&\\)')
-    
-    // Wrap cap and cup symbols
-    processedContent = processedContent.replace(/(cap|cup)\s*/g, '\\($1\\)')
-    
-    // Wrap sqrt expressions
-    processedContent = processedContent.replace(/\\sqrt\{[^}]*\}/g, '\\($&\\)')
-    
-    // Wrap leq and geq expressions
-    processedContent = processedContent.replace(/\\(leq|geq)/g, '\\($1\\)')
-    
-    // Wrap neq expression
-    processedContent = processedContent.replace(/\\neq/g, '\\($&\\)')
-    
-    // Wrap in and notin expressions
-    processedContent = processedContent.replace(/\\(in|notin)/g, '\\($1\\)')
-    
-    // Wrap subset and superset expressions
-    processedContent = processedContent.replace(/\\(subset|supset|subseteq|supseteq)/g, '\\($1\\)')
-    
-    // Wrap times and div expressions
-    processedContent = processedContent.replace(/\\(times|div)/g, '\\($1\\)')
-    
-    // Wrap pm and mp expressions
-    processedContent = processedContent.replace(/\\(pm|mp)/g, '\\($1\\)')
-    
-    // Wrap angle brackets
-    processedContent = processedContent.replace(/\\(langle|rangle)/g, '\\($1\\)')
-    
-    // Wrap dots expressions
-    processedContent = processedContent.replace(/\\(dots|vdots|ddots)/g, '\\($1\\)')
-    
-    // Simple regex to find LaTeX patterns
-    const latexPattern = /(\\\(.*?\\\)|\\\[.*?\\\]|\$\$.*?\$\$|\$.*?\$)/g
-    
-    // Split content by LaTeX patterns
-    const parts = processedContent.split(latexPattern)
-    
-    return parts.map((part, index) => {
-      if (index % 2 === 1) { // This is a LaTeX expression
-        // Determine if it's display mode
-        const isDisplay = part.startsWith('\\[') || part.startsWith('$$')
-        
-        // Extract the actual LaTeX content
-        let latexContent = part
-        if (part.startsWith('\\(')) latexContent = part.slice(2, -2)
-        if (part.startsWith('\\[')) latexContent = part.slice(2, -2)
-        if (part.startsWith('$') && !part.startsWith('$$')) latexContent = part.slice(1, -1)
-        if (part.startsWith('$$')) latexContent = part.slice(2, -2)
-        
-        return (
-          <span 
-            key={index} 
-            className={`math-content ${isDisplay ? 'display-math' : 'inline-math'}`}
-            data-math={latexContent}
-          />
-        )
-      } else {
-        // Regular HTML content
-        return <span key={index} dangerouslySetInnerHTML={{ __html: part }} />
-      }
-    })
+const renderContentWithMath = (content, isDisplayMode = false) => {
+  if (!content) return null;
+
+  if (!katexLoaded) {
+    return <span>{content}</span>;
   }
+
+  // Split into text + potential LaTeX parts
+  const latexPattern = /(\\\(.*?\\\)|\\\[.*?\\\]|\$\$.*?\$\$|\$.*?\$)/g;
+  const parts = content.split(latexPattern);
+
+  return parts.map((part, index) => {
+    if (latexPattern.test(part)) {
+      // ✅ Clean up math fragments before rendering
+      let latexContent = part;
+
+      // Remove delimiters
+      if (part.startsWith("\\(")) latexContent = part.slice(2, -2);
+      if (part.startsWith("\\[")) latexContent = part.slice(2, -2);
+      if (part.startsWith("$$")) latexContent = part.slice(2, -2);
+      if (part.startsWith("$") && !part.startsWith("$$")) latexContent = part.slice(1, -1);
+
+      // Normalize LaTeX-like fragments ONLY inside math context
+      latexContent = latexContent
+        .replace(/frac\s*([^\s]+)\s*([^\s]+)/g, "\\frac{$1}{$2}") // fix fracx y
+        .replace(/sqrt\s*([^\s]+)/g, "\\sqrt{$1}")                // sqrt3 → \sqrt{3}
+        .replace(/([a-zA-Z]+)(\d+)/g, "$1^{$2}")                  // xp2 → xp^{2}, a10 → a^{10}
+        .replace(/le/g, "\\leq")
+        .replace(/ge/g, "\\geq")
+        .replace(/neq/g, "\\neq")
+        .replace(/cap/g, "\\cap")
+        .replace(/cup/g, "\\cup")
+        .replace(/phi/g, "\\phi")
+        .replace(/alpha/g, "\\alpha");
+
+      try {
+        return (
+          <span
+            key={index}
+            dangerouslySetInnerHTML={{
+              __html: window.katex.renderToString(latexContent, {
+                throwOnError: false,
+                displayMode: isDisplayMode || part.startsWith("\\[") || part.startsWith("$$"),
+              }),
+            }}
+          />
+        );
+      } catch (e) {
+        console.error("KaTeX render error:", e, "with content:", latexContent);
+        return <span key={index}>{part}</span>;
+      }
+    } else {
+      // ✅ Plain text stays untouched (Q2 remains Q2)
+      return <span key={index}>{part}</span>;
+    }
+  });
+};
+
   
   // Load progress only after exam data is available
   useEffect(() => {
