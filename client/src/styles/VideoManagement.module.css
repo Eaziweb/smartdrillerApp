@@ -172,14 +172,17 @@
 
 /* Course Content - Accordion Panel */
 .courseContent {
-  max-height: 0;
-  overflow: hidden;
-  transition: max-height 0.5s ease-in-out;
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.3s ease-in-out;
 }
 
 .courseContent.active {
-  max-height: 5000px; /* Large enough to accommodate content */
-  transition: max-height 0.5s ease-in-out;
+  grid-template-rows: 1fr;
+}
+
+.courseContentInner {
+  overflow: hidden;
 }
 
 /* Topic Section */
@@ -748,4 +751,4 @@
     width: 100%;
     justify-content: center;
   }
-}
+} 

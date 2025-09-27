@@ -1,9 +1,8 @@
 "use client"
 import { useState, useEffect } from "react"
 import { Link } from "react-router-dom"
-import axios from "axios"
 import styles from "../../styles/VideoManagement.module.css"
-import api from "../../utils/api";
+import api from "../../utils/api"
 
 const VideoManagement = () => {
   const [courses, setCourses] = useState([])
@@ -26,12 +25,6 @@ const VideoManagement = () => {
     description: "",
     url: "",
   })
-  
-  // Get authorization token
-  const getAuthHeader = () => {
-    const token = localStorage.getItem("token")
-    return token ? { Authorization: `Bearer ${token}` } : {}
-  }
 
   useEffect(() => {
     loadCourses()
@@ -39,23 +32,20 @@ const VideoManagement = () => {
 
   const loadCourses = async () => {
     try {
-      const response = await api.get("/api/admin/videos/courses", {
-        headers: getAuthHeader(),
-      })
+      const response = await api.get("/api/admin/videos/courses")
       
-      // Ensure response.data is an array
       if (Array.isArray(response.data)) {
-        setCourses(response.data);
+        setCourses(response.data)
       } else if (response.data && typeof response.data === 'object') {
         if (Array.isArray(response.data.courses)) {
-          setCourses(response.data.courses);
+          setCourses(response.data.courses)
         } else {
-          console.error("Unexpected response format:", response.data);
-          setCourses([]);
+          console.error("Unexpected response format:", response.data)
+          setCourses([])
         }
       } else {
-        console.error("Response data is not an array:", response.data);
-        setCourses([]);
+        console.error("Response data is not an array:", response.data)
+        setCourses([])
       }
     } catch (error) {
       console.error("Failed to load courses:", error)
@@ -70,13 +60,9 @@ const VideoManagement = () => {
     e.preventDefault()
     try {
       if (editingItem) {
-        await api.put(`/api/admin/videos/courses/${editingItem._id}`, courseForm, {
-          headers: getAuthHeader(),
-        })
+        await api.put(`/api/admin/videos/courses/${editingItem._id}`, courseForm)
       } else {
-        await api.post("/api/admin/videos/courses", courseForm, {
-          headers: getAuthHeader(),
-        })
+        await api.post("/api/admin/videos/courses", courseForm)
       }
       setCourseForm({ title: "", description: "", isVisible: true })
       setShowCourseModal(false)
@@ -93,13 +79,9 @@ const VideoManagement = () => {
     e.preventDefault()
     try {
       if (editingItem) {
-        await api.put(`/api/admin/videos/topics/${editingItem._id}`, topicForm, {
-          headers: getAuthHeader(),
-        })
+        await api.put(`/api/admin/videos/topics/${editingItem._id}`, topicForm)
       } else {
-        await api.post(`/api/admin/videos/courses/${selectedCourse._id}/topics`, topicForm, {
-          headers: getAuthHeader(),
-        })
+        await api.post(`/api/admin/videos/courses/${selectedCourse._id}/topics`, topicForm)
       }
       setTopicForm({ title: "", description: "" })
       setShowTopicModal(false)
@@ -116,13 +98,9 @@ const VideoManagement = () => {
     e.preventDefault()
     try {
       if (editingItem) {
-        await api.put(`/api/admin/videos/${editingItem._id}`, videoForm, {
-          headers: getAuthHeader(),
-        })
+        await api.put(`/api/admin/videos/${editingItem._id}`, videoForm)
       } else {
-        await api.post(`/api/admin/videos/topics/${selectedTopic._id}/videos`, videoForm, {
-          headers: getAuthHeader(),
-        })
+        await api.post(`/api/admin/videos/topics/${selectedTopic._id}/videos`, videoForm)
       }
       setVideoForm({ title: "", description: "", url: "" })
       setShowVideoModal(false)
@@ -138,9 +116,7 @@ const VideoManagement = () => {
   const handleDeleteVideo = async (videoId) => {
     if (!window.confirm("Are you sure you want to delete this video?")) return
     try {
-      await api.delete(`/api/admin/videos/${videoId}`, {
-        headers: getAuthHeader(),
-      })
+      await api.delete(`/api/admin/videos/${videoId}`)
       loadCourses()
       showToast("Video deleted successfully!")
     } catch (error) {
@@ -152,9 +128,7 @@ const VideoManagement = () => {
   const handleDeleteTopic = async (topicId) => {
     if (!window.confirm("Are you sure you want to delete this topic and all its videos?")) return
     try {
-      await api.delete(`/api/admin/videos/topics/${topicId}`, {
-        headers: getAuthHeader(),
-      })
+      await api.delete(`/api/admin/videos/topics/${topicId}`)
       loadCourses()
       showToast("Topic deleted successfully!")
     } catch (error) {
@@ -166,9 +140,7 @@ const VideoManagement = () => {
   const handleDeleteCourse = async (courseId) => {
     if (!window.confirm("Are you sure you want to delete this course and all its content?")) return
     try {
-      await api.delete(`/api/admin/videos/courses/${courseId}`, {
-        headers: getAuthHeader(),
-      })
+      await api.delete(`/api/admin/videos/courses/${courseId}`)
       loadCourses()
       showToast("Course deleted successfully!")
     } catch (error) {
@@ -179,9 +151,7 @@ const VideoManagement = () => {
 
   const toggleCourseVisibility = async (course) => {
     try {
-      await api.put(`/api/admin/videos/courses/${course._id}/visibility`, {}, {
-        headers: getAuthHeader(),
-      })
+      await api.put(`/api/admin/videos/courses/${course._id}/visibility`, {})
       loadCourses()
       showToast(`Course ${course.isVisible ? 'hidden' : 'shown'} successfully!`)
     } catch (error) {
@@ -192,9 +162,7 @@ const VideoManagement = () => {
 
   const refreshVideoMetadata = async (videoId) => {
     try {
-      await api.post(`/api/admin/videos/${videoId}/refresh-metadata`, {}, {
-        headers: getAuthHeader(),
-      })
+      await api.post(`/api/admin/videos/${videoId}/refresh-metadata`, {})
       loadCourses()
       showToast("Video metadata refreshed successfully!")
     } catch (error) {
@@ -230,13 +198,7 @@ const VideoManagement = () => {
   }
 
   const toggleCourse = (courseId) => {
-    // If the clicked course is already open, close it
-    if (openCourseId === courseId) {
-      setOpenCourseId(null)
-    } else {
-      // Otherwise, open the clicked course and close any other open course
-      setOpenCourseId(courseId)
-    }
+    setOpenCourseId(prevOpenId => prevOpenId === courseId ? null : courseId)
   }
 
   const getYouTubeVideoId = (url) => {
@@ -321,7 +283,9 @@ const VideoManagement = () => {
                   <h3>{course.title}</h3>
                   <p>{course.description}</p>
                   <div className={styles.courseMeta}>
-                    <span className={styles.itemCount}>{Array.isArray(course.topics) ? course.topics.length : 0} topics</span>
+                    <span className={styles.itemCount}>
+                      {Array.isArray(course.topics) ? course.topics.length : 0} topics
+                    </span>
                     <span className={`${styles.visibilityBadge} ${course.isVisible ? styles.visible : styles.hidden}`}>
                       <i className={`fas ${course.isVisible ? "fa-eye" : "fa-eye-slash"}`}></i>
                       {course.isVisible ? "Visible" : "Hidden"}
@@ -332,7 +296,7 @@ const VideoManagement = () => {
                   <button
                     className={`${styles.btn} ${styles.btnSm} ${styles.btnSecondary}`}
                     onClick={(e) => {
-                      e.stopPropagation();
+                      e.stopPropagation()
                       setSelectedCourse(course)
                       setShowTopicModal(true)
                     }}
@@ -343,7 +307,7 @@ const VideoManagement = () => {
                   <button 
                     className={`${styles.btn} ${styles.btnSm} ${course.isVisible ? styles.btnSuccess : styles.btnWarning}`}
                     onClick={(e) => {
-                      e.stopPropagation();
+                      e.stopPropagation()
                       toggleCourseVisibility(course)
                     }}
                     title={course.isVisible ? "Hide from users" : "Show to users"}
@@ -353,7 +317,7 @@ const VideoManagement = () => {
                   <button 
                     className={`${styles.btn} ${styles.btnSm} ${styles.btnOutline}`} 
                     onClick={(e) => {
-                      e.stopPropagation();
+                      e.stopPropagation()
                       openEditCourse(course)
                     }}
                   >
@@ -362,7 +326,7 @@ const VideoManagement = () => {
                   <button 
                     className={`${styles.btn} ${styles.btnSm} ${styles.btnDanger}`} 
                     onClick={(e) => {
-                      e.stopPropagation();
+                      e.stopPropagation()
                       handleDeleteCourse(course._id)
                     }}
                   >
@@ -371,9 +335,9 @@ const VideoManagement = () => {
                 </div>
               </div>
               
-              {/* Only show course content if this course is open */}
-              {openCourseId === course._id && (
-                <div className={styles.courseContent}>
+              {/* Course Content with Accordion */}
+              <div className={`${styles.courseContent} ${openCourseId === course._id ? styles.active : ''}`}>
+                <div className={styles.courseContentInner}>
                   {!Array.isArray(course.topics) || course.topics.length === 0 ? (
                     <div className={styles.emptySection}>
                       <p>No topics in this course</p>
@@ -395,7 +359,9 @@ const VideoManagement = () => {
                           <div className={styles.topicInfo}>
                             <h4>{topic.title}</h4>
                             <p>{topic.description}</p>
-                            <span className={styles.itemCount}>{Array.isArray(topic.videos) ? topic.videos.length : 0} videos</span>
+                            <span className={styles.itemCount}>
+                              {Array.isArray(topic.videos) ? topic.videos.length : 0} videos
+                            </span>
                           </div>
                           <div className={styles.topicActions}>
                             <button
@@ -408,10 +374,16 @@ const VideoManagement = () => {
                               <i className="fas fa-plus"></i>
                               Add Video
                             </button>
-                            <button className={`${styles.btn} ${styles.btnSm} ${styles.btnOutline}`} onClick={() => openEditTopic(topic)}>
+                            <button 
+                              className={`${styles.btn} ${styles.btnSm} ${styles.btnOutline}`} 
+                              onClick={() => openEditTopic(topic)}
+                            >
                               <i className="fas fa-edit"></i>
                             </button>
-                            <button className={`${styles.btn} ${styles.btnSm} ${styles.btnDanger}`} onClick={() => handleDeleteTopic(topic._id)}>
+                            <button 
+                              className={`${styles.btn} ${styles.btnSm} ${styles.btnDanger}`} 
+                              onClick={() => handleDeleteTopic(topic._id)}
+                            >
                               <i className="fas fa-trash"></i>
                             </button>
                           </div>
@@ -458,13 +430,22 @@ const VideoManagement = () => {
                                   </div>
                                 </div>
                                 <div className={styles.videoActions}>
-                                  <button className={`${styles.btn} ${styles.btnSm} ${styles.btnOutline}`} onClick={() => openEditVideo(video)}>
+                                  <button 
+                                    className={`${styles.btn} ${styles.btnSm} ${styles.btnOutline}`} 
+                                    onClick={() => openEditVideo(video)}
+                                  >
                                     <i className="fas fa-edit"></i>
                                   </button>
-                                  <button className={`${styles.btn} ${styles.btnSm} ${styles.btnSecondary}`} onClick={() => refreshVideoMetadata(video._id)}>
+                                  <button 
+                                    className={`${styles.btn} ${styles.btnSm} ${styles.btnSecondary}`} 
+                                    onClick={() => refreshVideoMetadata(video._id)}
+                                  >
                                     <i className="fas fa-sync-alt"></i>
                                   </button>
-                                  <button className={`${styles.btn} ${styles.btnSm} ${styles.btnDanger}`} onClick={() => handleDeleteVideo(video._id)}>
+                                  <button 
+                                    className={`${styles.btn} ${styles.btnSm} ${styles.btnDanger}`} 
+                                    onClick={() => handleDeleteVideo(video._id)}
+                                  >
                                     <i className="fas fa-trash"></i>
                                   </button>
                                 </div>
@@ -476,7 +457,7 @@ const VideoManagement = () => {
                     ))
                   )}
                 </div>
-              )}
+              </div>
             </div>
           ))
         )}

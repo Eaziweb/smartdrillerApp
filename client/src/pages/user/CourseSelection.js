@@ -5,8 +5,7 @@ import { useAuth } from "../../contexts/AuthContext"
 import { useNotification } from "../../contexts/NotificationContext"
 import ProgressRing from '../../components/ProgressRing'
 import styles from "../../styles/course-selection.module.css"
-import api from "../../utils/api";
-import axios from "axios";
+import api from "../../utils/api"
 
 // Portal component for rendering dropdowns outside the main DOM hierarchy
 const Portal = ({ children, className }) => {
@@ -52,7 +51,7 @@ const CourseSelection = () => {
   const [fetchingTopics, setFetchingTopics] = useState(false)
   const [fetchingCourses, setFetchingCourses] = useState(false)
   const [progressLoading, setProgressLoading] = useState(true)
-  const [progressError, setProgressError] = useState(null) // Add error state for progress
+  const [progressError, setProgressError] = useState(null)
   
   // Simplified dropdown state - track which dropdown is open for which course
   const [openDropdown, setOpenDropdown] = useState({ courseCode: null, type: null })
@@ -74,26 +73,7 @@ const CourseSelection = () => {
     setProgressLoading(true);
     setProgressError(null);
     try {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        throw new Error("Authentication token not found");
-      }
-      
-      // Get the API base URL from environment or use default
-      const API_BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:5000/api";
-      const url = `${API_BASE_URL}/questions/study-progress`;
-      
-      console.log("Attempting to fetch study progress from:", url);
-      
-      // Use axios directly with a longer timeout
-      const response = await axios.get(url, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-        timeout: 30000, // 30 seconds timeout
-      });
-      
-      console.log("Study progress response:", response);
+      const response = await api.get("/questions/study-progress");
       
       if (response.data.success) {
         setStudyProgress(response.data.progress);
@@ -103,28 +83,19 @@ const CourseSelection = () => {
     } catch (error) {
       console.error("Failed to load study progress:", error);
       setProgressError(error.message);
-      // Set empty progress on error to avoid breaking the UI
       setStudyProgress({});
       
       // Only show notification for non-timeout errors
       if (error.code !== 'ECONNABORTED') {
         if (error.response) {
-          // The request was made and the server responded with a status code
-          // that falls out of the range of 2xx
-          console.error("Error response data:", error.response.data);
-          console.error("Error response status:", error.response.status);
-          
           if (error.response.status === 404) {
             showNotification("Study progress endpoint not found. This feature may be temporarily unavailable.", "warning");
           } else {
             showNotification(`Failed to load study progress: ${error.response.data.message || error.message}`, "error");
           }
         } else if (error.request) {
-          // The request was made but no response was received
-          console.error("Error request:", error.request);
           showNotification("Network error. Please check your connection and try again.", "error");
         } else {
-          // Something happened in setting up the request that triggered an Error
           showNotification(`Failed to load study progress: ${error.message}`, "error");
         }
       }
@@ -136,13 +107,7 @@ const CourseSelection = () => {
   const fetchCourses = async () => {
     setFetchingCourses(true)
     try {
-      const token = localStorage.getItem("token")
-      const response = await api.get("/api/courses", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-      
+      const response = await api.get("/courses")
       setCourses(response.data)
     } catch (error) {
       console.error("Failed to fetch courses:", error)
@@ -156,12 +121,7 @@ const CourseSelection = () => {
     setFetchingYears(true)
     setError(null)
     try {
-      const token = localStorage.getItem("token")
-      const response = await api.get("/api/questions/course-years", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
+      const response = await api.get("/questions/course-years")
       
       if (!response.data || Object.keys(response.data).length === 0) {
         setError("No course data available. Please contact support.")
@@ -181,12 +141,7 @@ const CourseSelection = () => {
   const fetchTopics = async (courseCode) => {
     setFetchingTopics(true)
     try {
-      const token = localStorage.getItem("token")
-      const response = await api.get(`/api/questions/topics/${courseCode}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
+      const response = await api.get(`/questions/topics/${courseCode}`)
       
       const topics = response.data
       
@@ -287,9 +242,6 @@ const CourseSelection = () => {
       return;
     }
     
-    // Close any open dropdown first
-    setOpenDropdown({ courseCode: null, type: null });
-    
     // For topics, show the popup instead
     if (type === "topics") {
       if (!courseTopics[courseCode] || courseTopics[courseCode].length === 0) {
@@ -305,10 +257,8 @@ const CourseSelection = () => {
     const position = calculateDropdownPosition(courseCode, type);
     setDropdownPosition(position);
     
-    // Use timeout to ensure the previous dropdown is closed before opening the new one
-    setTimeout(() => {
-      setOpenDropdown({ courseCode, type });
-    }, 10);
+    // Open the new dropdown
+    setOpenDropdown({ courseCode, type });
   }
   
   const handleOptionSelect = (courseCode, type, value, label) => {
@@ -394,13 +344,7 @@ const CourseSelection = () => {
         ...(isMockMode && { timeAllowed: Number.parseInt(courseDataObj.time) }),
       }
       
-      const token = localStorage.getItem("token")
-      const response = await api.post("/api/questions/fetch", requestData, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      })
+      const response = await api.post("/questions/fetch", requestData)
       
       if (!response.data.success) {
         throw new Error(response.data.message || "Failed to fetch questions")
@@ -439,10 +383,10 @@ const CourseSelection = () => {
   }, [user, navigate])
   
   useEffect(() => {
-    if (!fetchingYears && Object.keys(courseYears).length > 0 && !isMockMode) {
+    if (!fetchingYears && Object.keys(courseYears).length > 0 && !isMockMode && user?.isSubscribed) {
       loadAllStudyProgress()
     }
-  }, [fetchingYears, courseYears, isMockMode])
+  }, [fetchingYears, courseYears, isMockMode, user])
   
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -489,7 +433,6 @@ const CourseSelection = () => {
       case "year":
         const years = courseYears[courseCode] || []
         if (years.length === 0) {
-          showNotification(`No years available for ${courseCode}. Please select another course.`, "error")
           return []
         }
         return years.map((year) => ({ value: year, label: year }))
@@ -589,8 +532,10 @@ const CourseSelection = () => {
             >
               <div className={styles.courseName} onClick={() => {
                 const checkbox = document.getElementById(`checkbox-${course.courseCode}`)
-                checkbox.checked = !checkbox.checked
-                handleCourseSelect(course.courseCode, checkbox.checked)
+                if (checkbox) {
+                  checkbox.checked = !checkbox.checked
+                  handleCourseSelect(course.courseCode, checkbox.checked)
+                }
               }}>
                 <span className={styles.select}>
                   <input 
@@ -713,8 +658,10 @@ const CourseSelection = () => {
             >
               <div className={styles.courseName} onClick={() => {
                 const checkbox = document.getElementById(`checkbox-${course.courseCode}`)
-                checkbox.checked = !checkbox.checked
-                handleCourseSelect(course.courseCode, checkbox.checked)
+                if (checkbox) {
+                  checkbox.checked = !checkbox.checked
+                  handleCourseSelect(course.courseCode, checkbox.checked)
+                }
               }}>
                 <span className={styles.select}>
                   <input 

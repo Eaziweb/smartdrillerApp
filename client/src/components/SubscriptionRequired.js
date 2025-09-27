@@ -6,7 +6,6 @@ import "../styles/SubscriptionRequired.css"
 const SubscriptionRequired = () => {
   const navigate = useNavigate()
 
-
   const handleGoHome = () => {
     navigate("/home")
   }
@@ -41,7 +40,6 @@ const SubscriptionRequired = () => {
         </div>
 
         <div className="subscription-actions">
-
           <button className="btn-home" onClick={handleGoHome}>
             Back to Home
           </button>

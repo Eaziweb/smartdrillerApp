@@ -1,8 +1,8 @@
 "use client"
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect } from "react"
 import { useAuth } from "../../contexts/AuthContext"
 import styles from "../../styles/AdminQuizManagement.module.css"
-import api from "../../utils/api";
+import api from "../../utils/api"
 
 const AdminQuizManagement = () => {
   const { user } = useAuth()
@@ -17,18 +17,18 @@ const AdminQuizManagement = () => {
     year: "",
     topic: "",
   })
-  const [cleanupLoading, setCleanupLoading] = useState(false);
+  const [cleanupLoading, setCleanupLoading] = useState(false)
   const [bulkImportProgress, setBulkImportProgress] = useState({
     loading: false,
     progress: 0,
     message: "",
     error: false
-  });
+  })
   
-  // Question form state
+  // Form states
   const [questionForm, setQuestionForm] = useState({
     question: "",
-    options: ["", ""], // Start with 2 options instead of 4
+    options: ["", ""],
     correctOption: 1,
     explanation: "",
     tags: "",
@@ -39,20 +39,17 @@ const AdminQuizManagement = () => {
     imagePreview: null,
   })
   
-  // Course year form state
   const [courseYearForm, setCourseYearForm] = useState({
     course: "",
     year: "",
   })
   
-  // Course form state
   const [courseForm, setCourseForm] = useState({
     courseCode: "",
     courseName: "",
     semester: "first",
   })
   
-  // Bulk import state
   const [bulkImportData, setBulkImportData] = useState("")
   const [editingQuestion, setEditingQuestion] = useState(null)
   const [editingCourse, setEditingCourse] = useState(null)
@@ -65,20 +62,20 @@ const AdminQuizManagement = () => {
     topicStats: []
   })
   
-  // Confirmation dialog state
+  // Dialog states
   const [confirmDialog, setConfirmDialog] = useState({
     isOpen: false,
     message: "",
     onConfirm: null,
   })
   
-  // Toast notification state
   const [toast, setToast] = useState({
     show: false,
     message: "",
     type: "success",
   })
   
+  // Fetch initial data
   useEffect(() => {
     fetchQuestions()
     fetchCourseYears()
@@ -86,13 +83,12 @@ const AdminQuizManagement = () => {
     fetchStatistics()
   }, [])
   
+  // Data fetching functions
   const fetchCourses = async () => {
     try {
       const token = localStorage.getItem("token")
       const response = await api.get("/api/courses/admin", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
       })
       setCourses(Array.isArray(response.data) ? response.data : [])
     } catch (error) {
@@ -111,9 +107,7 @@ const AdminQuizManagement = () => {
       }).toString()
       
       const response = await api.get(`/api/questions/admin/search?${queryParams}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
       })
       
       setQuestions(response.data.questions || [])
@@ -128,9 +122,7 @@ const AdminQuizManagement = () => {
     try {
       const token = localStorage.getItem("token")
       const response = await api.get("/api/courseYears/admin", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
       })
       setCourseYears(response.data.courseYears || {})
     } catch (error) {
@@ -139,25 +131,24 @@ const AdminQuizManagement = () => {
   }
   
   const fetchStatistics = async () => {
+    setLoading(true)
     try {
-      const token = localStorage.getItem("token");
+      const token = localStorage.getItem("token")
       const response = await api.get("/api/questions/statistics", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      setStatistics(response.data);
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      setStatistics(response.data)
     } catch (error) {
-      console.error("Error fetching statistics:", error);
+      console.error("Error fetching statistics:", error)
+      showToast("Failed to fetch statistics", "error")
+    } finally {
+      setLoading(false)
     }
-  };
+  }
   
+  // Utility functions
   const showToast = (message, type = "success") => {
-    setToast({
-      show: true,
-      message,
-      type,
-    })
+    setToast({ show: true, message, type })
     setTimeout(() => setToast({ show: false, message: "", type: "success" }), 3000)
   }
   
@@ -194,38 +185,36 @@ const AdminQuizManagement = () => {
     })
   }
   
-  // Function to add an option
   const addOption = () => {
     if (questionForm.options.length < 4) {
       setQuestionForm({
         ...questionForm,
         options: [...questionForm.options, ""]
-      });
+      })
     }
-  };
+  }
   
-  // Function to remove an option
   const removeOption = (index) => {
     if (questionForm.options.length > 2) {
-      const newOptions = [...questionForm.options];
-      newOptions.splice(index, 1);
+      const newOptions = [...questionForm.options]
+      newOptions.splice(index, 1)
       
-      // Adjust correct option if needed
-      let newCorrectOption = questionForm.correctOption;
+      let newCorrectOption = questionForm.correctOption
       if (newCorrectOption > newOptions.length) {
-        newCorrectOption = newOptions.length;
+        newCorrectOption = newOptions.length
       } else if (newCorrectOption === index + 1) {
-        newCorrectOption = 1; // Reset to first option if removing the selected one
+        newCorrectOption = 1
       }
       
       setQuestionForm({
         ...questionForm,
         options: newOptions,
         correctOption: newCorrectOption
-      });
+      })
     }
-  };
+  }
   
+  // Form handlers
   const handleAddQuestion = async (e) => {
     e.preventDefault()
     
@@ -235,7 +224,6 @@ const AdminQuizManagement = () => {
     }
     
     const formData = new FormData()
-    
     formData.append("question", questionForm.question)
     questionForm.options.forEach((option, index) => {
       formData.append(`options[${index}]`, option)
@@ -268,18 +256,7 @@ const AdminQuizManagement = () => {
       })
       
       showToast(response.data.message || "Question added successfully")
-      setQuestionForm({
-        question: "",
-        options: ["", ""],
-        correctOption: 1,
-        explanation: "",
-        tags: "",
-        course: "",
-        year: "",
-        topic: "",
-        image: null,
-        imagePreview: null,
-      })
+      resetQuestionForm()
       fetchQuestions()
       fetchCourseYears()
       fetchStatistics()
@@ -298,7 +275,6 @@ const AdminQuizManagement = () => {
     }
     
     const formData = new FormData()
-    
     formData.append("question", questionForm.question)
     questionForm.options.forEach((option, index) => {
       formData.append(`options[${index}]`, option)
@@ -332,193 +308,12 @@ const AdminQuizManagement = () => {
       
       showToast("Question updated successfully")
       setEditingQuestion(null)
-      setQuestionForm({
-        question: "",
-        options: ["", ""],
-        correctOption: 1,
-        explanation: "",
-        tags: "",
-        course: "",
-        year: "",
-        topic: "",
-        image: null,
-        imagePreview: null,
-      })
+      resetQuestionForm()
       fetchQuestions()
       fetchStatistics()
     } catch (error) {
       console.error("Error updating question:", error)
       showToast(error.response?.data?.message || "Failed to update question", "error")
-    }
-  }
-  
-  const deleteQuestion = async (questionId) => {
-    try {
-      const token = localStorage.getItem("token")
-      await api.delete(`/api/questions/admin/${questionId}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-      
-      showToast("Question deleted successfully")
-      fetchQuestions()
-      fetchStatistics()
-    } catch (error) {
-      console.error("Error deleting question:", error)
-      showToast("Failed to delete question", "error")
-    }
-  }
-  
-  const handleDeleteQuestion = (questionId) => {
-    setConfirmDialog({
-      isOpen: true,
-      message: "Are you sure you want to delete this question?",
-      onConfirm: () => deleteQuestion(questionId),
-    })
-  }
-  
-  const handleCleanupPending = async () => {
-    setCleanupLoading(true);
-    try {
-      const token = localStorage.getItem("token");
-      const response = await api.post("/api/questions/admin/cleanup-pending", {}, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      
-      showToast(response.data.message);
-      fetchQuestions();
-      fetchStatistics();
-    } catch (error) {
-      console.error("Error cleaning up pending questions:", error);
-      showToast(error.response?.data?.message || "Failed to clean up pending questions", "error");
-    } finally {
-      setCleanupLoading(false);
-    }
-  };
-  
-  const handleBulkImport = async (e) => {
-    e.preventDefault();
-    setBulkImportProgress({
-      loading: true,
-      progress: 0,
-      message: "Validating questions...",
-      error: false
-    });
-    
-    try {
-      const tryParse = (data) => {
-        try {
-          const escaped = data.replace(/\\/g, '\\\\');
-          return JSON.parse(escaped);
-        } catch (err) {
-          return null;
-        }
-      };
-      
-      setBulkImportProgress(prev => ({...prev, message: "Parsing JSON data..."}));
-      let parsedQuestions = tryParse(bulkImportData);
-      
-      if (!parsedQuestions || !Array.isArray(parsedQuestions)) {
-        setBulkImportProgress({
-          loading: false,
-          progress: 0,
-          message: "",
-          error: true
-        });
-        showToast("Invalid JSON format. Must be an array of questions.", "error");
-        return;
-      }
-      
-      const expectedCount = parsedQuestions.length;
-      setBulkImportProgress(prev => ({...prev, message: `Validating ${expectedCount} questions...`}));
-      
-      const validatedQuestions = parsedQuestions.map((q, index) => {
-        // Update progress based on validation
-        const progress = Math.round((index / parsedQuestions.length) * 40);
-        setBulkImportProgress(prev => ({...prev, progress}));
-        
-        if (!q.question || !q.options || q.correctOption === undefined || 
-            !q.explanation || !q.course || !q.year || !q.topic) {
-          throw new Error(`Question ${index + 1}: Missing required fields`);
-        }
-        
-        if (!Array.isArray(q.options) || q.options.length < 2 || q.options.length > 4) {
-          throw new Error(`Question ${index + 1}: Must have between 2 and 4 options`);
-        }
-        
-        const correctOption = Number(q.correctOption);
-        if (isNaN(correctOption) || correctOption < 1 || correctOption > q.options.length) {
-          throw new Error(`Question ${index + 1}: Correct option must be between 1 and ${q.options.length}`);
-        }
-        
-        return {
-          ...q,
-          correctOption: correctOption
-        };
-      });
-      
-      setBulkImportProgress(prev => ({...prev, message: "Sending questions to server...", progress: 50}));
-      
-      const token = localStorage.getItem("token");
-      
-      // Create an AbortController for timeout handling
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 10 * 60 * 1000); // 10 minutes timeout
-      
-      try {
-        const response = await api.post("/api/questions/admin/bulk-import", { questions: validatedQuestions }, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-          signal: controller.signal,
-          onUploadProgress: (progressEvent) => {
-            const progress = Math.round((progressEvent.loaded / progressEvent.total) * 40) + 50;
-            setBulkImportProgress(prev => ({...prev, progress, message: "Uploading questions..."}));
-          }
-        });
-        
-        clearTimeout(timeoutId);
-        
-        const { imported } = response.data;
-        if (imported !== expectedCount) {
-          throw new Error(`Import incomplete. Expected ${expectedCount} questions, but only ${imported} were imported.`);
-        }
-        
-        setBulkImportProgress(prev => ({...prev, progress: 100, message: "Import complete!"}));
-        showToast(response.data.message);
-        setBulkImportData("");
-        fetchQuestions();
-        fetchCourseYears();
-        fetchStatistics();
-      } catch (error) {
-        clearTimeout(timeoutId);
-        
-        if (error.name === 'AbortError') {
-          showToast("Import timed out. Please try again with a smaller batch.", "error");
-          // Automatically trigger cleanup after timeout
-          handleCleanupPending();
-        } else {
-          throw error;
-        }
-      }
-    } catch (error) {
-      console.error("Error importing questions:", error);
-      setBulkImportProgress({
-        loading: false,
-        progress: 0,
-        message: "",
-        error: true
-      });
-      showToast(`Import failed: ${error.message}`, "error");
-    } finally {
-      // Reset progress after a delay to show completion
-      setTimeout(() => {
-        setBulkImportProgress(prev => ({...prev, loading: false, progress: 0}));
-      }, 2000);
     }
   }
   
@@ -542,31 +337,6 @@ const AdminQuizManagement = () => {
     }
   }
   
-  const deleteCourseYear = async (courseYearId) => {
-    try {
-      const token = localStorage.getItem("token")
-      await api.delete(`/api/courseYears/admin/${courseYearId}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-      
-      showToast("Course year deleted successfully")
-      fetchCourseYears()
-    } catch (error) {
-      console.error("Error deleting course year:", error)
-      showToast("Failed to delete course year", "error")
-    }
-  }
-  
-  const handleDeleteCourseYear = (courseYearId) => {
-    setConfirmDialog({
-      isOpen: true,
-      message: "Are you sure you want to delete this course year?",
-      onConfirm: () => deleteCourseYear(courseYearId),
-    })
-  }
-  
   const handleAddCourse = async (e) => {
     e.preventDefault()
     try {
@@ -579,11 +349,7 @@ const AdminQuizManagement = () => {
       })
       
       showToast(response.data.message)
-      setCourseForm({
-        courseCode: "",
-        courseName: "",
-        semester: "first",
-      })
+      resetCourseForm()
       fetchCourses()
     } catch (error) {
       console.error("Error adding course:", error)
@@ -604,11 +370,7 @@ const AdminQuizManagement = () => {
       
       showToast("Course updated successfully")
       setEditingCourse(null)
-      setCourseForm({
-        courseCode: "",
-        courseName: "",
-        semester: "first",
-      })
+      resetCourseForm()
       fetchCourses()
     } catch (error) {
       console.error("Error updating course:", error)
@@ -616,14 +378,176 @@ const AdminQuizManagement = () => {
     }
   }
   
+  const handleBulkImport = async (e) => {
+    e.preventDefault()
+    setBulkImportProgress({
+      loading: true,
+      progress: 0,
+      message: "Validating questions...",
+      error: false
+    })
+    
+    try {
+      const tryParse = (data) => {
+        try {
+          const escaped = data.replace(/\\/g, '\\\\')
+          return JSON.parse(escaped)
+        } catch (err) {
+          return null
+        }
+      }
+      
+      setBulkImportProgress(prev => ({...prev, message: "Parsing JSON data..."}))
+      let parsedQuestions = tryParse(bulkImportData)
+      
+      if (!parsedQuestions || !Array.isArray(parsedQuestions)) {
+        setBulkImportProgress({
+          loading: false,
+          progress: 0,
+          message: "",
+          error: true
+        })
+        showToast("Invalid JSON format. Must be an array of questions.", "error")
+        return
+      }
+      
+      const expectedCount = parsedQuestions.length
+      setBulkImportProgress(prev => ({...prev, message: `Validating ${expectedCount} questions...`}))
+      
+      const validatedQuestions = parsedQuestions.map((q, index) => {
+        const progress = Math.round((index / parsedQuestions.length) * 40)
+        setBulkImportProgress(prev => ({...prev, progress}))
+        
+        if (!q.question || !q.options || q.correctOption === undefined || 
+            !q.explanation || !q.course || !q.year || !q.topic) {
+          throw new Error(`Question ${index + 1}: Missing required fields`)
+        }
+        
+        if (!Array.isArray(q.options) || q.options.length < 2 || q.options.length > 4) {
+          throw new Error(`Question ${index + 1}: Must have between 2 and 4 options`)
+        }
+        
+        const correctOption = Number(q.correctOption)
+        if (isNaN(correctOption) || correctOption < 1 || correctOption > q.options.length) {
+          throw new Error(`Question ${index + 1}: Correct option must be between 1 and ${q.options.length}`)
+        }
+        
+        return { ...q, correctOption: correctOption }
+      })
+      
+      setBulkImportProgress(prev => ({...prev, message: "Sending questions to server...", progress: 50}))
+      
+      const token = localStorage.getItem("token")
+      const controller = new AbortController()
+      const timeoutId = setTimeout(() => controller.abort(), 10 * 60 * 1000)
+      
+      try {
+        const response = await api.post("/api/questions/admin/bulk-import", { questions: validatedQuestions }, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          signal: controller.signal,
+          onUploadProgress: (progressEvent) => {
+            const progress = Math.round((progressEvent.loaded / progressEvent.total) * 40) + 50
+            setBulkImportProgress(prev => ({...prev, progress, message: "Uploading questions..."}))
+          }
+        })
+        
+        clearTimeout(timeoutId)
+        const { imported } = response.data
+        if (imported !== expectedCount) {
+          throw new Error(`Import incomplete. Expected ${expectedCount} questions, but only ${imported} were imported.`)
+        }
+        
+        setBulkImportProgress(prev => ({...prev, progress: 100, message: "Import complete!"}))
+        showToast(response.data.message)
+        setBulkImportData("")
+        fetchQuestions()
+        fetchCourseYears()
+        fetchStatistics()
+      } catch (error) {
+        clearTimeout(timeoutId)
+        
+        if (error.name === 'AbortError') {
+          showToast("Import timed out. Please try again with a smaller batch.", "error")
+          handleCleanupPending()
+        } else {
+          throw error
+        }
+      }
+    } catch (error) {
+      console.error("Error importing questions:", error)
+      setBulkImportProgress({
+        loading: false,
+        progress: 0,
+        message: "",
+        error: true
+      })
+      showToast(`Import failed: ${error.message}`, "error")
+    } finally {
+      setTimeout(() => {
+        setBulkImportProgress(prev => ({...prev, loading: false, progress: 0}))
+      }, 2000)
+    }
+  }
+  
+  const handleCleanupPending = async () => {
+    setCleanupLoading(true)
+    try {
+      const token = localStorage.getItem("token")
+      const response = await api.post("/api/questions/admin/cleanup-pending", {}, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      
+      showToast(response.data.message)
+      fetchQuestions()
+      fetchStatistics()
+    } catch (error) {
+      console.error("Error cleaning up pending questions:", error)
+      showToast(error.response?.data?.message || "Failed to clean up pending questions", "error")
+    } finally {
+      setCleanupLoading(false)
+    }
+  }
+  
+  // Delete handlers
+  const deleteQuestion = async (questionId) => {
+    try {
+      const token = localStorage.getItem("token")
+      await api.delete(`/api/questions/admin/${questionId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      
+      showToast("Question deleted successfully")
+      fetchQuestions()
+      fetchStatistics()
+    } catch (error) {
+      console.error("Error deleting question:", error)
+      showToast("Failed to delete question", "error")
+    }
+  }
+  
+  const deleteCourseYear = async (courseYearId) => {
+    try {
+      const token = localStorage.getItem("token")
+      await api.delete(`/api/courseYears/admin/${courseYearId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      
+      showToast("Course year deleted successfully")
+      fetchCourseYears()
+    } catch (error) {
+      console.error("Error deleting course year:", error)
+      showToast("Failed to delete course year", "error")
+    }
+  }
+  
   const toggleCourseStatus = async (courseId, currentStatus) => {
     try {
       const token = localStorage.getItem("token")
       const response = await api.put(`/api/courses/admin/${courseId}`, { isActive: !currentStatus }, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
+        headers: { Authorization: `Bearer ${token}` },
       })
       
       showToast(`Course ${!currentStatus ? 'activated' : 'deactivated'} successfully`)
@@ -634,22 +558,11 @@ const AdminQuizManagement = () => {
     }
   }
   
-  const handleToggleCourseStatus = (courseId, currentStatus) => {
-    setConfirmDialog({
-      isOpen: true,
-      message: `Are you sure you want to ${!currentStatus ? 'activate' : 'deactivate'} this course?`,
-      onConfirm: () => toggleCourseStatus(courseId, currentStatus),
-    })
-  }
-  
   const handleDeactivateSemester = async (semester) => {
     try {
       const token = localStorage.getItem("token")
       const response = await api.post("/api/courses/admin/deactivate-semester", { semester }, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
+        headers: { Authorization: `Bearer ${token}` },
       })
       
       showToast(response.data.message)
@@ -660,6 +573,7 @@ const AdminQuizManagement = () => {
     }
   }
   
+  // Edit handlers
   const startEditQuestion = (question) => {
     setEditingQuestion(question)
     setQuestionForm({
@@ -685,8 +599,8 @@ const AdminQuizManagement = () => {
     })
   }
   
-  const cancelEdit = () => {
-    setEditingQuestion(null)
+  // Reset form functions
+  const resetQuestionForm = () => {
     setQuestionForm({
       question: "",
       options: ["", ""],
@@ -701,12 +615,46 @@ const AdminQuizManagement = () => {
     })
   }
   
-  const cancelEditCourse = () => {
-    setEditingCourse(null)
+  const resetCourseForm = () => {
     setCourseForm({
       courseCode: "",
       courseName: "",
       semester: "first",
+    })
+  }
+  
+  const cancelEdit = () => {
+    setEditingQuestion(null)
+    resetQuestionForm()
+  }
+  
+  const cancelEditCourse = () => {
+    setEditingCourse(null)
+    resetCourseForm()
+  }
+  
+  // Confirmation dialog handlers
+  const handleDeleteQuestion = (questionId) => {
+    setConfirmDialog({
+      isOpen: true,
+      message: "Are you sure you want to delete this question?",
+      onConfirm: () => deleteQuestion(questionId),
+    })
+  }
+  
+  const handleDeleteCourseYear = (courseYearId) => {
+    setConfirmDialog({
+      isOpen: true,
+      message: "Are you sure you want to delete this course year?",
+      onConfirm: () => deleteCourseYear(courseYearId),
+    })
+  }
+  
+  const handleToggleCourseStatus = (courseId, currentStatus) => {
+    setConfirmDialog({
+      isOpen: true,
+      message: `Are you sure you want to ${!currentStatus ? 'activate' : 'deactivate'} this course?`,
+      onConfirm: () => toggleCourseStatus(courseId, currentStatus),
     })
   }
   
@@ -749,81 +697,24 @@ const AdminQuizManagement = () => {
       <header className={styles.adminHeader}>
         <h1>Admin Quiz Management</h1>
         <nav className={styles.adminNav}>
-          <button 
-            className={`${styles.navBtn} ${activeTab === "questions" ? styles.active : ""}`} 
-            onClick={() => setActiveTab("questions")}
-          >
-            Questions
-          </button>
-          <button 
-            className={`${styles.navBtn} ${activeTab === "courseYears" ? styles.active : ""}`} 
-            onClick={() => setActiveTab("courseYears")}
-          >
-            Course Years
-          </button>
-          <button 
-            className={`${styles.navBtn} ${activeTab === "courses" ? styles.active : ""}`} 
-            onClick={() => setActiveTab("courses")}
-          >
-            Courses
-          </button>
+          {["questions", "courseYears", "courses", "statistics"].map((tab) => (
+            <button
+              key={tab}
+              className={`${styles.navBtn} ${activeTab === tab ? styles.active : ""}`}
+              onClick={() => setActiveTab(tab)}
+            >
+              {tab === "questions" && "Questions"}
+              {tab === "courseYears" && "Course Years"}
+              {tab === "courses" && "Courses"}
+              {tab === "statistics" && "Statistics"}
+            </button>
+          ))}
         </nav>
       </header>
       
       {/* Questions Tab */}
       {activeTab === "questions" && (
-        <div className={styles.questionsSection}>
-          {/* Statistics Section */}
-          <div className={styles.statisticsSection}>
-            <div className={styles.statsCard}>
-              <h3>Question Statistics</h3>
-              <div className={styles.statsGrid}>
-                <div className={styles.statItem}>
-                  <div className={styles.statValue}>{statistics.totalQuestions}</div>
-                  <div className={styles.statLabel}>Total Questions</div>
-                </div>
-                <div className={styles.statItem}>
-                  <div className={styles.statValue}>{statistics.courseStats?.length || 0}</div>
-                  <div className={styles.statLabel}>Courses</div>
-                </div>
-                <div className={styles.statItem}>
-                  <div className={styles.statValue}>{statistics.yearStats?.length || 0}</div>
-                  <div className={styles.statLabel}>Years</div>
-                </div>
-                <div className={styles.statItem}>
-                  <div className={styles.statValue}>{statistics.topicStats?.length || 0}</div>
-                  <div className={styles.statLabel}>Topics</div>
-                </div>
-              </div>
-            </div>
-            
-            {/* Course Stats */}
-            <div className={styles.statsCard}>
-              <h3>Questions by Course</h3>
-              <div className={styles.statsList}>
-                {statistics.courseStats?.map((stat) => (
-                  <div key={stat._id} className={styles.statsListItem}>
-                    <span className={styles.statsName}>{stat._id.toUpperCase()}</span>
-                    <span className={styles.statsValue}>{stat.count}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-            
-            {/* Year Stats */}
-            <div className={styles.statsCard}>
-              <h3>Questions by Year</h3>
-              <div className={styles.statsList}>
-                {statistics.yearStats?.map((stat) => (
-                  <div key={stat._id} className={styles.statsListItem}>
-                    <span className={styles.statsName}>{stat._id}</span>
-                    <span className={styles.statsValue}>{stat.count}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-          
+        <div className={styles.tabContent}>
           {/* Add/Edit Question Form */}
           <div className={styles.formSection}>
             <h3>{editingQuestion ? "Edit Question" : "Add New Question"}</h3>
@@ -860,6 +751,7 @@ const AdminQuizManagement = () => {
                   />
                 </div>
               </div>
+              
               <div className={styles.formGroup}>
                 <label>Question</label>
                 <textarea
@@ -870,7 +762,7 @@ const AdminQuizManagement = () => {
                 />
               </div>
               
-              {/* Image Upload Section */}
+              {/* Image Upload */}
               <div className={styles.formGroup}>
                 <label>Question Image (Optional)</label>
                 <div className={styles.imageUploadContainer}>
@@ -935,9 +827,9 @@ const AdminQuizManagement = () => {
                       type="text"
                       value={option}
                       onChange={(e) => {
-                        const newOptions = [...questionForm.options];
-                        newOptions[index] = e.target.value;
-                        setQuestionForm({ ...questionForm, options: newOptions });
+                        const newOptions = [...questionForm.options]
+                        newOptions[index] = e.target.value
+                        setQuestionForm({ ...questionForm, options: newOptions })
                       }}
                       placeholder={`Option ${index + 1}`}
                       required
@@ -965,6 +857,7 @@ const AdminQuizManagement = () => {
                   required
                 />
               </div>
+              
               <div className={styles.formGroup}>
                 <label>Tags (comma-separated)</label>
                 <input
@@ -974,6 +867,7 @@ const AdminQuizManagement = () => {
                   placeholder="e.g., mathematical induction, divisibility"
                 />
               </div>
+              
               <div className={styles.formActions}>
                 <button type="submit" className={`${styles.btn} ${styles.btnPrimary}`}>
                   {editingQuestion ? "Update Question" : "Add Question"}
@@ -995,7 +889,7 @@ const AdminQuizManagement = () => {
               <ul>
                 <li>Must be a valid JSON array of question objects</li>
                 <li>Each question must have: question, options (array of 2-4), correctOption (1-N), explanation, course, year, topic</li>
-                <li>Correct option must be a number between 1 and the number of options (1 = first option, 2 = second option, etc.)</li>
+                <li>Correct option must be a number between 1 and the number of options</li>
                 <li>Tags field is optional and should be an array of strings</li>
                 <li>Image field is optional and should be a URL string</li>
               </ul>
@@ -1042,6 +936,7 @@ const AdminQuizManagement = () => {
                   disabled={bulkImportProgress.loading}
                 />
               </div>
+              
               <div className={styles.formActions}>
                 <button 
                   type="submit" 
@@ -1121,13 +1016,19 @@ const AdminQuizManagement = () => {
                     <span className={`${styles.badge} ${styles.yearBadge}`}>{question.year}</span>
                     <span className={`${styles.badge} ${styles.topicBadge}`}>{question.topic}</span>
                   </div>
+                  
                   <div className={styles.questionContent}>
                     <p className={styles.questionText}>{question.question}</p>
+                    
                     {question.image && (
                       <div className={styles.questionImage}>
-                        <img src={question.image.startsWith('/uploads') ? question.image : `/uploads${question.image}`} alt="Question Image" />
+                        <img 
+                          src={question.image.startsWith('/uploads') ? question.image : `/uploads${question.image}`} 
+                          alt="Question Image" 
+                        />
                       </div>
                     )}
+                    
                     <div className={styles.options}>
                       {question.options.map((option, index) => (
                         <div key={index} className={`${styles.option} ${index + 1 === question.correctOption ? styles.correct : ""}`}>
@@ -1135,15 +1036,18 @@ const AdminQuizManagement = () => {
                         </div>
                       ))}
                     </div>
+                    
                     <div className={styles.explanation}>
                       <strong>Explanation:</strong> {question.explanation}
                     </div>
+                    
                     {question.tags.length > 0 && (
                       <div className={styles.tags}>
                         <strong>Tags:</strong> {question.tags.join(", ")}
                       </div>
                     )}
                   </div>
+                  
                   <div className={styles.questionActions}>
                     <button onClick={() => startEditQuestion(question)} className={`${styles.btn} ${styles.btnEdit}`}>
                       Edit
@@ -1161,7 +1065,7 @@ const AdminQuizManagement = () => {
       
       {/* Course Years Tab */}
       {activeTab === "courseYears" && (
-        <div className={styles.courseYearsSection}>
+        <div className={styles.tabContent}>
           <div className={styles.sectionHeader}>
             <h2>Course Years Management</h2>
           </div>
@@ -1192,9 +1096,12 @@ const AdminQuizManagement = () => {
                   />
                 </div>
               </div>
-              <button type="submit" className={`${styles.btn} ${styles.btnPrimary}`}>
-                Add Course Year
-              </button>
+              
+              <div className={styles.formActions}>
+                <button type="submit" className={`${styles.btn} ${styles.btnPrimary}`}>
+                  Add Course Year
+                </button>
+              </div>
             </form>
           </div>
           
@@ -1212,7 +1119,10 @@ const AdminQuizManagement = () => {
                     {data.years.map((yearData) => (
                       <div key={yearData._id} className={styles.yearCard}>
                         <span className={styles.yearText}>{yearData.year}</span>
-                        <button onClick={() => handleDeleteCourseYear(yearData._id)} className={`${styles.btn} ${styles.btnDeleteSmall}`}>
+                        <button 
+                          onClick={() => handleDeleteCourseYear(yearData._id)} 
+                          className={`${styles.btn} ${styles.btnDeleteSmall}`}
+                        >
                           ×
                         </button>
                       </div>
@@ -1227,17 +1137,26 @@ const AdminQuizManagement = () => {
       
       {/* Courses Tab */}
       {activeTab === "courses" && (
-        <div className={styles.coursesSection}>
+        <div className={styles.tabContent}>
           <div className={styles.sectionHeader}>
             <h2>Course Management</h2>
             <div className={styles.semesterActions}>
-              <button onClick={() => handleDeactivateSemester('first')} className={`${styles.btn} ${styles.btnWarning}`}>
+              <button 
+                onClick={() => handleDeactivateSemester('first')} 
+                className={`${styles.btn} ${styles.btnWarning}`}
+              >
                 Deactivate First Semester
               </button>
-              <button onClick={() => handleDeactivateSemester('second')} className={`${styles.btn} ${styles.btnWarning}`}>
+              <button 
+                onClick={() => handleDeactivateSemester('second')} 
+                className={`${styles.btn} ${styles.btnWarning}`}
+              >
                 Deactivate Second Semester
               </button>
-              <button onClick={() => handleDeactivateSemester('both')} className={`${styles.btn} ${styles.btnDanger}`}>
+              <button 
+                onClick={() => handleDeactivateSemester('both')} 
+                className={`${styles.btn} ${styles.btnDanger}`}
+              >
                 Deactivate Both Semesters
               </button>
             </div>
@@ -1280,6 +1199,7 @@ const AdminQuizManagement = () => {
                   </select>
                 </div>
               </div>
+              
               <div className={styles.formActions}>
                 <button type="submit" className={`${styles.btn} ${styles.btnPrimary}`}>
                   {editingCourse ? "Update Course" : "Add Course"}
@@ -1312,6 +1232,7 @@ const AdminQuizManagement = () => {
                       {course.isActive ? 'Active' : 'Inactive'}
                     </span>
                   </div>
+                  
                   <div className={styles.courseActions}>
                     <button onClick={() => startEditCourse(course)} className={`${styles.btn} ${styles.btnEdit}`}>
                       Edit
@@ -1327,6 +1248,114 @@ const AdminQuizManagement = () => {
               ))
             )}
           </div>
+        </div>
+      )}
+      
+      {/* Statistics Tab */}
+      {activeTab === "statistics" && (
+        <div className={styles.tabContent}>
+          <div className={styles.sectionHeader}>
+            <h2>Quiz Statistics</h2>
+            <button 
+              onClick={fetchStatistics}
+              className={`${styles.btn} ${styles.btnPrimary}`}
+              disabled={loading}
+            >
+              <i className="fas fa-sync-alt"></i> {loading ? 'Loading...' : 'Refresh'}
+            </button>
+          </div>
+          
+          {loading ? (
+            <div className={styles.loading}>Loading statistics...</div>
+          ) : (
+            <div className={styles.statisticsGrid}>
+              <div className={styles.statsCard}>
+                <h3>Question Statistics</h3>
+                <div className={styles.statsGrid}>
+                  <div className={styles.statItem}>
+                    <div className={styles.statValue}>{statistics.totalQuestions}</div>
+                    <div className={styles.statLabel}>Total Questions</div>
+                  </div>
+                  <div className={styles.statItem}>
+                    <div className={styles.statValue}>{statistics.courseStats?.length || 0}</div>
+                    <div className={styles.statLabel}>Courses</div>
+                  </div>
+                  <div className={styles.statItem}>
+                    <div className={styles.statValue}>{statistics.yearStats?.length || 0}</div>
+                    <div className={styles.statLabel}>Years</div>
+                  </div>
+                  <div className={styles.statItem}>
+                    <div className={styles.statValue}>{statistics.topicStats?.length || 0}</div>
+                    <div className={styles.statLabel}>Topics</div>
+                  </div>
+                </div>
+              </div>
+              
+              <div className={styles.statsCard}>
+                <h3>Questions by Course</h3>
+                <div className={styles.statsList}>
+                  {statistics.courseStats?.map((stat) => (
+                    <div key={stat._id} className={styles.statsListItem}>
+                      <span className={styles.statsName}>{stat._id.toUpperCase()}</span>
+                      <span className={styles.statsValue}>{stat.count}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              
+              <div className={styles.statsCard}>
+                <h3>Questions by Year</h3>
+                <div className={styles.statsList}>
+                  {statistics.yearStats?.map((stat) => (
+                    <div key={stat._id} className={styles.statsListItem}>
+                      <span className={styles.statsName}>{stat._id}</span>
+                      <span className={styles.statsValue}>{stat.count}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              
+              <div className={styles.statsCard}>
+                <h3>Questions by Topic</h3>
+                <div className={styles.statsList}>
+                  {statistics.topicStats?.map((stat) => (
+                    <div key={stat._id} className={styles.statsListItem}>
+                      <span className={styles.statsName}>{stat._id}</span>
+                      <span className={styles.statsValue}>{stat.count}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              
+              <div className={styles.statsCard}>
+                <h3>System Information</h3>
+                <div className={styles.statsList}>
+                  <div className={styles.statsListItem}>
+                    <span className={styles.statsName}>Total Courses</span>
+                    <span className={styles.statsValue}>{courses.length}</span>
+                  </div>
+                  <div className={styles.statsListItem}>
+                    <span className={styles.statsName}>Active Courses</span>
+                    <span className={styles.statsValue}>
+                      {courses.filter(course => course.isActive).length}
+                    </span>
+                  </div>
+                  <div className={styles.statsListItem}>
+                    <span className={styles.statsName}>Inactive Courses</span>
+                    <span className={styles.statsValue}>
+                      {courses.filter(course => !course.isActive).length}
+                    </span>
+                  </div>
+                  <div className={styles.statsListItem}>
+                    <span className={styles.statsName}>Total Course Years</span>
+                    <span className={styles.statsValue}>
+                      {Object.values(courseYears).reduce((acc, course) => acc + course.years.length, 0)}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       )}
     </div>

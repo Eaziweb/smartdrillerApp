@@ -1,15 +1,18 @@
 "use client"
-
 import { useAuth } from "../contexts/AuthContext"
 import SubscriptionRequired from "./SubscriptionRequired"
+import styles from "../../styles/loading.module.css"
+
 
 const SubscriptionProtectedRoute = ({ children }) => {
   const { user, loading } = useAuth()
 
   if (loading) {
     return (
-      <div className="loading-container">
-        <div className="loading-spinner">Loading...</div>
+      <div className={styles.loadingContainer}>
+        <div className={styles.spinnerContainer}>
+          <i className="fas fa-spinner fa-spin"></i>
+        </div>
       </div>
     )
   }

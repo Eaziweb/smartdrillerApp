@@ -146,9 +146,8 @@ router.get("/", async (req, res) => {
     res.status(500).json({ message: "Server error" })
   }
 })
-// In your courses router (routes/courses.js)
 
-// Get course by code
+
 router.get("/:courseCode", async (req, res) => {
   try {
     const { courseCode } = req.params;

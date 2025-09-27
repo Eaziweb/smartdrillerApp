@@ -9,6 +9,7 @@ const Materials = () => {
   const [materials, setMaterials] = useState([])
   const [courses, setCourses] = useState([])
   const [loading, setLoading] = useState(false)
+  const [coursesLoading, setCoursesLoading] = useState(true)
   const [uploadModalOpen, setUploadModalOpen] = useState(false)
   const [filters, setFilters] = useState({
     search: "",
@@ -30,18 +31,21 @@ const Materials = () => {
   }, [currentPage, filters])
 
   const loadCourses = async () => {
+    setCoursesLoading(true)
     try {
-      const token = localStorage.getItem("token")
-      const response = await api.get("/api/materials/courses", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
+      // Remove manual token setting since api utility handles it
+      const response = await api.get("/api/materials/courses")
+      
       if (response.data.success) {
         setCourses(response.data.courses)
+      } else {
+        showNotification(response.data.message || "Failed to load courses", "error")
       }
     } catch (error) {
       console.error("Error loading courses:", error)
+      showNotification("Error loading courses", "error")
+    } finally {
+      setCoursesLoading(false)
     }
   }
 
@@ -54,16 +58,13 @@ const Materials = () => {
         ...filters,
       })
       
-      const token = localStorage.getItem("token")
-      const response = await api.get(`/api/materials?${queryParams}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
+      const response = await api.get(`/api/materials?${queryParams}`)
       
       if (response.data.success) {
         setMaterials(response.data.materials)
         setTotalPages(response.data.totalPages)
+      } else {
+        showNotification(response.data.message || "Error loading materials", "error")
       }
     } catch (error) {
       console.error("Error loading materials:", error)
@@ -87,12 +88,7 @@ const Materials = () => {
     formData.append("file", uploadForm.file)
     
     try {
-      const token = localStorage.getItem("token")
-      const response = await api.post("/api/materials/upload", formData, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
+      const response = await api.post("/api/materials/upload", formData)
       
       if (response.data.success) {
         showNotification("Material uploaded successfully! It is now pending admin approval.", "success")
@@ -109,47 +105,43 @@ const Materials = () => {
   }
 
   const downloadMaterial = async (materialId, title) => {
-  try {
-    const token = localStorage.getItem("token")
-    const response = await api.get(`/api/materials/${materialId}/download`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-      responseType: 'blob',
-    })
-    
-    // Check if response is actually a blob (not an error)
-    if (response.data.type === 'application/json') {
-      // Convert blob to text to read error message
-      const reader = new FileReader();
-      reader.onload = () => {
-        try {
-          const errorData = JSON.parse(reader.result);
-          showNotification(errorData.message || "Error downloading material", "error");
-        } catch (e) {
-          showNotification("Error downloading material", "error");
-        }
-      };
-      reader.readAsText(response.data);
-      return;
+    try {
+      const response = await api.get(`/api/materials/${materialId}/download`, {
+        responseType: 'blob',
+      })
+      
+      // Check if response is actually a blob (not an error)
+      if (response.data.type === 'application/json') {
+        // Convert blob to text to read error message
+        const reader = new FileReader();
+        reader.onload = () => {
+          try {
+            const errorData = JSON.parse(reader.result);
+            showNotification(errorData.message || "Error downloading material", "error");
+          } catch (e) {
+            showNotification("Error downloading material", "error");
+          }
+        };
+        reader.readAsText(response.data);
+        return;
+      }
+      
+      // Handle successful download
+      const blob = new Blob([response.data])
+      const url = window.URL.createObjectURL(blob)
+      const a = document.createElement("a")
+      a.href = url
+      a.download = title
+      document.body.appendChild(a)
+      a.click()
+      window.URL.revokeObjectURL(url)
+      document.body.removeChild(a)
+      showNotification("Download started", "success")
+    } catch (error) {
+      console.error("Error downloading material:", error)
+      showNotification("Error downloading material", "error")
     }
-    
-    // Handle successful download
-    const blob = new Blob([response.data])
-    const url = window.URL.createObjectURL(blob)
-    const a = document.createElement("a")
-    a.href = url
-    a.download = title
-    document.body.appendChild(a)
-    a.click()
-    window.URL.revokeObjectURL(url)
-    document.body.removeChild(a)
-    showNotification("Download started", "success")
-  } catch (error) {
-    console.error("Error downloading material:", error)
-    showNotification("Error downloading material", "error")
   }
-}
 
   const handleFilterChange = (key, value) => {
     setFilters((prev) => ({ ...prev, [key]: value }))
@@ -237,8 +229,9 @@ const Materials = () => {
             value={filters.course}
             onChange={(e) => handleFilterChange("course", e.target.value)}
             className={styles.filterSelect}
+            disabled={coursesLoading}
           >
-            <option value="">All Courses</option>
+            <option value="">{coursesLoading ? "Loading courses..." : "All Courses"}</option>
             {courses.map((course) => (
               <option key={course._id} value={course._id}>
                 {course.name} ({course.code})
@@ -356,8 +349,9 @@ const Materials = () => {
                   value={uploadForm.course}
                   onChange={(e) => setUploadForm((prev) => ({ ...prev, course: e.target.value }))}
                   required
+                  disabled={coursesLoading}
                 >
-                  <option value="">Select Course</option>
+                  <option value="">{coursesLoading ? "Loading courses..." : "Select Course"}</option>
                   {courses.map((course) => (
                     <option key={course._id} value={course._id}>
                       {course.name} ({course.code})
