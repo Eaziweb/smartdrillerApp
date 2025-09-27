@@ -154,11 +154,29 @@ const Mock = () => {
   const renderContentWithMath = (content, isDisplayMode = false) => {
     if (!content) return null
     
+    // First, preprocess the content to add delimiters around common LaTeX patterns
+    let processedContent = content
+    
+    // Wrap fractions without delimiters
+    processedContent = processedContent.replace(/\\frac{[^{}]*}{[^{}]*}/g, '\\($&\\)')
+    
+    // Wrap Greek letters without delimiters
+    processedContent = processedContent.replace(/\\(alpha|beta|gamma|delta|epsilon|zeta|eta|theta|iota|kappa|lambda|mu|nu|xi|omicron|pi|rho|sigma|tau|upsilon|phi|chi|psi|omega)\s*/g, '\\($&\\)')
+    
+    // Wrap exponents: simple case like x^2
+    processedContent = processedContent.replace(/([a-zA-Z])\^([0-9]+|\{[^}]*\})/g, '\\($1^$2\\)')
+    
+    // Wrap set notation like {x: x < 3}
+    processedContent = processedContent.replace(/\{[^}]*:[^}]*\}/g, '\\($&\\)')
+    
+    // Wrap cap and cup symbols
+    processedContent = processedContent.replace(/(cap|cup)\s*/g, '\\($1\\)')
+    
     // Simple regex to find LaTeX patterns
     const latexPattern = /(\\\(.*?\\\)|\\\[.*?\\\]|\$\$.*?\$\$|\$.*?\$)/g
     
     // Split content by LaTeX patterns
-    const parts = content.split(latexPattern)
+    const parts = processedContent.split(latexPattern)
     
     return parts.map((part, index) => {
       if (index % 2 === 1) { // This is a LaTeX expression
@@ -600,16 +618,22 @@ const Mock = () => {
           {currentQuestion.options.map((option, index) => {
             const optionNumber = index + 1
             const isSelected = userAnswer === optionNumber
+            const isCorrect = currentQuestion.correctOption === optionNumber
+            const showCorrect = false // Mock doesn't show correct answers during test
+            const showWrong = false // Mock doesn't show wrong answers during test
+            
             return (
               <div
                 key={index}
-                className={`${styles.option} ${isSelected ? styles.selected : ""}`}
+                className={`${styles.option} ${isSelected ? styles.selected : ""} ${showCorrect ? styles.correct : ""} ${showWrong ? styles.wrong : ""}`}
                 onClick={() => handleAnswerSelect(currentQuestion._id, optionNumber)}
               >
                 <div className={styles.optionLetter}>{String.fromCharCode(65 + index)}</div>
                 <div className={styles.optionText}>
                   {renderContentWithMath(option)}
                 </div>
+                {showCorrect && <i className={`fas fa-check ${styles.optionIcon} ${styles.correctIcon}`}></i>}
+                {showWrong && <i className={`fas fa-times ${styles.optionIcon} ${styles.wrongIcon}`}></i>}
               </div>
             )
           })}

@@ -581,3 +581,86 @@
     font-size: 1rem;
   }
 }
+.math-content {
+  display: inline-block;
+  font-family: 'KaTeX_Main', 'Times New Roman', serif;
+  line-height: 1.2;
+}
+
+.display-math {
+  display: block;
+  text-align: center;
+  margin: 1em 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+.inline-math {
+  display: inline;
+  white-space: nowrap;
+}
+
+
+
+
+
+/* Add padding for math expressions to prevent overlap */
+.math-content {
+  padding: 0 2px;
+}
+
+/* For better rendering of fractions and complex expressions */
+.katex {
+  font-size: 1.1em;
+}
+
+.katex-display {
+  font-size: 1.2em;
+}
+
+/* Responsive adjustments for math content */
+@media (max-width: 768px) {
+  .questionText {
+    font-size: 1.1rem;
+    padding: 1rem;
+  }
+  
+  .optionText {
+    font-size: 0.9rem;
+  }
+  
+  .explanationText {
+    font-size: 0.9rem;
+  }
+  
+  .katex {
+    font-size: 1em;
+  }
+  
+  .katex-display {
+    font-size: 1.1em;
+  }
+}
+
+@media (max-width: 480px) {
+  .questionText {
+    font-size: 1rem;
+    padding: 0.75rem;
+  }
+  
+  .optionText {
+    font-size: 0.85rem;
+  }
+  
+  .explanationText {
+    font-size: 0.85rem;
+  }
+  
+  .katex {
+    font-size: 0.9em;
+  }
+  
+  .katex-display {
+    font-size: 1em;
+  }
+}
