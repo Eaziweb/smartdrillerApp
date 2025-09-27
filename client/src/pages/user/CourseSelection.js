@@ -73,7 +73,7 @@ const CourseSelection = () => {
     setProgressLoading(true);
     setProgressError(null);
     try {
-      const response = await api.get("/questions/study-progress");
+      const response = await api.get("/api/questions/study-progress");
       
       if (response.data.success) {
         setStudyProgress(response.data.progress);
@@ -107,11 +107,33 @@ const CourseSelection = () => {
   const fetchCourses = async () => {
     setFetchingCourses(true)
     try {
-      const response = await api.get("/courses")
-      setCourses(response.data)
+      // Try the correct API path
+      const response = await api.get("/api/courses")
+      
+      if (response.data && response.data.success) {
+        // Organize courses by semester
+        const firstSemester = response.data.courses.filter(course => course.semester === 'first');
+        const secondSemester = response.data.courses.filter(course => course.semester === 'second');
+        setCourses({ first: firstSemester, second: secondSemester });
+      } else {
+        throw new Error(response.data?.message || "Failed to load courses");
+      }
     } catch (error) {
       console.error("Failed to fetch courses:", error)
       setError("Failed to load courses. Please check your connection and try again.")
+      
+      // Show more specific error message
+      if (error.response) {
+        if (error.response.status === 404) {
+          showNotification("Courses endpoint not found. Please contact support.", "error");
+        } else {
+          showNotification(`Error loading courses: ${error.response.data.message || error.message}`, "error");
+        }
+      } else if (error.request) {
+        showNotification("Network error. Please check your connection and try again.", "error");
+      } else {
+        showNotification(`Error loading courses: ${error.message}`, "error");
+      }
     } finally {
       setFetchingCourses(false)
     }
@@ -121,17 +143,35 @@ const CourseSelection = () => {
     setFetchingYears(true)
     setError(null)
     try {
-      const response = await api.get("/questions/course-years")
+      // Try the correct API path
+      const response = await api.get("/api/questions/course-years")
       
-      if (!response.data || Object.keys(response.data).length === 0) {
+      if (!response.data || !response.data.success) {
+        throw new Error(response.data?.message || "Failed to load course years");
+      }
+      
+      if (!response.data.years || Object.keys(response.data.years).length === 0) {
         setError("No course data available. Please contact support.")
         return
       }
       
-      setCourseYears(response.data)
+      setCourseYears(response.data.years)
     } catch (error) {
       console.error("Failed to fetch course years:", error)
       setError("Failed to load course data. Please check your connection and try again.")
+      
+      // Show more specific error message
+      if (error.response) {
+        if (error.response.status === 404) {
+          showNotification("Course years endpoint not found. Please contact support.", "error");
+        } else {
+          showNotification(`Error loading course years: ${error.response.data.message || error.message}`, "error");
+        }
+      } else if (error.request) {
+        showNotification("Network error. Please check your connection and try again.", "error");
+      } else {
+        showNotification(`Error loading course years: ${error.message}`, "error");
+      }
     } finally {
       setFetchingYears(false)
       setLoading(false)
@@ -141,9 +181,14 @@ const CourseSelection = () => {
   const fetchTopics = async (courseCode) => {
     setFetchingTopics(true)
     try {
-      const response = await api.get(`/questions/topics/${courseCode}`)
+      // Try the correct API path
+      const response = await api.get(`/api/questions/topics/${courseCode}`)
       
-      const topics = response.data
+      if (!response.data || !response.data.success) {
+        throw new Error(response.data?.message || "Failed to load topics");
+      }
+      
+      const topics = response.data.topics
       
       if (!topics || topics.length === 0) {
         showNotification(`No topics available for ${courseCode}. Please select another course.`, "error")
@@ -161,6 +206,19 @@ const CourseSelection = () => {
       console.error("Failed to fetch topics:", error)
       showNotification(`Failed to load topics for ${courseCode}. Please try again.`, "error")
       handleCourseSelect(courseCode, false) // Deselect the course
+      
+      // Show more specific error message
+      if (error.response) {
+        if (error.response.status === 404) {
+          showNotification(`Topics endpoint not found for ${courseCode}.`, "error");
+        } else {
+          showNotification(`Error loading topics: ${error.response.data.message || error.message}`, "error");
+        }
+      } else if (error.request) {
+        showNotification("Network error. Please check your connection and try again.", "error");
+      } else {
+        showNotification(`Error loading topics: ${error.message}`, "error");
+      }
     } finally {
       setFetchingTopics(false)
     }
@@ -344,10 +402,11 @@ const CourseSelection = () => {
         ...(isMockMode && { timeAllowed: Number.parseInt(courseDataObj.time) }),
       }
       
-      const response = await api.post("/questions/fetch", requestData)
+      // Try the correct API path
+      const response = await api.post("/api/questions/fetch", requestData)
       
-      if (!response.data.success) {
-        throw new Error(response.data.message || "Failed to fetch questions")
+      if (!response.data || !response.data.success) {
+        throw new Error(response.data?.message || "Failed to fetch questions")
       }
       
       if (!response.data.questions || response.data.questions.length === 0) {
@@ -367,7 +426,19 @@ const CourseSelection = () => {
       navigate(isMockMode ? "/mock" : "/study")
     } catch (error) {
       console.error("Failed to start exam:", error)
-      showNotification(error.response?.data?.message || error.message || "Failed to start exam", "error")
+      
+      // Show more specific error message
+      if (error.response) {
+        if (error.response.status === 404) {
+          showNotification("Questions endpoint not found. Please contact support.", "error");
+        } else {
+          showNotification(`Error: ${error.response.data.message || error.message}`, "error");
+        }
+      } else if (error.request) {
+        showNotification("Network error. Please check your connection and try again.", "error");
+      } else {
+        showNotification(`Error: ${error.message}`, "error");
+      }
     } finally {
       setFetchingQuestions(false)
     }

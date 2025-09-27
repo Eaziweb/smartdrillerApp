@@ -6,7 +6,7 @@ import api from "../../utils/api";
 import styles from "../../styles/NoteManagement.module.css";
 
 const NoteManagement = () => {
-  const [courses, setCourses] = useState([]); // Initialize as empty array
+  const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showCourseModal, setShowCourseModal] = useState(false);
   const [showNoteModal, setShowNoteModal] = useState(false);
@@ -30,27 +30,26 @@ const NoteManagement = () => {
     loadCourses();
   }, []);
 
-const loadCourses = async () => {
-  try {
-    const response = await api.get("/api/admin/notes/courses", {
-      headers: getAuthHeader(),
-    });
-    
-    // Ensure response.data is an array
-    if (Array.isArray(response.data)) {
-      setCourses(response.data);
-    } else {
-      console.error("Unexpected response format:", response.data);
+  const loadCourses = async () => {
+    try {
+      const response = await api.get("/api/admin/notes/courses", {
+        headers: getAuthHeader(),
+      });
+      
+      if (Array.isArray(response.data)) {
+        setCourses(response.data);
+      } else {
+        console.error("Unexpected response format:", response.data);
+        setCourses([]);
+      }
+    } catch (error) {
+      console.error("Failed to load courses:", error);
+      showToast("Failed to load courses", "error");
       setCourses([]);
+    } finally {
+      setLoading(false);
     }
-  } catch (error) {
-    console.error("Failed to load courses:", error);
-    showToast("Failed to load courses", "error");
-    setCourses([]);
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
   const handleCreateCourse = async (e) => {
     e.preventDefault();
@@ -187,7 +186,7 @@ const loadCourses = async () => {
 
   const formatText = (type) => {
     const textarea = document.getElementById("noteContent");
-    if (!textarea) return; // Safety check
+    if (!textarea) return;
     
     const start = textarea.selectionStart;
     const end = textarea.selectionEnd;
@@ -346,7 +345,7 @@ const loadCourses = async () => {
                 </div>
               </div>
 
-              {/* Only show course content if this course is open */}
+              {/* Course content - only visible when course is open */}
               {openCourseId === course._id && (
                 <div className={styles.courseContent}>
                   {!Array.isArray(course.notes) || course.notes.length === 0 ? (

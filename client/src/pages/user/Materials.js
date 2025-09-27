@@ -33,13 +33,14 @@ const Materials = () => {
   const loadCourses = async () => {
     setCoursesLoading(true)
     try {
-      // Remove manual token setting since api utility handles it
       const response = await api.get("/api/materials/courses")
       
-      if (response.data.success) {
+      // Check if response has data and courses array
+      if (response.data && response.data.courses) {
         setCourses(response.data.courses)
       } else {
-        showNotification(response.data.message || "Failed to load courses", "error")
+        console.error("Unexpected response format:", response.data)
+        showNotification("Failed to load courses", "error")
       }
     } catch (error) {
       console.error("Error loading courses:", error)
@@ -60,11 +61,12 @@ const Materials = () => {
       
       const response = await api.get(`/api/materials?${queryParams}`)
       
-      if (response.data.success) {
+      if (response.data && response.data.materials) {
         setMaterials(response.data.materials)
         setTotalPages(response.data.totalPages)
       } else {
-        showNotification(response.data.message || "Error loading materials", "error")
+        console.error("Unexpected response format:", response.data)
+        showNotification("Error loading materials", "error")
       }
     } catch (error) {
       console.error("Error loading materials:", error)
@@ -90,13 +92,13 @@ const Materials = () => {
     try {
       const response = await api.post("/api/materials/upload", formData)
       
-      if (response.data.success) {
+      if (response.data && response.data.success) {
         showNotification("Material uploaded successfully! It is now pending admin approval.", "success")
         setUploadModalOpen(false)
         setUploadForm({ title: "", description: "", course: "", file: null })
         loadMaterials()
       } else {
-        throw new Error(response.data.message)
+        throw new Error(response.data?.message || "Upload failed")
       }
     } catch (error) {
       console.error("Error uploading material:", error)
@@ -234,7 +236,7 @@ const Materials = () => {
             <option value="">{coursesLoading ? "Loading courses..." : "All Courses"}</option>
             {courses.map((course) => (
               <option key={course._id} value={course._id}>
-                {course.name} ({course.code})
+                {course.courseName} ({course.courseCode})
               </option>
             ))}
           </select>
@@ -258,37 +260,43 @@ const Materials = () => {
       
       {loading ? (
         <div className={styles.loading}>Loading materials...</div>
+      ) : materials.length === 0 ? (
+        <div className={styles.emptyState}>
+          <i className="fas fa-folder-open"></i>
+          <h3>No materials found</h3>
+          <p>Try adjusting your filters or upload new materials</p>
+        </div>
       ) : (
-<div className={styles.materialsGrid}>
-  {materials.map((material) => (
-    <div key={material._id} className={styles.materialCard}>
-      <div className={styles.materialIcon}>
-        <i className={`fas ${getFileIcon(material.filename)}`}></i>
-      </div>
-      <div className={styles.materialInfo}>
-        <div className={styles.materialHeader}>
-          <h3 className={styles.materialTitle}>{material.title}</h3>
-          <div className={styles.materialMeta}>
-            <span className={styles.materialCourse}>
-              {material.courseCode || material.courseName || "Unknown"}
-            </span>
-            <span className={styles.materialSize}>{formatFileSize(material.fileSize)}</span>
-          </div>
+        <div className={styles.materialsGrid}>
+          {materials.map((material) => (
+            <div key={material._id} className={styles.materialCard}>
+              <div className={styles.materialIcon}>
+                <i className={`fas ${getFileIcon(material.filename)}`}></i>
+              </div>
+              <div className={styles.materialInfo}>
+                <div className={styles.materialHeader}>
+                  <h3 className={styles.materialTitle}>{material.title}</h3>
+                  <div className={styles.materialMeta}>
+                    <span className={styles.materialCourse}>
+                      {material.course?.courseCode || material.course?.courseName || "Unknown"}
+                    </span>
+                    <span className={styles.materialSize}>{formatFileSize(material.fileSize)}</span>
+                  </div>
+                </div>
+                <div className={styles.materialDetails}>
+                  <span className={styles.uploader}>By: {material.uploadedBy?.fullName || "Unknown"}</span>
+                  <span className={styles.uploadDate}>{new Date(material.createdAt).toLocaleDateString()}</span>
+                </div>
+              </div>
+              <div className={styles.materialActions}>
+                <button onClick={() => downloadMaterial(material._id, material.originalName)} className={styles.downloadBtn}>
+                  <i className="fas fa-download"></i>
+                  Download
+                </button>
+              </div>
+            </div>
+          ))}
         </div>
-        <div className={styles.materialDetails}>
-          <span className={styles.uploader}>By: {material.uploaderName}</span>
-          <span className={styles.uploadDate}>{new Date(material.createdAt).toLocaleDateString()}</span>
-        </div>
-      </div>
-      <div className={styles.materialActions}>
-        <button onClick={() => downloadMaterial(material._id, material.filename)} className={styles.downloadBtn}>
-          <i className="fas fa-download"></i>
-          Download
-        </button>
-      </div>
-    </div>
-  ))}
-</div>
       )}
       
       {totalPages > 1 && (
@@ -354,7 +362,7 @@ const Materials = () => {
                   <option value="">{coursesLoading ? "Loading courses..." : "Select Course"}</option>
                   {courses.map((course) => (
                     <option key={course._id} value={course._id}>
-                      {course.name} ({course.code})
+                      {course.courseName} ({course.courseCode})
                     </option>
                   ))}
                 </select>
