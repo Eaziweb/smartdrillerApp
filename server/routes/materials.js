@@ -163,7 +163,6 @@ router.post("/upload", auth, upload.single("file"), async (req, res) => {
     })
   }
 })
-
 // Download material
 router.get("/:id/download", auth, async (req, res) => {
   try {
@@ -176,11 +175,7 @@ router.get("/:id/download", auth, async (req, res) => {
       })
     }
 
-    // Increment download count
-    material.downloadCount = (material.downloadCount || 0) + 1
-    await material.save()
-
-    // Check if file exists
+    // Check if file exists first
     if (!fs.existsSync(material.filePath)) {
       return res.status(404).json({
         success: false,
@@ -188,7 +183,18 @@ router.get("/:id/download", auth, async (req, res) => {
       })
     }
 
-    res.download(material.filePath, material.filename)
+    // Increment download count
+    material.downloadCount = (material.downloadCount || 0) + 1
+    await material.save()
+
+    // Set proper headers for download
+    res.setHeader('Content-Type', 'application/octet-stream');
+    res.setHeader('Content-Disposition', `attachment; filename="${material.filename}"`);
+    
+    // Stream the file
+    const fileStream = fs.createReadStream(material.filePath);
+    fileStream.pipe(res);
+    
   } catch (error) {
     console.error("Error downloading material:", error)
     res.status(500).json({
@@ -196,6 +202,6 @@ router.get("/:id/download", auth, async (req, res) => {
       message: "Failed to download material",
     })
   }
-})
+})  
 
 module.exports = router

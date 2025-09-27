@@ -20,14 +20,23 @@ const Home = () => {
   const [touchStartX, setTouchStartX] = useState(0)
   const [touchEndX, setTouchEndX] = useState(0)
   const contactPopupRef = useRef(null)
+  const sidebarRef = useRef(null)
   
   useEffect(() => {
     loadNotifications()
     
     // Close contact popup when clicking outside
     const handleClickOutside = (event) => {
+      // Handle contact popup
       if (contactPopupOpen && contactPopupRef.current && !contactPopupRef.current.contains(event.target)) {
         setContactPopupOpen(false)
+        return; // Prevent further processing
+      }
+      
+      // Handle sidebar close when clicking outside
+      if (sidebarOpen && sidebarRef.current && !sidebarRef.current.contains(event.target)) {
+        setSidebarOpen(false)
+        return; // Prevent further processing
       }
     }
     
@@ -35,7 +44,7 @@ const Home = () => {
     return () => {
       document.removeEventListener('mousedown', handleClickOutside)
     }
-  }, [user, contactPopupOpen])
+  }, [user, contactPopupOpen, sidebarOpen])
   
   const loadNotifications = async () => {
     try {
@@ -210,18 +219,19 @@ const Home = () => {
       {loading && (
         <div className={styles.loadingOverlay}>
           <div className={styles.loadingSpinner}></div>
-          <p>Processing...</p>
         </div>
       )}
       
       {/* Overlay */}
       <div
         className={`${styles.overlay} ${sidebarOpen || notificationPanelOpen || aboutModalOpen ? styles.active : ""}`}
-        onClick={() => {
-          setSidebarOpen(false)
-          setNotificationPanelOpen(false)
-          setContactPopupOpen(false)
-          setAboutModalOpen(false)
+        onClick={(e) => {
+          // Only close overlays if not clicking on a contact popup link
+          if (!contactPopupRef.current?.contains(e.target)) {
+            setSidebarOpen(false)
+            setNotificationPanelOpen(false)
+            setAboutModalOpen(false)
+          }
         }}
       ></div>
       
@@ -255,6 +265,7 @@ const Home = () => {
       
       {/* Sidebar */}
       <div 
+        ref={sidebarRef}
         className={`${styles.sidebar} ${sidebarOpen ? styles.active : ""}`}
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
@@ -263,10 +274,17 @@ const Home = () => {
         <div className={styles.sidebarHeader}>
           <div className={styles.userProfile}>
             <Link to="/profile" style={{ textDecoration: "none", color: "white" }}>
-              <h2 className={styles.profileName}>{user?.fullName || "User"}</h2>
+              <div className={styles.profileContainer}>
+                <i className={`fas fa-user-circle ${styles.profileIcon}`}></i>
+                <h2 className={styles.profileName}>{user?.fullName || "User"}</h2>
+                <i className={`fas fa-chevron-right ${styles.profileArrow}`}></i>
+              </div>
             </Link>
           </div>
-          <button className={styles.closeBtn} onClick={toggleSidebar}>
+          <button className={styles.closeBtn} onClick={(e) => {
+            e.stopPropagation(); // Prevent event from bubbling up
+            setSidebarOpen(false)
+          }}>
             <i className="fas fa-times"></i>
           </button>
         </div>
@@ -307,9 +325,9 @@ const Home = () => {
                 </a>
               </li>
               <li>
-                <Link to="#" onClick={toggleAboutModal}>
+                <a href="#" onClick={toggleAboutModal}>
                   <i className="fas fa-info-circle"></i> About SmartDriller
-                </Link>
+                </a>
               </li>
             </ul>
           </div>
@@ -318,9 +336,9 @@ const Home = () => {
             <h3>Account</h3>
             <ul>
               <li>
-                <Link to="#" onClick={logout}>
+                <a href="#" onClick={logout}>
                   <i className="fas fa-sign-out-alt"></i> Logout
-                </Link>
+                </a>
               </li>
             </ul>
           </div>

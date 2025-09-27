@@ -47,24 +47,36 @@ const upload = multer({
 
 const router = express.Router();
 
+// routes/questions.js
+
 router.post("/fetch", auth, subscriptionCheck, async (req, res) => {
   try {
     const { course, year, topics, questionCount, examType } = req.body;
+    
     // Build query
     const query = {
       course: course.toLowerCase(), // Search with lowercase course code
       year,
       isActive: true,
     };
+    
     // Add topic filter if specific topics are selected
     if (topics && topics !== "all" && topics.length > 0) {
       const topicArray = Array.isArray(topics) ? topics : topics.split(",");
       query.topic = { $in: topicArray };
     }
+    
     // Get questions
     let questions = await Question.find(query).select("-createdBy");
-    // Shuffle questions for randomness
-    questions = questions.sort(() => Math.random() - 0.5);
+    
+    // Only shuffle questions for mock mode, not study mode
+    if (examType === "mock") {
+      questions = questions.sort(() => Math.random() - 0.5);
+    }
+    // For study mode, keep questions in their original order (sorted by creation date)
+    else {
+      questions = questions.sort({ createdAt: 1 }); // or any other consistent ordering
+    }
     
     // Only limit to requested count if it's not "all"
     if (questionCount && questionCount !== "all") {
@@ -374,6 +386,7 @@ router.post("/study-progress", auth, subscriptionCheck, async (req, res) => {
 });
 
 // Admin: Add question with image upload
+// Admin: Add question with image upload
 router.post("/admin/add", adminAuth, upload.single("image"), async (req, res) => {
   try {
     const { question, options, correctOption, explanation, tags, course, year, topic } = req.body;
@@ -391,8 +404,9 @@ router.post("/admin/add", adminAuth, upload.single("image"), async (req, res) =>
       return res.status(400).json({ message: "Invalid options format" });
     }
     
-    if (!Array.isArray(parsedOptions) || parsedOptions.length !== 4) {
-      return res.status(400).json({ message: "Options must be an array of 4 items" });
+    // Updated validation: Allow 2-4 options
+    if (!Array.isArray(parsedOptions) || parsedOptions.length < 2 || parsedOptions.length > 4) {
+      return res.status(400).json({ message: "Options must be an array of 2-4 items" });
     }
     
     // Convert and validate correctOption
@@ -400,9 +414,10 @@ router.post("/admin/add", adminAuth, upload.single("image"), async (req, res) =>
     if (isNaN(correctOptionNumber)) {
       return res.status(400).json({ message: "Correct option must be a number" });
     }
-    // FIXED: Changed validation from 0-3 to 1-4
-    if (correctOptionNumber < 1 || correctOptionNumber > 4) {
-      return res.status(400).json({ message: "Correct option must be between 1 and 4" });
+    
+    // Updated validation: Check against actual number of options
+    if (correctOptionNumber < 1 || correctOptionNumber > parsedOptions.length) {
+      return res.status(400).json({ message: `Correct option must be between 1 and ${parsedOptions.length}` });
     }
     
     // Check if course exists and is active
@@ -429,7 +444,7 @@ router.post("/admin/add", adminAuth, upload.single("image"), async (req, res) =>
       question: question.trim(),
       image: req.file ? `/uploads/questions/${req.file.filename}` : null,
       options: parsedOptions.map(opt => opt.trim()),
-      correctOption: correctOptionNumber, // FIXED: Store as 1-4 (no conversion)
+      correctOption: correctOptionNumber,
       explanation: explanation.trim(),
       tags: parsedTags,
       course: course.toLowerCase(),
@@ -449,6 +464,7 @@ router.post("/admin/add", adminAuth, upload.single("image"), async (req, res) =>
   }
 });
 
+// Similarly update the PUT route for editing questions
 router.put("/admin/:id", adminAuth, upload.single("image"), async (req, res) => {
   try {
     const { id } = req.params;
@@ -468,8 +484,9 @@ router.put("/admin/:id", adminAuth, upload.single("image"), async (req, res) => 
     if (options !== undefined) {
       try {
         const parsedOptions = Array.isArray(options) ? options : JSON.parse(options);
-        if (!Array.isArray(parsedOptions) || parsedOptions.length !== 4) {
-          return res.status(400).json({ message: "Options must be an array of 4 items" });
+        // Updated validation: Allow 2-4 options
+        if (!Array.isArray(parsedOptions) || parsedOptions.length < 2 || parsedOptions.length > 4) {
+          return res.status(400).json({ message: "Options must be an array of 2-4 items" });
         }
         updates.options = parsedOptions.map(opt => opt.trim());
       } catch (error) {
@@ -481,11 +498,15 @@ router.put("/admin/:id", adminAuth, upload.single("image"), async (req, res) => 
       if (isNaN(correctOptionNumber)) {
         return res.status(400).json({ message: "Correct option must be a number" });
       }
-      // FIXED: Changed validation from 0-3 to 1-4
-      if (correctOptionNumber < 1 || correctOptionNumber > 4) {
-        return res.status(400).json({ message: "Correct option must be between 1 and 4" });
+      
+      // Get the number of options (either from updates or existing question)
+      const numOptions = updates.options ? updates.options.length : existingQuestion.options.length;
+      
+      // Updated validation: Check against actual number of options
+      if (correctOptionNumber < 1 || correctOptionNumber > numOptions) {
+        return res.status(400).json({ message: `Correct option must be between 1 and ${numOptions}` });
       }
-      updates.correctOption = correctOptionNumber; // FIXED: Store as 1-4 (no conversion)
+      updates.correctOption = correctOptionNumber;
     }
     if (explanation !== undefined) updates.explanation = explanation.trim();
     if (course !== undefined) updates.course = course.toLowerCase();
@@ -519,8 +540,71 @@ router.put("/admin/:id", adminAuth, upload.single("image"), async (req, res) => 
     res.status(500).json({ message: "Server error: " + error.message });
   }
 });
-// Admin: Bulk import questions with transaction
-// Admin: Bulk import questions with all-or-nothing approach
+
+// Add a new endpoint to get question statistics
+router.get("/statistics", adminAuth, async (req, res) => {
+  try {
+    // Get total questions count
+    const totalQuestions = await Question.countDocuments({ isActive: true });
+    
+    // Get questions per course
+    const courseStats = await Question.aggregate([
+      { $match: { isActive: true } },
+      {
+        $group: {
+          _id: "$course",
+          count: { $sum: 1 }
+        }
+      },
+      {
+        $sort: { count: -1 }
+      }
+    ]);
+    
+    // Get questions per year
+    const yearStats = await Question.aggregate([
+      { $match: { isActive: true } },
+      {
+        $group: {
+          _id: "$year",
+          count: { $sum: 1 }
+        }
+      },
+      {
+        $sort: { _id: -1 }
+      }
+    ]);
+    
+    // Get questions per topic (top 10)
+    const topicStats = await Question.aggregate([
+      { $match: { isActive: true } },
+      {
+        $group: {
+          _id: "$topic",
+          count: { $sum: 1 }
+        }
+      },
+      {
+        $sort: { count: -1 }
+      },
+      {
+        $limit: 10
+      }
+    ]);
+    
+    res.json({
+      totalQuestions,
+      courseStats,
+      yearStats,
+      topicStats
+    });
+  } catch (error) {
+    console.error("Error fetching question statistics:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+// Update bulk import to handle variable number of options
 router.post("/admin/bulk-import", adminAuth, async (req, res) => {
   // Generate a unique import ID for this operation
   const importId = require('uuid').v4();
@@ -555,16 +639,16 @@ router.post("/admin/bulk-import", adminAuth, async (req, res) => {
         continue;
       }
       
-      // Validate options
-      if (!Array.isArray(q.options) || q.options.length !== 4) {
-        validationErrors.push(`Question ${i + 1}: Must have exactly 4 options`);
+      // Validate options - Updated to allow 2-4 options
+      if (!Array.isArray(q.options) || q.options.length < 2 || q.options.length > 4) {
+        validationErrors.push(`Question ${i + 1}: Must have between 2 and 4 options`);
         continue;
       }
       
       // Validate correct option
       const correctOptionNumber = Number(q.correctOption);
-      if (isNaN(correctOptionNumber) || correctOptionNumber < 1 || correctOptionNumber > 4) {
-        validationErrors.push(`Question ${i + 1}: Correct option must be between 1 and 4`);
+      if (isNaN(correctOptionNumber) || correctOptionNumber < 1 || correctOptionNumber > q.options.length) {
+        validationErrors.push(`Question ${i + 1}: Correct option must be between 1 and ${q.options.length}`);
         continue;
       }
       

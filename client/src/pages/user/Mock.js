@@ -50,6 +50,38 @@ const Mock = () => {
     }
   }, [speechSupported])
 
+  // Add keyboard navigation
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (!examData) return;
+      
+      switch(e.key) {
+        case 'ArrowLeft':
+          if (currentQuestionIndex > 0) {
+            navigateToQuestion(currentQuestionIndex - 1);
+          }
+          break;
+        case 'ArrowRight':
+          if (currentQuestionIndex < examData.questions.length - 1) {
+            navigateToQuestion(currentQuestionIndex + 1);
+          }
+          break;
+        case 'Enter':
+          if (currentQuestionIndex === examData.questions.length - 1) {
+            submitMock();
+          }
+          break;
+        default:
+          break;
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [currentQuestionIndex, examData, userAnswers]);
+
   // Load KaTeX
   useEffect(() => {
     if (!user?.isSubscribed) {
@@ -216,9 +248,7 @@ const Mock = () => {
       return text
         .replace(/\\\(.*?\\\)/g, '') // Remove inline math
         .replace(/\\\[.*?\\\]/g, '') // Remove display math
-        .replace(/\$\$.*?\$\$/g, '') // Remove display math with $$
-        .replace(/\$.*?\$/g, '')     // Remove inline math with $
-        .replace(/\\[a-zA-Z]+/g, '') // Remove LaTeX commands
+        .replace(/\$\$.*?\$\$/g, '') // Remove display math with $$         .replace(/\$.*?\$/g, '')     // Remove inline math with $         .replace(/\\[a-zA-Z]+/g, '') // Remove LaTeX commands
         .replace(/[{}]/g, '')        // Remove braces
         .trim()
     }
@@ -474,7 +504,7 @@ const Mock = () => {
     if (imagePath.startsWith('/uploads')) {
       return imagePath
     }
-    return `/uploads/${imagePath}`
+    return `/uploads${imagePath}` // Fixed: Added leading slash
   }
   
   // Handle image error with better fallback
@@ -507,7 +537,7 @@ const Mock = () => {
             <i className="fa fa-arrow-left"></i>
           </button>
           <div className={styles.subjectInfo}>
-            <h2>Mock Test</h2>
+            <h2>{examData.course.toUpperCase()}</h2> {/* Display course code in caps */}
             <span>Question {currentQuestionIndex + 1} of {examData.questions.length}</span>
           </div>
         </div>
@@ -524,6 +554,16 @@ const Mock = () => {
             >
               <i className={`fas ${isReading ? 'fa-volume-up' : 'fa-volume-mute'}`}></i>
               {isReading && <span className={styles.readingIndicator}></span>}
+            </button>
+          )}
+          {isLastQuestion && (
+            <button 
+              className={`${styles.iconBtn} ${styles.submitBtn}`}
+              onClick={submitMock}
+              disabled={submitting}
+              title="Submit Test (Enter)"
+            >
+              <i className="fas fa-paper-plane"></i>
             </button>
           )}
           <button className={styles.iconBtn} onClick={() => setShowReportModal(true)}>
@@ -606,16 +646,16 @@ const Mock = () => {
           className={styles.navBtn}
           onClick={() => navigateToQuestion(currentQuestionIndex - 1)}
           disabled={currentQuestionIndex === 0}
+          title="Previous Question (Left Arrow)"
         >
           <i className="fas fa-chevron-left"></i>
-          Previous
         </button>
         <button
           className={styles.navBtn}
           onClick={() => navigateToQuestion(currentQuestionIndex + 1)}
           disabled={currentQuestionIndex === examData.questions.length - 1}
+          title="Next Question (Right Arrow)"
         >
-          Next
           <i className="fas fa-chevron-right"></i>
         </button>
       </div>

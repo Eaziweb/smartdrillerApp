@@ -70,6 +70,38 @@ const Study = () => {
     }
   }, [currentQuestionIndex, examData, speechSupported])
 
+  // Add keyboard navigation
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (!examData) return;
+      
+      switch(e.key) {
+        case 'ArrowLeft':
+          if (currentQuestionIndex > 0) {
+            navigateToQuestion(currentQuestionIndex - 1);
+          }
+          break;
+        case 'ArrowRight':
+          if (currentQuestionIndex < examData.questions.length - 1) {
+            navigateToQuestion(currentQuestionIndex + 1);
+          }
+          break;
+        case 'Enter':
+          if (!studiedQuestions.has(examData.questions[currentQuestionIndex]._id)) {
+            handleStudy(examData.questions[currentQuestionIndex]._id);
+          }
+          break;
+        default:
+          break;
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [currentQuestionIndex, examData, studiedQuestions]);
+
   // Function to stop speech and reset states
   const stopSpeech = () => {
     if (speechRef.current) {
@@ -88,9 +120,7 @@ const Study = () => {
       return text
         .replace(/\\\(.*?\\\)/g, '') // Remove inline math
         .replace(/\\\[.*?\\\]/g, '') // Remove display math
-        .replace(/\$\$.*?\$\$/g, '') // Remove display math with $$
-        .replace(/\$.*?\$/g, '')     // Remove inline math with $
-        .replace(/\\[a-zA-Z]+/g, '') // Remove LaTeX commands
+        .replace(/\$\$.*?\$\$/g, '') // Remove display math with $$         .replace(/\$.*?\$/g, '')     // Remove inline math with $         .replace(/\\[a-zA-Z]+/g, '') // Remove LaTeX commands
         .replace(/[{}]/g, '')        // Remove braces
         .trim()
     }
@@ -133,9 +163,7 @@ const Study = () => {
       return text
         .replace(/\\\(.*?\\\)/g, '') // Remove inline math
         .replace(/\\\[.*?\\\]/g, '') // Remove display math
-        .replace(/\$\$.*?\$\$/g, '') // Remove display math with $$
-        .replace(/\$.*?\$/g, '')     // Remove inline math with $
-        .replace(/\\[a-zA-Z]+/g, '') // Remove LaTeX commands
+        .replace(/\$\$.*?\$\$/g, '') // Remove display math with $$         .replace(/\$.*?\$/g, '')     // Remove inline math with $         .replace(/\\[a-zA-Z]+/g, '') // Remove LaTeX commands
         .replace(/[{}]/g, '')        // Remove braces
         .trim()
     }
@@ -208,26 +236,25 @@ const Study = () => {
   }
 
   // Modified handleStudy to trigger voice reading
- const handleStudy = async (questionId) => {
-  setStudiedQuestions((prev) => new Set([...prev, questionId]));
-  setShowExplanation((prev) => ({ ...prev, [questionId]: true }));
+  const handleStudy = async (questionId) => {
+    setStudiedQuestions((prev) => new Set([...prev, questionId]));
+    setShowExplanation((prev) => ({ ...prev, [questionId]: true }));
 
-  // Trigger voice reading if enabled
-  if (voiceReaderOn && speechSupported && examData) {
-    const currentQuestion = examData.questions[currentQuestionIndex];
-    if (currentQuestion._id === questionId) {
-      stopSpeech();
-      readQuestionContent(currentQuestion, true);
+    // Trigger voice reading if enabled
+    if (voiceReaderOn && speechSupported && examData) {
+      const currentQuestion = examData.questions[currentQuestionIndex];
+      if (currentQuestion._id === questionId) {
+        stopSpeech();
+        readQuestionContent(currentQuestion, true);
+      }
     }
-  }
 
-  try {
-    await api.post("/api/questions/study-progress", { questionId });
-  } catch (error) {
-    console.error("Failed to record study progress:", error);
-  }
-};
-
+    try {
+      await api.post("/api/questions/study-progress", { questionId });
+    } catch (error) {
+      console.error("Failed to record study progress:", error);
+    }
+  };
 
   // Modified navigateToQuestion to stop speech
   const navigateToQuestion = (index) => {
@@ -310,11 +337,29 @@ const Study = () => {
   const renderContentWithMath = (content, isDisplayMode = false) => {
     if (!content) return null
     
+    // First, preprocess the content to add delimiters around common LaTeX patterns
+    let processedContent = content
+    
+    // Wrap fractions without delimiters
+    processedContent = processedContent.replace(/\\frac{[^{}]*}{[^{}]*}/g, '\\($&\\)')
+    
+    // Wrap Greek letters without delimiters
+    processedContent = processedContent.replace(/\\(alpha|beta|gamma|delta|epsilon|zeta|eta|theta|iota|kappa|lambda|mu|nu|xi|omicron|pi|rho|sigma|tau|upsilon|phi|chi|psi|omega)\s*/g, '\\($&\\)')
+    
+    // Wrap exponents: simple case like x^2
+    processedContent = processedContent.replace(/([a-zA-Z])\^([0-9]+|\{[^}]*\})/g, '\\($1^$2\\)')
+    
+    // Wrap set notation like {x: x < 3}
+    processedContent = processedContent.replace(/\{[^}]*:[^}]*\}/g, '\\($&\\)')
+    
+    // Wrap cap and cup symbols
+    processedContent = processedContent.replace(/(cap|cup)\s*/g, '\\($1\\)')
+    
     // Simple regex to find LaTeX patterns
     const latexPattern = /(\\\(.*?\\\)|\\\[.*?\\\]|\$\$.*?\$\$|\$.*?\$)/g
     
     // Split content by LaTeX patterns
-    const parts = content.split(latexPattern)
+    const parts = processedContent.split(latexPattern)
     
     return parts.map((part, index) => {
       if (index % 2 === 1) { // This is a LaTeX expression
@@ -492,7 +537,7 @@ const Study = () => {
     if (imagePath.startsWith('/uploads')) {
       return imagePath
     }
-    return `/uploads/${imagePath}`
+    return `/uploads${imagePath}` // Fixed: Added leading slash
   }
   
   // Handle image error with better fallback
@@ -525,7 +570,7 @@ const Study = () => {
             <i className="fa fa-arrow-left"></i>
           </button>
           <div className={styles.subjectInfo}>
-            <h2>Study Mode</h2>
+            <h2>{examData.course.toUpperCase()}</h2> {/* Display course code in caps */}
             <span>Question {currentQuestionIndex + 1} of {examData.questions.length}</span>
           </div>
         </div>
@@ -631,27 +676,32 @@ const Study = () => {
         })}
       </div>
       
-      <div className={styles.actionButtons}>
-        <button className={`${styles.btn} ${styles.btnPrimary}`} onClick={() => handleStudy(currentQuestion._id)} disabled={isStudied}>
-          {isStudied ? "Studied" : "Study"}
-        </button>
-      </div>
-      
+      {/* Navigation with study button in the middle */}
       <div className={styles.navigationContainer}>
         <button
           className={styles.navBtn}
           onClick={() => navigateToQuestion(currentQuestionIndex - 1)}
           disabled={currentQuestionIndex === 0}
+          title="Previous Question (Left Arrow)"
         >
           <i className="fas fa-chevron-left"></i>
-          Previous
         </button>
+        
+        <button 
+          className={`${styles.studyBtn} ${isStudied ? styles.studiedBtn : ''}`}
+          onClick={() => handleStudy(currentQuestion._id)}
+          disabled={isStudied}
+          title="Study Question (Enter)"
+        >
+          {isStudied ? "Studied" : "Study"}
+        </button>
+        
         <button
           className={styles.navBtn}
           onClick={() => navigateToQuestion(currentQuestionIndex + 1)}
           disabled={currentQuestionIndex === examData.questions.length - 1}
+          title="Next Question (Right Arrow)"
         >
-          Next
           <i className="fas fa-chevron-right"></i>
         </button>
       </div>

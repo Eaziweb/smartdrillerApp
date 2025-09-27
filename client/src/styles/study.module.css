@@ -1,4 +1,6 @@
-/* styles/study.module.css */
+/* study.module.css */
+
+/* Mobile-first responsive design */
 .studyPage {
   min-height: 100vh;
   background: #ffffff;
@@ -7,6 +9,7 @@
   color: #1e293b;
 }
 
+/* Loading container */
 .loadingContainer {
   display: flex;
   flex-direction: column;
@@ -315,50 +318,7 @@
   color: white;
 }
 
-/* Action Buttons */
-.actionButtons {
-  display: flex;
-  justify-content: center;
-  margin: 2rem 0;
-}
-
-.btn {
-  padding: 0.75rem 2rem;
-  border: none;
-  border-radius: 12px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  font-size: 1rem;
-}
-
-.btnPrimary {
-  background: linear-gradient(135deg, #0099ff 0%, #002060 100%);
-  color: white;
-}
-
-.btnPrimary:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-}
-
-.btnPrimary:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-  transform: none;
-}
-
-.btnSecondary {
-  background: #f1f5f9;
-  color: #1e293b;
-  border: 1px solid #e2e8f0;
-}
-
-.btnSecondary:hover {
-  background: #e2e8f0;
-}
-
-/* Navigation */
+/* Navigation with study button */
 .navigationContainer {
   position: fixed;
   bottom: 0;
@@ -368,6 +328,7 @@
   padding: 1rem 2rem;
   display: flex;
   justify-content: space-between;
+  align-items: center;
   box-shadow: 0 -4px 6px -1px rgba(0, 0, 0, 0.1);
   z-index: 50;
   border-top: 1px solid #e2e8f0;
@@ -376,19 +337,20 @@
 .navBtn {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.75rem 1.5rem;
+  justify-content: center;
+  width: 50px;
+  height: 50px;
   background: linear-gradient(135deg, #0099ff 0%, #002060 100%);
   color: white;
   border: none;
-  border-radius: 12px;
+  border-radius: 50%;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
 }
 
 .navBtn:hover:not(:disabled) {
-  transform: translateY(-2px);
+  transform: scale(1.05);
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 }
 
@@ -396,6 +358,33 @@
   opacity: 0.4;
   cursor: not-allowed;
   transform: none;
+}
+
+.studyBtn {
+  padding: 0.75rem 2rem;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 1rem;
+}
+
+.studyBtn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.studyBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.studiedBtn {
+  background: linear-gradient(135deg, #64748b 0%, #475569 100%);
 }
 
 /* Modal */
@@ -474,10 +463,50 @@
   justify-content: flex-end;
 }
 
+.btn {
+  padding: 0.75rem 2rem;
+  border: none;
+  border-radius: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 1rem;
+}
+
+.btnPrimary {
+  background: linear-gradient(135deg, #0099ff 0%, #002060 100%);
+  color: white;
+}
+
+.btnPrimary:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.btnPrimary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.btnSecondary {
+  background: #f1f5f9;
+  color: #1e293b;
+  border: 1px solid #e2e8f0;
+}
+
+.btnSecondary:hover {
+  background: #e2e8f0;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
   .quizHeader {
     padding: 1rem;
+  }
+  
+  .subjectInfo h2 {
+    font-size: 1.2rem;
   }
   
   .questionContainer {
@@ -500,7 +529,12 @@
   }
   
   .navBtn {
-    padding: 0.5rem 1rem;
+    width: 45px;
+    height: 45px;
+  }
+  
+  .studyBtn {
+    padding: 0.6rem 1.5rem;
     font-size: 0.9rem;
   }
   
@@ -517,12 +551,6 @@
   .questionImage img {
     max-height: 250px;
   }
-}
-
-@media (max-width: 480px) {
-  .questionImage img {
-    max-height: 200px;
-  }
   
   .questionText {
     font-size: 1.1rem;
@@ -533,12 +561,38 @@
     font-size: 0.9rem;
   }
   
-  .actionButtons {
-    margin: 1rem 0;
+  .explanationText {
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .questionImage img {
+    max-height: 200px;
   }
   
-  .btn {
-    padding: 0.6rem 1.5rem;
-    font-size: 0.9rem;
+  .questionText {
+    font-size: 1rem;
+    padding: 0.75rem;
+  }
+  
+  .optionText {
+    font-size: 0.85rem;
+  }
+  
+  .navBtn {
+    width: 40px;
+    height: 40px;
+  }
+  
+  .studyBtn {
+    padding: 0.5rem 1.2rem;
+    font-size: 0.85rem;
+  }
+  
+  .gridItem {
+    width: 30px;
+    height: 30px;
+    font-size: 0.85rem;
   }
 }

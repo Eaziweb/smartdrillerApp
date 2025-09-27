@@ -146,13 +146,21 @@
 }
 
 /* Material item - thinner design */
+
 .materialCard {
   display: flex;
   align-items: center;
-  padding: 0.75rem 1rem;
-  border-bottom: 1px solid var(--border-color);
-  transition: background-color 0.2s ease;
-  min-height: 60px; /* Reduced height */
+  padding: 10px 15px;
+  border-radius: 8px;
+  background-color: #fff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  margin-bottom: 12px;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.materialCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 .materialCard:last-child {
@@ -163,58 +171,55 @@
   background-color: var(--bg-accent);
 }
 
-/* Icon style */
 .materialIcon {
-  width: 40px;
-  height: 40px;
-  background: var(--primary-gradient);
-  border-radius: var(--radius-md);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
-  font-size: 1.2rem;
-  margin-right: 1rem;
-  flex-shrink: 0;
+  margin-right: 15px;
+  font-size: 24px;
+  color: #4a5568;
+  width: 30px;
+  text-align: center;
 }
 
-/* Info container */
 .materialInfo {
   flex: 1;
+  min-width: 0;
+}
+
+.materialHeader {
   display: flex;
-  flex-direction: column;
-  justify-content: center;
-  min-width: 0; /* Allows text truncation */
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 5px;
 }
 
 .materialTitle {
-  font-size: 0.95rem;
+  margin: 0;
+  font-size: 16px;
   font-weight: 600;
-  margin-bottom: 0.15rem;
-  color: var(--text-primary);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  max-width: 300px;
 }
 
-.materialDescription {
-  color: var(--text-secondary);
-  font-size: 0.8rem;
-  margin-bottom: 0.35rem;
-  line-height: 1.3;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-/* Meta information - all on one line */
 .materialMeta {
   display: flex;
-  gap: 0.75rem;
-  align-items: center;
-  margin-bottom: 0.15rem;
-  flex-wrap: wrap;
+  gap: 10px;
+  font-size: 14px;
+  color: #718096;
 }
+
+
+.materialDetails {
+  display: flex;
+  gap: 15px;
+  font-size: 14px;
+  color: #718096;
+}
+
+.materialActions {
+  margin-left: 15px;
+}
+
 
 .materialCourse {
   background: var(--primary-light);
@@ -263,25 +268,26 @@
 }
 
 .downloadBtn {
-  background: var(--primary-light);
-  color: white;
-  border: none;
-  padding: 0.4rem 0.8rem;
-  border-radius: var(--radius-md);
-  cursor: pointer;
-  transition: all 0.3s ease;
   display: flex;
   align-items: center;
-  gap: 0.35rem;
+  gap: 5px;
+  padding: 6px 12px;
+  background-color: #4299e1;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
   font-weight: 500;
-  font-size: 0.8rem;
-  white-space: nowrap;
+  transition: background-color 0.2s;
 }
 
 .downloadBtn:hover {
-  background: var(--primary-dark);
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-md);
+  background-color: #3182ce;
+}
+
+/* Remove the description section */
+.materialDescription {
+  display: none;
 }
 
 .pagination {
