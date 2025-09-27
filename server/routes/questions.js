@@ -163,13 +163,11 @@ router.get("/search", auth, async (req, res) => {
   }
 });
 
-// Get available courses for search
-// Get available course years
-
-// routes/questions.js
 
 router.get("/study-progress", auth, subscriptionCheck, async (req, res) => {
   try {
+    console.log("Study progress endpoint called");
+    
     // Get all study progress records for this user (without populating studiedQuestions)
     const progressRecords = await StudyProgress.find({
       user: req.user.id
@@ -226,12 +224,13 @@ router.get("/study-progress", auth, subscriptionCheck, async (req, res) => {
       }
     }
     
+    console.log("Sending study progress response");
     res.json({
       success: true,
       progress: progressMap
     });
   } catch (error) {
-    console.error(error);
+    console.error("Error in study progress endpoint:", error);
     res.status(500).json({ message: "Server error" });
   }
 });

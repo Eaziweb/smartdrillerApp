@@ -14,6 +14,7 @@ const VideoManagement = () => {
   const [selectedCourse, setSelectedCourse] = useState(null)
   const [selectedTopic, setSelectedTopic] = useState(null)
   const [editingItem, setEditingItem] = useState(null)
+  const [openCourseId, setOpenCourseId] = useState(null) // Track which course is open
   const [courseForm, setCourseForm] = useState({ 
     title: "", 
     description: "",
@@ -213,6 +214,16 @@ const VideoManagement = () => {
     setShowVideoModal(true)
   }
 
+  const toggleCourse = (courseId) => {
+    // If the clicked course is already open, close it
+    if (openCourseId === courseId) {
+      setOpenCourseId(null)
+    } else {
+      // Otherwise, open the clicked course and close any other open course
+      setOpenCourseId(courseId)
+    }
+  }
+
   const getYouTubeVideoId = (url) => {
     const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/
     const match = url.match(regExp)
@@ -283,7 +294,10 @@ const VideoManagement = () => {
         ) : (
           courses.map((course) => (
             <div key={course._id} className={styles.courseSection}>
-              <div className={styles.courseHeader}>
+              <div 
+                className={`${styles.courseHeader} ${openCourseId === course._id ? styles.active : ''}`}
+                onClick={() => toggleCourse(course._id)}
+              >
                 <div className={styles.courseInfo}>
                   <h3>{course.title}</h3>
                   <p>{course.description}</p>
@@ -298,7 +312,8 @@ const VideoManagement = () => {
                 <div className={styles.courseActions}>
                   <button
                     className={`${styles.btn} ${styles.btnSm} ${styles.btnSecondary}`}
-                    onClick={() => {
+                    onClick={(e) => {
+                      e.stopPropagation();
                       setSelectedCourse(course)
                       setShowTopicModal(true)
                     }}
@@ -308,119 +323,139 @@ const VideoManagement = () => {
                   </button>
                   <button 
                     className={`${styles.btn} ${styles.btnSm} ${course.isVisible ? styles.btnSuccess : styles.btnWarning}`}
-                    onClick={() => toggleCourseVisibility(course)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      toggleCourseVisibility(course)
+                    }}
                     title={course.isVisible ? "Hide from users" : "Show to users"}
                   >
                     <i className={`fas ${course.isVisible ? "fa-eye-slash" : "fa-eye"}`}></i>
                   </button>
-                  <button className={`${styles.btn} ${styles.btnSm} ${styles.btnOutline}`} onClick={() => openEditCourse(course)}>
+                  <button 
+                    className={`${styles.btn} ${styles.btnSm} ${styles.btnOutline}`} 
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      openEditCourse(course)
+                    }}
+                  >
                     <i className="fas fa-edit"></i>
                   </button>
-                  <button className={`${styles.btn} ${styles.btnSm} ${styles.btnDanger}`} onClick={() => handleDeleteCourse(course._id)}>
+                  <button 
+                    className={`${styles.btn} ${styles.btnSm} ${styles.btnDanger}`} 
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDeleteCourse(course._id)
+                    }}
+                  >
                     <i className="fas fa-trash"></i>
                   </button>
                 </div>
               </div>
               
-              {course.topics && course.topics.length > 0 ? (
-                course.topics.map((topic) => (
-                  <div key={topic._id} className={styles.topicSection}>
-                    <div className={styles.topicHeader}>
-                      <div className={styles.topicInfo}>
-                        <h4>{topic.title}</h4>
-                        <p>{topic.description}</p>
-                        <span className={styles.itemCount}>{topic.videos?.length || 0} videos</span>
-                      </div>
-                      <div className={styles.topicActions}>
-                        <button
-                          className={`${styles.btn} ${styles.btnSm} ${styles.btnSecondary}`}
-                          onClick={() => {
-                            setSelectedTopic(topic)
-                            setShowVideoModal(true)
-                          }}
-                        >
-                          <i className="fas fa-plus"></i>
-                          Add Video
-                        </button>
-                        <button className={`${styles.btn} ${styles.btnSm} ${styles.btnOutline}`} onClick={() => openEditTopic(topic)}>
-                          <i className="fas fa-edit"></i>
-                        </button>
-                        <button className={`${styles.btn} ${styles.btnSm} ${styles.btnDanger}`} onClick={() => handleDeleteTopic(topic._id)}>
-                          <i className="fas fa-trash"></i>
-                        </button>
-                      </div>
-                    </div>
-                    
-                    {topic.videos && topic.videos.length > 0 ? (
-                      <div className={styles.videosGrid}>
-                        {topic.videos.map((video) => (
-                          <div key={video._id} className={styles.videoItem}>
-                            <div className={styles.videoThumbnail}>
-                              <img
-                                src={`https://img.youtube.com/vi/${getYouTubeVideoId(video.url)}/hqdefault.jpg`}
-                                alt={video.title}
-                              />
-                              <div className={styles.videoDuration}>
-                                <i className="fas fa-clock"></i>
-                                <span>{video.duration || "0:00"}</span>
-                              </div>
-                            </div>
-                            <div className={styles.videoInfo}>
-                              <h5>{video.title}</h5>
-                              <p>{video.description}</p>
-                              <div className={styles.videoStats}>
-                                <span className={styles.videoViews}>
-                                  <i className="fas fa-eye"></i> {formatNumber(video.views || 0)} views
-                                </span>
-                                <span className={styles.videoLikes}>
-                                  <i className="fas fa-thumbs-up"></i> {formatNumber(video.likes || 0)} likes
-                                </span>
-                              </div>
-                            </div>
-                            <div className={styles.videoActions}>
-                              <button className={`${styles.btn} ${styles.btnSm} ${styles.btnOutline}`} onClick={() => openEditVideo(video)}>
-                                <i className="fas fa-edit"></i>
-                              </button>
-                              <button className={`${styles.btn} ${styles.btnSm} ${styles.btnSecondary}`} onClick={() => refreshVideoMetadata(video._id)}>
-                                <i className="fas fa-sync-alt"></i>
-                              </button>
-                              <button className={`${styles.btn} ${styles.btnSm} ${styles.btnDanger}`} onClick={() => handleDeleteVideo(video._id)}>
-                                <i className="fas fa-trash"></i>
-                              </button>
-                            </div>
+              {/* Only show course content if this course is open */}
+              {openCourseId === course._id && (
+                <div className={styles.courseContent}>
+                  {course.topics && course.topics.length > 0 ? (
+                    course.topics.map((topic) => (
+                      <div key={topic._id} className={styles.topicSection}>
+                        <div className={styles.topicHeader}>
+                          <div className={styles.topicInfo}>
+                            <h4>{topic.title}</h4>
+                            <p>{topic.description}</p>
+                            <span className={styles.itemCount}>{topic.videos?.length || 0} videos</span>
                           </div>
-                        ))}
+                          <div className={styles.topicActions}>
+                            <button
+                              className={`${styles.btn} ${styles.btnSm} ${styles.btnSecondary}`}
+                              onClick={() => {
+                                setSelectedTopic(topic)
+                                setShowVideoModal(true)
+                              }}
+                            >
+                              <i className="fas fa-plus"></i>
+                              Add Video
+                            </button>
+                            <button className={`${styles.btn} ${styles.btnSm} ${styles.btnOutline}`} onClick={() => openEditTopic(topic)}>
+                              <i className="fas fa-edit"></i>
+                            </button>
+                            <button className={`${styles.btn} ${styles.btnSm} ${styles.btnDanger}`} onClick={() => handleDeleteTopic(topic._id)}>
+                              <i className="fas fa-trash"></i>
+                            </button>
+                          </div>
+                        </div>
+                        
+                        {topic.videos && topic.videos.length > 0 ? (
+                          <div className={styles.videosGrid}>
+                            {topic.videos.map((video) => (
+                              <div key={video._id} className={styles.videoItem}>
+                                <div className={styles.videoThumbnail}>
+                                  <img
+                                    src={`https://img.youtube.com/vi/${getYouTubeVideoId(video.url)}/hqdefault.jpg`}
+                                    alt={video.title}
+                                  />
+                                  <div className={styles.videoDuration}>
+                                    <i className="fas fa-clock"></i>
+                                    <span>{video.duration || "0:00"}</span>
+                                  </div>
+                                </div>
+                                <div className={styles.videoInfo}>
+                                  <h5>{video.title}</h5>
+                                  <p>{video.description}</p>
+                                  <div className={styles.videoStats}>
+                                    <span className={styles.videoViews}>
+                                      <i className="fas fa-eye"></i> {formatNumber(video.views || 0)} views
+                                    </span>
+                                    <span className={styles.videoLikes}>
+                                      <i className="fas fa-thumbs-up"></i> {formatNumber(video.likes || 0)} likes
+                                    </span>
+                                  </div>
+                                </div>
+                                <div className={styles.videoActions}>
+                                  <button className={`${styles.btn} ${styles.btnSm} ${styles.btnOutline}`} onClick={() => openEditVideo(video)}>
+                                    <i className="fas fa-edit"></i>
+                                  </button>
+                                  <button className={`${styles.btn} ${styles.btnSm} ${styles.btnSecondary}`} onClick={() => refreshVideoMetadata(video._id)}>
+                                    <i className="fas fa-sync-alt"></i>
+                                  </button>
+                                  <button className={`${styles.btn} ${styles.btnSm} ${styles.btnDanger}`} onClick={() => handleDeleteVideo(video._id)}>
+                                    <i className="fas fa-trash"></i>
+                                  </button>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <div className={styles.emptySection}>
+                            <p>No videos in this topic</p>
+                            <button
+                              className={`${styles.btn} ${styles.btnSm} ${styles.btnSecondary}`}
+                              onClick={() => {
+                                setSelectedTopic(topic)
+                                setShowVideoModal(true)
+                              }}
+                            >
+                              <i className="fas fa-plus"></i>
+                              Add Video
+                            </button>
+                          </div>
+                        )}
                       </div>
-                    ) : (
-                      <div className={styles.emptySection}>
-                        <p>No videos in this topic</p>
-                        <button
-                          className={`${styles.btn} ${styles.btnSm} ${styles.btnSecondary}`}
-                          onClick={() => {
-                            setSelectedTopic(topic)
-                            setShowVideoModal(true)
-                          }}
-                        >
-                          <i className="fas fa-plus"></i>
-                          Add Video
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                ))
-              ) : (
-                <div className={styles.emptySection}>
-                  <p>No topics in this course</p>
-                  <button
-                    className={`${styles.btn} ${styles.btnSm} ${styles.btnSecondary}`}
-                    onClick={() => {
-                      setSelectedCourse(course)
-                      setShowTopicModal(true)
-                    }}
-                  >
-                    <i className="fas fa-plus"></i>
-                    Add Topic
-                  </button>
+                    ))
+                  ) : (
+                    <div className={styles.emptySection}>
+                      <p>No topics in this course</p>
+                      <button
+                        className={`${styles.btn} ${styles.btnSm} ${styles.btnSecondary}`}
+                        onClick={() => {
+                          setSelectedCourse(course)
+                          setShowTopicModal(true)
+                        }}
+                      >
+                        <i className="fas fa-plus"></i>
+                        Add Topic
+                      </button>
+                    </div>
+                  )}
                 </div>
               )}
             </div>

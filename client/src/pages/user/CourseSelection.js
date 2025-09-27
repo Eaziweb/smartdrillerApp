@@ -6,7 +6,7 @@ import { useNotification } from "../../contexts/NotificationContext"
 import ProgressRing from '../../components/ProgressRing'
 import styles from "../../styles/course-selection.module.css"
 import api from "../../utils/api";
-import axios from "axios"; // Add axios import
+import axios from "axios";
 
 // Portal component for rendering dropdowns outside the main DOM hierarchy
 const Portal = ({ children, className }) => {
@@ -51,7 +51,8 @@ const CourseSelection = () => {
   const [fetchingYears, setFetchingYears] = useState(false)
   const [fetchingTopics, setFetchingTopics] = useState(false)
   const [fetchingCourses, setFetchingCourses] = useState(false)
-  const [progressLoading, setProgressLoading] = useState(true) // Add loading state for progress
+  const [progressLoading, setProgressLoading] = useState(true)
+  const [progressError, setProgressError] = useState(null) // Add error state for progress
   
   // Simplified dropdown state - track which dropdown is open for which course
   const [openDropdown, setOpenDropdown] = useState({ courseCode: null, type: null })
@@ -71,17 +72,28 @@ const CourseSelection = () => {
     if (isMockMode) return;
     
     setProgressLoading(true);
+    setProgressError(null);
     try {
-      const token = localStorage.getItem("token")
+      const token = localStorage.getItem("token");
+      if (!token) {
+        throw new Error("Authentication token not found");
+      }
+      
+      // Get the API base URL from environment or use default
       const API_BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:5000/api";
+      const url = `${API_BASE_URL}/questions/study-progress`;
+      
+      console.log("Attempting to fetch study progress from:", url);
       
       // Use axios directly with a longer timeout
-      const response = await axios.get(`${API_BASE_URL}/questions/study-progress`, {
+      const response = await axios.get(url, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
         timeout: 30000, // 30 seconds timeout
       });
+      
+      console.log("Study progress response:", response);
       
       if (response.data.success) {
         setStudyProgress(response.data.progress);
@@ -90,11 +102,31 @@ const CourseSelection = () => {
       }
     } catch (error) {
       console.error("Failed to load study progress:", error);
+      setProgressError(error.message);
       // Set empty progress on error to avoid breaking the UI
       setStudyProgress({});
+      
       // Only show notification for non-timeout errors
-      if (!error.code || error.code !== 'ECONNABORTED') {
-        showNotification("Failed to load study progress. Some features may not work correctly.", "warning");
+      if (error.code !== 'ECONNABORTED') {
+        if (error.response) {
+          // The request was made and the server responded with a status code
+          // that falls out of the range of 2xx
+          console.error("Error response data:", error.response.data);
+          console.error("Error response status:", error.response.status);
+          
+          if (error.response.status === 404) {
+            showNotification("Study progress endpoint not found. This feature may be temporarily unavailable.", "warning");
+          } else {
+            showNotification(`Failed to load study progress: ${error.response.data.message || error.message}`, "error");
+          }
+        } else if (error.request) {
+          // The request was made but no response was received
+          console.error("Error request:", error.request);
+          showNotification("Network error. Please check your connection and try again.", "error");
+        } else {
+          // Something happened in setting up the request that triggered an Error
+          showNotification(`Failed to load study progress: ${error.message}`, "error");
+        }
       }
     } finally {
       setProgressLoading(false);
@@ -825,6 +857,8 @@ const CourseSelection = () => {
                       <div className={styles.progressIndicator}>
                         {progressLoading ? (
                           <div className={styles.spinnerMini}></div>
+                        ) : progressError ? (
+                          <span title={progressError} className={styles.errorIcon}>!</span>
                         ) : (
                           <ProgressRing percentage={progressData.percentage} radius={12} stroke={2} />
                         )}
@@ -892,6 +926,13 @@ const CourseSelection = () => {
               </button>
             </div>
           </div>
+        </div>
+      )}
+      
+      {/* Debug information - only in development */}
+      {process.env.NODE_ENV === 'development' && progressError && (
+        <div className={styles.debugInfo}>
+          <p>Debug: Study Progress Error - {progressError}</p>
         </div>
       )}
     </div>

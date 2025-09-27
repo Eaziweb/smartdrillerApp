@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import axios from "axios";
 import styles from "../../styles/NoteManagement.module.css";
+
 const NoteManagement = () => {
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -10,20 +11,24 @@ const NoteManagement = () => {
   const [showNoteModal, setShowNoteModal] = useState(false);
   const [selectedCourse, setSelectedCourse] = useState(null);
   const [editingItem, setEditingItem] = useState(null);
+  const [openCourseId, setOpenCourseId] = useState(null); // Track which course is open
   const [courseForm, setCourseForm] = useState({ title: "", description: "" });
   const [noteForm, setNoteForm] = useState({
     title: "",
     description: "",
     content: "",
   });
+
   // Get authorization token
   const getAuthHeader = () => {
     const token = localStorage.getItem("token");
     return token ? { Authorization: `Bearer ${token}` } : {};
   };
+
   useEffect(() => {
     loadCourses();
   }, []);
+
   const loadCourses = async () => {
     try {
       const response = await axios.get("/api/admin/notes/courses", {
@@ -37,6 +42,7 @@ const NoteManagement = () => {
       setLoading(false);
     }
   };
+
   const handleCreateCourse = async (e) => {
     e.preventDefault();
     try {
@@ -70,6 +76,7 @@ const NoteManagement = () => {
       );
     }
   };
+
   const handleCreateNote = async (e) => {
     e.preventDefault();
     try {
@@ -103,6 +110,7 @@ const NoteManagement = () => {
       );
     }
   };
+
   const handleDeleteNote = async (noteId) => {
     if (!window.confirm("Are you sure you want to delete this note?")) return;
     try {
@@ -119,6 +127,7 @@ const NoteManagement = () => {
       );
     }
   };
+
   const handleDeleteCourse = async (courseId) => {
     if (
       !window.confirm(
@@ -140,11 +149,13 @@ const NoteManagement = () => {
       );
     }
   };
+
   const openEditCourse = (course) => {
     setEditingItem(course);
     setCourseForm({ title: course.title, description: course.description });
     setShowCourseModal(true);
   };
+
   const openEditNote = (note) => {
     setEditingItem(note);
     setNoteForm({
@@ -154,6 +165,17 @@ const NoteManagement = () => {
     });
     setShowNoteModal(true);
   };
+
+  const toggleCourse = (courseId) => {
+    // If the clicked course is already open, close it
+    if (openCourseId === courseId) {
+      setOpenCourseId(null);
+    } else {
+      // Otherwise, open the clicked course and close any other open course
+      setOpenCourseId(courseId);
+    }
+  };
+
   const formatText = (type) => {
     const textarea = document.getElementById("noteContent");
     const start = textarea.selectionStart;
@@ -197,17 +219,18 @@ const NoteManagement = () => {
       textarea.value.substring(end);
     setNoteForm({ ...noteForm, content: newContent });
   };
+
   const showToast = (message, type = "success") => {
     const toast = document.createElement("div");
     toast.className = `${styles.toast} ${
       styles[`toast${type.charAt(0).toUpperCase() + type.slice(1)}`]
     }`;
     toast.innerHTML = `
-<i class="fas ${
-      type === "success" ? "fa-check-circle" : "fa-exclamation-triangle"
-    }"></i>
-<span>${message}</span>
-`;
+      <i class="fas ${
+        type === "success" ? "fa-check-circle" : "fa-exclamation-triangle"
+      }"></i>
+      <span>${message}</span>
+    `;
     document.body.appendChild(toast);
     setTimeout(() => toast.classList.add("show"), 100);
     setTimeout(() => {
@@ -215,6 +238,7 @@ const NoteManagement = () => {
       setTimeout(() => document.body.removeChild(toast), 300);
     }, 3000);
   };
+
   if (loading) {
     return (
       <div className={styles.noteManagement}>
@@ -225,6 +249,7 @@ const NoteManagement = () => {
       </div>
     );
   }
+
   return (
     <div className={styles.noteManagement}>
       <header className={styles.managementHeader}>
@@ -244,75 +269,121 @@ const NoteManagement = () => {
       </header>
 
       <div className={styles.managementContent}>
-        {courses.map((course) => (
-          <div key={course._id} className={styles.courseSection}>
-            <div className={styles.courseHeader}>
-              <div className={styles.courseInfo}>
-                <h3>{course.title}</h3>
-                <p>{course.description}</p>
-                <span className={styles.itemCount}>
-                  {course.notes?.length || 0} notes
-                </span>
-              </div>
-              <div className={styles.courseActions}>
-                <button
-                  className={`${styles.btn} ${styles.btnSm} ${styles.btnSecondary}`}
-                  onClick={() => {
-                    setSelectedCourse(course);
-                    setShowNoteModal(true);
-                  }}
-                >
-                  <i className="fas fa-plus"></i>
-                  Add Note
-                </button>
-                <button
-                  className={`${styles.btn} ${styles.btnSm} ${styles.btnOutline}`}
-                  onClick={() => openEditCourse(course)}
-                >
-                  <i className="fas fa-edit"></i>
-                </button>
-                <button
-                  className={`${styles.btn} ${styles.btnSm} ${styles.btnDanger}`}
-                  onClick={() => handleDeleteCourse(course._id)}
-                >
-                  <i className="fas fa-trash"></i>
-                </button>
-              </div>
-            </div>
-
-            {course.notes && course.notes.length > 0 && (
-              <div className={styles.notesGrid}>
-                {course.notes.map((note) => (
-                  <div key={note._id} className={styles.noteItem}>
-                    <div className={styles.noteContent}>
-                      <h4>{note.title}</h4>
-                      <p>{note.description}</p>
-                      <div className={styles.noteMeta}>
-                        <span className={styles.noteDate}>
-                          {new Date(note.createdAt).toLocaleDateString()}
-                        </span>
-                      </div>
-                    </div>
-                    <div className={styles.noteActions}>
-                      <button
-                        className={`${styles.btn} ${styles.btnSm} ${styles.btnOutline}`}
-                        onClick={() => openEditNote(note)}
-                      >
-                        <i className="fas fa-edit"></i>
-                      </button>
-                      <button
-                        className={`${styles.btn} ${styles.btnSm} ${styles.btnDanger}`}
-                        onClick={() => handleDeleteNote(note._id)}
-                      >
-                        <i className="fas fa-trash"></i>
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
+        {courses.length === 0 ? (
+          <div className={styles.emptyState}>
+            <i className="fas fa-sticky-note"></i>
+            <h2>No courses found</h2>
+            <p>Create your first course to get started</p>
+            <button
+              className={`${styles.btn} ${styles.btnPrimary}`}
+              onClick={() => setShowCourseModal(true)}
+            >
+              <i className="fas fa-plus"></i>
+              Add Course
+            </button>
           </div>
-        ))}
+        ) : (
+          courses.map((course) => (
+            <div key={course._id} className={styles.courseSection}>
+              <div 
+                className={`${styles.courseHeader} ${openCourseId === course._id ? styles.active : ''}`}
+                onClick={() => toggleCourse(course._id)}
+              >
+                <div className={styles.courseInfo}>
+                  <h3>{course.title}</h3>
+                  <p>{course.description}</p>
+                  <div className={styles.courseMeta}>
+                    <span className={styles.itemCount}>
+                      {course.notes?.length || 0} notes
+                    </span>
+                  </div>
+                </div>
+                <div className={styles.courseActions}>
+                  <button
+                    className={`${styles.btn} ${styles.btnSm} ${styles.btnSecondary}`}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSelectedCourse(course);
+                      setShowNoteModal(true);
+                    }}
+                  >
+                    <i className="fas fa-plus"></i>
+                    Add Note
+                  </button>
+                  <button
+                    className={`${styles.btn} ${styles.btnSm} ${styles.btnOutline}`}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      openEditCourse(course);
+                    }}
+                  >
+                    <i className="fas fa-edit"></i>
+                  </button>
+                  <button
+                    className={`${styles.btn} ${styles.btnSm} ${styles.btnDanger}`}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDeleteCourse(course._id);
+                    }}
+                  >
+                    <i className="fas fa-trash"></i>
+                  </button>
+                </div>
+              </div>
+
+              {/* Only show course content if this course is open */}
+              {openCourseId === course._id && (
+                <div className={styles.courseContent}>
+                  {course.notes && course.notes.length > 0 ? (
+                    <div className={styles.notesGrid}>
+                      {course.notes.map((note) => (
+                        <div key={note._id} className={styles.noteItem}>
+                          <div className={styles.noteContent}>
+                            <h4>{note.title}</h4>
+                            <p>{note.description}</p>
+                            <div className={styles.noteMeta}>
+                              <span className={styles.noteDate}>
+                                {new Date(note.createdAt).toLocaleDateString()}
+                              </span>
+                            </div>
+                          </div>
+                          <div className={styles.noteActions}>
+                            <button
+                              className={`${styles.btn} ${styles.btnSm} ${styles.btnOutline}`}
+                              onClick={() => openEditNote(note)}
+                            >
+                              <i className="fas fa-edit"></i>
+                            </button>
+                            <button
+                              className={`${styles.btn} ${styles.btnSm} ${styles.btnDanger}`}
+                              onClick={() => handleDeleteNote(note._id)}
+                            >
+                              <i className="fas fa-trash"></i>
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className={styles.emptySection}>
+                      <p>No notes in this course</p>
+                      <button
+                        className={`${styles.btn} ${styles.btnSm} ${styles.btnSecondary}`}
+                        onClick={() => {
+                          setSelectedCourse(course);
+                          setShowNoteModal(true);
+                        }}
+                      >
+                        <i className="fas fa-plus"></i>
+                        Add Note
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          ))
+        )}
       </div>
 
       {/* Course Modal */}
@@ -517,4 +588,5 @@ const NoteManagement = () => {
     </div>
   );
 };
+
 export default NoteManagement;
