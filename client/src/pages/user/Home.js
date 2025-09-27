@@ -1,12 +1,3 @@
-"use client"
-import { useState, useEffect, useRef } from "react"
-import { Link } from "react-router-dom"
-import { useAuth } from "../../contexts/AuthContext"
-import styles from "../../styles/home.module.css"
-import AboutSmartDriller from "./AboutSmartDriller"
-import SubscriptionModal from "./SubscriptionModal"
-import api from "../../utils/api";
-
 const Home = () => {
   const { user, logout, updateUser } = useAuth()
   const [sidebarOpen, setSidebarOpen] = useState(false)
@@ -21,9 +12,31 @@ const Home = () => {
   const [touchEndX, setTouchEndX] = useState(0)
   const contactPopupRef = useRef(null)
   const sidebarRef = useRef(null)
+  const isInitialized = useRef(false)
   
   useEffect(() => {
-    loadNotifications()
+    const initializeData = async () => {
+      if (isInitialized.current) return
+      isInitialized.current = true
+      
+      try {
+        // Fetch the latest user data
+        const userResponse = await api.get("/api/users/profile")
+        const updatedUser = userResponse.data.user
+        updateUser(updatedUser)
+        
+        // Fetch notifications and calculate unread count
+        await loadNotifications(updatedUser)
+      } catch (error) {
+        console.error("Failed to initialize data:", error)
+        // If fetching user data fails, try to load notifications with the current user data
+        if (user) {
+          await loadNotifications(user)
+        }
+      }
+    }
+    
+    initializeData()
     
     // Close contact popup when clicking outside
     const handleClickOutside = (event) => {
@@ -44,22 +57,30 @@ const Home = () => {
     return () => {
       document.removeEventListener('mousedown', handleClickOutside)
     }
-  }, [user, contactPopupOpen, sidebarOpen])
+  }, []) // Empty dependency array means this runs once when the component mounts
   
-  const loadNotifications = async () => {
+  // Load notifications when the user data changes, but not on initial mount
+  useEffect(() => {
+    if (user && isInitialized.current) {
+      loadNotifications(user)
+    }
+  }, [user]) // This effect runs when the user data changes
+  
+  const loadNotifications = async (userData) => {
     try {
-      const response = await api.get("/api/notifications")
-      setNotifications(response.data)
+      // Fetch notifications
+      const notificationsResponse = await api.get("/api/notifications")
+      setNotifications(notificationsResponse.data)
       
-      // Calculate unread notifications
-      if (user?.lastNotificationView) {
-        const lastView = new Date(user.lastNotificationView)
-        const unread = response.data.filter(
+      // Calculate unread notifications based on the provided user data
+      if (userData?.lastNotificationView) {
+        const lastView = new Date(userData.lastNotificationView)
+        const unread = notificationsResponse.data.filter(
           notif => new Date(notif.createdAt) > lastView
         ).length
         setUnreadCount(unread)
       } else {
-        setUnreadCount(response.data.length)
+        setUnreadCount(notificationsResponse.data.length)
       }
     } catch (error) {
       console.error("Failed to load notifications:", error)
@@ -68,12 +89,10 @@ const Home = () => {
   
   const markNotificationsAsRead = async () => {
     try {
-      await api.put("/api/users/last-notification-view")
-      
-      updateUser({
-        ...user,
-        lastNotificationView: new Date()
-      })
+      // Update the lastNotificationView on the backend and get the updated user data
+      const response = await api.put("/api/users/last-notification-view")
+      const updatedUser = response.data.user
+      updateUser(updatedUser)
       
       setUnreadCount(0)
     } catch (error) {
@@ -89,6 +108,8 @@ const Home = () => {
       await markNotificationsAsRead()
     }
   }
+  
+
   
   const handleActivate = async () => {
     if (user?.isSubscribed) {
