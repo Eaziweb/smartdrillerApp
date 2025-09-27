@@ -66,16 +66,15 @@ router.post("/fetch", auth, subscriptionCheck, async (req, res) => {
       query.topic = { $in: topicArray };
     }
     
-    // Get questions
-    let questions = await Question.find(query).select("-createdBy");
-    
-    // Only shuffle questions for mock mode, not study mode
+    // Get questions with sort applied at database level
+    let questions;
     if (examType === "mock") {
+      // For mock mode, fetch without sorting and shuffle in memory
+      questions = await Question.find(query).select("-createdBy");
       questions = questions.sort(() => Math.random() - 0.5);
-    }
-    // For study mode, keep questions in their original order (sorted by creation date)
-    else {
-      questions = questions.sort({ createdAt: 1 }); // or any other consistent ordering
+    } else {
+      // For study mode, sort by creation date at database level
+      questions = await Question.find(query).select("-createdBy").sort({ createdAt: 1 });
     }
     
     // Only limit to requested count if it's not "all"
