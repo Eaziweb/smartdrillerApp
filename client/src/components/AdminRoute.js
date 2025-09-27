@@ -1,7 +1,7 @@
 "use client"
 import { Navigate } from "react-router-dom"
 import { useAuth } from "../contexts/AuthContext"
-import styles from "../../styles/loading.module.css"
+import styles from "../styles/loading.module.css"
 
 
 const AdminRoute = ({ children }) => {

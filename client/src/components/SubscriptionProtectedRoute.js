@@ -1,7 +1,7 @@
 "use client"
 import { useAuth } from "../contexts/AuthContext"
 import SubscriptionRequired from "./SubscriptionRequired"
-import styles from "../../styles/loading.module.css"
+import styles from "../styles/loading.module.css"
 
 
 const SubscriptionProtectedRoute = ({ children }) => {

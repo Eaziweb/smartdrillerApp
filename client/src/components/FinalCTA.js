@@ -24,7 +24,7 @@ const FinalCTA = () => {
               <div className={styles.statLabel}>Student Rating</div>
             </div>
           </div>
-          <Link to="#" className={styles.btnCTA}>
+          <Link to="/register" className={styles.btnCTA}>
             Start Practicing Now
             <i className="fas fa-arrow-right"></i>
           </Link>

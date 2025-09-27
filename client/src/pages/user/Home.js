@@ -178,7 +178,7 @@ const Home = () => {
     const shareData = {
       title: 'SmartDriller',
       text: 'Join SmartDriller, an educational website for first year university students!',
-      url: 'https://smartdriller-mtvvrdqkt-fayeye1ezekiel1-gmailcoms-projects.vercel.app'
+      url: 'https://smartdriller.vercel.app/'
     };
 
     try {
