@@ -1,184 +1,136 @@
-const express = require("express")
-const router = express.Router()
-const { adminAuth } = require("../middleware/auth")
-const NoteCourse = require("../models/NoteCourse")
-const Note = require("../models/Note")
+// routes/adminNotes.js
+const express = require("express");
+const router = express.Router();
+const { adminAuth } = require("../middleware/auth");
+const NoteCourse = require("../models/NoteCourse");
+const Note = require("../models/Note");
 
-// Get all courses with notes (for admin)
+// Get all courses with notes
 router.get("/courses", adminAuth, async (req, res) => {
   try {
-    const courses = await NoteCourse.find()
-      .populate({
-        path: "notes",
-        select: "title description createdAt",
-      })
-      .sort({ createdAt: 1 })
-
-    res.json(courses)
+    const courses = await NoteCourse.find({ isVisible: true })
+      .populate("notes")
+      .sort({ createdAt: -1 });
+    res.json(courses);
   } catch (error) {
-    console.error("Error fetching note courses:", error)
-    res.status(500).json({ message: "Server error" })
+    console.error("Error fetching courses:", error);
+    res.status(500).json({ message: "Failed to fetch courses" });
   }
-})
+});
 
-// Create new course
+// Create a new course
 router.post("/courses", adminAuth, async (req, res) => {
   try {
-    const { title, description } = req.body
-
-    const course = new NoteCourse({
-      title,
-      description,
-    })
-
-    await course.save()
-    res.status(201).json(course)
+    const { title, description } = req.body;
+    const course = new NoteCourse({ title, description });
+    await course.save();
+    res.status(201).json(course);
   } catch (error) {
-    console.error("Error creating note course:", error)
-    res.status(500).json({ message: "Server error" })
+    console.error("Error creating course:", error);
+    res.status(500).json({ message: "Failed to create course" });
   }
-})
-// Get single note by ID
-router.get("/:noteId", adminAuth, async (req, res) => {
+});
+
+// Update a course
+router.put("/courses/:id", adminAuth, async (req, res) => {
   try {
-    const { noteId } = req.params
-    const note = await Note.findById(noteId)
-    if (!note) {
-      return res.status(404).json({ message: "Note not found" })
-    }
-    res.json(note)
-  } catch (error) {
-    console.error("Error fetching note:", error)
-    res.status(500).json({ message: "Server error" })
-  }
-})
-// Update course
-// routes/admin/notes.js
-// Update course
-router.put("/courses/:courseId", adminAuth, async (req, res) => {
-  try {
-    const { courseId } = req.params
-    const { title, description, isVisible } = req.body
+    const { title, description } = req.body;
     const course = await NoteCourse.findByIdAndUpdate(
-      courseId, 
-      { title, description, isVisible }, 
+      req.params.id,
+      { title, description },
       { new: true }
-    )
+    );
     if (!course) {
-      return res.status(404).json({ message: "Course not found" })
+      return res.status(404).json({ message: "Course not found" });
     }
-    res.json(course)
+    res.json(course);
   } catch (error) {
-    console.error("Error updating note course:", error)
-    res.status(500).json({ message: "Server error" })
+    console.error("Error updating course:", error);
+    res.status(500).json({ message: "Failed to update course" });
   }
-})
+});
 
-// Toggle course visibility
-router.put("/courses/:courseId/visibility", adminAuth, async (req, res) => {
+// Delete a course
+router.delete("/courses/:id", adminAuth, async (req, res) => {
   try {
-    const { courseId } = req.params
-    const course = await NoteCourse.findById(courseId)
+    const course = await NoteCourse.findById(req.params.id);
     if (!course) {
-      return res.status(404).json({ message: "Course not found" })
+      return res.status(404).json({ message: "Course not found" });
     }
     
-    course.isVisible = !course.isVisible
-    await course.save()
-    
-    res.json({ 
-      message: `Course ${course.isVisible ? 'shown' : 'hidden'} successfully`,
-      isVisible: course.isVisible
-    })
-  } catch (error) {
-    console.error("Error toggling course visibility:", error)
-    res.status(500).json({ message: "Server error" })
-  }
-})
-
-// Delete course
-router.delete("/courses/:courseId", adminAuth, async (req, res) => {
-  try {
-    const { courseId } = req.params
-
     // Delete all notes in this course
-    await Note.deleteMany({ course: courseId })
-
-    // Delete the course
-    await NoteCourse.findByIdAndDelete(courseId)
-
-    res.json({ message: "Course deleted successfully" })
+    await Note.deleteMany({ course: req.params.id });
+    
+    await NoteCourse.findByIdAndDelete(req.params.id);
+    res.json({ message: "Course deleted successfully" });
   } catch (error) {
-    console.error("Error deleting note course:", error)
-    res.status(500).json({ message: "Server error" })
+    console.error("Error deleting course:", error);
+    res.status(500).json({ message: "Failed to delete course" });
   }
-})
+});
 
-// Create new note
+// Create a new note
 router.post("/courses/:courseId/notes", adminAuth, async (req, res) => {
   try {
-    const { courseId } = req.params
-    const { title, description, content } = req.body
-
+    const { title, description, content } = req.body;
     const note = new Note({
       title,
       description,
       content,
-      course: courseId,
-    })
-
-    await note.save()
-
+      course: req.params.courseId,
+    });
+    await note.save();
+    
     // Add note to course
-    await NoteCourse.findByIdAndUpdate(courseId, { $push: { notes: note._id } })
-
-    res.status(201).json(note)
+    await NoteCourse.findByIdAndUpdate(req.params.courseId, {
+      $push: { notes: note._id }
+    });
+    
+    res.status(201).json(note);
   } catch (error) {
-    console.error("Error creating note:", error)
-    res.status(500).json({ message: "Server error" })
+    console.error("Error creating note:", error);
+    res.status(500).json({ message: "Failed to create note" });
   }
-})
+});
 
-// Update note
-router.put("/:noteId", adminAuth, async (req, res) => {
+// Update a note
+router.put("/notes/:id", adminAuth, async (req, res) => {
   try {
-    const { noteId } = req.params
-    const { title, description, content } = req.body
-
-    const note = await Note.findByIdAndUpdate(noteId, { title, description, content }, { new: true })
-
+    const { title, description, content } = req.body;
+    const note = await Note.findByIdAndUpdate(
+      req.params.id,
+      { title, description, content },
+      { new: true }
+    );
     if (!note) {
-      return res.status(404).json({ message: "Note not found" })
+      return res.status(404).json({ message: "Note not found" });
     }
-
-    res.json(note)
+    res.json(note);
   } catch (error) {
-    console.error("Error updating note:", error)
-    res.status(500).json({ message: "Server error" })
+    console.error("Error updating note:", error);
+    res.status(500).json({ message: "Failed to update note" });
   }
-})
+});
 
-// Delete note
-router.delete("/:noteId", adminAuth, async (req, res) => {
+// Delete a note
+router.delete("/notes/:id", adminAuth, async (req, res) => {
   try {
-    const { noteId } = req.params
-
-    const note = await Note.findById(noteId)
+    const note = await Note.findById(req.params.id);
     if (!note) {
-      return res.status(404).json({ message: "Note not found" })
+      return res.status(404).json({ message: "Note not found" });
     }
-
+    
     // Remove note from course
-    await NoteCourse.findByIdAndUpdate(note.course, { $pull: { notes: noteId } })
-
-    // Delete the note
-    await Note.findByIdAndDelete(noteId)
-
-    res.json({ message: "Note deleted successfully" })
+    await NoteCourse.findByIdAndUpdate(note.course, {
+      $pull: { notes: note._id }
+    });
+    
+    await Note.findByIdAndDelete(req.params.id);
+    res.json({ message: "Note deleted successfully" });
   } catch (error) {
-    console.error("Error deleting note:", error)
-    res.status(500).json({ message: "Server error" })
+    console.error("Error deleting note:", error);
+    res.status(500).json({ message: "Failed to delete note" });
   }
-})
+});
 
-module.exports = router
+module.exports = router;

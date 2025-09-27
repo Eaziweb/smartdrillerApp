@@ -1,13 +1,34 @@
 /* styles/VideoManagement.module.css */
+:root {
+  --primary-color: #002060;
+  --secondary-color: #0066ff;
+  --gradient-primary: linear-gradient(135deg, #0099ff 0%, #002060 100%);
+  --text-primary: #333;
+  --text-secondary: #666;
+  --background-color: #f5f7fa;
+  --card-background: #ffffff;
+  --border-color: #e1ebf7;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 12px rgba(0, 32, 96, 0.08);
+  --shadow-lg: 0 8px 24px rgba(0, 32, 96, 0.12);
+  --danger-color: #ff3860;
+  --success-color: #23d160;
+  --warning-color: #ffdd57;
+}
+
+/* Main container */
 .videoManagement {
   min-height: 100vh;
-  background: #f5f7fa;
+  background: linear-gradient(135deg, #f5f7fa 0%, #e4ecf7 100%);
   color: #333;
 }
 
+/* Header */
 .managementHeader {
-  background: white;
-  box-shadow: 0 2px 10px rgba(0, 32, 96, 0.1);
+  background: var(--gradient-primary);
+  box-shadow: var(--shadow-md);
   position: sticky;
   top: 0;
   z-index: 100;
@@ -17,9 +38,10 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 1rem;
+  padding: 1rem 2rem;
   max-width: 1200px;
   margin: 0 auto;
+  color: white;
 }
 
 .backBtn {
@@ -29,24 +51,24 @@
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  background: #f0f4f8;
-  color: #002060;
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
   text-decoration: none;
   transition: all 0.3s ease;
 }
 
 .backBtn:hover {
-  background: #e1ebf7;
+  background: rgba(255, 255, 255, 0.3);
   transform: translateX(-3px);
 }
 
 .managementHeader h1 {
   font-size: 1.5rem;
-  color: #002060;
   margin: 0;
   font-weight: 600;
 }
 
+/* Content */
 .managementContent {
   padding: 1.5rem;
   max-width: 1200px;
@@ -55,41 +77,85 @@
 
 /* Course Section */
 .courseSection {
-  background: white;
-  border-radius: 16px;
+  background: var(--card-background);
+  border-radius: var(--radius-lg);
   margin-bottom: 1.5rem;
-  box-shadow: 0 4px 15px rgba(0, 32, 96, 0.08);
+  box-shadow: var(--shadow-md);
   overflow: hidden;
-  border: 1px solid #e1ebf7;
+  border: 1px solid var(--border-color);
+  transition: all 0.3s ease;
 }
 
+.courseSection:hover {
+  box-shadow: var(--shadow-lg);
+}
+
+/* Course Header - Accordion */
 .courseHeader {
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 1.5rem;
   background: linear-gradient(135deg, #ffffff 0%, #f5f7fa 100%);
-  border-bottom: 1px solid #e1ebf7;
+  border-bottom: 1px solid var(--border-color);
+  cursor: pointer;
+  position: relative;
+  transition: background-color 0.3s ease;
+}
+
+.courseHeader:hover {
+  background: linear-gradient(135deg, #f5f7fa 0%, #e1ebf7 100%);
+}
+
+.courseHeader.active {
+  background: linear-gradient(135deg, #f5f7fa 0%, #e1ebf7 100%);
+  border-bottom: 1px solid var(--border-color);
+}
+
+/* Chevron icon for accordion */
+.courseHeader::after {
+  content: "\f107";
+  font-family: "Font Awesome 5 Free";
+  font-weight: 900;
+  position: absolute;
+  right: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--secondary-color);
+  transition: transform 0.3s ease;
+  font-size: 1.2rem;
+}
+
+.courseHeader.active::after {
+  transform: translateY(-50%) rotate(90deg);
 }
 
 .courseInfo h3 {
   margin: 0 0 0.5rem 0;
-  color: #002060;
+  color: var(--primary-color);
   font-size: 1.25rem;
   font-weight: 600;
 }
 
 .courseInfo p {
   margin: 0 0 0.5rem 0;
-  color: #555;
+  color: var(--text-secondary);
   font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.courseMeta {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 0.5rem;
 }
 
 .itemCount {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  color: #0066ff;
+  color: var(--secondary-color);
   font-size: 0.8rem;
   font-weight: 500;
   background: rgba(0, 102, 255, 0.1);
@@ -104,9 +170,21 @@
   gap: 0.5rem;
 }
 
+/* Course Content - Accordion Panel */
+.courseContent {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.5s ease-in-out;
+}
+
+.courseContent.active {
+  max-height: 5000px; /* Large enough to accommodate content */
+  transition: max-height 0.5s ease-in-out;
+}
+
 /* Topic Section */
 .topicSection {
-  border-bottom: 1px solid #e1ebf7;
+  border-bottom: 1px solid var(--border-color);
   background: #f9fbff;
 }
 
@@ -123,14 +201,14 @@
 
 .topicInfo h4 {
   margin: 0 0 0.5rem 0;
-  color: #002060;
+  color: var(--primary-color);
   font-size: 1.1rem;
   font-weight: 500;
 }
 
 .topicInfo p {
   margin: 0 0 0.5rem 0;
-  color: #555;
+  color: var(--text-secondary);
   font-size: 0.9rem;
 }
 
@@ -143,13 +221,19 @@
 }
 
 .videoItem {
-  background: white;
-  border-radius: 12px;
+  background: var(--card-background);
+  border-radius: var(--radius-md);
   overflow: hidden;
-  box-shadow: 0 4px 12px rgba(0, 32, 96, 0.08);
-  border: 1px solid #e1ebf7;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border-color);
   display: flex;
   flex-direction: column;
+  transition: all 0.3s ease;
+}
+
+.videoItem:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
 }
 
 .videoThumbnail {
@@ -189,14 +273,14 @@
 
 .videoInfo h5 {
   margin: 0 0 0.5rem 0;
-  color: #002060;
+  color: var(--primary-color);
   font-size: 1rem;
   font-weight: 500;
 }
 
 .videoInfo p {
   margin: 0 0 0.75rem 0;
-  color: #555;
+  color: var(--text-secondary);
   font-size: 0.875rem;
   line-height: 1.4;
   display: -webkit-box;
@@ -210,7 +294,7 @@
   gap: 1rem;
   margin-top: auto;
   font-size: 0.75rem;
-  color: #666;
+  color: var(--text-secondary);
 }
 
 .videoViews,
@@ -222,8 +306,8 @@
 
 .videoActions {
   padding: 0.75rem 1rem;
-  background: #f5f7fa;
-  border-top: 1px solid #e1ebf7;
+  background: var(--background-color);
+  border-top: 1px solid var(--border-color);
   justify-content: flex-end;
 }
 
@@ -235,32 +319,34 @@
   justify-content: center;
   padding: 3rem;
   text-align: center;
-  background: white;
-  border-radius: 16px;
-  box-shadow: 0 4px 15px rgba(0, 32, 96, 0.08);
+  background: var(--card-background);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
 }
 
 .emptyState i {
   font-size: 3rem;
-  color: #0066ff;
+  color: var(--secondary-color);
   margin-bottom: 1rem;
   opacity: 0.7;
 }
 
 .emptyState h2 {
   margin: 0 0 0.5rem 0;
-  color: #002060;
+  color: var(--primary-color);
 }
 
 .emptyState p {
   margin: 0 0 1.5rem 0;
-  color: #666;
+  color: var(--text-secondary);
 }
 
 .emptySection {
   padding: 1.5rem;
   text-align: center;
-  color: #666;
+  color: var(--text-secondary);
+  background: rgba(0, 102, 255, 0.02);
+  border-top: 1px solid var(--border-color);
 }
 
 .emptySection p {
@@ -274,7 +360,7 @@
   gap: 0.5rem;
   padding: 0.5rem 1rem;
   border: none;
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   font-size: 0.875rem;
   font-weight: 500;
   cursor: pointer;
@@ -287,18 +373,18 @@
 }
 
 .btnPrimary {
-  background: linear-gradient(135deg, #0066ff 0%, #002060 70%);
+  background: var(--gradient-primary);
   color: white;
 }
 
 .btnPrimary:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 102, 255, 0.3);
+  box-shadow: var(--shadow-md);
 }
 
 .btnSecondary {
   background: #f0f4f8;
-  color: #0066ff;
+  color: var(--secondary-color);
 }
 
 .btnSecondary:hover {
@@ -307,8 +393,8 @@
 
 .btnOutline {
   background: transparent;
-  color: #0066ff;
-  border: 1px solid #0066ff;
+  color: var(--secondary-color);
+  border: 1px solid var(--secondary-color);
 }
 
 .btnOutline:hover {
@@ -322,6 +408,61 @@
 
 .btnDanger:hover {
   background: #f5c6cb;
+}
+
+/* Visibility Badge */
+.visibilityBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.visibilityBadge.visible {
+  background-color: rgba(92, 184, 92, 0.2);
+  color: #5cb85c;
+}
+
+.visibilityBadge.hidden {
+  background-color: rgba(240, 173, 78, 0.2);
+  color: #f0ad4e;
+}
+
+/* Checkbox Label */
+.checkboxLabel {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-weight: normal;
+}
+
+.checkboxLabel input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+}
+
+/* Warning and Success Buttons */
+.btnWarning {
+  background-color: #f0ad4e;
+  color: white;
+}
+
+.btnWarning:hover {
+  background-color: #ec971f;
+}
+
+.btnSuccess {
+  background-color: #5cb85c;
+  color: white;
+}
+
+.btnSuccess:hover {
+  background-color: #4cae4c;
 }
 
 /* Modal */
@@ -344,17 +485,19 @@
   width: 100%;
   height: 100%;
   background: rgba(0, 0, 0, 0.5);
+  animation: fadeIn 0.3s ease;
 }
 
 .modalContent {
   position: relative;
-  background: white;
-  border-radius: 16px;
+  background: var(--card-background);
+  border-radius: var(--radius-lg);
   width: 90%;
   max-width: 600px;
   max-height: 90vh;
   overflow-y: auto;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  box-shadow: var(--shadow-lg);
+  animation: slideUp 0.3s ease;
 }
 
 .modalHeader {
@@ -362,12 +505,14 @@
   align-items: center;
   justify-content: space-between;
   padding: 1rem 1.5rem;
-  border-bottom: 1px solid #e1ebf7;
+  border-bottom: 1px solid var(--border-color);
+  background: rgba(0, 102, 255, 0.05);
 }
 
 .modalHeader h3 {
   margin: 0;
-  color: #002060;
+  color: var(--primary-color);
+  font-size: 1.3rem;
   font-weight: 600;
 }
 
@@ -375,14 +520,21 @@
   background: none;
   border: none;
   font-size: 1.5rem;
-  color: #666;
+  color: var(--text-secondary);
   cursor: pointer;
   padding: 0.25rem;
-  transition: color 0.3s ease;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
 }
 
 .closeBtn:hover {
-  color: #002060;
+  background: rgba(0, 0, 0, 0.1);
+  color: var(--danger-color);
 }
 
 .modalForm {
@@ -396,25 +548,25 @@
 .formGroup label {
   display: block;
   margin-bottom: 0.5rem;
-  color: #333;
+  color: var(--text-primary);
   font-weight: 500;
-  font-size: 0.875rem;
 }
 
 .formGroup input,
 .formGroup textarea {
   width: 100%;
-  padding: 0.75rem;
-  border: 1px solid #e1ebf7;
-  border-radius: 6px;
-  font-size: 0.875rem;
-  transition: border-color 0.3s ease;
+  padding: 0.75rem 1rem;
+  border: 2px solid var(--border-color);
+  border-radius: var(--radius-md);
+  font-size: 1rem;
+  outline: none;
+  transition: all 0.3s ease;
+  font-family: inherit;
 }
 
 .formGroup input:focus,
 .formGroup textarea:focus {
-  outline: none;
-  border-color: #0066ff;
+  border-color: var(--secondary-color);
   box-shadow: 0 0 0 3px rgba(0, 102, 255, 0.1);
 }
 
@@ -428,29 +580,30 @@
 /* Toast Notifications */
 .toast {
   position: fixed;
-  bottom: 20px;
+  top: 20px;
   right: 20px;
-  background: white;
   padding: 1rem 1.5rem;
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  box-shadow: var(--shadow-md);
+  z-index: 2000;
   transform: translateY(100px);
   opacity: 0;
   transition: all 0.3s ease;
-  z-index: 2000;
 }
 
 .toastSuccess {
-  border-left: 4px solid #28a745;
-  color: #28a745;
+  border-left: 4px solid var(--success-color);
+  color: var(--success-color);
+  background: rgba(35, 209, 96, 0.1);
 }
 
 .toastError {
-  border-left: 4px solid #dc3545;
-  color: #dc3545;
+  border-left: 4px solid var(--danger-color);
+  color: var(--danger-color);
+  background: rgba(255, 56, 96, 0.1);
 }
 
 .toast.show {
@@ -471,86 +624,31 @@
   width: 40px;
   height: 40px;
   border: 4px solid #f3f3f3;
-  border-top: 4px solid #0066ff;
+  border-top: 4px solid var(--secondary-color);
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }
 
-/* styles/VideoManagement.module.css */
-
-/* Add these styles to your existing CSS file */
-
-.visibilityBadge {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  padding: 4px 8px;
-  border-radius: 12px;
-  font-size: 12px;
-  font-weight: 500;
-  margin-left: 10px;
-}
-
-.visibilityBadge.visible {
-  background-color: rgba(92, 184, 92, 0.2);
-  color: #5cb85c;
-}
-
-.visibilityBadge.hidden {
-  background-color: rgba(240, 173, 78, 0.2);
-  color: #f0ad4e;
-}
-
-.checkboxLabel {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  cursor: pointer;
-  font-weight: normal;
-}
-
-.checkboxLabel input[type="checkbox"] {
-  width: 18px;
-  height: 18px;
-  cursor: pointer;
-}
-
-.btnWarning {
-  background-color: #f0ad4e;
-  color: white;
-}
-
-.btnWarning:hover {
-  background-color: #ec971f;
-}
-
-.btnSuccess {
-  background-color: #5cb85c;
-  color: white;
-}
-
-.btnSuccess:hover {
-  background-color: #4cae4c;
-}
-
-.courseMeta {
-  display: flex;
-  align-items: center;
-  margin-top: 5px;
-}
+/* Animations */
 @keyframes spin {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
-/* Responsive Styles */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+/* Responsive Design */
 @media (max-width: 768px) {
   .headerContent {
-    padding: 1rem 0.5rem;
+    padding: 1rem;
   }
   
   .managementHeader h1 {
@@ -612,8 +710,34 @@
     height: 180px;
   }
   
+  .modalContent {
+    width: 95%;
+    margin: 2.5%;
+  }
+  
+  .modalHeader {
+    padding: 0.75rem 1rem;
+  }
+  
+  .modalHeader h3 {
+    font-size: 1.1rem;
+  }
+  
   .modalForm {
     padding: 1rem;
+  }
+  
+  .formGroup input,
+  .formGroup textarea {
+    padding: 0.65rem 0.85rem;
+    font-size: 0.9rem;
+  }
+  
+  .toast {
+    top: 10px;
+    right: 10px;
+    left: 10px;
+    padding: 0.8rem 1rem;
   }
   
   .formActions {
@@ -624,55 +748,4 @@
     width: 100%;
     justify-content: center;
   }
-}
-.courseHeader {
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-}
-
-.courseHeader:hover {
-  background: linear-gradient(135deg, #f5f7fa 0%, #e1ebf7 100%);
-}
-
-.courseHeader.active {
-  background: linear-gradient(135deg, #f5f7fa 0%, #e1ebf7 100%);
-}
-
-.courseHeader.active::after {
-  content: "\f107";
-  font-family: "Font Awesome 5 Free";
-  font-weight: 900;
-  position: absolute;
-  right: 20px;
-  top: 50%;
-  transform: translateY(-50%);
-  color: #0066ff;
-}
-
-.courseHeader::after {
-  content: "\f105";
-  font-family: "Font Awesome 5 Free";
-  font-weight: 900;
-  position: absolute;
-  right: 20px;
-  top: 50%;
-  transform: translateY(-50%);
-  color: #0066ff;
-  transition: transform 0.3s ease;
-}
-
-.courseHeader.active::after {
-  transform: translateY(-50%) rotate(90deg);
-}
-
-.courseContent {
-  padding: 0;
-  max-height: 0;
-  overflow: hidden;
-  transition: max-height 0.3s ease-out;
-}
-
-.courseContent.active {
-  max-height: 5000px; /* A large value to accommodate content */
-  transition: max-height 0.5s ease-in;
 }

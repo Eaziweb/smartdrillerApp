@@ -29,36 +29,27 @@ const NoteManagement = () => {
     loadCourses();
   }, []);
 
-  const loadCourses = async () => {
-    try {
-      const response = await axios.get("/api/admin/notes/courses", {
-        headers: getAuthHeader(),
-      });
-      
-      // Ensure response.data is an array
-      if (Array.isArray(response.data)) {
-        setCourses(response.data);
-      } else if (response.data && typeof response.data === 'object') {
-        // If it's an object but not an array, try to extract array from it
-        // This handles cases where the API returns { courses: [...] } or similar
-        if (Array.isArray(response.data.courses)) {
-          setCourses(response.data.courses);
-        } else {
-          console.error("Unexpected response format:", response.data);
-          setCourses([]);
-        }
-      } else {
-        console.error("Response data is not an array:", response.data);
-        setCourses([]);
-      }
-    } catch (error) {
-      console.error("Failed to load courses:", error);
-      showToast("Failed to load courses", "error");
-      setCourses([]); // Ensure courses is always an array
-    } finally {
-      setLoading(false);
+const loadCourses = async () => {
+  try {
+    const response = await axios.get("/api/admin/notes/courses", {
+      headers: getAuthHeader(),
+    });
+    
+    // Ensure response.data is an array
+    if (Array.isArray(response.data)) {
+      setCourses(response.data);
+    } else {
+      console.error("Unexpected response format:", response.data);
+      setCourses([]);
     }
-  };
+  } catch (error) {
+    console.error("Failed to load courses:", error);
+    showToast("Failed to load courses", "error");
+    setCourses([]);
+  } finally {
+    setLoading(false);
+  }
+};
 
   const handleCreateCourse = async (e) => {
     e.preventDefault();

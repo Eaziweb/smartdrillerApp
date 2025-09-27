@@ -14,7 +14,7 @@ const VideoManagement = () => {
   const [selectedCourse, setSelectedCourse] = useState(null)
   const [selectedTopic, setSelectedTopic] = useState(null)
   const [editingItem, setEditingItem] = useState(null)
-  const [openCourseId, setOpenCourseId] = useState(null) // Track which course is open
+  const [openCourseId, setOpenCourseId] = useState(null)
   const [courseForm, setCourseForm] = useState({ 
     title: "", 
     description: "",
@@ -42,10 +42,25 @@ const VideoManagement = () => {
       const response = await api.get("/api/admin/videos/courses", {
         headers: getAuthHeader(),
       })
-      setCourses(response.data)
+      
+      // Ensure response.data is an array
+      if (Array.isArray(response.data)) {
+        setCourses(response.data);
+      } else if (response.data && typeof response.data === 'object') {
+        if (Array.isArray(response.data.courses)) {
+          setCourses(response.data.courses);
+        } else {
+          console.error("Unexpected response format:", response.data);
+          setCourses([]);
+        }
+      } else {
+        console.error("Response data is not an array:", response.data);
+        setCourses([]);
+      }
     } catch (error) {
       console.error("Failed to load courses:", error)
       showToast("Failed to load courses", "error")
+      setCourses([])
     } finally {
       setLoading(false)
     }
@@ -250,7 +265,11 @@ const VideoManagement = () => {
     setTimeout(() => toast.classList.add(styles.show), 100)
     setTimeout(() => {
       toast.classList.remove(styles.show)
-      setTimeout(() => document.body.removeChild(toast), 300)
+      setTimeout(() => {
+        if (document.body.contains(toast)) {
+          document.body.removeChild(toast)
+        }
+      }, 300)
     }, 3000)
   }
 
@@ -281,7 +300,7 @@ const VideoManagement = () => {
       </header>
       
       <div className={styles.managementContent}>
-        {courses.length === 0 ? (
+        {!Array.isArray(courses) || courses.length === 0 ? (
           <div className={styles.emptyState}>
             <i className="fas fa-video"></i>
             <h2>No courses found</h2>
@@ -302,7 +321,7 @@ const VideoManagement = () => {
                   <h3>{course.title}</h3>
                   <p>{course.description}</p>
                   <div className={styles.courseMeta}>
-                    <span className={styles.itemCount}>{course.topics?.length || 0} topics</span>
+                    <span className={styles.itemCount}>{Array.isArray(course.topics) ? course.topics.length : 0} topics</span>
                     <span className={`${styles.visibilityBadge} ${course.isVisible ? styles.visible : styles.hidden}`}>
                       <i className={`fas ${course.isVisible ? "fa-eye" : "fa-eye-slash"}`}></i>
                       {course.isVisible ? "Visible" : "Hidden"}
@@ -355,14 +374,28 @@ const VideoManagement = () => {
               {/* Only show course content if this course is open */}
               {openCourseId === course._id && (
                 <div className={styles.courseContent}>
-                  {course.topics && course.topics.length > 0 ? (
+                  {!Array.isArray(course.topics) || course.topics.length === 0 ? (
+                    <div className={styles.emptySection}>
+                      <p>No topics in this course</p>
+                      <button
+                        className={`${styles.btn} ${styles.btnSm} ${styles.btnSecondary}`}
+                        onClick={() => {
+                          setSelectedCourse(course)
+                          setShowTopicModal(true)
+                        }}
+                      >
+                        <i className="fas fa-plus"></i>
+                        Add Topic
+                      </button>
+                    </div>
+                  ) : (
                     course.topics.map((topic) => (
                       <div key={topic._id} className={styles.topicSection}>
                         <div className={styles.topicHeader}>
                           <div className={styles.topicInfo}>
                             <h4>{topic.title}</h4>
                             <p>{topic.description}</p>
-                            <span className={styles.itemCount}>{topic.videos?.length || 0} videos</span>
+                            <span className={styles.itemCount}>{Array.isArray(topic.videos) ? topic.videos.length : 0} videos</span>
                           </div>
                           <div className={styles.topicActions}>
                             <button
@@ -384,7 +417,21 @@ const VideoManagement = () => {
                           </div>
                         </div>
                         
-                        {topic.videos && topic.videos.length > 0 ? (
+                        {!Array.isArray(topic.videos) || topic.videos.length === 0 ? (
+                          <div className={styles.emptySection}>
+                            <p>No videos in this topic</p>
+                            <button
+                              className={`${styles.btn} ${styles.btnSm} ${styles.btnSecondary}`}
+                              onClick={() => {
+                                setSelectedTopic(topic)
+                                setShowVideoModal(true)
+                              }}
+                            >
+                              <i className="fas fa-plus"></i>
+                              Add Video
+                            </button>
+                          </div>
+                        ) : (
                           <div className={styles.videosGrid}>
                             {topic.videos.map((video) => (
                               <div key={video._id} className={styles.videoItem}>
@@ -424,37 +471,9 @@ const VideoManagement = () => {
                               </div>
                             ))}
                           </div>
-                        ) : (
-                          <div className={styles.emptySection}>
-                            <p>No videos in this topic</p>
-                            <button
-                              className={`${styles.btn} ${styles.btnSm} ${styles.btnSecondary}`}
-                              onClick={() => {
-                                setSelectedTopic(topic)
-                                setShowVideoModal(true)
-                              }}
-                            >
-                              <i className="fas fa-plus"></i>
-                              Add Video
-                            </button>
-                          </div>
                         )}
                       </div>
                     ))
-                  ) : (
-                    <div className={styles.emptySection}>
-                      <p>No topics in this course</p>
-                      <button
-                        className={`${styles.btn} ${styles.btnSm} ${styles.btnSecondary}`}
-                        onClick={() => {
-                          setSelectedCourse(course)
-                          setShowTopicModal(true)
-                        }}
-                      >
-                        <i className="fas fa-plus"></i>
-                        Add Topic
-                      </button>
-                    </div>
                   )}
                 </div>
               )}
