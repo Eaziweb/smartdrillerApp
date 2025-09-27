@@ -5,7 +5,8 @@ import { useAuth } from "../../contexts/AuthContext"
 import { useNotification } from "../../contexts/NotificationContext"
 import ProgressRing from '../../components/ProgressRing'
 import styles from "../../styles/course-selection.module.css"
-import api from "../../utils/api"
+import api from "../../utils/api";
+import axios from "axios";
 
 // Portal component for rendering dropdowns outside the main DOM hierarchy
 const Portal = ({ children, className }) => {
@@ -51,7 +52,7 @@ const CourseSelection = () => {
   const [fetchingTopics, setFetchingTopics] = useState(false)
   const [fetchingCourses, setFetchingCourses] = useState(false)
   const [progressLoading, setProgressLoading] = useState(true)
-  const [progressError, setProgressError] = useState(null)
+  const [progressError, setProgressError] = useState(null) // Add error state for progress
   
   // Simplified dropdown state - track which dropdown is open for which course
   const [openDropdown, setOpenDropdown] = useState({ courseCode: null, type: null })
@@ -67,73 +68,82 @@ const CourseSelection = () => {
   const dropdownTriggerRefs = useRef({})
   
   // Fetch study progress for all courses
-  const loadAllStudyProgress = async () => {
-    if (isMockMode) return;
-    
-    setProgressLoading(true);
-    setProgressError(null);
-    try {
-      const response = await api.get("/api/questions/study-progress");
-      
-      if (response.data.success) {
-        setStudyProgress(response.data.progress);
-      } else {
-        throw new Error(response.data.message || "Failed to load study progress");
-      }
-    } catch (error) {
-      console.error("Failed to load study progress:", error);
-      setProgressError(error.message);
-      setStudyProgress({});
-      
-      // Only show notification for non-timeout errors
-      if (error.code !== 'ECONNABORTED') {
-        if (error.response) {
-          if (error.response.status === 404) {
-            showNotification("Study progress endpoint not found. This feature may be temporarily unavailable.", "warning");
-          } else {
-            showNotification(`Failed to load study progress: ${error.response.data.message || error.message}`, "error");
-          }
-        } else if (error.request) {
-          showNotification("Network error. Please check your connection and try again.", "error");
-        } else {
-          showNotification(`Failed to load study progress: ${error.message}`, "error");
-        }
-      }
-    } finally {
-      setProgressLoading(false);
+const loadAllStudyProgress = async () => {
+  if (isMockMode) return;
+
+  setProgressLoading(true);
+  setProgressError(null);
+
+  try {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      throw new Error("Authentication token not found");
     }
-  };
+
+    const response = await api.get("/api/questions/study-progress", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    console.log("Study progress response:", response);
+
+    if (response.data.success) {
+      setStudyProgress(response.data.progress);
+    } else {
+      throw new Error(response.data.message || "Failed to load study progress");
+    }
+  } catch (error) {
+    console.error("Failed to load study progress:", error);
+    setProgressError(error.message);
+    setStudyProgress({}); // Avoid breaking UI
+
+    if (error.response) {
+      console.error("Error response data:", error.response.data);
+      console.error("Error response status:", error.response.status);
+
+      if (error.response.status === 404) {
+        showNotification(
+          "Study progress endpoint not found. This feature may be temporarily unavailable.",
+          "warning"
+        );
+      } else {
+        showNotification(
+          `Failed to load study progress: ${error.response.data.message || error.message}`,
+          "error"
+        );
+      }
+    } else if (error.request) {
+      console.error("Error request:", error.request);
+      showNotification(
+        "Network error. Please check your connection and try again.",
+        "error"
+      );
+    } else {
+      showNotification(
+        `Failed to load study progress: ${error.message}`,
+        "error"
+      );
+    }
+  } finally {
+    setProgressLoading(false);
+  }
+};
   
   const fetchCourses = async () => {
     setFetchingCourses(true)
     try {
-      // Try the correct API path
-      const response = await api.get("/api/courses")
+      const token = localStorage.getItem("token")
+      const response = await api.get("/api/courses", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
       
-      if (response.data && response.data.success) {
-        // Organize courses by semester
-        const firstSemester = response.data.courses.filter(course => course.semester === 'first');
-        const secondSemester = response.data.courses.filter(course => course.semester === 'second');
-        setCourses({ first: firstSemester, second: secondSemester });
-      } else {
-        throw new Error(response.data?.message || "Failed to load courses");
-      }
+      setCourses(response.data)
     } catch (error) {
       console.error("Failed to fetch courses:", error)
       setError("Failed to load courses. Please check your connection and try again.")
-      
-      // Show more specific error message
-      if (error.response) {
-        if (error.response.status === 404) {
-          showNotification("Courses endpoint not found. Please contact support.", "error");
-        } else {
-          showNotification(`Error loading courses: ${error.response.data.message || error.message}`, "error");
-        }
-      } else if (error.request) {
-        showNotification("Network error. Please check your connection and try again.", "error");
-      } else {
-        showNotification(`Error loading courses: ${error.message}`, "error");
-      }
     } finally {
       setFetchingCourses(false)
     }
@@ -143,35 +153,22 @@ const CourseSelection = () => {
     setFetchingYears(true)
     setError(null)
     try {
-      // Try the correct API path
-      const response = await api.get("/api/questions/course-years")
+      const token = localStorage.getItem("token")
+      const response = await api.get("/api/questions/course-years", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
       
-      if (!response.data || !response.data.success) {
-        throw new Error(response.data?.message || "Failed to load course years");
-      }
-      
-      if (!response.data.years || Object.keys(response.data.years).length === 0) {
+      if (!response.data || Object.keys(response.data).length === 0) {
         setError("No course data available. Please contact support.")
         return
       }
       
-      setCourseYears(response.data.years)
+      setCourseYears(response.data)
     } catch (error) {
       console.error("Failed to fetch course years:", error)
       setError("Failed to load course data. Please check your connection and try again.")
-      
-      // Show more specific error message
-      if (error.response) {
-        if (error.response.status === 404) {
-          showNotification("Course years endpoint not found. Please contact support.", "error");
-        } else {
-          showNotification(`Error loading course years: ${error.response.data.message || error.message}`, "error");
-        }
-      } else if (error.request) {
-        showNotification("Network error. Please check your connection and try again.", "error");
-      } else {
-        showNotification(`Error loading course years: ${error.message}`, "error");
-      }
     } finally {
       setFetchingYears(false)
       setLoading(false)
@@ -181,14 +178,14 @@ const CourseSelection = () => {
   const fetchTopics = async (courseCode) => {
     setFetchingTopics(true)
     try {
-      // Try the correct API path
-      const response = await api.get(`/api/questions/topics/${courseCode}`)
+      const token = localStorage.getItem("token")
+      const response = await api.get(`/api/questions/topics/${courseCode}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
       
-      if (!response.data || !response.data.success) {
-        throw new Error(response.data?.message || "Failed to load topics");
-      }
-      
-      const topics = response.data.topics
+      const topics = response.data
       
       if (!topics || topics.length === 0) {
         showNotification(`No topics available for ${courseCode}. Please select another course.`, "error")
@@ -206,19 +203,6 @@ const CourseSelection = () => {
       console.error("Failed to fetch topics:", error)
       showNotification(`Failed to load topics for ${courseCode}. Please try again.`, "error")
       handleCourseSelect(courseCode, false) // Deselect the course
-      
-      // Show more specific error message
-      if (error.response) {
-        if (error.response.status === 404) {
-          showNotification(`Topics endpoint not found for ${courseCode}.`, "error");
-        } else {
-          showNotification(`Error loading topics: ${error.response.data.message || error.message}`, "error");
-        }
-      } else if (error.request) {
-        showNotification("Network error. Please check your connection and try again.", "error");
-      } else {
-        showNotification(`Error loading topics: ${error.message}`, "error");
-      }
     } finally {
       setFetchingTopics(false)
     }
@@ -300,6 +284,9 @@ const CourseSelection = () => {
       return;
     }
     
+    // Close any open dropdown first
+    setOpenDropdown({ courseCode: null, type: null });
+    
     // For topics, show the popup instead
     if (type === "topics") {
       if (!courseTopics[courseCode] || courseTopics[courseCode].length === 0) {
@@ -315,8 +302,10 @@ const CourseSelection = () => {
     const position = calculateDropdownPosition(courseCode, type);
     setDropdownPosition(position);
     
-    // Open the new dropdown
-    setOpenDropdown({ courseCode, type });
+    // Use timeout to ensure the previous dropdown is closed before opening the new one
+    setTimeout(() => {
+      setOpenDropdown({ courseCode, type });
+    }, 10);
   }
   
   const handleOptionSelect = (courseCode, type, value, label) => {
@@ -402,11 +391,16 @@ const CourseSelection = () => {
         ...(isMockMode && { timeAllowed: Number.parseInt(courseDataObj.time) }),
       }
       
-      // Try the correct API path
-      const response = await api.post("/api/questions/fetch", requestData)
+      const token = localStorage.getItem("token")
+      const response = await api.post("/api/questions/fetch", requestData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      })
       
-      if (!response.data || !response.data.success) {
-        throw new Error(response.data?.message || "Failed to fetch questions")
+      if (!response.data.success) {
+        throw new Error(response.data.message || "Failed to fetch questions")
       }
       
       if (!response.data.questions || response.data.questions.length === 0) {
@@ -426,19 +420,7 @@ const CourseSelection = () => {
       navigate(isMockMode ? "/mock" : "/study")
     } catch (error) {
       console.error("Failed to start exam:", error)
-      
-      // Show more specific error message
-      if (error.response) {
-        if (error.response.status === 404) {
-          showNotification("Questions endpoint not found. Please contact support.", "error");
-        } else {
-          showNotification(`Error: ${error.response.data.message || error.message}`, "error");
-        }
-      } else if (error.request) {
-        showNotification("Network error. Please check your connection and try again.", "error");
-      } else {
-        showNotification(`Error: ${error.message}`, "error");
-      }
+      showNotification(error.response?.data?.message || error.message || "Failed to start exam", "error")
     } finally {
       setFetchingQuestions(false)
     }
@@ -454,10 +436,10 @@ const CourseSelection = () => {
   }, [user, navigate])
   
   useEffect(() => {
-    if (!fetchingYears && Object.keys(courseYears).length > 0 && !isMockMode && user?.isSubscribed) {
+    if (!fetchingYears && Object.keys(courseYears).length > 0 && !isMockMode) {
       loadAllStudyProgress()
     }
-  }, [fetchingYears, courseYears, isMockMode, user])
+  }, [fetchingYears, courseYears, isMockMode])
   
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -504,6 +486,7 @@ const CourseSelection = () => {
       case "year":
         const years = courseYears[courseCode] || []
         if (years.length === 0) {
+          showNotification(`No years available for ${courseCode}. Please select another course.`, "error")
           return []
         }
         return years.map((year) => ({ value: year, label: year }))
@@ -603,10 +586,8 @@ const CourseSelection = () => {
             >
               <div className={styles.courseName} onClick={() => {
                 const checkbox = document.getElementById(`checkbox-${course.courseCode}`)
-                if (checkbox) {
-                  checkbox.checked = !checkbox.checked
-                  handleCourseSelect(course.courseCode, checkbox.checked)
-                }
+                checkbox.checked = !checkbox.checked
+                handleCourseSelect(course.courseCode, checkbox.checked)
               }}>
                 <span className={styles.select}>
                   <input 
@@ -729,10 +710,8 @@ const CourseSelection = () => {
             >
               <div className={styles.courseName} onClick={() => {
                 const checkbox = document.getElementById(`checkbox-${course.courseCode}`)
-                if (checkbox) {
-                  checkbox.checked = !checkbox.checked
-                  handleCourseSelect(course.courseCode, checkbox.checked)
-                }
+                checkbox.checked = !checkbox.checked
+                handleCourseSelect(course.courseCode, checkbox.checked)
               }}>
                 <span className={styles.select}>
                   <input 
