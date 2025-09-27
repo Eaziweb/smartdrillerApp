@@ -105,6 +105,7 @@ const Mock = () => {
         }
         
         setKatexLoaded(true)
+        console.log("KaTeX loaded successfully")
       } catch (error) {
         console.error("Failed to load KaTeX:", error)
       }
@@ -171,6 +172,33 @@ const Mock = () => {
     
     // Wrap cap and cup symbols
     processedContent = processedContent.replace(/(cap|cup)\s*/g, '\\($1\\)')
+    
+    // Wrap sqrt expressions
+    processedContent = processedContent.replace(/\\sqrt\{[^}]*\}/g, '\\($&\\)')
+    
+    // Wrap leq and geq expressions
+    processedContent = processedContent.replace(/\\(leq|geq)/g, '\\($1\\)')
+    
+    // Wrap neq expression
+    processedContent = processedContent.replace(/\\neq/g, '\\($&\\)')
+    
+    // Wrap in and notin expressions
+    processedContent = processedContent.replace(/\\(in|notin)/g, '\\($1\\)')
+    
+    // Wrap subset and superset expressions
+    processedContent = processedContent.replace(/\\(subset|supset|subseteq|supseteq)/g, '\\($1\\)')
+    
+    // Wrap times and div expressions
+    processedContent = processedContent.replace(/\\(times|div)/g, '\\($1\\)')
+    
+    // Wrap pm and mp expressions
+    processedContent = processedContent.replace(/\\(pm|mp)/g, '\\($1\\)')
+    
+    // Wrap angle brackets
+    processedContent = processedContent.replace(/\\(langle|rangle)/g, '\\($1\\)')
+    
+    // Wrap dots expressions
+    processedContent = processedContent.replace(/\\(dots|vdots|ddots)/g, '\\($1\\)')
     
     // Simple regex to find LaTeX patterns
     const latexPattern = /(\\\(.*?\\\)|\\\[.*?\\\]|\$\$.*?\$\$|\$.*?\$)/g

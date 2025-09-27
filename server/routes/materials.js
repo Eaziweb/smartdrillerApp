@@ -5,8 +5,9 @@ const path = require("path")
 const fs = require("fs")
 const { auth } = require("../middleware/auth")
 const Material = require("../models/Material")
-const  Course = require("../models/Course")
+const Course = require("../models/Course")
 
+// Multer storage config
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     const uploadDir = "uploads/materials"
@@ -22,186 +23,108 @@ const storage = multer.diskStorage({
 })
 
 const upload = multer({
-  storage: storage,
-  limits: {
-    fileSize: 100 * 1024 * 1024, // 100MB limit
-  },
+  storage,
+  limits: { fileSize: 100 * 1024 * 1024 }, // 100MB
   fileFilter: (req, file, cb) => {
     const allowedTypes = /pdf|doc|docx|ppt|pptx|mp4|mp3|txt/
     const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase())
     const mimetype = allowedTypes.test(file.mimetype)
-
-    if (mimetype && extname) {
-      return cb(null, true)
-    } else {
-      cb(new Error("Only documents, videos, and audio files are allowed"))
-    }
+    if (mimetype && extname) cb(null, true)
+    else cb(new Error("Only documents, videos, and audio files are allowed"))
   },
 })
 
+// Get all approved materials
 router.get("/", auth, async (req, res) => {
   try {
     const { page = 1, limit = 12, search = "", course = "", type = "" } = req.query
-
-    const query = { isApproved: true } // Only show approved materials
+    const query = { isApproved: true }
 
     if (search) {
-      query.$or = [{ title: { $regex: search, $options: "i" } }, { description: { $regex: search, $options: "i" } }]
+      query.$or = [
+        { title: { $regex: search, $options: "i" } },
+        { description: { $regex: search, $options: "i" } },
+      ]
     }
-
-    if (course) {
-      query.course = course
-    }
-
-    if (type) {
-      query.fileType = type
-    }
+    if (course) query.course = course
+    if (type) query.fileType = type
 
     const materials = await Material.find(query)
       .populate("course", "courseName courseCode")
       .populate("uploadedBy", "fullName")
       .sort({ createdAt: -1 })
-      .limit(limit * 1)
+      .limit(Number(limit))
       .skip((page - 1) * limit)
 
     const total = await Material.countDocuments(query)
     const totalPages = Math.ceil(total / limit)
 
-    const formattedMaterials = materials.map((material) => ({
-      _id: material._id,
-      title: material.title,
-      description: material.description,
-      filename: material.filename,
-      fileSize: material.fileSize,
-      fileType: material.fileType,
-      courseName: material.course?.courseName || material.course?.courseCode || "Unknown",
-      courseCode: material.course?.courseCode,
-      uploaderName: material.uploadedBy?.fullName || "Unknown",
-      downloadCount: material.downloadCount,
-      createdAt: material.createdAt,
-    }))
-
-    res.json({
-      success: true,
-      materials: formattedMaterials,
-      currentPage: Number.parseInt(page),
-      totalPages,
-      total,
-    })
+    res.json({ success: true, materials, currentPage: Number(page), totalPages, total })
   } catch (error) {
     console.error("Error fetching materials:", error)
-    res.status(500).json({
-      success: false,
-      message: "Failed to fetch materials",
-    })
+    res.status(500).json({ success: false, message: "Failed to fetch materials" })
   }
 })
-// Get courses for filter dropdown
+
+// Get courses for dropdown
 router.get("/courses", auth, async (req, res) => {
   try {
-    // Include both courseName and courseCode
     const courses = await Course.find({}, "courseName courseCode").sort({ courseName: 1 })
-    
-    // Format the courses to include both name and code
-    const formattedCourses = courses.map(course => ({
-      _id: course._id,
-      name: course.courseName,
-      code: course.courseCode // Add course code
-    }))
-    
-    res.json({
-      success: true,
-      courses: formattedCourses
-    })
+    res.json({ success: true, courses })
   } catch (error) {
     console.error("Error fetching courses:", error)
-    res.status(500).json({
-      success: false,
-      message: "Failed to fetch courses"
-    })
+    res.status(500).json({ success: false, message: "Failed to fetch courses" })
   }
 })
-// routes/materials.js
+
 // Upload material
 router.post("/upload", auth, upload.single("file"), async (req, res) => {
   try {
     const { title, description, course } = req.body
-
-    if (!req.file) {
-      return res.status(400).json({
-        success: false,
-        message: "File is required",
-      })
-    }
+    if (!req.file) return res.status(400).json({ success: false, message: "File is required" })
 
     const fileExtension = path.extname(req.file.originalname).toLowerCase().substring(1)
 
     const material = new Material({
       title,
       description,
-      filename: req.file.originalname,
-      filePath: req.file.path,
+      filename: req.file.filename,
+      originalName: req.file.originalname,
+      filePath: path.join("uploads/materials", req.file.filename),
       fileSize: req.file.size,
       fileType: fileExtension,
       course,
       uploadedBy: req.user.id,
-      isApproved: false, // Explicitly set to false
+      isApproved: false,
     })
 
     await material.save()
-
-    res.json({
-      success: true,
-      message: "Material uploaded successfully and is pending admin approval",
-      material,
-    })
+    res.json({ success: true, message: "Material uploaded successfully (pending admin approval)", material })
   } catch (error) {
     console.error("Error uploading material:", error)
-    res.status(500).json({
-      success: false,
-      message: "Failed to upload material",
-    })
+    res.status(500).json({ success: false, message: "Failed to upload material" })
   }
 })
+
 // Download material
 router.get("/:id/download", auth, async (req, res) => {
   try {
     const material = await Material.findById(req.params.id)
+    if (!material) return res.status(404).json({ success: false, message: "Material not found" })
 
-    if (!material) {
-      return res.status(404).json({
-        success: false,
-        message: "Material not found",
-      })
+    const absolutePath = path.resolve(material.filePath)
+    if (!fs.existsSync(absolutePath)) {
+      return res.status(404).json({ success: false, message: "File not found on server" })
     }
 
-    // Check if file exists first
-    if (!fs.existsSync(material.filePath)) {
-      return res.status(404).json({
-        success: false,
-        message: "File not found on server",
-      })
-    }
-
-    // Increment download count
     material.downloadCount = (material.downloadCount || 0) + 1
     await material.save()
 
-    // Set proper headers for download
-    res.setHeader('Content-Type', 'application/octet-stream');
-    res.setHeader('Content-Disposition', `attachment; filename="${material.filename}"`);
-    
-    // Stream the file
-    const fileStream = fs.createReadStream(material.filePath);
-    fileStream.pipe(res);
-    
+    res.download(absolutePath, material.originalName)
   } catch (error) {
     console.error("Error downloading material:", error)
-    res.status(500).json({
-      success: false,
-      message: "Failed to download material",
-    })
+    res.status(500).json({ success: false, message: "Failed to download material" })
   }
-})  
+})
 
 module.exports = router

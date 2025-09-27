@@ -1,4 +1,3 @@
-// models/Material.js
 const mongoose = require("mongoose")
 
 const materialSchema = new mongoose.Schema(
@@ -13,7 +12,11 @@ const materialSchema = new mongoose.Schema(
       trim: true,
     },
     filename: {
-      type: String,
+      type: String, // stored unique filename (e.g., 17288388-1234.pdf)
+      required: true,
+    },
+    originalName: {
+      type: String, // user’s original uploaded filename
       required: true,
     },
     filePath: {
@@ -30,7 +33,7 @@ const materialSchema = new mongoose.Schema(
     },
     course: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "CourseofStudy", // Updated to match your course model
+      ref: "Course", // ✅ must match your actual course model
       required: true,
     },
     uploadedBy: {
@@ -44,16 +47,14 @@ const materialSchema = new mongoose.Schema(
     },
     isApproved: {
       type: Boolean,
-      default: false, // Changed to false so materials need approval
+      default: false,
     },
     rejectionReason: {
       type: String,
       default: "",
     },
   },
-  {
-    timestamps: true,
-  },
+  { timestamps: true }
 )
 
 module.exports = mongoose.model("Material", materialSchema)
