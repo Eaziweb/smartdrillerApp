@@ -6,6 +6,7 @@ import { useNotification } from "../../contexts/NotificationContext"
 import ProgressRing from '../../components/ProgressRing'
 import styles from "../../styles/course-selection.module.css"
 import api from "../../utils/api";
+import axios from "axios"; // Add axios import
 
 // Portal component for rendering dropdowns outside the main DOM hierarchy
 const Portal = ({ children, className }) => {
@@ -50,6 +51,7 @@ const CourseSelection = () => {
   const [fetchingYears, setFetchingYears] = useState(false)
   const [fetchingTopics, setFetchingTopics] = useState(false)
   const [fetchingCourses, setFetchingCourses] = useState(false)
+  const [progressLoading, setProgressLoading] = useState(true) // Add loading state for progress
   
   // Simplified dropdown state - track which dropdown is open for which course
   const [openDropdown, setOpenDropdown] = useState({ courseCode: null, type: null })
@@ -68,12 +70,17 @@ const CourseSelection = () => {
   const loadAllStudyProgress = async () => {
     if (isMockMode) return;
     
+    setProgressLoading(true);
     try {
       const token = localStorage.getItem("token")
-      const response = await api.get("/api/questions/study-progress", {
+      const API_BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:5000/api";
+      
+      // Use axios directly with a longer timeout
+      const response = await axios.get(`${API_BASE_URL}/questions/study-progress`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
+        timeout: 30000, // 30 seconds timeout
       });
       
       if (response.data.success) {
@@ -83,7 +90,14 @@ const CourseSelection = () => {
       }
     } catch (error) {
       console.error("Failed to load study progress:", error);
+      // Set empty progress on error to avoid breaking the UI
       setStudyProgress({});
+      // Only show notification for non-timeout errors
+      if (!error.code || error.code !== 'ECONNABORTED') {
+        showNotification("Failed to load study progress. Some features may not work correctly.", "warning");
+      }
+    } finally {
+      setProgressLoading(false);
     }
   };
   
@@ -809,7 +823,11 @@ const CourseSelection = () => {
                     <span>{option.label}</span>
                     {!isMockMode && (
                       <div className={styles.progressIndicator}>
-                        <ProgressRing percentage={progressData.percentage} radius={12} stroke={2} />
+                        {progressLoading ? (
+                          <div className={styles.spinnerMini}></div>
+                        ) : (
+                          <ProgressRing percentage={progressData.percentage} radius={12} stroke={2} />
+                        )}
                       </div>
                     )}
                   </div>

@@ -166,15 +166,30 @@ router.get("/search", auth, async (req, res) => {
 // Get available courses for search
 // Get available course years
 
+// routes/questions.js
+
 router.get("/study-progress", auth, subscriptionCheck, async (req, res) => {
   try {
-    // Get all study progress records for this user
+    // Get all study progress records for this user (without populating studiedQuestions)
     const progressRecords = await StudyProgress.find({
       user: req.user.id
-    }).populate("studiedQuestions");
+    }).lean();
     
-    // Get all available courses and years
+    // Get all available courses and years (active)
     const courseYears = await CourseYear.find({ isActive: true });
+    
+    // Get total questions for each course-year in one aggregation
+    const totalQuestionsByCourseYear = await Question.aggregate([
+      { $match: { isActive: true } },
+      { $group: { _id: { course: "$course", year: "$year" }, count: { $sum: 1 } } }
+    ]);
+    
+    // Create a map for total questions by course-year
+    const totalQuestionsMap = {};
+    totalQuestionsByCourseYear.forEach(item => {
+      const key = `${item._id.course}-${item._id.year}`;
+      totalQuestionsMap[key] = item.count;
+    });
     
     // Structure the response
     const progressMap = {};
@@ -185,12 +200,8 @@ router.get("/study-progress", auth, subscriptionCheck, async (req, res) => {
         progressMap[cy.course] = {};
       }
       
-      // Count total questions for this course and year
-      const totalQuestions = await Question.countDocuments({
-        course: cy.course,
-        year: cy.year,
-        isActive: true
-      });
+      // Get total questions from the map
+      const totalQuestions = totalQuestionsMap[`${cy.course}-${cy.year}`] || 0;
       
       // Initialize with default progress (0%)
       progressMap[cy.course][cy.year] = {
@@ -204,17 +215,13 @@ router.get("/study-progress", auth, subscriptionCheck, async (req, res) => {
     for (const record of progressRecords) {
       // Only update if this course-year combination exists in our map
       if (progressMap[record.course] && progressMap[record.course][record.year]) {
-        // Recalculate total questions to ensure accuracy
-        const totalQuestions = await Question.countDocuments({
-          course: record.course,
-          year: record.year,
-          isActive: true
-        });
+        const studiedCount = record.studiedQuestions.length;
+        const totalQuestions = totalQuestionsMap[`${record.course}-${record.year}`] || 0;
         
         progressMap[record.course][record.year] = {
-          studiedCount: record.studiedQuestions.length,
+          studiedCount,
           totalQuestions,
-          percentage: totalQuestions > 0 ? Math.round((record.studiedQuestions.length / totalQuestions) * 100) : 0
+          percentage: totalQuestions > 0 ? Math.round((studiedCount / totalQuestions) * 100) : 0
         };
       }
     }
