@@ -5,13 +5,13 @@ import axios from "axios";
 import styles from "../../styles/NoteManagement.module.css";
 
 const NoteManagement = () => {
-  const [courses, setCourses] = useState([]);
+  const [courses, setCourses] = useState([]); // Initialize as empty array
   const [loading, setLoading] = useState(true);
   const [showCourseModal, setShowCourseModal] = useState(false);
   const [showNoteModal, setShowNoteModal] = useState(false);
   const [selectedCourse, setSelectedCourse] = useState(null);
   const [editingItem, setEditingItem] = useState(null);
-  const [openCourseId, setOpenCourseId] = useState(null); // Track which course is open
+  const [openCourseId, setOpenCourseId] = useState(null);
   const [courseForm, setCourseForm] = useState({ title: "", description: "" });
   const [noteForm, setNoteForm] = useState({
     title: "",
@@ -34,10 +34,27 @@ const NoteManagement = () => {
       const response = await axios.get("/api/admin/notes/courses", {
         headers: getAuthHeader(),
       });
-      setCourses(response.data);
+      
+      // Ensure response.data is an array
+      if (Array.isArray(response.data)) {
+        setCourses(response.data);
+      } else if (response.data && typeof response.data === 'object') {
+        // If it's an object but not an array, try to extract array from it
+        // This handles cases where the API returns { courses: [...] } or similar
+        if (Array.isArray(response.data.courses)) {
+          setCourses(response.data.courses);
+        } else {
+          console.error("Unexpected response format:", response.data);
+          setCourses([]);
+        }
+      } else {
+        console.error("Response data is not an array:", response.data);
+        setCourses([]);
+      }
     } catch (error) {
       console.error("Failed to load courses:", error);
       showToast("Failed to load courses", "error");
+      setCourses([]); // Ensure courses is always an array
     } finally {
       setLoading(false);
     }
@@ -178,6 +195,8 @@ const NoteManagement = () => {
 
   const formatText = (type) => {
     const textarea = document.getElementById("noteContent");
+    if (!textarea) return; // Safety check
+    
     const start = textarea.selectionStart;
     const end = textarea.selectionEnd;
     const selectedText = textarea.value.substring(start, end);
@@ -235,7 +254,11 @@ const NoteManagement = () => {
     setTimeout(() => toast.classList.add("show"), 100);
     setTimeout(() => {
       toast.classList.remove("show");
-      setTimeout(() => document.body.removeChild(toast), 300);
+      setTimeout(() => {
+        if (document.body.contains(toast)) {
+          document.body.removeChild(toast);
+        }
+      }, 300);
     }, 3000);
   };
 
@@ -269,7 +292,7 @@ const NoteManagement = () => {
       </header>
 
       <div className={styles.managementContent}>
-        {courses.length === 0 ? (
+        {!Array.isArray(courses) || courses.length === 0 ? (
           <div className={styles.emptyState}>
             <i className="fas fa-sticky-note"></i>
             <h2>No courses found</h2>
@@ -294,7 +317,7 @@ const NoteManagement = () => {
                   <p>{course.description}</p>
                   <div className={styles.courseMeta}>
                     <span className={styles.itemCount}>
-                      {course.notes?.length || 0} notes
+                      {Array.isArray(course.notes) ? course.notes.length : 0} notes
                     </span>
                   </div>
                 </div>
@@ -334,7 +357,21 @@ const NoteManagement = () => {
               {/* Only show course content if this course is open */}
               {openCourseId === course._id && (
                 <div className={styles.courseContent}>
-                  {course.notes && course.notes.length > 0 ? (
+                  {!Array.isArray(course.notes) || course.notes.length === 0 ? (
+                    <div className={styles.emptySection}>
+                      <p>No notes in this course</p>
+                      <button
+                        className={`${styles.btn} ${styles.btnSm} ${styles.btnSecondary}`}
+                        onClick={() => {
+                          setSelectedCourse(course);
+                          setShowNoteModal(true);
+                        }}
+                      >
+                        <i className="fas fa-plus"></i>
+                        Add Note
+                      </button>
+                    </div>
+                  ) : (
                     <div className={styles.notesGrid}>
                       {course.notes.map((note) => (
                         <div key={note._id} className={styles.noteItem}>
@@ -343,7 +380,7 @@ const NoteManagement = () => {
                             <p>{note.description}</p>
                             <div className={styles.noteMeta}>
                               <span className={styles.noteDate}>
-                                {new Date(note.createdAt).toLocaleDateString()}
+                                {note.createdAt ? new Date(note.createdAt).toLocaleDateString() : "Unknown date"}
                               </span>
                             </div>
                           </div>
@@ -363,20 +400,6 @@ const NoteManagement = () => {
                           </div>
                         </div>
                       ))}
-                    </div>
-                  ) : (
-                    <div className={styles.emptySection}>
-                      <p>No notes in this course</p>
-                      <button
-                        className={`${styles.btn} ${styles.btnSm} ${styles.btnSecondary}`}
-                        onClick={() => {
-                          setSelectedCourse(course);
-                          setShowNoteModal(true);
-                        }}
-                      >
-                        <i className="fas fa-plus"></i>
-                        Add Note
-                      </button>
                     </div>
                   )}
                 </div>
