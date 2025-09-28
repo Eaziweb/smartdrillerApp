@@ -816,12 +816,14 @@
   }
   
   .courseInfo h3 {
-    font-size: 1rem;
+    font-size: .85rem;
   }
-  
+  .topicCount i {
+  font-size: 0.6rem;
+}
   .topicCount {
-    font-size: 0.75rem;
-    padding: 0.2rem 0.5rem;
+    font-size: 0.65rem;
+    padding: 0.2rem 0.4rem;
   }
   
   .topicHeader {
@@ -829,7 +831,7 @@
   }
   
   .topicInfo h4 {
-    font-size: 0.95rem;
+    font-size: 0.7rem;
   }
   
   .videoCount {
