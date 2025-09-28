@@ -310,37 +310,6 @@ const Study = () => {
     }
   }, [examData, progressLoaded])
   
-  // Process content with KaTeX when it changes
-  useEffect(() => {
-    if (katexLoaded && contentRef.current) {
-      processMathContent()
-    }
-  }, [katexLoaded, currentQuestionIndex, examData, showExplanation])
-  
-  const processMathContent = () => {
-    if (!window.katex || !contentRef.current) return
-    
-    // Find all elements with math content
-    const mathElements = contentRef.current.querySelectorAll('.math-content')
-    
-    mathElements.forEach(element => {
-      const content = element.getAttribute('data-math')
-      if (content) {
-        try {
-          // Render the math content
-          const renderedMath = window.katex.renderToString(content, {
-            throwOnError: false,
-            displayMode: element.classList.contains('display-math')
-          })
-          element.innerHTML = renderedMath
-        } catch (e) {
-          console.error("KaTeX rendering error:", e)
-          element.innerHTML = content // Fallback to raw content
-        }
-      }
-    })
-  }
-  
   const loadExamData = () => {
     try {
       const storedData = localStorage.getItem("currentExam")
@@ -460,41 +429,64 @@ const Study = () => {
     }
   }
   
-  // Helper function to render content with math
-  const renderContentWithMath = (content, isDisplayMode = false) => {
-    if (!content) return null
-    
-    // Simple regex to find LaTeX patterns
-    const latexPattern = /(\\\(.*?\\\)|\\\[.*?\\\]|\$\$.*?\$\$|\$.*?\$)/g
-    
-    // Split content by LaTeX patterns
-    const parts = content.split(latexPattern)
-    
-    return parts.map((part, index) => {
-      if (index % 2 === 1) { // This is a LaTeX expression
-        // Determine if it's display mode
-        const isDisplay = part.startsWith('\\[') || part.startsWith('$$')
-        
-        // Extract the actual LaTeX content
-        let latexContent = part
-        if (part.startsWith('\\(')) latexContent = part.slice(2, -2)
-        if (part.startsWith('\\[')) latexContent = part.slice(2, -2)
-        if (part.startsWith('$') && !part.startsWith('$$')) latexContent = part.slice(1, -1)
-        if (part.startsWith('$$')) latexContent = part.slice(2, -2)
-        
-        return (
-          <span 
-            key={index} 
-            className={`math-content ${isDisplay ? 'display-math' : 'inline-math'}`}
-            data-math={latexContent}
-          />
-        )
-      } else {
-        // Regular HTML content
-        return <span key={index} dangerouslySetInnerHTML={{ __html: part }} />
-      }
-    })
+const renderContentWithMath = (content, isDisplayMode = false) => {
+  if (!content) return null;
+
+  if (!katexLoaded) {
+    return <span>{content}</span>;
   }
+
+  // Split into text + potential LaTeX parts
+  const latexPattern = /(\\\(.*?\\\)|\\\[.*?\\\]|\$\$.*?\$\$|\$.*?\$)/g;
+  const parts = content.split(latexPattern);
+
+  return parts.map((part, index) => {
+    if (latexPattern.test(part)) {
+      // ✅ Clean up math fragments before rendering
+      let latexContent = part;
+
+      // Remove delimiters
+      if (part.startsWith("\\(")) latexContent = part.slice(2, -2);
+      if (part.startsWith("\\[")) latexContent = part.slice(2, -2);
+      if (part.startsWith("$$")) latexContent = part.slice(2, -2);
+      if (part.startsWith("$") && !part.startsWith("$$")) latexContent = part.slice(1, -1);
+
+      // Normalize LaTeX-like fragments ONLY inside math context
+      latexContent = latexContent
+        .replace(/frac\s*([^\s]+)\s*([^\s]+)/g, "\\frac{$1}{$2}") // fix fracx y
+        .replace(/sqrt\s*([^\s]+)/g, "\\sqrt{$1}")                // sqrt3 → \sqrt{3}
+        .replace(/([a-zA-Z]+)(\d+)/g, "$1^{$2}")                  // xp2 → xp^{2}, a10 → a^{10}
+        .replace(/le/g, "\\leq")
+        .replace(/ge/g, "\\geq")
+        .replace(/neq/g, "\\neq")
+        .replace(/cap/g, "\\cap")
+        .replace(/cup/g, "\\cup")
+        .replace(/phi/g, "\\phi")
+        .replace(/alpha/g, "\\alpha");
+
+      try {
+        return (
+          <span
+            key={index}
+            dangerouslySetInnerHTML={{
+              __html: window.katex.renderToString(latexContent, {
+                throwOnError: false,
+                displayMode: isDisplayMode || part.startsWith("\\[") || part.startsWith("$$"),
+              }),
+            }}
+          />
+        );
+      } catch (e) {
+        console.error("KaTeX render error:", e, "with content:", latexContent);
+        return <span key={index}>{part}</span>;
+      }
+    } else {
+      // ✅ Plain text stays untouched (Q2 remains Q2)
+      return <span key={index}>{part}</span>;
+    }
+  });
+};
+
   
   if (loading || !examData) {
     return (
@@ -601,7 +593,7 @@ const Study = () => {
           </div>
         )}
         <div className={styles.questionText}>
-          {renderContentWithMath(currentQuestion.question)}
+          {katexLoaded && renderContentWithMath(currentQuestion.question)}
         </div>
         <div className={styles.optionsContainer}>
           {currentQuestion.options.map((option, index) => {
@@ -620,7 +612,7 @@ const Study = () => {
               >
                 <div className={styles.optionLetter}>{String.fromCharCode(65 + index)}</div>
                 <div className={styles.optionText}>
-                  {renderContentWithMath(option)}
+                  {katexLoaded && renderContentWithMath(option)}
                 </div>
                 {showCorrect && <i className={`fas fa-check ${styles.optionIcon} ${styles.correctIcon}`}></i>}
                 {showWrong && <i className={`fas fa-times ${styles.optionIcon} ${styles.wrongIcon}`}></i>}
@@ -635,7 +627,7 @@ const Study = () => {
               <span>Explanation</span>
             </div>
             <div className={styles.explanationText}>
-              {renderContentWithMath(currentQuestion.explanation)}
+              {katexLoaded && renderContentWithMath(currentQuestion.explanation)}
             </div>
           </div>
         )}
