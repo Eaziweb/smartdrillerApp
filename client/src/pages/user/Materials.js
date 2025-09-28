@@ -112,6 +112,7 @@ const downloadMaterial = async (materialId, title) => {
     const link = document.createElement('a');
     link.href = `/api/materials/${materialId}/download`;
     link.download = title;
+    link.target = '_blank'; // Open in new tab to handle redirects properly
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);

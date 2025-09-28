@@ -103,6 +103,9 @@ const Home = () => {
       
       // Reset unread count
       setUnreadCount(0);
+      
+      // Store in localStorage as backup
+      localStorage.setItem('lastNotificationView', new Date().toISOString());
     } catch (error) {
       console.error("Failed to mark notifications as read:", error);
     }
@@ -116,6 +119,20 @@ const Home = () => {
       await markNotificationsAsRead();
     }
   };
+  
+  // Check for stored lastNotificationView on component mount
+  useEffect(() => {
+    const storedLastView = localStorage.getItem('lastNotificationView');
+    if (storedLastView && user) {
+      // If we have a stored timestamp but user doesn't, update user
+      if (!user.lastNotificationView || new Date(user.lastNotificationView) < new Date(storedLastView)) {
+        updateUser({
+          ...user,
+          lastNotificationView: storedLastView
+        });
+      }
+    }
+  }, [user]);
   
   const handleActivate = async () => {
     if (user?.isSubscribed) {

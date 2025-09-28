@@ -47,16 +47,72 @@ router.put("/profile", auth, async (req, res) => {
   }
 });
 
+// Add this GET endpoint for fetching user profile
+router.get("/profile", auth, async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id)
+      .populate('university')
+      .populate('course');
+    
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    
+    res.json({
+      user: {
+        id: user._id,
+        fullName: user.fullName,
+        email: user.email,
+        course: user.course,
+        phoneNumber: user.phoneNumber,
+        accountNumber: user.accountNumber,
+        bankName: user.bankName,
+        university: user.university,
+        isSubscribed: user.isSubscribed,
+        subscriptionExpiry: user.subscriptionExpiry,
+        subscriptionType: user.subscriptionType,
+        isRecurring: user.isRecurring,
+        remainingMonths: user.remainingMonths,
+        nextPaymentDate: user.nextPaymentDate,
+        lastNotificationView: user.lastNotificationView,
+      },
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
 // Update last notification view time
 router.put("/last-notification-view", auth, async (req, res) => {
   try {
+    const now = new Date();
     const user = await User.findByIdAndUpdate(
       req.user._id,
-      { lastNotificationView: new Date() },
+      { lastNotificationView: now },
       { new: true }
-    );
+    ).populate('university').populate('course');
 
-    res.json({ success: true, user });
+    res.json({ 
+      success: true, 
+      user: {
+        id: user._id,
+        fullName: user.fullName,
+        email: user.email,
+        course: user.course,
+        phoneNumber: user.phoneNumber,
+        accountNumber: user.accountNumber,
+        bankName: user.bankName,
+        university: user.university,
+        isSubscribed: user.isSubscribed,
+        subscriptionExpiry: user.subscriptionExpiry,
+        subscriptionType: user.subscriptionType,
+        isRecurring: user.isRecurring,
+        remainingMonths: user.remainingMonths,
+        nextPaymentDate: user.nextPaymentDate,
+        lastNotificationView: user.lastNotificationView,
+      }
+    });
   } catch (error) {
     console.error("Failed to update last notification view:", error);
     res.status(500).json({ message: "Server error" });
