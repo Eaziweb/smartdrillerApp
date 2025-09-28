@@ -104,6 +104,9 @@ const Videos = () => {
       )),
   )
 
+  // Detect if device is mobile
+  const isMobile = typeof window !== 'undefined' && /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
+
   if (loading) {
     return (
       <div className={styles.videosPage}>
@@ -280,18 +283,20 @@ const Videos = () => {
               </button>
             </div>
             <div className={styles.modalBody}>
-              <div className={styles.videoPlayer}>
-                <iframe
-                  width="100%"
-                  height="400"
-                  src={`https://www.youtube.com/embed/${getYouTubeVideoId(selectedVideo.url)}?autoplay=1`}
-                  frameBorder="0"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowFullScreen
-                ></iframe>
+              <div className={styles.videoPlayerContainer}>
+                <div className={styles.videoPlayer}>
+                  <iframe
+                    src={`https://www.youtube.com/embed/${getYouTubeVideoId(selectedVideo.url)}?rel=0&showinfo=0&modestbranding=1${isMobile ? '&autoplay=0' : '&autoplay=1'}`}
+                    frameBorder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                    title={selectedVideo.title}
+                  ></iframe>
+                </div>
               </div>
               <div className={styles.videoDetails}>
-                <p>{selectedVideo.description}</p>
+                <h4 className={styles.videoTitle}>{selectedVideo.title}</h4>
+                <p className={styles.videoDescription}>{selectedVideo.description}</p>
                 <div className={styles.videoStats}>
                   <div className={styles.statItem}>
                     <i className="fas fa-eye"></i>
