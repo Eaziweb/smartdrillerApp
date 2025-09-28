@@ -833,9 +833,12 @@
   }
   
   .videoCount {
-    font-size: 0.7rem;
-    padding: 0.15rem 0.5rem;
+    font-size: 0.4rem;
+    padding: 0.1rem 0.4rem;
   }
+  .videoCount i {
+  font-size: 0.4rem;
+}
   
   .videosGrid .videoThumbnail {
     height: 140px;
@@ -848,15 +851,15 @@
   }
   
   .videosGrid .videoInfo {
-    padding: 0.7rem;
+    padding: 0.5rem;
   }
   
   .videosGrid .videoInfo h5 {
-    font-size: 0.9rem;
+    font-size: 0.8rem;
   }
   
   .videosGrid .videoInfo p {
-    font-size: 0.75rem;
+    font-size: 0.5rem;
   }
   
   .videoPlayer {
@@ -886,8 +889,8 @@
   .videosList .videoMeta {
     flex-direction: column;
     align-items: flex-start;
-    gap: 0.25rem;
-    font-size: 0.65rem;
+    gap: 0.2rem;
+    font-size: 0.45rem;
   }
   
   .videosList .videoViews,
@@ -899,17 +902,15 @@
   
   .videosList .videoViews i,
   .videosList .videoDate i {
-    font-size: 0.6rem;
+    font-size: 0.5rem;
   }
   
   .videosList .videoInfo h5 {
-    font-size: 0.9rem;
-    line-height: 1.2;
+    font-size: 0.62rem;
   }
   
   .videosList .videoInfo p {
-    font-size: 0.7rem;
-    line-height: 1.2;
+    font-size: 0.45rem;
   }
   
   .videosList .videoThumbnail {
