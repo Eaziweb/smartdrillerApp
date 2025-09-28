@@ -819,12 +819,22 @@
     font-size: 1rem;
   }
   
+  .topicCount {
+    font-size: 0.75rem;
+    padding: 0.2rem 0.5rem;
+  }
+  
   .topicHeader {
     padding: 0.7rem 1rem;
   }
   
   .topicInfo h4 {
     font-size: 0.95rem;
+  }
+  
+  .videoCount {
+    font-size: 0.7rem;
+    padding: 0.15rem 0.5rem;
   }
   
   .videosGrid .videoThumbnail {
@@ -890,5 +900,25 @@
   .videosList .videoViews i,
   .videosList .videoDate i {
     font-size: 0.6rem;
+  }
+  
+  .videosList .videoInfo h5 {
+    font-size: 0.9rem;
+    line-height: 1.2;
+  }
+  
+  .videosList .videoInfo p {
+    font-size: 0.7rem;
+    line-height: 1.2;
+  }
+  
+  .videosList .videoThumbnail {
+    width: 120px;
+  }
+  
+  .videosList .playButton {
+    width: 35px;
+    height: 35px;
+    font-size: 0.8rem;
   }
 }

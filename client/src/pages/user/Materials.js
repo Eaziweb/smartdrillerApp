@@ -106,44 +106,22 @@ const Materials = () => {
     }
   }
 
-  const downloadMaterial = async (materialId, title) => {
-    try {
-      const response = await api.get(`/api/materials/${materialId}/download`, {
-        responseType: 'blob',
-      })
-      
-      // Check if response is actually a blob (not an error)
-      if (response.data.type === 'application/json') {
-        // Convert blob to text to read error message
-        const reader = new FileReader();
-        reader.onload = () => {
-          try {
-            const errorData = JSON.parse(reader.result);
-            showNotification(errorData.message || "Error downloading material", "error");
-          } catch (e) {
-            showNotification("Error downloading material", "error");
-          }
-        };
-        reader.readAsText(response.data);
-        return;
-      }
-      
-      // Handle successful download
-      const blob = new Blob([response.data])
-      const url = window.URL.createObjectURL(blob)
-      const a = document.createElement("a")
-      a.href = url
-      a.download = title
-      document.body.appendChild(a)
-      a.click()
-      window.URL.revokeObjectURL(url)
-      document.body.removeChild(a)
-      showNotification("Download started", "success")
-    } catch (error) {
-      console.error("Error downloading material:", error)
-      showNotification("Error downloading material", "error")
-    }
+const downloadMaterial = async (materialId, title) => {
+  try {
+    // Create a temporary link to trigger download
+    const link = document.createElement('a');
+    link.href = `/api/materials/${materialId}/download`;
+    link.download = title;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    showNotification("Download started", "success");
+  } catch (error) {
+    console.error("Error downloading material:", error);
+    showNotification("Error downloading material", "error");
   }
+}
 
   const handleFilterChange = (key, value) => {
     setFilters((prev) => ({ ...prev, [key]: value }))
@@ -268,34 +246,37 @@ const Materials = () => {
         </div>
       ) : (
         <div className={styles.materialsGrid}>
-          {materials.map((material) => (
-            <div key={material._id} className={styles.materialCard}>
-              <div className={styles.materialIcon}>
-                <i className={`fas ${getFileIcon(material.filename)}`}></i>
-              </div>
-              <div className={styles.materialInfo}>
-                <div className={styles.materialHeader}>
-                  <h3 className={styles.materialTitle}>{material.title}</h3>
-                  <div className={styles.materialMeta}>
-                    <span className={styles.materialCourse}>
-                      {material.course?.courseCode || material.course?.courseName || "Unknown"}
-                    </span>
-                    <span className={styles.materialSize}>{formatFileSize(material.fileSize)}</span>
-                  </div>
-                </div>
-                <div className={styles.materialDetails}>
-                  <span className={styles.uploader}>By: {material.uploadedBy?.fullName || "Unknown"}</span>
-                  <span className={styles.uploadDate}>{new Date(material.createdAt).toLocaleDateString()}</span>
-                </div>
-              </div>
-              <div className={styles.materialActions}>
-                <button onClick={() => downloadMaterial(material._id, material.originalName)} className={styles.downloadBtn}>
-                  <i className="fas fa-download"></i>
-                  Download
-                </button>
-              </div>
-            </div>
-          ))}
+   {materials.map((material) => (
+  <div key={material._id} className={styles.materialCard}>
+    <div className={styles.materialIcon}>
+      <i className={`fas ${getFileIcon(material.originalName)}`}></i>
+    </div>
+    <div className={styles.materialInfo}>
+      <div className={styles.materialHeader}>
+        <h3 className={styles.materialTitle}>{material.title}</h3>
+        <div className={styles.materialMeta}>
+          <span className={styles.materialCourse}>
+            {material.course?.courseCode || material.course?.courseName || "Unknown"}
+          </span>
+          <span className={styles.materialSize}>{formatFileSize(material.fileSize)}</span>
+        </div>
+      </div>
+      <div className={styles.materialDetails}>
+        <span className={styles.uploader}>By: {material.uploadedBy?.fullName || "Unknown"}</span>
+        <span className={styles.uploadDate}>{new Date(material.createdAt).toLocaleDateString()}</span>
+      </div>
+    </div>
+    <div className={styles.materialActions}>
+      <button 
+        onClick={() => downloadMaterial(material._id, material.originalName)} 
+        className={styles.downloadBtn}
+      >
+        <i className="fas fa-download"></i>
+        Download
+      </button>
+    </div>
+  </div>
+))}
         </div>
       )}
       

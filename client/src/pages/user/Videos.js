@@ -1,7 +1,7 @@
 "use client"
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { Link } from "react-router-dom"
-import api from "../../utils/api";
+import api from "../../utils/api"
 import styles from "../../styles/Videos.module.css"
 
 const Videos = () => {
@@ -15,6 +15,7 @@ const Videos = () => {
   const [openTopic, setOpenTopic] = useState(null)
   const [selectedVideo, setSelectedVideo] = useState(null)
   const [error, setError] = useState(null)
+  const [topicVideos, setTopicVideos] = useState({}) // Cache for topic videos
 
   useEffect(() => {
     loadCourses()
@@ -24,7 +25,7 @@ const Videos = () => {
     localStorage.setItem("videoViewStyle", viewStyle)
   }, [viewStyle])
 
-  const loadCourses = async () => {
+  const loadCourses = useCallback(async () => {
     setLoading(true)
     setError(null)
     try {
@@ -38,57 +39,62 @@ const Videos = () => {
     } finally {
       setLoading(false)
     }
-  }
+  }, [])
 
-  const toggleCourse = (courseId) => {
+  const toggleCourse = useCallback((courseId) => {
     setOpenCourse(openCourse === courseId ? null : courseId)
     setOpenTopic(null)
-  }
+  }, [openCourse])
 
-  const toggleTopic = async (topicId) => {
+  const toggleTopic = useCallback(async (topicId) => {
     if (openTopic === topicId) {
       setOpenTopic(null)
       return
     }
+    
+    // Check if videos are already cached
+    if (topicVideos[topicId]) {
+      setOpenTopic(topicId)
+      return
+    }
+    
     setOpenTopic(topicId)
-    // Lazy load videos for this topic
     try {
       const response = await api.get(`/api/videos/topic/${topicId}`, {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       })
-      setCourses((prevCourses) =>
-        prevCourses.map((course) => ({
-          ...course,
-          topics: course.topics.map((topic) => (topic._id === topicId ? { ...topic, videos: response.data } : topic)),
-        })),
-      )
+      // Cache the videos for this topic
+      setTopicVideos(prev => ({
+        ...prev,
+        [topicId]: response.data
+      }))
     } catch (error) {
       console.error("Failed to load videos:", error)
     }
-  }
+  }, [openTopic, topicVideos])
 
-  const openVideoPlayer = (video) => {
+  const openVideoPlayer = useCallback((video) => {
     setSelectedVideo(video)
-  }
+  }, [])
 
-  const closeVideoPlayer = () => {
+  const closeVideoPlayer = useCallback(() => {
     setSelectedVideo(null)
-  }
+  }, [])
 
-  const getYouTubeVideoId = (url) => {
+  const getYouTubeVideoId = useCallback((url) => {
     const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/
     const match = url.match(regExp)
     return match && match[2].length === 11 ? match[2] : null
-  }
+  }, [])
 
-  const formatNumber = (num) => {
+  const formatNumber = useCallback((num) => {
     if (num >= 1000000) {
       return (num / 1000000).toFixed(1) + "M"
     } else if (num >= 1000) {
       return (num / 1000).toFixed(1) + "K"
     }
     return num.toString()
-  }
+  }, [])
 
   const filteredCourses = courses.filter(
     (course) =>
@@ -211,9 +217,9 @@ const Videos = () => {
                           <i className={`${styles.topicChevron} fas fa-chevron-${openTopic === topic._id ? "up" : "down"}`}></i>
                         </div>
                         
-                        {openTopic === topic._id && topic.videos && (
+                        {openTopic === topic._id && (
                           <div className={viewStyle === "grid" ? styles.videosGrid : styles.videosList}>
-                            {topic.videos.map((video) => (
+                            {(topicVideos[topic._id] || []).map((video) => (
                               <div key={video._id} className={styles.videoCard} onClick={() => openVideoPlayer(video)}>
                                 <div className={styles.videoThumbnail}>
                                   <img
