@@ -132,48 +132,24 @@ const MaterialManagement = () => {
     }
   }
 
-  const downloadMaterial = async (materialId, filename) => {
+const downloadMaterial = async (fileUrl, filename) => {
   try {
-    const token = localStorage.getItem("token")
-    const response = await api.get(`/api/admin/materials/${materialId}/download`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-      responseType: 'blob',
-    })
-    
-    // Check if response is actually a blob (not an error)
-    if (response.data.type === 'application/json') {
-      // Convert blob to text to read error message
-      const reader = new FileReader();
-      reader.onload = () => {
-        try {
-          const errorData = JSON.parse(reader.result);
-          showNotification(errorData.message || "Error downloading material", "error");
-        } catch (e) {
-          showNotification("Error downloading material", "error");
-        }
-      };
-      reader.readAsText(response.data);
-      return;
-    }
-    
-    // Handle successful download
-    const blob = new Blob([response.data])
-    const url = window.URL.createObjectURL(blob)
-    const a = document.createElement("a")
-    a.href = url
-    a.download = filename
-    document.body.appendChild(a)
-    a.click()
-    window.URL.revokeObjectURL(url)
-    document.body.removeChild(a)
+    // Create a temporary link
+    const link = document.createElement("a")
+    link.href = fileUrl
+    link.download = filename
+    link.target = "_blank" // still works for PDF/video preview in new tab
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+
     showNotification("Download started", "success")
   } catch (error) {
     console.error("Error downloading material:", error)
     showNotification("Error downloading material", "error")
   }
 }
+
 
   const handleFilterChange = (key, value) => {
     setFilters((prev) => ({ ...prev, [key]: value }))
@@ -315,13 +291,14 @@ const MaterialManagement = () => {
                   <td>{material.downloadCount || 0}</td>
                   <td>
                     <div className={styles.actionButtons}>
-                      <button
-                        onClick={() => downloadMaterial(material._id, material.filename)}
-                        className={styles.downloadBtn}
-                        title="Download"
-                      >
-                        <i className="fas fa-download"></i>
-                      </button>
+                 <button
+  onClick={() => downloadMaterial(material.fileUrl, material.filename)} 
+  className={styles.downloadBtn}
+  title="Download"
+>
+  <i className="fas fa-download"></i>
+</button>
+
                       {!material.isApproved && (
                         <>
                           <button

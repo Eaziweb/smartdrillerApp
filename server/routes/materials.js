@@ -110,41 +110,30 @@ router.post("/upload", auth, upload.single("file"), async (req, res) => {
 // Download material
 router.get("/:id/download", auth, async (req, res) => {
   try {
-    const material = await Material.findById(req.params.id)
+    const material = await Material.findById(req.params.id);
     if (!material) {
-      return res.status(404).json({ success: false, message: "Material not found" })
+      return res.status(404).json({ success: false, message: "Material not found" });
     }
 
-    // Check if we have a Cloudinary URL
     if (!material.cloudinaryUrl) {
-      return res.status(404).json({ success: false, message: "File URL not available" })
+      return res.status(404).json({ success: false, message: "File URL not available" });
     }
 
     // Increment download count
-    material.downloadCount = (material.downloadCount || 0) + 1
-    await material.save()
+    material.downloadCount = (material.downloadCount || 0) + 1;
+    await material.save();
 
-    // For Cloudinary files, redirect to the URL with attachment flag
-    if (material.cloudinaryUrl) {
-      // Add attachment parameter to force download
-      const downloadUrl = material.cloudinaryUrl.includes('?') 
-        ? `${material.cloudinaryUrl}&fl_attachment=true`
-        : `${material.cloudinaryUrl}?fl_attachment=true`;
-      
-      return res.redirect(downloadUrl);
-    }
+    // Generate a proper Cloudinary download URL
+    const downloadUrl = material.cloudinaryUrl.includes("?")
+      ? `${material.cloudinaryUrl}&fl_attachment=${encodeURIComponent(material.originalName)}`
+      : `${material.cloudinaryUrl}?fl_attachment=${encodeURIComponent(material.originalName)}`;
 
-    // Fallback to local file storage (for backward compatibility)
-    const absolutePath = path.resolve(material.filePath)
-    if (!fs.existsSync(absolutePath)) {
-      return res.status(404).json({ success: false, message: "File not found on server" })
-    }
-
-    res.download(absolutePath, material.originalName)
+    return res.json({ success: true, url: downloadUrl });
   } catch (error) {
-    console.error("Error downloading material:", error)
-    res.status(500).json({ success: false, message: "Failed to download material" })
+    console.error("Error downloading material:", error);
+    res.status(500).json({ success: false, message: "Failed to download material" });
   }
-})
+});
+
 
 module.exports = router;

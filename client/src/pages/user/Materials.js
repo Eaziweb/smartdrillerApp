@@ -108,21 +108,30 @@ const Materials = () => {
 
 const downloadMaterial = async (materialId, title) => {
   try {
-    // Create a temporary link to trigger download
-    const link = document.createElement('a');
-    link.href = `/api/materials/${materialId}/download`;
-    link.download = title;
-    link.target = '_blank'; // Open in new tab to handle redirects properly
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    
-    showNotification("Download started", "success");
+    // Ask backend for the Cloudinary download URL
+    const response = await api.get(`/api/materials/${materialId}/download`);
+
+    if (response.data.success && response.data.url) {
+      // Create a temporary link to Cloudinary file
+      const link = document.createElement('a');
+      link.href = response.data.url;
+      link.download = title; // Suggests filename
+      link.target = '_blank'; // Opens in new tab (browser handles download)
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      showNotification("Download started", "success");
+    } else {
+      showNotification("File not available for download", "error");
+    }
   } catch (error) {
     console.error("Error downloading material:", error);
     showNotification("Error downloading material", "error");
   }
-}
+};
+
+
 
   const handleFilterChange = (key, value) => {
     setFilters((prev) => ({ ...prev, [key]: value }))
@@ -268,13 +277,14 @@ const downloadMaterial = async (materialId, title) => {
       </div>
     </div>
     <div className={styles.materialActions}>
-      <button 
-        onClick={() => downloadMaterial(material._id, material.originalName)} 
-        className={styles.downloadBtn}
-      >
-        <i className="fas fa-download"></i>
-        Download
-      </button>
+    <button
+  onClick={() => downloadMaterial(material.fileUrl, material.originalName)}
+  className={styles.downloadBtn}
+>
+  <i className="fas fa-download"></i>
+  Download
+</button>
+
     </div>
   </div>
 ))}
