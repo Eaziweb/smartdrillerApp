@@ -23,7 +23,7 @@ const materialSchema = new mongoose.Schema(
       type: String,
       required: true,
       trim: true,
-      unique: true
+      unique: true  // This creates a unique index
     },
     cloudinaryResourceType: {
       type: String,
@@ -138,7 +138,7 @@ materialSchema.index({ course: 1, isApproved: 1 });
 materialSchema.index({ uploadedBy: 1 });
 materialSchema.index({ fileType: 1 });
 materialSchema.index({ createdAt: -1 });
-materialSchema.index({ cloudinaryPublicId: 1 }, { unique: true });
+// Removed the duplicate index for cloudinaryPublicId since it's already defined as unique in the field definition
 
 // Pre-save middleware to ensure consistent data
 materialSchema.pre('save', function(next) {
