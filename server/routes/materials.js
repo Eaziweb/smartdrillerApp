@@ -111,7 +111,8 @@ router.post("/upload", auth, upload.single("file"), async (req, res) => {
   }
 });
 
-// Download material
+
+// Update the download route
 router.get("/:id/download", auth, async (req, res) => {
   try {
     const material = await Material.findById(req.params.id);
@@ -119,18 +120,21 @@ router.get("/:id/download", auth, async (req, res) => {
       return res.status(404).json({ success: false, message: "Material not found" });
     }
 
-    if (!material.cloudinaryUrl) {
-      return res.status(404).json({ success: false, message: "File URL not available" });
+    if (!material.cloudinaryPublicId) {
+      return res.status(404).json({ success: false, message: "File not available" });
     }
 
     // Increment download count
     material.downloadCount = (material.downloadCount || 0) + 1;
     await material.save();
 
-    // Generate a proper Cloudinary download URL with attachment parameter
-    const downloadUrl = material.cloudinaryUrl.includes("?")
-      ? `${material.cloudinaryUrl}&fl_attachment=${encodeURIComponent(material.originalName)}`
-      : `${material.cloudinaryUrl}?fl_attachment=${encodeURIComponent(material.originalName)}`;
+    // Generate a proper Cloudinary download URL using the SDK
+    const downloadUrl = cloudinary.url(material.cloudinaryPublicId, {
+      resource_type: 'raw',
+      attachment: material.originalName,
+      secure: true,
+      sign_url: true // Add signed URL for security
+    });
 
     return res.json({ success: true, url: downloadUrl });
   } catch (error) {

@@ -152,6 +152,7 @@ const AdminQuizManagement = () => {
     setTimeout(() => setToast({ show: false, message: "", type: "success" }), 3000)
   }
   
+  
   const handleImageUpload = (e) => {
     const file = e.target.files[0]
     if (file) {
@@ -184,7 +185,6 @@ const AdminQuizManagement = () => {
       imagePreview: null,
     })
   }
-  
   const addOption = () => {
     if (questionForm.options.length < 4) {
       setQuestionForm({
@@ -762,43 +762,43 @@ const AdminQuizManagement = () => {
                 />
               </div>
               
-              {/* Image Upload */}
-              <div className={styles.formGroup}>
-                <label>Question Image (Optional)</label>
-                <div className={styles.imageUploadContainer}>
-                  {questionForm.imagePreview ? (
-                    <div className={styles.imagePreviewContainer}>
-                      <img 
-                        src={questionForm.imagePreview} 
-                        alt="Question preview" 
-                        className={styles.imagePreview}
-                      />
-                      <button 
-                        type="button" 
-                        className={styles.removeImageBtn}
-                        onClick={removeImage}
-                      >
-                        Remove Image
-                      </button>
-                    </div>
-                  ) : (
-                    <div className={styles.imageUploadBox}>
-                      <input
-                        type="file"
-                        id="image-upload"
-                        accept="image/*"
-                        onChange={handleImageUpload}
-                        className={styles.imageInput}
-                      />
-                      <label htmlFor="image-upload" className={styles.imageUploadLabel}>
-                        <i className="fas fa-cloud-upload-alt"></i>
-                        <span>Click to upload an image</span>
-                        <p>Supports: JPG, PNG, GIF (Max 5MB)</p>
-                      </label>
-                    </div>
-                  )}
-                </div>
-              </div>
+            {/* Image Upload */}
+      <div className={styles.formGroup}>
+        <label>Question Image (Optional)</label>
+        <div className={styles.imageUploadContainer}>
+          {questionForm.imagePreview ? (
+            <div className={styles.imagePreviewContainer}>
+              <img 
+                src={questionForm.imagePreview} 
+                alt="Question preview" 
+                className={styles.imagePreview}
+              />
+              <button 
+                type="button" 
+                className={styles.removeImageBtn}
+                onClick={removeImage}
+              >
+                Remove Image
+              </button>
+            </div>
+          ) : (
+            <div className={styles.imageUploadBox}>
+              <input
+                type="file"
+                id="image-upload"
+                accept="image/*"
+                onChange={handleImageUpload}
+                className={styles.imageInput}
+              />
+              <label htmlFor="image-upload" className={styles.imageUploadLabel}>
+                <i className="fas fa-cloud-upload-alt"></i>
+                <span>Click to upload an image</span>
+                <p>Supports: JPG, PNG, GIF (Max 5MB)</p>
+              </label>
+            </div>
+          )}
+        </div>
+      </div>
               
               {/* Options Section */}
               <div className={styles.optionsSection}>
@@ -1000,34 +1000,34 @@ const AdminQuizManagement = () => {
             </div>
           </div>
           
-          {/* Questions List */}
-          <div className={styles.questionsList}>
-            {loading ? (
-              <div className={styles.loading}>Loading questions...</div>
-            ) : questions.length === 0 ? (
-              <div className={styles.noResults}>
-                <p>No questions found. Try adjusting your search or filters.</p>
+ {/* Questions List */}
+      <div className={styles.questionsList}>
+        {loading ? (
+          <div className={styles.loading}>Loading questions...</div>
+        ) : questions.length === 0 ? (
+          <div className={styles.noResults}>
+            <p>No questions found. Try adjusting your search or filters.</p>
+          </div>
+        ) : (
+          questions.map((question) => (
+            <div key={question._id} className={styles.questionCard}>
+              <div className={styles.questionHeader}>
+                <span className={`${styles.badge} ${styles.courseBadge}`}>{question.course.toUpperCase()}</span>
+                <span className={`${styles.badge} ${styles.yearBadge}`}>{question.year}</span>
+                <span className={`${styles.badge} ${styles.topicBadge}`}>{question.topic}</span>
               </div>
-            ) : (
-              questions.map((question) => (
-                <div key={question._id} className={styles.questionCard}>
-                  <div className={styles.questionHeader}>
-                    <span className={`${styles.badge} ${styles.courseBadge}`}>{question.course.toUpperCase()}</span>
-                    <span className={`${styles.badge} ${styles.yearBadge}`}>{question.year}</span>
-                    <span className={`${styles.badge} ${styles.topicBadge}`}>{question.topic}</span>
+              
+              <div className={styles.questionContent}>
+                <p className={styles.questionText}>{question.question}</p>
+                
+                {(question.cloudinaryUrl || question.image) && (
+                  <div className={styles.questionImage}>
+                    <img 
+                      src={question.cloudinaryUrl || (question.image.startsWith('/uploads') ? question.image : `/uploads${question.image}`)} 
+                      alt="Question Image" 
+                    />
                   </div>
-                  
-                  <div className={styles.questionContent}>
-                    <p className={styles.questionText}>{question.question}</p>
-                    
-                    {question.image && (
-                      <div className={styles.questionImage}>
-                        <img 
-                          src={question.image.startsWith('/uploads') ? question.image : `/uploads${question.image}`} 
-                          alt="Question Image" 
-                        />
-                      </div>
-                    )}
+                )}
                     
                     <div className={styles.options}>
                       {question.options.map((option, index) => (

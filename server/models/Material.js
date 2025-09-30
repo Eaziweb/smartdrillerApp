@@ -1,6 +1,4 @@
-// Material.js (Model)
-const mongoose = require("mongoose")
-
+// models/Material.js
 const materialSchema = new mongoose.Schema(
   {
     title: {
@@ -24,6 +22,12 @@ const materialSchema = new mongoose.Schema(
       type: String,
       required: true,
       trim: true,
+    },
+    cloudinaryResourceType: {
+      type: String,
+      required: true,
+      enum: ['image', 'raw', 'video', 'auto'],
+      default: 'raw'
     },
     // Original file information
     originalName: {
@@ -86,7 +90,7 @@ const materialSchema = new mongoose.Schema(
     toJSON: { virtuals: true },
     toObject: { virtuals: true }
   }
-)
+);
 
 // Virtual for file URL
 materialSchema.virtual('fileUrl').get(function() {
@@ -137,4 +141,4 @@ materialSchema.pre('save', function(next) {
   next();
 });
 
-module.exports = mongoose.model("Material", materialSchema)
+module.exports = mongoose.model("Material", materialSchema);

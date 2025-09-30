@@ -6,6 +6,8 @@ const Material = require("../models/Material");
 const { cloudinary } = require("../config/cloudinary");
 
 // Get all materials (with filters)
+// routes/admin-materials.js
+// Update the GET route to properly format the uploader name
 router.get("/", adminAuth, async (req, res) => {
   try {
     const { page = 1, limit = 20, search = "", course = "", type = "", status = "" } = req.query;
@@ -32,9 +34,15 @@ router.get("/", adminAuth, async (req, res) => {
     const total = await Material.countDocuments(query);
     const totalPages = Math.ceil(total / limit);
 
+    // Format materials to include uploaderName
+    const formattedMaterials = materials.map(material => ({
+      ...material.toObject(),
+      uploaderName: material.uploadedBy?.fullName || "Unknown"
+    }));
+
     res.json({
       success: true,
-      materials,
+      materials: formattedMaterials,
       currentPage: Number(page),
       totalPages,
       total,
@@ -109,20 +117,23 @@ router.delete("/:id", adminAuth, async (req, res) => {
   }
 });
 
-// Download material
+
 router.get("/:id/download", adminAuth, async (req, res) => {
   try {
     const material = await Material.findById(req.params.id);
     if (!material) return res.status(404).json({ success: false, message: "Material not found" });
 
-    if (!material.cloudinaryUrl) {
+    if (!material.cloudinaryPublicId) {
       return res.status(404).json({ success: false, message: "File URL not available" });
     }
 
-    // Generate a Cloudinary download URL with attachment parameter
-    const downloadUrl = material.cloudinaryUrl.includes("?")
-      ? `${material.cloudinaryUrl}&fl_attachment=${encodeURIComponent(material.originalName)}`
-      : `${material.cloudinaryUrl}?fl_attachment=${encodeURIComponent(material.originalName)}`;
+    // Generate a proper Cloudinary download URL using the SDK
+    const downloadUrl = cloudinary.url(material.cloudinaryPublicId, {
+      resource_type: 'raw',
+      attachment: material.originalName,
+      secure: true,
+      sign_url: true // Add signed URL for security
+    });
 
     res.json({ success: true, url: downloadUrl });
   } catch (error) {

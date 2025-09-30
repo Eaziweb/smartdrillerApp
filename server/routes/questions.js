@@ -1,3 +1,4 @@
+// routes/questions.js
 const express = require("express");
 const mongoose = require("mongoose"); 
 const multer = require('multer');
@@ -9,37 +10,23 @@ const Course = require("../models/Course");
 const StudyProgress = require("../models/StudyProgress");
 const { ensureCourseYearExists } = require("../utils/courseYearUtils");
 const { auth, adminAuth } = require("../middleware/auth");
-const subscriptionCheck = require("../middleware/subscriptionCheck");;
+const subscriptionCheck = require("../middleware/subscriptionCheck");
 const { v4: uuidv4 } = require('uuid');
-// Configure multer for image uploads
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    const uploadDir = path.join(__dirname, "../uploads/questions");
-    // Create directory if it doesn't exist
-    if (!fs.existsSync(uploadDir)) {
-      fs.mkdirSync(uploadDir, { recursive: true });
-    }
-    cb(null, uploadDir);
-  },
-  filename: function (req, file, cb) {
-    // Generate unique filename
-    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1E9);
-    cb(null, file.fieldname + "-" + uniqueSuffix + path.extname(file.originalname));
+const cloudinary = require('../config/cloudinary');
+const { CloudinaryStorage } = require('multer-storage-cloudinary');
+
+// Configure Cloudinary storage for question images
+const storage = new CloudinaryStorage({
+  cloudinary: cloudinary,
+  params: {
+    folder: 'questions',
+    allowed_formats: ['jpg', 'jpeg', 'png', 'gif'],
+    transformation: [{ width: 800, height: 600, crop: 'limit' }]
   }
 });
 
-const fileFilter = (req, file, cb) => {
-  // Accept images only
-  if (file.mimetype.startsWith("image/")) {
-    cb(null, true);
-  } else {
-    cb(new Error("Only image files are allowed!"), false);
-  }
-};
-
 const upload = multer({
   storage: storage,
-  fileFilter: fileFilter,
   limits: {
     fileSize: 5 * 1024 * 1024, // 5MB limit
   }
@@ -390,7 +377,7 @@ router.post("/study-progress", auth, subscriptionCheck, async (req, res) => {
   }
 });
 
-// Admin: Add question with image upload
+
 // Admin: Add question with image upload
 router.post("/admin/add", adminAuth, upload.single("image"), async (req, res) => {
   try {
@@ -447,7 +434,8 @@ router.post("/admin/add", adminAuth, upload.single("image"), async (req, res) =>
     
     const newQuestion = new Question({
       question: question.trim(),
-      image: req.file ? `/uploads/questions/${req.file.filename}` : null,
+      cloudinaryUrl: req.file ? req.file.path : null,
+      cloudinaryPublicId: req.file ? req.file.filename : null,
       options: parsedOptions.map(opt => opt.trim()),
       correctOption: correctOptionNumber,
       explanation: explanation.trim(),
@@ -530,7 +518,13 @@ router.put("/admin/:id", adminAuth, upload.single("image"), async (req, res) => 
     
     // Handle image
     if (req.file) {
-      updates.image = `/uploads/questions/${req.file.filename}`;
+      // If there's an existing image on Cloudinary, delete it
+      if (existingQuestion.cloudinaryPublicId) {
+        await cloudinary.uploader.destroy(existingQuestion.cloudinaryPublicId);
+      }
+      
+      updates.cloudinaryUrl = req.file.path;
+      updates.cloudinaryPublicId = req.file.filename;
     }
     
     // Update the question
@@ -543,6 +537,32 @@ router.put("/admin/:id", adminAuth, upload.single("image"), async (req, res) => 
   } catch (error) {
     console.error("Error updating question:", error);
     res.status(500).json({ message: "Server error: " + error.message });
+  }
+});
+
+// Admin: Delete question
+router.delete("/admin/:id", adminAuth, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const question = await Question.findById(id);
+    
+    if (!question) {
+      return res.status(404).json({ message: "Question not found" });
+    }
+    
+    // If there's an image on Cloudinary, delete it
+    if (question.cloudinaryPublicId) {
+      await cloudinary.uploader.destroy(question.cloudinaryPublicId);
+    }
+    
+    // Soft delete by setting isActive to false
+    question.isActive = false;
+    await question.save();
+    
+    res.json({ message: "Question deleted successfully" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
   }
 });
 
@@ -802,19 +822,19 @@ router.get("/admin/search", adminAuth, async (req, res) => {
   }
 });
 
-// Admin: Delete question
-router.delete("/admin/:id", adminAuth, async (req, res) => {
-  try {
-    const { id } = req.params;
-    const question = await Question.findByIdAndUpdate(id, { isActive: false }, { new: true });
-    if (!question) {
-      return res.status(404).json({ message: "Question not found" });
-    }
-    res.json({ message: "Question deleted successfully" });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Server error" });
-  }
-});
+// // Admin: Delete question
+// router.delete("/admin/:id", adminAuth, async (req, res) => {
+//   try {
+//     const { id } = req.params;
+//     const question = await Question.findByIdAndUpdate(id, { isActive: false }, { new: true });
+//     if (!question) {
+//       return res.status(404).json({ message: "Question not found" });
+//     }
+//     res.json({ message: "Question deleted successfully" });
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).json({ message: "Server error" });
+//   }
+// });
 
 module.exports = router;

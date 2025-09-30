@@ -2,9 +2,8 @@
 import { useState, useEffect, useRef } from "react"
 import { useNavigate } from "react-router-dom"
 import { useAuth } from "../../contexts/AuthContext"
-import api from "../../utils/api";
+import api from "../../utils/api"
 import styles from "../../styles/study.module.css"
-// Import KaTeX CSS
 import 'katex/dist/katex.min.css'
 
 const Study = () => {
@@ -29,12 +28,12 @@ const Study = () => {
   const [isReading, setIsReading] = useState(false)
   const speechRef = useRef(null)
   const contentRef = useRef(null)
-  const voiceReaderOnRef = useRef(voiceReaderOn) // Ref to track the latest state
+  const voiceReaderOnRef = useRef(voiceReaderOn)
 
   // Update ref when state changes
   useEffect(() => {
-    voiceReaderOnRef.current = voiceReaderOn;
-  }, [voiceReaderOn]);
+    voiceReaderOnRef.current = voiceReaderOn
+  }, [voiceReaderOn])
 
   // Check if speech synthesis is supported
   useEffect(() => {
@@ -54,10 +53,8 @@ const Study = () => {
       const currentQuestion = examData.questions[currentQuestionIndex]
       const isStudied = studiedQuestions.has(currentQuestion._id)
       
-      // Stop any ongoing speech
       stopSpeech()
       
-      // Read appropriate content based on study status
       if (isStudied) {
         readQuestionContent(currentQuestion, true)
       } else {
@@ -73,148 +70,136 @@ const Study = () => {
   // Add keyboard navigation
   useEffect(() => {
     const handleKeyDown = (e) => {
-      if (!examData) return;
+      if (!examData) return
       
       switch(e.key) {
         case 'ArrowLeft':
           if (currentQuestionIndex > 0) {
-            navigateToQuestion(currentQuestionIndex - 1);
+            navigateToQuestion(currentQuestionIndex - 1)
           }
-          break;
+          break
         case 'ArrowRight':
           if (currentQuestionIndex < examData.questions.length - 1) {
-            navigateToQuestion(currentQuestionIndex + 1);
+            navigateToQuestion(currentQuestionIndex + 1)
           }
-          break;
+          break
         case 'Enter':
           if (!studiedQuestions.has(examData.questions[currentQuestionIndex]._id)) {
-            handleStudy(examData.questions[currentQuestionIndex]._id);
+            handleStudy(examData.questions[currentQuestionIndex]._id)
           }
-          break;
+          break
         default:
-          break;
+          break
       }
-    };
+    }
 
-    window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('keydown', handleKeyDown)
     return () => {
-      window.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [currentQuestionIndex, examData, studiedQuestions]);
+      window.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [currentQuestionIndex, examData, studiedQuestions])
 
-  // Function to stop speech and reset states
+  // Stop speech function
   const stopSpeech = () => {
     if (speechRef.current) {
       speechRef.current.cancel()
       setIsReading(false)
-      setVoiceReaderOn(false) // Turn off voice reader when stopped
+      setVoiceReaderOn(false)
     }
   }
 
-  // Function to read question and options only
+  // Read question and options only
   const readQuestionAndOptions = (question) => {
     if (!speechRef.current) return
     
-    // Clean LaTeX expressions from text
     const cleanText = (text) => {
       return text
-        .replace(/\\\(.*?\\\)/g, '') // Remove inline math
-        .replace(/\\\[.*?\\\]/g, '') // Remove display math
-        .replace(/\$\$.*?\$\$/g, '') // Remove display math with $$         .replace(/\$.*?\$/g, '')     // Remove inline math with $         .replace(/\\[a-zA-Z]+/g, '') // Remove LaTeX commands
-        .replace(/[{}]/g, '')        // Remove braces
+        .replace(/\\\(.*?\\\)/g, '')
+        .replace(/\\\[.*?\\\]/g, '')
+        .replace(/\$\$.*?\$\$/g, '')
+        .replace(/\$.*?\$/g, '')
+        .replace(/\\[a-zA-Z]+/g, '')
+        .replace(/[{}]/g, '')
         .trim()
     }
     
-    // Prepare text to read
     let textToRead = `Question: ${cleanText(question.question)}. Options: `
     
-    // Add all options
     question.options.forEach((option, index) => {
       textToRead += `${String.fromCharCode(65 + index)}. ${cleanText(option)}. `
     })
     
-    // Create speech utterance
     const utterance = new SpeechSynthesisUtterance(textToRead)
     utterance.rate = 0.9
     utterance.pitch = 1
     utterance.volume = 1
     
-    // Set up event handlers
     utterance.onstart = () => setIsReading(true)
     utterance.onend = () => {
       setIsReading(false)
-      setVoiceReaderOn(false) // Turn off voice reader when finished
+      setVoiceReaderOn(false)
     }
     utterance.onerror = () => {
       setIsReading(false)
-      setVoiceReaderOn(false) // Turn off voice reader on error
+      setVoiceReaderOn(false)
     }
     
-    // Speak the text
     speechRef.current.speak(utterance)
   }
 
-  // Function to read question content (for studied questions)
+  // Read question content (for studied questions)
   const readQuestionContent = (question, isStudied) => {
     if (!speechRef.current || !isStudied) return
     
-    // Clean LaTeX expressions from text
     const cleanText = (text) => {
       return text
-        .replace(/\\\(.*?\\\)/g, '') // Remove inline math
-        .replace(/\\\[.*?\\\]/g, '') // Remove display math
-        .replace(/\$\$.*?\$\$/g, '') // Remove display math with $$         .replace(/\$.*?\$/g, '')     // Remove inline math with $         .replace(/\\[a-zA-Z]+/g, '') // Remove LaTeX commands
-        .replace(/[{}]/g, '')        // Remove braces
+        .replace(/\\\(.*?\\\)/g, '')
+        .replace(/\\\[.*?\\\]/g, '')
+        .replace(/\$\$.*?\$\$/g, '')
+        .replace(/\$.*?\$/g, '')
+        .replace(/\\[a-zA-Z]+/g, '')
+        .replace(/[{}]/g, '')
         .trim()
     }
     
-    // Prepare text to read
     let textToRead = `Question: ${cleanText(question.question)}. `
     
-    // Add correct answer
     const correctOptionIndex = question.correctOption - 1
     textToRead += `The correct answer is: ${String.fromCharCode(65 + correctOptionIndex)}. ${cleanText(question.options[correctOptionIndex])}. `
     
-    // Add user's answer if it's wrong
     const userAnswer = userAnswers[question._id]
     if (userAnswer !== undefined && userAnswer !== question.correctOption) {
       const wrongOptionIndex = userAnswer - 1
       textToRead += `Your answer was: ${String.fromCharCode(65 + wrongOptionIndex)}. ${cleanText(question.options[wrongOptionIndex])}. `
     }
     
-    // Add explanation
     textToRead += `Explanation: ${cleanText(question.explanation)}`
     
-    // Create speech utterance
     const utterance = new SpeechSynthesisUtterance(textToRead)
     utterance.rate = 0.9
     utterance.pitch = 1
     utterance.volume = 1
     
-    // Set up event handlers
     utterance.onstart = () => setIsReading(true)
     utterance.onend = () => {
       setIsReading(false)
-      setVoiceReaderOn(false) // Turn off voice reader when finished
+      setVoiceReaderOn(false)
     }
     utterance.onerror = () => {
       setIsReading(false)
-      setVoiceReaderOn(false) // Turn off voice reader on error
+      setVoiceReaderOn(false)
     }
     
-    // Speak the text
     speechRef.current.speak(utterance)
   }
 
   // Toggle voice reader
   const toggleVoiceReader = () => {
-    // If currently reading, just stop and turn off
     if (isReading) {
       stopSpeech()
       return
     }
     
-    // If not reading, toggle the state
     const newState = !voiceReaderOn
     setVoiceReaderOn(newState)
     
@@ -222,7 +207,6 @@ const Study = () => {
       const currentQuestion = examData.questions[currentQuestionIndex]
       const isStudied = studiedQuestions.has(currentQuestion._id)
       
-      // Cancel any ongoing speech (shouldn't be any because isReading is false, but just in case)
       if (speechRef.current) {
         speechRef.current.cancel()
       }
@@ -235,34 +219,33 @@ const Study = () => {
     }
   }
 
-  // Modified handleStudy to trigger voice reading
+  // Handle study action
   const handleStudy = async (questionId) => {
-    setStudiedQuestions((prev) => new Set([...prev, questionId]));
-    setShowExplanation((prev) => ({ ...prev, [questionId]: true }));
+    setStudiedQuestions((prev) => new Set([...prev, questionId]))
+    setShowExplanation((prev) => ({ ...prev, [questionId]: true }))
 
-    // Trigger voice reading if enabled
     if (voiceReaderOn && speechSupported && examData) {
-      const currentQuestion = examData.questions[currentQuestionIndex];
+      const currentQuestion = examData.questions[currentQuestionIndex]
       if (currentQuestion._id === questionId) {
-        stopSpeech();
-        readQuestionContent(currentQuestion, true);
+        stopSpeech()
+        readQuestionContent(currentQuestion, true)
       }
     }
 
     try {
-      await api.post("/api/questions/study-progress", { questionId });
+      await api.post("/api/questions/study-progress", { questionId })
     } catch (error) {
-      console.error("Failed to record study progress:", error);
+      console.error("Failed to record study progress:", error)
     }
-  };
+  }
 
-  // Modified navigateToQuestion to stop speech
+  // Navigate to question
   const navigateToQuestion = (index) => {
     stopSpeech()
     setCurrentQuestionIndex(index)
   }
 
-  // Modified handleBack to stop speech
+  // Handle back navigation
   const handleBack = () => {
     stopSpeech()
     const progressKey = `study_progress_${examData?.course}_${examData?.year}`
@@ -270,6 +253,7 @@ const Study = () => {
     navigate("/course-selection?type=study")
   }
 
+  // Initialize component
   useEffect(() => {
     if (!user?.isSubscribed) {
       navigate("/home")
@@ -279,21 +263,17 @@ const Study = () => {
     loadExamData()
     loadBookmarks()
     
-    // Load KaTeX dynamically
     const loadKaTeX = async () => {
       try {
-        // Import KaTeX components
         const katexModule = await import('katex')
         const { render, renderToString } = katexModule
         
-        // Store KaTeX functions globally for easy access
         window.katex = {
           render,
           renderToString
         }
         
         setKatexLoaded(true)
-        console.log("KaTeX loaded successfully")
       } catch (error) {
         console.error("Failed to load KaTeX:", error)
       }
@@ -302,7 +282,7 @@ const Study = () => {
     loadKaTeX()
   }, [user, navigate])
   
-  // Load progress only after exam data is available
+  // Load progress when exam data is available
   useEffect(() => {
     if (examData && !progressLoaded) {
       loadProgress()
@@ -310,6 +290,7 @@ const Study = () => {
     }
   }, [examData, progressLoaded])
   
+  // Load exam data
   const loadExamData = () => {
     try {
       const storedData = localStorage.getItem("currentExam")
@@ -330,6 +311,7 @@ const Study = () => {
     }
   }
   
+  // Load bookmarks
   const loadBookmarks = async () => {
     try {
       const response = await api.get("/api/bookmarks")
@@ -345,6 +327,7 @@ const Study = () => {
     }
   }
   
+  // Load progress
   const loadProgress = () => {
     if (!examData) return
     try {
@@ -362,6 +345,7 @@ const Study = () => {
     }
   }
   
+  // Save progress
   const saveProgress = () => {
     if (!examData) return
     try {
@@ -379,12 +363,14 @@ const Study = () => {
     }
   }
   
+  // Save progress when relevant data changes
   useEffect(() => {
     if (progressLoaded) {
       saveProgress()
     }
   }, [userAnswers, studiedQuestions, showExplanation, currentQuestionIndex, progressLoaded])
   
+  // Handle answer selection
   const handleAnswerSelect = (questionId, optionIndex) => {
     if (studiedQuestions.has(questionId)) return
     setUserAnswers((prev) => ({
@@ -393,6 +379,7 @@ const Study = () => {
     }))
   }
   
+  // Handle bookmark
   const handleBookmark = async (questionId) => {
     try {
       if (bookmarkedQuestions.has(questionId)) {
@@ -411,6 +398,7 @@ const Study = () => {
     }
   }
   
+  // Handle report submission
   const handleReport = async () => {
     if (!reportDescription.trim()) return
     setSubmittingReport(true)
@@ -429,65 +417,91 @@ const Study = () => {
     }
   }
   
-const renderContentWithMath = (content, isDisplayMode = false) => {
-  if (!content) return null;
+  // Render content with math
+  const renderContentWithMath = (content) => {
+    if (!content) return null
 
-  if (!katexLoaded) {
-    return <span>{content}</span>;
-  }
-
-  // Split into text + potential LaTeX parts
-  const latexPattern = /(\\\(.*?\\\)|\\\[.*?\\\]|\$\$.*?\$\$|\$.*?\$)/g;
-  const parts = content.split(latexPattern);
-
-  return parts.map((part, index) => {
-    if (latexPattern.test(part)) {
-      // ✅ Clean up math fragments before rendering
-      let latexContent = part;
-
-      // Remove delimiters
-      if (part.startsWith("\\(")) latexContent = part.slice(2, -2);
-      if (part.startsWith("\\[")) latexContent = part.slice(2, -2);
-      if (part.startsWith("$$")) latexContent = part.slice(2, -2);
-      if (part.startsWith("$") && !part.startsWith("$$")) latexContent = part.slice(1, -1);
-
-      // Normalize LaTeX-like fragments ONLY inside math context
-      latexContent = latexContent
-        .replace(/frac\s*([^\s]+)\s*([^\s]+)/g, "\\frac{$1}{$2}") // fix fracx y
-        .replace(/sqrt\s*([^\s]+)/g, "\\sqrt{$1}")                // sqrt3 → \sqrt{3}
-        .replace(/([a-zA-Z]+)(\d+)/g, "$1^{$2}")                  // xp2 → xp^{2}, a10 → a^{10}
-        .replace(/le/g, "\\leq")
-        .replace(/ge/g, "\\geq")
-        .replace(/neq/g, "\\neq")
-        .replace(/cap/g, "\\cap")
-        .replace(/cup/g, "\\cup")
-        .replace(/phi/g, "\\phi")
-        .replace(/alpha/g, "\\alpha");
-
-      try {
-        return (
-          <span
-            key={index}
-            dangerouslySetInnerHTML={{
-              __html: window.katex.renderToString(latexContent, {
-                throwOnError: false,
-                displayMode: isDisplayMode || part.startsWith("\\[") || part.startsWith("$$"),
-              }),
-            }}
-          />
-        );
-      } catch (e) {
-        console.error("KaTeX render error:", e, "with content:", latexContent);
-        return <span key={index}>{part}</span>;
-      }
-    } else {
-      // ✅ Plain text stays untouched (Q2 remains Q2)
-      return <span key={index}>{part}</span>;
+    if (!katexLoaded) {
+      return <span>{content}</span>
     }
-  });
-};
 
+    const latexPattern = /(\\\(.*?\\\)|\\\[.*?\\\]|\$\$.*?\$\$|\$.*?\$)/g
+    const parts = content.split(latexPattern)
+
+    return parts.map((part, index) => {
+      if (latexPattern.test(part)) {
+        let latexContent = part
+
+        if (part.startsWith("\\(")) latexContent = part.slice(2, -2)
+        if (part.startsWith("\\[")) latexContent = part.slice(2, -2)
+        if (part.startsWith("$$")) latexContent = part.slice(2, -2)
+        if (part.startsWith("$") && !part.startsWith("$$")) latexContent = part.slice(1, -1)
+
+        latexContent = latexContent
+          .replace(/frac\s*([^\s]+)\s*([^\s]+)/g, "\\frac{$1}{$2}")
+          .replace(/sqrt\s*([^\s]+)/g, "\\sqrt{$1}")
+          .replace(/([a-zA-Z]+)(\d+)/g, "$1^{$2}")
+          .replace(/le/g, "\\leq")
+          .replace(/ge/g, "\\geq")
+          .replace(/neq/g, "\\neq")
+          .replace(/cap/g, "\\cap")
+          .replace(/cup/g, "\\cup")
+          .replace(/phi/g, "\\phi")
+          .replace(/alpha/g, "\\alpha")
+
+        try {
+          return (
+            <span
+              key={index}
+              dangerouslySetInnerHTML={{
+                __html: window.katex.renderToString(latexContent, {
+                  throwOnError: false,
+                  displayMode: part.startsWith("\\[") || part.startsWith("$$"),
+                }),
+              }}
+            />
+          )
+        } catch (e) {
+          console.error("KaTeX render error:", e, "with content:", latexContent)
+          return <span key={index}>{part}</span>
+        }
+      } else {
+        return <span key={index}>{part}</span>
+      }
+    })
+  }
   
+  // Get image URL with proper fallback
+  const getImageUrl = (imagePath) => {
+    if (!imagePath) return null
+    
+    if (imagePath.startsWith('http')) {
+      return imagePath
+    }
+    if (imagePath.startsWith('/uploads')) {
+      return imagePath
+    }
+    return `/uploads${imagePath}`
+  }
+  
+  // Handle image error
+  const handleImageError = (e) => {
+    e.target.onerror = null
+    e.target.style.display = 'none'
+    
+    const container = e.target.parentElement
+    if (container && container.classList.contains(styles.questionImage)) {
+      if (!container.querySelector('.image-fallback')) {
+        const fallback = document.createElement('div')
+        fallback.className = 'image-fallback'
+        fallback.innerHTML = '<i class="fas fa-image"></i><span>Image not available</span>'
+        fallback.style.cssText = 'display: flex; flex-direction: column; align-items: center; justify-content: center; height: 200px; color: #666;'
+        container.appendChild(fallback)
+      }
+    }
+  }
+  
+  // Loading state
   if (loading || !examData) {
     return (
       <div className={styles.loadingContainer}>
@@ -502,40 +516,6 @@ const renderContentWithMath = (content, isDisplayMode = false) => {
   const userAnswer = userAnswers[currentQuestion._id]
   const showExp = showExplanation[currentQuestion._id]
   
-  // Improved image URL handling with better fallback
-  const getImageUrl = (imagePath) => {
-    if (!imagePath) return null // Return null if no image path provided
-    if (imagePath.startsWith('http')) {
-      return imagePath
-    }
-    if (imagePath.startsWith('/uploads')) {
-      return imagePath
-    }
-    return `/uploads${imagePath}` // Fixed: Added leading slash
-  }
-  
-  // Handle image error with better fallback
-  const handleImageError = (e) => {
-    // Prevent infinite loop by removing the error handler
-    e.target.onerror = null;
-    
-    // Hide the broken image
-    e.target.style.display = 'none';
-    
-    // If there's a container, we could show a placeholder text or icon
-    const container = e.target.parentElement;
-    if (container && container.classList.contains(styles.questionImage)) {
-      // Create a fallback element if it doesn't exist
-      if (!container.querySelector('.image-fallback')) {
-        const fallback = document.createElement('div');
-        fallback.className = 'image-fallback';
-        fallback.innerHTML = '<i class="fas fa-image"></i><span>Image not available</span>';
-        fallback.style.cssText = 'display: flex; flex-direction: column; align-items: center; justify-content: center; height: 200px; color: #666;';
-        container.appendChild(fallback);
-      }
-    }
-  }
-  
   return (
     <div className={styles.studyPage} ref={contentRef}>
       <div className={styles.quizHeader}>
@@ -544,7 +524,7 @@ const renderContentWithMath = (content, isDisplayMode = false) => {
             <i className="fa fa-arrow-left"></i>
           </button>
           <div className={styles.subjectInfo}>
-            <h2>{examData.course.toUpperCase()}</h2> {/* Display course code in caps */}
+            <h2>{examData.course.toUpperCase()}</h2>
             <span>Question {currentQuestionIndex + 1} of {examData.questions.length}</span>
           </div>
         </div>
@@ -583,10 +563,10 @@ const renderContentWithMath = (content, isDisplayMode = false) => {
       </div>
       
       <div className={styles.questionContainer}>
-        {currentQuestion.image && getImageUrl(currentQuestion.image) && (
+        {(currentQuestion.cloudinaryUrl || currentQuestion.image) && (
           <div className={styles.questionImage}>
             <img 
-              src={getImageUrl(currentQuestion.image)} 
+              src={getImageUrl(currentQuestion.cloudinaryUrl || currentQuestion.image)} 
               alt="Question illustration" 
               onError={handleImageError}
             />
@@ -601,7 +581,6 @@ const renderContentWithMath = (content, isDisplayMode = false) => {
             const isSelected = userAnswer === optionNumber
             const isCorrect = currentQuestion.correctOption === optionNumber
             const showCorrect = isStudied && isCorrect
-            // Only show wrong if the user selected this option and it's not correct
             const showWrong = isStudied && isSelected && !isCorrect
             
             return (
@@ -650,7 +629,6 @@ const renderContentWithMath = (content, isDisplayMode = false) => {
         })}
       </div>
       
-      {/* Navigation with study button in the middle */}
       <div className={styles.navigationContainer}>
         <button
           className={styles.navBtn}

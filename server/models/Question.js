@@ -1,12 +1,24 @@
 // models/Question.js
-const mongoose = require("mongoose")
+const mongoose = require("mongoose");
+
 const questionSchema = new mongoose.Schema({
-  
   question: {
     type: String,
     required: true,
     trim: true,
   },
+  // Cloudinary image fields
+  cloudinaryUrl: {
+    type: String,
+    trim: true,
+    default: null,
+  },
+  cloudinaryPublicId: {
+    type: String,
+    trim: true,
+    default: null,
+  },
+  // Keep the old image field for backward compatibility
   image: {
     type: String,
     trim: true,
@@ -76,9 +88,22 @@ const questionSchema = new mongoose.Schema({
     enum: ['pending', 'active'],
     default: 'active',
   },
-})
+});
+
 questionSchema.pre("save", function (next) {
-  this.updatedAt = Date.now()
-  next()
-})
-module.exports = mongoose.model("Question", questionSchema)
+  this.updatedAt = Date.now();
+  next();
+});
+
+// Virtual for image URL - returns Cloudinary URL if available, otherwise falls back to local path
+questionSchema.virtual('imageUrl').get(function() {
+  if (this.cloudinaryUrl) {
+    return this.cloudinaryUrl;
+  }
+  if (this.image && this.image.startsWith('/uploads')) {
+    return this.image;
+  }
+  return null;
+});
+
+module.exports = mongoose.model("Question", questionSchema);
