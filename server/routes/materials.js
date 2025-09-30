@@ -112,6 +112,7 @@ router.post("/upload", auth, upload.single("file"), async (req, res) => {
 });
 
 
+// routes/materials.js
 // Update the download route
 router.get("/:id/download", auth, async (req, res) => {
   try {
@@ -133,7 +134,7 @@ router.get("/:id/download", auth, async (req, res) => {
       resource_type: 'raw',
       attachment: material.originalName,
       secure: true,
-      sign_url: true // Add signed URL for security
+      sign_url: true
     });
 
     return res.json({ success: true, url: downloadUrl });
@@ -142,5 +143,4 @@ router.get("/:id/download", auth, async (req, res) => {
     res.status(500).json({ success: false, message: "Failed to download material" });
   }
 });
-
 module.exports = router;

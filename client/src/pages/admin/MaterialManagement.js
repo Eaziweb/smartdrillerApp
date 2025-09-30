@@ -63,103 +63,105 @@ const MaterialManagement = () => {
     setDeleteModal({ open: true, id })
   }
 
-  const confirmApprove = async () => {
-    const materialId = approveModal.id
-    setApproveModal({ open: false, id: null })
-    try {
-      const token = localStorage.getItem("token")
-      const response = await api.put(`/api/admin/materials/${materialId}/approve`, {}, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-      
-      if (response.data.success) {
-        showNotification("Material approved successfully", "success")
-        loadMaterials()
-      } else {
-        throw new Error(response.data.message)
-      }
-    } catch (error) {
-      console.error("Error approving material:", error)
-      showNotification("Error approving material", "error")
+const confirmApprove = async () => {
+  const materialId = approveModal.id;
+  setApproveModal({ open: false, id: null });
+  try {
+    const token = localStorage.getItem("token");
+    const response = await api.put(`/api/admin/materials/${materialId}/approve`, {}, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    
+    if (response.data.success) {
+      showNotification("Material approved successfully", "success");
+      loadMaterials();
+    } else {
+      throw new Error(response.data.message || "Approval failed");
     }
+  } catch (error) {
+    console.error("Error approving material:", error);
+    showNotification(error.response?.data?.message || "Error approving material", "error");
   }
+};
 
-  const confirmReject = async () => {
-    const materialId = rejectModal.id
-    const reason = rejectModal.reason
-    setRejectModal({ open: false, id: null, reason: "" })
-    try {
-      const token = localStorage.getItem("token")
-      const response = await api.put(`/api/admin/materials/${materialId}/reject`, { reason }, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-      
-      if (response.data.success) {
-        showNotification("Material rejected successfully", "success")
-        loadMaterials()
-      } else {
-        throw new Error(response.data.message)
-      }
-    } catch (error) {
-      console.error("Error rejecting material:", error)
-      showNotification("Error rejecting material", "error")
+const confirmReject = async () => {
+  const materialId = rejectModal.id;
+  const reason = rejectModal.reason;
+  setRejectModal({ open: false, id: null, reason: "" });
+  try {
+    const token = localStorage.getItem("token");
+    const response = await api.put(`/api/admin/materials/${materialId}/reject`, { reason }, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    
+    if (response.data.success) {
+      showNotification("Material rejected successfully", "success");
+      loadMaterials();
+    } else {
+      throw new Error(response.data.message || "Rejection failed");
     }
+  } catch (error) {
+    console.error("Error rejecting material:", error);
+    showNotification(error.response?.data?.message || "Error rejecting material", "error");
   }
+};
 
-  const confirmDelete = async () => {
-    const materialId = deleteModal.id
-    setDeleteModal({ open: false, id: null })
-    try {
-      const token = localStorage.getItem("token")
-      const response = await api.delete(`/api/admin/materials/${materialId}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-      
-      if (response.data.success) {
-        showNotification("Material deleted successfully", "success")
-        loadMaterials()
-      } else {
-        throw new Error(response.data.message)
-      }
-    } catch (error) {
-      console.error("Error deleting material:", error)
-      showNotification("Error deleting material", "error")
+const confirmDelete = async () => {
+  const materialId = deleteModal.id;
+  setDeleteModal({ open: false, id: null });
+  try {
+    const token = localStorage.getItem("token");
+    const response = await api.delete(`/api/admin/materials/${materialId}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    
+    if (response.data.success) {
+      showNotification("Material deleted successfully", "success");
+      loadMaterials();
+    } else {
+      throw new Error(response.data.message || "Deletion failed");
     }
+  } catch (error) {
+    console.error("Error deleting material:", error);
+    showNotification(error.response?.data?.message || "Error deleting material", "error");
   }
+};
 
-  const downloadMaterial = async (materialId, filename) => {
-    try {
-      const token = localStorage.getItem("token");
-      const response = await api.get(`/api/admin/materials/${materialId}/download`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+// MaterialManagement.jsx
+// Update the download function
+const downloadMaterial = async (materialId, filename) => {
+  try {
+    const token = localStorage.getItem("token");
+    const response = await api.get(`/api/admin/materials/${materialId}/download`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
 
-      if (response.data.success && response.data.url) {
-        // Create a temporary link to download the file
-        const link = document.createElement('a');
-        link.href = response.data.url;
-        link.download = filename; // Suggests filename
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+    if (response.data.success && response.data.url) {
+      // Create a temporary link to download the file
+      const link = document.createElement('a');
+      link.href = response.data.url;
+      link.download = filename; // Suggests filename
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
 
-        showNotification("Download started", "success");
-      } else {
-        showNotification("File not available for download", "error");
-      }
-    } catch (error) {
-      console.error("Error downloading material:", error);
-      showNotification("Error downloading material", "error");
+      showNotification("Download started", "success");
+    } else {
+      showNotification(response.data.message || "File not available for download", "error");
     }
-  };
+  } catch (error) {
+    console.error("Error downloading material:", error);
+    showNotification(error.response?.data?.message || "Error downloading material", "error");
+  }
+};
 
   const handleFilterChange = (key, value) => {
     setFilters((prev) => ({ ...prev, [key]: value }))
