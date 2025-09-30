@@ -41,6 +41,7 @@ const Correction = () => {
         
         setKatexLoaded(true)
       } catch (error) {
+        console.error("Failed to load KaTeX:", error)
       }
     }
     
@@ -140,6 +141,46 @@ const Correction = () => {
     setCurrentQuestionIndex(index)
   }
 
+  // Get image URL with proper fallback for Cloudinary and local images
+  const getImageUrl = (imagePath) => {
+    if (!imagePath) return null
+    
+    // If it's a full URL (Cloudinary), return as is
+    if (imagePath.startsWith('http')) {
+      return imagePath
+    }
+    
+    // If it's a local path starting with /uploads, return as is
+    if (imagePath.startsWith('/uploads')) {
+      return imagePath
+    }
+    
+    // Otherwise, prepend /uploads
+    return `/uploads${imagePath}`
+  }
+  
+  // Handle image error with better fallback
+  const handleImageError = (e) => {
+    // Prevent infinite loop by removing the error handler
+    e.target.onerror = null
+    
+    // Hide the broken image
+    e.target.style.display = 'none'
+    
+    // If there's a container, show a placeholder
+    const container = e.target.parentElement
+    if (container && container.classList.contains(styles.questionImage)) {
+      // Create a fallback element if it doesn't exist
+      if (!container.querySelector('.image-fallback')) {
+        const fallback = document.createElement('div')
+        fallback.className = 'image-fallback'
+        fallback.innerHTML = '<i class="fas fa-image"></i><span>Image not available</span>'
+        fallback.style.cssText = 'display: flex; flex-direction: column; align-items: center; justify-content: center; height: 200px; color: #666;'
+        container.appendChild(fallback)
+      }
+    }
+  }
+
   if (loading || !correctionData) {
     return (
       <div className={styles.loadingContainer}>
@@ -178,6 +219,17 @@ const Correction = () => {
       
       {/* Question Content */}
       <div className={styles.questionContainer}>
+        {/* Display image if available */}
+        {(currentQuestion.cloudinaryUrl || currentQuestion.image) && (
+          <div className={styles.questionImage}>
+            <img 
+              src={getImageUrl(currentQuestion.cloudinaryUrl || currentQuestion.image)} 
+              alt="Question illustration" 
+              onError={handleImageError}
+            />
+          </div>
+        )}
+        
         <div className={styles.questionText}>
           {renderContentWithMath(currentQuestion.question)}
         </div>

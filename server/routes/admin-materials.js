@@ -3,9 +3,11 @@ const express = require("express");
 const router = express.Router();
 const { adminAuth } = require("../middleware/auth");
 const Material = require("../models/Material");
-const cloudinary = require("../config/cloudinary"); // ✅ FIXED import
+const cloudinary = require("../config/cloudinary");
 
-// Get all materials (with filters)
+// ==========================
+// 📌 Get all materials (with filters)
+// ==========================
 router.get("/", adminAuth, async (req, res) => {
   try {
     const { page = 1, limit = 20, search = "", course = "", type = "", status = "" } = req.query;
@@ -50,7 +52,9 @@ router.get("/", adminAuth, async (req, res) => {
   }
 });
 
-// Approve material - move file to approved folder
+// ==========================
+// 📌 Approve material (move file to approved folder)
+// ==========================
 router.put("/:id/approve", adminAuth, async (req, res) => {
   try {
     const material = await Material.findById(req.params.id);
@@ -63,7 +67,7 @@ router.put("/:id/approve", adminAuth, async (req, res) => {
 
     try {
       await cloudinary.uploader.rename(oldPublicId, newPublicId, {
-        resource_type: "raw", // ✅ ensure PDFs remain PDFs
+        resource_type: "raw", // ✅ keep as raw file (PDF/DOCX/PPT)
       });
     } catch (renameError) {
       console.error("Error renaming file in Cloudinary:", renameError);
@@ -87,7 +91,9 @@ router.put("/:id/approve", adminAuth, async (req, res) => {
   }
 });
 
-// Reject material - delete from Cloudinary and DB
+// ==========================
+// 📌 Reject material (delete from Cloudinary + DB)
+// ==========================
 router.put("/:id/reject", adminAuth, async (req, res) => {
   try {
     const material = await Material.findById(req.params.id);
@@ -114,7 +120,9 @@ router.put("/:id/reject", adminAuth, async (req, res) => {
   }
 });
 
-// Delete material - delete from Cloudinary and DB
+// ==========================
+// 📌 Delete material (Cloudinary + DB)
+// ==========================
 router.delete("/:id", adminAuth, async (req, res) => {
   try {
     const material = await Material.findById(req.params.id);
@@ -141,7 +149,9 @@ router.delete("/:id", adminAuth, async (req, res) => {
   }
 });
 
-// Download material - generate a proper PDF/docx/ppt download URL
+// ==========================
+// 📌 Download material
+// ==========================
 router.get("/:id/download", adminAuth, async (req, res) => {
   try {
     const material = await Material.findById(req.params.id);
@@ -153,7 +163,7 @@ router.get("/:id/download", adminAuth, async (req, res) => {
       return res.status(404).json({ success: false, message: "File URL not available" });
     }
 
-    // ✅ Construct proper raw download URL
+    // ✅ Force file download (PDF/DOCX/PPT)
     const downloadUrl = `https://res.cloudinary.com/${process.env.CLOUDINARY_CLOUD_NAME}/raw/upload/fl_attachment/${material.cloudinaryPublicId}`;
 
     res.json({ success: true, url: downloadUrl });
@@ -164,4 +174,3 @@ router.get("/:id/download", adminAuth, async (req, res) => {
 });
 
 module.exports = router;
-  

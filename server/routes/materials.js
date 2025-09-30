@@ -1,39 +1,44 @@
-// materials.js
+// routes/materials.js
 const express = require("express");
 const router = express.Router();
-const multer = require('multer');
-const { CloudinaryStorage } = require('multer-storage-cloudinary');
-const cloudinary = require('../config/cloudinary');
+const multer = require("multer");
+const { CloudinaryStorage } = require("multer-storage-cloudinary");
+const cloudinary = require("../config/cloudinary");
 const { auth } = require("../middleware/auth");
 const Material = require("../models/Material");
 const Course = require("../models/Course");
 
-// Configure Cloudinary storage with pending folder
+// ✅ Configure Cloudinary storage for RAW file uploads
 const storage = new CloudinaryStorage({
-  cloudinary: cloudinary,
-  params: {
-    folder: 'materials/pending',
-    allowed_formats: ['pdf', 'docx', 'ppt'],
-    resource_type: 'raw'
-  }
+  cloudinary,
+  params: async (req, file) => {
+    const ext = file.originalname.split(".").pop().toLowerCase();
+
+    return {
+      folder: "materials/pending",
+      public_id: `${Date.now()}-${file.originalname.replace(/\.[^/.]+$/, "")}`,
+      resource_type: "raw", // ✅ ensure it's saved as raw file
+      format: ext           // ✅ keep original extension
+    };
+  },
 });
 
-const upload = multer({ 
-  storage: storage,
+const upload = multer({
+  storage,
   limits: { fileSize: 100 * 1024 * 1024 }, // 100MB
   fileFilter: (req, file, cb) => {
-    const allowedTypes = ['pdf', 'docx', 'ppt'];
-    const extname = allowedTypes.includes(file.originalname.split('.').pop().toLowerCase());
-    const mimetype = allowedTypes.includes(file.mimetype.split('/')[1]);
-    if (mimetype && extname) {
-      return cb(null, true);
+    const allowedTypes = ["pdf", "docx", "ppt"];
+    const ext = file.originalname.split(".").pop().toLowerCase();
+
+    if (allowedTypes.includes(ext)) {
+      cb(null, true);
     } else {
       cb(new Error("Only PDF, DOCX, and PPT files are allowed"));
     }
-  }
+  },
 });
 
-// Get all approved materials
+// ✅ Get all approved materials
 router.get("/", auth, async (req, res) => {
   try {
     const { page = 1, limit = 12, search = "", course = "", type = "" } = req.query;
@@ -42,7 +47,7 @@ router.get("/", auth, async (req, res) => {
     if (search) {
       query.$or = [
         { title: { $regex: search, $options: "i" } },
-        { description: { $regex: search, $options: "i" } }
+        { description: { $regex: search, $options: "i" } },
       ];
     }
     if (course) query.course = course;
@@ -65,7 +70,7 @@ router.get("/", auth, async (req, res) => {
   }
 });
 
-// Get courses for dropdown
+// ✅ Get courses for dropdown
 router.get("/courses", auth, async (req, res) => {
   try {
     const courses = await Course.find({}, "courseName courseCode").sort({ courseName: 1 });
@@ -76,7 +81,7 @@ router.get("/courses", auth, async (req, res) => {
   }
 });
 
-// Upload material
+// ✅ Upload material
 router.post("/upload", auth, upload.single("file"), async (req, res) => {
   try {
     const { title, description, course } = req.body;
@@ -84,7 +89,7 @@ router.post("/upload", auth, upload.single("file"), async (req, res) => {
       return res.status(400).json({ success: false, message: "File is required" });
     }
 
-    const fileExtension = req.file.originalname.split('.').pop().toLowerCase();
+    const fileExtension = req.file.originalname.split(".").pop().toLowerCase();
 
     const material = new Material({
       title,
@@ -100,10 +105,10 @@ router.post("/upload", auth, upload.single("file"), async (req, res) => {
     });
 
     await material.save();
-    res.json({ 
-      success: true, 
-      message: "Material uploaded successfully (pending admin approval)", 
-      material 
+    res.json({
+      success: true,
+      message: "Material uploaded successfully (pending admin approval)",
+      material,
     });
   } catch (error) {
     console.error("Error uploading material:", error);
@@ -111,9 +116,7 @@ router.post("/upload", auth, upload.single("file"), async (req, res) => {
   }
 });
 
-
-// routes/materials.js
-// Update the download route
+// ✅ Download material
 router.get("/:id/download", auth, async (req, res) => {
   try {
     const material = await Material.findById(req.params.id);
@@ -129,13 +132,8 @@ router.get("/:id/download", auth, async (req, res) => {
     material.downloadCount = (material.downloadCount || 0) + 1;
     await material.save();
 
-    // Generate a proper Cloudinary download URL using the SDK
-    const downloadUrl = cloudinary.url(material.cloudinaryPublicId, {
-      resource_type: 'raw',
-      attachment: material.originalName,
-      secure: true,
-      sign_url: true
-    });
+    // ✅ Construct proper raw download URL
+    const downloadUrl = `https://res.cloudinary.com/${process.env.CLOUDINARY_CLOUD_NAME}/raw/upload/fl_attachment/${material.cloudinaryPublicId}`;
 
     return res.json({ success: true, url: downloadUrl });
   } catch (error) {
@@ -143,4 +141,5 @@ router.get("/:id/download", auth, async (req, res) => {
     res.status(500).json({ success: false, message: "Failed to download material" });
   }
 });
+
 module.exports = router;
