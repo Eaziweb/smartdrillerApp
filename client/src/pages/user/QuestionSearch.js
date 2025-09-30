@@ -258,36 +258,42 @@ const QuestionSearch = () => {
     return <div className={styles.pagination}>{pages}</div>
   }
 
-  // Improved image URL handling with better fallback
+  // Get image URL with proper fallback for Cloudinary and local images
   const getImageUrl = (imagePath) => {
-    if (!imagePath) return null // Return null if no image path provided
+    if (!imagePath) return null
+    
+    // If it's a full URL (Cloudinary), return as is
     if (imagePath.startsWith('http')) {
       return imagePath
     }
+    
+    // If it's a local path starting with /uploads, return as is
     if (imagePath.startsWith('/uploads')) {
       return imagePath
     }
-    return `/uploads/${imagePath}`
+    
+    // Otherwise, prepend /uploads
+    return `/uploads${imagePath}`
   }
   
   // Handle image error with better fallback
   const handleImageError = (e) => {
     // Prevent infinite loop by removing the error handler
-    e.target.onerror = null;
+    e.target.onerror = null
     
     // Hide the broken image
-    e.target.style.display = 'none';
+    e.target.style.display = 'none'
     
-    // If there's a container, we could show a placeholder text or icon
-    const container = e.target.parentElement;
+    // If there's a container, show a placeholder
+    const container = e.target.parentElement
     if (container && container.classList.contains(styles.questionImage)) {
       // Create a fallback element if it doesn't exist
       if (!container.querySelector('.image-fallback')) {
-        const fallback = document.createElement('div');
-        fallback.className = 'image-fallback';
-        fallback.innerHTML = '<i class="fas fa-image"></i><span>Image not available</span>';
-        fallback.style.cssText = 'display: flex; flex-direction: column; align-items: center; justify-content: center; height: 200px; color: #666;';
-        container.appendChild(fallback);
+        const fallback = document.createElement('div')
+        fallback.className = 'image-fallback'
+        fallback.innerHTML = '<i class="fas fa-image"></i><span>Image not available</span>'
+        fallback.style.cssText = 'display: flex; flex-direction: column; align-items: center; justify-content: center; height: 200px; color: #666;'
+        container.appendChild(fallback)
       }
     }
   }
@@ -404,10 +410,11 @@ const QuestionSearch = () => {
                         {renderContentWithMath(question.question)}
                       </h3>
                       
-                      {question.image && getImageUrl(question.image) && (
+                      {/* Display image if available */}
+                      {(question.cloudinaryUrl || question.image) && (
                         <div className={styles.questionImage}>
                           <img 
-                            src={getImageUrl(question.image)} 
+                            src={getImageUrl(question.cloudinaryUrl || question.image)} 
                             alt="Question" 
                             onError={handleImageError}
                           />

@@ -204,6 +204,46 @@ const Bookmarks = () => {
     }, 3000)
   }
 
+  // Get image URL with proper fallback for Cloudinary and local images
+  const getImageUrl = (imagePath) => {
+    if (!imagePath) return null
+    
+    // If it's a full URL (Cloudinary), return as is
+    if (imagePath.startsWith('http')) {
+      return imagePath
+    }
+    
+    // If it's a local path starting with /uploads, return as is
+    if (imagePath.startsWith('/uploads')) {
+      return imagePath
+    }
+    
+    // Otherwise, prepend /uploads
+    return `/uploads${imagePath}`
+  }
+  
+  // Handle image error with better fallback
+  const handleImageError = (e) => {
+    // Prevent infinite loop by removing the error handler
+    e.target.onerror = null
+    
+    // Hide the broken image
+    e.target.style.display = 'none'
+    
+    // If there's a container, show a placeholder
+    const container = e.target.parentElement
+    if (container && container.classList.contains(styles.questionImage)) {
+      // Create a fallback element if it doesn't exist
+      if (!container.querySelector('.image-fallback')) {
+        const fallback = document.createElement('div')
+        fallback.className = 'image-fallback'
+        fallback.innerHTML = '<i class="fas fa-image"></i><span>Image not available</span>'
+        fallback.style.cssText = 'display: flex; flex-direction: column; align-items: center; justify-content: center; height: 200px; color: #666;'
+        container.appendChild(fallback)
+      }
+    }
+  }
+
   if (loading) {
     return (
       <div className={styles.loadingContainer}>
@@ -296,6 +336,8 @@ const Bookmarks = () => {
                       index={(currentPage - 1) * 10 + index + 1}
                       onRemove={handleRemoveBookmark}
                       renderContentWithMath={renderContentWithMath}
+                      getImageUrl={getImageUrl}
+                      handleImageError={handleImageError}
                     />
                   ))}
                 </div>
@@ -334,7 +376,7 @@ const Bookmarks = () => {
 }
 
 // Question Card Component
-const QuestionCard = ({ bookmark, index, onRemove, renderContentWithMath }) => {
+const QuestionCard = ({ bookmark, index, onRemove, renderContentWithMath, getImageUrl, handleImageError }) => {
   const [showConfirmDelete, setShowConfirmDelete] = useState(false)
   const question = bookmark.question
   const correctOptionIndex = question.correctOption - 1
@@ -358,9 +400,14 @@ const QuestionCard = ({ bookmark, index, onRemove, renderContentWithMath }) => {
       </div>
       
       <div className={styles.questionContent}>
-        {question.image && (
+        {/* Display image if available */}
+        {(question.cloudinaryUrl || question.image) && (
           <div className={styles.questionImage}>
-            <img src={question.image} alt="Question illustration" />
+            <img 
+              src={getImageUrl(question.cloudinaryUrl || question.image)} 
+              alt="Question illustration" 
+              onError={handleImageError}
+            />
           </div>
         )}
         
