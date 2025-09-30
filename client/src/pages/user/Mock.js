@@ -31,7 +31,7 @@ const Mock = () => {
   const timerRef = useRef(null)
   const contentRef = useRef(null)
   const speechRef = useRef(null)
-  const voiceReaderOnRef = useRef(voiceReaderOn) // Ref to track the latest state
+  const voiceReaderOnRef = useRef(voiceReaderOn)
 
   // Update ref when state changes
   useEffect(() => {
@@ -94,7 +94,6 @@ const Mock = () => {
     // Load KaTeX dynamically
     const loadKaTeX = async () => {
       try {
-        // Import KaTeX components
         const katexModule = await import('katex')
         const { render, renderToString } = katexModule
         
@@ -151,64 +150,41 @@ const Mock = () => {
     })
   }
   
-const renderContentWithMath = (content, isDisplayMode = false) => {
-  if (!content) return null;
-
-  if (!katexLoaded) {
-    return <span>{content}</span>;
-  }
-
-  // Split into text + potential LaTeX parts
-  const latexPattern = /(\\\(.*?\\\)|\\\[.*?\\\]|\$\$.*?\$\$|\$.*?\$)/g;
-  const parts = content.split(latexPattern);
-
-  return parts.map((part, index) => {
-    if (latexPattern.test(part)) {
-      // ✅ Clean up math fragments before rendering
-      let latexContent = part;
-
-      // Remove delimiters
-      if (part.startsWith("\\(")) latexContent = part.slice(2, -2);
-      if (part.startsWith("\\[")) latexContent = part.slice(2, -2);
-      if (part.startsWith("$$")) latexContent = part.slice(2, -2);
-      if (part.startsWith("$") && !part.startsWith("$$")) latexContent = part.slice(1, -1);
-
-      // Normalize LaTeX-like fragments ONLY inside math context
-      latexContent = latexContent
-        .replace(/frac\s*([^\s]+)\s*([^\s]+)/g, "\\frac{$1}{$2}") // fix fracx y
-        .replace(/sqrt\s*([^\s]+)/g, "\\sqrt{$1}")                // sqrt3 → \sqrt{3}
-        .replace(/([a-zA-Z]+)(\d+)/g, "$1^{$2}")                  // xp2 → xp^{2}, a10 → a^{10}
-        .replace(/le/g, "\\leq")
-        .replace(/ge/g, "\\geq")
-        .replace(/neq/g, "\\neq")
-        .replace(/cap/g, "\\cap")
-        .replace(/cup/g, "\\cup")
-        .replace(/phi/g, "\\phi")
-        .replace(/alpha/g, "\\alpha");
-
-      try {
+  // Helper function to render content with math
+  const renderContentWithMath = (content, isDisplayMode = false) => {
+    if (!content) return null
+    
+    // Simple regex to find LaTeX patterns
+    const latexPattern = /(\\\(.*?\\\)|\\\[.*?\\\]|\$\$.*?\$\$|\$.*?\$)/g
+    
+    // Split content by LaTeX patterns
+    const parts = content.split(latexPattern)
+    
+    return parts.map((part, index) => {
+      if (index % 2 === 1) { // This is a LaTeX expression
+        // Determine if it's display mode
+        const isDisplay = part.startsWith('\\[') || part.startsWith('$$')
+        
+        // Extract the actual LaTeX content
+        let latexContent = part
+        if (part.startsWith('\\(')) latexContent = part.slice(2, -2)
+        if (part.startsWith('\\[')) latexContent = part.slice(2, -2)
+        if (part.startsWith('$') && !part.startsWith('$$')) latexContent = part.slice(1, -1)
+        if (part.startsWith('$$')) latexContent = part.slice(2, -2)
+        
         return (
-          <span
-            key={index}
-            dangerouslySetInnerHTML={{
-              __html: window.katex.renderToString(latexContent, {
-                throwOnError: false,
-                displayMode: isDisplayMode || part.startsWith("\\[") || part.startsWith("$$"),
-              }),
-            }}
+          <span 
+            key={index} 
+            className={`math-content ${isDisplay ? 'display-math' : 'inline-math'}`}
+            data-math={latexContent}
           />
-        );
-      } catch (e) {
-        console.error("KaTeX render error:", e, "with content:", latexContent);
-        return <span key={index}>{part}</span>;
+        )
+      } else {
+        // Regular HTML content
+        return <span key={index} dangerouslySetInnerHTML={{ __html: part }} />
       }
-    } else {
-      // ✅ Plain text stays untouched (Q2 remains Q2)
-      return <span key={index}>{part}</span>;
-    }
-  });
-};
-
+    })
+  }
   
   // Load progress only after exam data is available
   useEffect(() => {
@@ -259,7 +235,7 @@ const renderContentWithMath = (content, isDisplayMode = false) => {
     if (speechRef.current) {
       speechRef.current.cancel()
       setIsReading(false)
-      setVoiceReaderOn(false) // Turn off voice reader when stopped
+      setVoiceReaderOn(false)
     }
   }
 
@@ -272,7 +248,9 @@ const renderContentWithMath = (content, isDisplayMode = false) => {
       return text
         .replace(/\\\(.*?\\\)/g, '') // Remove inline math
         .replace(/\\\[.*?\\\]/g, '') // Remove display math
-        .replace(/\$\$.*?\$\$/g, '') // Remove display math with $$         .replace(/\$.*?\$/g, '')     // Remove inline math with $         .replace(/\\[a-zA-Z]+/g, '') // Remove LaTeX commands
+        .replace(/\$\$.*?\$\$/g, '') // Remove display math with $$         
+        .replace(/\$.*?\$/g, '')     // Remove inline math with $         
+        .replace(/\\[a-zA-Z]+/g, '') // Remove LaTeX commands
         .replace(/[{}]/g, '')        // Remove braces
         .trim()
     }
@@ -295,11 +273,11 @@ const renderContentWithMath = (content, isDisplayMode = false) => {
     utterance.onstart = () => setIsReading(true)
     utterance.onend = () => {
       setIsReading(false)
-      setVoiceReaderOn(false) // Turn off voice reader when finished
+      setVoiceReaderOn(false)
     }
     utterance.onerror = () => {
       setIsReading(false)
-      setVoiceReaderOn(false) // Turn off voice reader on error
+      setVoiceReaderOn(false)
     }
     
     // Speak the text
@@ -428,7 +406,7 @@ const renderContentWithMath = (content, isDisplayMode = false) => {
   }
   
   const handleBack = () => {
-    stopSpeech() // Stop voice reader when back button is clicked
+    stopSpeech()
     setShowQuitModal(true)
   }
   
@@ -492,7 +470,7 @@ const renderContentWithMath = (content, isDisplayMode = false) => {
   }
   
   const navigateToQuestion = (index) => {
-    stopSpeech() // Stop voice reader when navigating to another question
+    stopSpeech()
     setCurrentQuestionIndex(index)
   }
   
@@ -504,6 +482,46 @@ const renderContentWithMath = (content, isDisplayMode = false) => {
       return `${hours}:${minutes.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`
     }
     return `${minutes}:${secs.toString().padStart(2, "0")}`
+  }
+  
+  // Get image URL with proper fallback for Cloudinary and local images
+  const getImageUrl = (imagePath) => {
+    if (!imagePath) return null
+    
+    // If it's a full URL (Cloudinary), return as is
+    if (imagePath.startsWith('http')) {
+      return imagePath
+    }
+    
+    // If it's a local path starting with /uploads, return as is
+    if (imagePath.startsWith('/uploads')) {
+      return imagePath
+    }
+    
+    // Otherwise, prepend /uploads
+    return `/uploads${imagePath}`
+  }
+  
+  // Handle image error with better fallback
+  const handleImageError = (e) => {
+    // Prevent infinite loop by removing the error handler
+    e.target.onerror = null
+    
+    // Hide the broken image
+    e.target.style.display = 'none'
+    
+    // If there's a container, show a placeholder
+    const container = e.target.parentElement
+    if (container && container.classList.contains(styles.questionImage)) {
+      // Create a fallback element if it doesn't exist
+      if (!container.querySelector('.image-fallback')) {
+        const fallback = document.createElement('div')
+        fallback.className = 'image-fallback'
+        fallback.innerHTML = '<i class="fas fa-image"></i><span>Image not available</span>'
+        fallback.style.cssText = 'display: flex; flex-direction: column; align-items: center; justify-content: center; height: 200px; color: #666;'
+        container.appendChild(fallback)
+      }
+    }
   }
   
   if (loading || !examData) {
@@ -519,40 +537,6 @@ const renderContentWithMath = (content, isDisplayMode = false) => {
   const userAnswer = userAnswers[currentQuestion._id]
   const isLastQuestion = currentQuestionIndex === examData.questions.length - 1
   
-  // Improved image URL handling with better fallback
-  const getImageUrl = (imagePath) => {
-    if (!imagePath) return null // Return null if no image path provided
-    if (imagePath.startsWith('http')) {
-      return imagePath
-    }
-    if (imagePath.startsWith('/uploads')) {
-      return imagePath
-    }
-    return `/uploads${imagePath}` // Fixed: Added leading slash
-  }
-  
-  // Handle image error with better fallback
-  const handleImageError = (e) => {
-    // Prevent infinite loop by removing the error handler
-    e.target.onerror = null;
-    
-    // Hide the broken image
-    e.target.style.display = 'none';
-    
-    // If there's a container, we could show a placeholder text or icon
-    const container = e.target.parentElement;
-    if (container && container.classList.contains(styles.questionImage)) {
-      // Create a fallback element if it doesn't exist
-      if (!container.querySelector('.image-fallback')) {
-        const fallback = document.createElement('div');
-        fallback.className = 'image-fallback';
-        fallback.innerHTML = '<i class="fas fa-image"></i><span>Image not available</span>';
-        fallback.style.cssText = 'display: flex; flex-direction: column; align-items: center; justify-content: center; height: 200px; color: #666;';
-        container.appendChild(fallback);
-      }
-    }
-  }
-  
   return (
     <div className={styles.mockPage} ref={contentRef}>
       <div className={styles.quizHeader}>
@@ -561,7 +545,7 @@ const renderContentWithMath = (content, isDisplayMode = false) => {
             <i className="fa fa-arrow-left"></i>
           </button>
           <div className={styles.subjectInfo}>
-            <h2>{examData.course.toUpperCase()}</h2> {/* Display course code in caps */}
+            <h2>{examData.course.toUpperCase()}</h2>
             <span>Question {currentQuestionIndex + 1} of {examData.questions.length}</span>
           </div>
         </div>
@@ -608,10 +592,10 @@ const renderContentWithMath = (content, isDisplayMode = false) => {
       </div>
       
       <div className={styles.questionContainer}>
-        {currentQuestion.image && getImageUrl(currentQuestion.image) && (
+        {(currentQuestion.cloudinaryUrl || currentQuestion.image) && (
           <div className={styles.questionImage}>
             <img 
-              src={getImageUrl(currentQuestion.image)} 
+              src={getImageUrl(currentQuestion.cloudinaryUrl || currentQuestion.image)} 
               alt="Question illustration" 
               onError={handleImageError}
             />
