@@ -133,35 +133,26 @@ const confirmDelete = async () => {
   }
 };
 
-// MaterialManagement.jsx
-// Update the download function
-const downloadMaterial = async (materialId, filename) => {
-  try {
-    const token = localStorage.getItem("token");
-    const response = await api.get(`/api/admin/materials/${materialId}/download`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-
-    if (response.data.success && response.data.url) {
-      // Create a temporary link to download the file
-      const link = document.createElement('a');
-      link.href = response.data.url;
-      link.download = filename; // Suggests filename
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-
-      showNotification("Download started", "success");
-    } else {
-      showNotification(response.data.message || "File not available for download", "error");
-    }
-  } catch (error) {
-    console.error("Error downloading material:", error);
-    showNotification(error.response?.data?.message || "Error downloading material", "error");
+const downloadMaterial = (publicId, filename) => {
+  if (!publicId) {
+    showNotification("File not available", "error");
+    return;
   }
+
+  // Construct the public Cloudinary URL
+  const downloadUrl = `https://res.cloudinary.com/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/raw/upload/${publicId}`;
+
+  // Create a temporary link to download
+  const link = document.createElement('a');
+  link.href = downloadUrl;
+  link.download = filename; // Suggests filename
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+
+  showNotification("Download started", "success");
 };
+
 
   const handleFilterChange = (key, value) => {
     setFilters((prev) => ({ ...prev, [key]: value }))
@@ -301,13 +292,14 @@ const downloadMaterial = async (materialId, filename) => {
                   <td>{material.downloadCount || 0}</td>
                   <td>
                     <div className={styles.actionButtons}>
-                      <button
-                        onClick={() => downloadMaterial(material._id, material.originalName)}
-                        className={styles.downloadBtn}
-                        title="Download"
-                      >
-                        <i className="fas fa-download"></i>
-                      </button>
+                     <button
+  onClick={() => downloadMaterial(material.cloudinaryPublicId, material.originalName)}
+  className={styles.downloadBtn}
+  title="Download"
+>
+  <i className="fas fa-download"></i>
+</button>
+
 
                       {!material.isApproved && (
                         <>

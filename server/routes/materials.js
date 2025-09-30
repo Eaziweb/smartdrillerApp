@@ -14,14 +14,17 @@ const storage = new CloudinaryStorage({
   cloudinary,
   params: async (req, file) => {
     const ext = file.originalname.split(".").pop().toLowerCase();
+
     return {
-      folder: "materials",
+      folder: "materials/approved",    // your folder
       public_id: `${Date.now()}-${file.originalname.replace(/\.[^/.]+$/, "")}`,
-      resource_type: "raw",
+      resource_type: "raw",            // keep as raw
       format: ext,
+      type: "upload",                  // <-- ensures public
     };
   },
 });
+
 
 const upload = multer({
   storage,
