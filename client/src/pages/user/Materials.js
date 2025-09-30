@@ -106,28 +106,31 @@ const Materials = () => {
     }
   }
 
-  const downloadMaterial = async (materialId, filename) => {
-    try {
-      const response = await api.get(`/api/materials/${materialId}/download`);
+const downloadMaterial = async (materialId, filename) => {
+  try {
+    // Call backend to get signed download URL
+    const response = await api.get(`/api/materials/${materialId}/download`);
 
-      if (response.data.success && response.data.url) {
-        // Create a temporary link to download the file
-        const link = document.createElement('a');
-        link.href = response.data.url;
-        link.download = filename; // Suggests filename
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+    if (response.data.success && response.data.url) {
+      const downloadUrl = response.data.url;
 
-        showNotification("Download started", "success");
-      } else {
-        showNotification("File not available for download", "error");
-      }
-    } catch (error) {
-      console.error("Error downloading material:", error);
-      showNotification("Error downloading material", "error");
+      // Create a temporary <a> element to trigger browser download
+      const link = document.createElement("a");
+      link.href = downloadUrl;
+      link.download = filename; // Suggest the filename
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      showNotification("Download started", "success");
+    } else {
+      showNotification("File not available for download", "error");
     }
-  };
+  } catch (error) {
+    console.error("Error downloading material:", error);
+    showNotification("Error downloading material", "error");
+  }
+};
 
   const handleFilterChange = (key, value) => {
     setFilters((prev) => ({ ...prev, [key]: value }))

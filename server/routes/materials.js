@@ -122,10 +122,15 @@ router.get("/:id/download", auth, async (req, res) => {
     const material = await Material.findById(req.params.id);
     if (!material) return res.status(404).json({ success: false, message: "Material not found" });
 
+    if (!material.cloudinaryPublicId) {
+      return res.status(404).json({ success: false, message: "File not available" });
+    }
+
+    // ✅ Generate signed URL for raw file download
     const downloadUrl = cloudinary.utils.private_download_url(
       material.cloudinaryPublicId,
       process.env.CLOUDINARY_API_SECRET,
-      { attachment: material.originalName }
+      { attachment: material.originalName } // forces browser to download
     );
 
     res.json({ success: true, url: downloadUrl });
