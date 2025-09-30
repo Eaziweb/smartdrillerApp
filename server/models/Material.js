@@ -1,3 +1,4 @@
+// Material.js (Model)
 const mongoose = require("mongoose")
 
 const materialSchema = new mongoose.Schema(
@@ -23,13 +24,6 @@ const materialSchema = new mongoose.Schema(
       type: String,
       required: true,
       trim: true,
-      unique: true  // This creates a unique index
-    },
-    cloudinaryResourceType: {
-      type: String,
-      required: true,
-      enum: ['image', 'raw', 'video', 'auto'],
-      default: 'raw'
     },
     // Original file information
     originalName: {
@@ -46,7 +40,8 @@ const materialSchema = new mongoose.Schema(
       type: String,
       required: true,
       trim: true,
-      lowercase: true
+      lowercase: true,
+      enum: ['pdf', 'docx', 'ppt']
     },
     // Relationships
     course: {
@@ -93,7 +88,7 @@ const materialSchema = new mongoose.Schema(
   }
 )
 
-// Virtual for file URL (can be extended with transformations)
+// Virtual for file URL
 materialSchema.virtual('fileUrl').get(function() {
   if (!this.cloudinaryUrl) return null;
   
@@ -115,20 +110,8 @@ materialSchema.virtual('formattedFileSize').get(function() {
 materialSchema.virtual('fileIcon').get(function() {
   const iconMap = {
     pdf: 'fa-file-pdf',
-    doc: 'fa-file-word',
     docx: 'fa-file-word',
-    ppt: 'fa-file-powerpoint',
-    pptx: 'fa-file-powerpoint',
-    xls: 'fa-file-excel',
-    xlsx: 'fa-file-excel',
-    jpg: 'fa-file-image',
-    jpeg: 'fa-file-image',
-    png: 'fa-file-image',
-    mp4: 'fa-file-video',
-    mp3: 'fa-file-audio',
-    txt: 'fa-file-text',
-    zip: 'fa-file-archive',
-    rar: 'fa-file-archive'
+    ppt: 'fa-file-powerpoint'
   };
   return iconMap[this.fileType] || 'fa-file';
 });
@@ -138,7 +121,6 @@ materialSchema.index({ course: 1, isApproved: 1 });
 materialSchema.index({ uploadedBy: 1 });
 materialSchema.index({ fileType: 1 });
 materialSchema.index({ createdAt: -1 });
-// Removed the duplicate index for cloudinaryPublicId since it's already defined as unique in the field definition
 
 // Pre-save middleware to ensure consistent data
 materialSchema.pre('save', function(next) {

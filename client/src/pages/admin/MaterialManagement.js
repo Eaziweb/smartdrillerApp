@@ -1,3 +1,4 @@
+// MaterialManagement.jsx (Frontend)
 "use client"
 import { useState, useEffect } from "react"
 import styles from "../../styles/MaterialManagement.module.css"
@@ -132,24 +133,33 @@ const MaterialManagement = () => {
     }
   }
 
-const downloadMaterial = async (fileUrl, filename) => {
-  try {
-    // Create a temporary link
-    const link = document.createElement("a")
-    link.href = fileUrl
-    link.download = filename
-    link.target = "_blank" // still works for PDF/video preview in new tab
-    document.body.appendChild(link)
-    link.click()
-    document.body.removeChild(link)
+  const downloadMaterial = async (materialId, filename) => {
+    try {
+      const token = localStorage.getItem("token");
+      const response = await api.get(`/api/admin/materials/${materialId}/download`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
-    showNotification("Download started", "success")
-  } catch (error) {
-    console.error("Error downloading material:", error)
-    showNotification("Error downloading material", "error")
-  }
-}
+      if (response.data.success && response.data.url) {
+        // Create a temporary link to download the file
+        const link = document.createElement('a');
+        link.href = response.data.url;
+        link.download = filename; // Suggests filename
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
 
+        showNotification("Download started", "success");
+      } else {
+        showNotification("File not available for download", "error");
+      }
+    } catch (error) {
+      console.error("Error downloading material:", error);
+      showNotification("Error downloading material", "error");
+    }
+  };
 
   const handleFilterChange = (key, value) => {
     setFilters((prev) => ({ ...prev, [key]: value }))
@@ -235,10 +245,8 @@ const downloadMaterial = async (fileUrl, filename) => {
           >
             <option value="">All Types</option>
             <option value="pdf">PDF</option>
-            <option value="doc">Document</option>
+            <option value="docx">Document</option>
             <option value="ppt">Presentation</option>
-            <option value="video">Video</option>
-            <option value="audio">Audio</option>
           </select>
           <button onClick={clearFilters} className={styles.clearBtn}>
             Clear Filters
@@ -275,12 +283,12 @@ const downloadMaterial = async (fileUrl, filename) => {
                       <i className={`fas fa-file`}></i>
                       <div>
                         <div className={styles.title}>{material.title}</div>
-                        <div className={styles.filename}>{material.filename}</div>
+                        <div className={styles.filename}>{material.originalName}</div>
                       </div>
                     </div>
                   </td>
                   <td>{material.courseName}</td>
-                  <td>{material.uploaderName}</td>
+                  <td>{material.uploadedBy?.fullName || "Unknown"}</td>
                   <td>
                     <span className={`${styles.statusBadge} ${material.isApproved ? styles.approved : styles.pending}`}>
                       {material.isApproved ? "Approved" : "Pending"}
@@ -291,13 +299,13 @@ const downloadMaterial = async (fileUrl, filename) => {
                   <td>{material.downloadCount || 0}</td>
                   <td>
                     <div className={styles.actionButtons}>
-                 <button
-  onClick={() => downloadMaterial(material.fileUrl, material.filename)} 
-  className={styles.downloadBtn}
-  title="Download"
->
-  <i className="fas fa-download"></i>
-</button>
+                      <button
+                        onClick={() => downloadMaterial(material._id, material.originalName)}
+                        className={styles.downloadBtn}
+                        title="Download"
+                      >
+                        <i className="fas fa-download"></i>
+                      </button>
 
                       {!material.isApproved && (
                         <>

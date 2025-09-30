@@ -1,3 +1,4 @@
+// materials.js
 const express = require("express");
 const router = express.Router();
 const multer = require('multer');
@@ -7,13 +8,13 @@ const { auth } = require("../middleware/auth");
 const Material = require("../models/Material");
 const Course = require("../models/Course");
 
-// Configure Cloudinary storage
+// Configure Cloudinary storage with pending folder
 const storage = new CloudinaryStorage({
   cloudinary: cloudinary,
   params: {
-    folder: 'materials',
-    allowed_formats: ['pdf', 'doc', 'docx', 'ppt', 'pptx', 'mp4', 'mp3', 'txt'],
-    resource_type: 'auto'
+    folder: 'materials/pending',
+    allowed_formats: ['pdf', 'docx', 'ppt'],
+    resource_type: 'raw'
   }
 });
 
@@ -21,11 +22,14 @@ const upload = multer({
   storage: storage,
   limits: { fileSize: 100 * 1024 * 1024 }, // 100MB
   fileFilter: (req, file, cb) => {
-    const allowedTypes = /pdf|doc|docx|ppt|pptx|mp4|mp3|txt/;
-    const extname = allowedTypes.test(file.originalname.split('.').pop().toLowerCase());
-    const mimetype = allowedTypes.test(file.mimetype);
-    if (mimetype && extname) cb(null, true);
-    else cb(new Error("Only documents, videos, and audio files are allowed"));
+    const allowedTypes = ['pdf', 'docx', 'ppt'];
+    const extname = allowedTypes.includes(file.originalname.split('.').pop().toLowerCase());
+    const mimetype = allowedTypes.includes(file.mimetype.split('/')[1]);
+    if (mimetype && extname) {
+      return cb(null, true);
+    } else {
+      cb(new Error("Only PDF, DOCX, and PPT files are allowed"));
+    }
   }
 });
 
@@ -123,7 +127,7 @@ router.get("/:id/download", auth, async (req, res) => {
     material.downloadCount = (material.downloadCount || 0) + 1;
     await material.save();
 
-    // Generate a proper Cloudinary download URL
+    // Generate a proper Cloudinary download URL with attachment parameter
     const downloadUrl = material.cloudinaryUrl.includes("?")
       ? `${material.cloudinaryUrl}&fl_attachment=${encodeURIComponent(material.originalName)}`
       : `${material.cloudinaryUrl}?fl_attachment=${encodeURIComponent(material.originalName)}`;
@@ -134,6 +138,5 @@ router.get("/:id/download", auth, async (req, res) => {
     res.status(500).json({ success: false, message: "Failed to download material" });
   }
 });
-
 
 module.exports = router;
