@@ -108,7 +108,6 @@ const Materials = () => {
 
 const downloadMaterial = async (materialId, filename) => {
   try {
-    // Call backend to get signed download URL
     const response = await api.get(`/api/materials/${materialId}/download`);
 
     if (response.data.success && response.data.url) {

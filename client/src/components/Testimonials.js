@@ -6,17 +6,17 @@ const Testimonials = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const testimonials = [
     {
-      name: "Adeoluwa Ezekiel",
+      name: "Person1",
       course: "MBBS",
       quote: "This platform completely changed the way I study! I used to struggle with past questions, but now everything is well-organized by topic and year. The explanations make it easy to understand. I feel way more confident before exams!"
     },
     {
-      name: "Musa Kanike",
+      name: "Person2",
       course: "Computer Engineering",
       quote: "Bookmarking questions is such a smart feature. I love that I can save tough questions and return to them later. It helps me focus on what I don't know yet."
     },
     {
-      name: "Ibrahim Mubaraq",
+      name: "Person3",
       course: "Medicine",
       quote: "Everything I need in one place. From past questions to materials, notes, and even YouTube videos—it's like having a digital study room. No more searching all over the internet."
     }

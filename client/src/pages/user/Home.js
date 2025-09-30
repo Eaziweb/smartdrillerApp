@@ -1,11 +1,11 @@
 "use client"
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect, useRef, useCallback, useMemo } from "react"
 import { Link } from "react-router-dom"
 import { useAuth } from "../../contexts/AuthContext"
 import styles from "../../styles/home.module.css"
 import AboutSmartDriller from "./AboutSmartDriller"
 import SubscriptionModal from "./SubscriptionModal"
-import api from "../../utils/api";
+import api from "../../utils/api"
 
 const Home = () => {
   const { user, logout, updateUser } = useAuth()
@@ -22,6 +22,81 @@ const Home = () => {
   const contactPopupRef = useRef(null)
   const sidebarRef = useRef(null)
   const initializedRef = useRef(false)
+  
+  // Memoize notification icon mapping
+  const getNotificationIcon = useCallback((type) => {
+    const iconMap = {
+      success: "fa-check-circle",
+      error: "fa-exclamation-circle",
+      warning: "fa-exclamation-triangle",
+      default: "fa-info-circle"
+    }
+    return iconMap[type] || iconMap.default
+  }, [])
+  
+  // Memoize feature cards
+  const featureCards = useMemo(() => [
+    {
+      to: "/course-selection?type=study",
+      icon: "fa-solid fa-book-open-reader",
+      title: "Study",
+      description: "Master concepts with thousands of expertly explained questions."
+    },
+    {
+      to: "/course-selection?type=mock",
+      icon: "fa-solid fa-stopwatch",
+      title: "Mock Test",
+      description: "Simulate real exams and instantly identify your weaknesses."
+    },
+    {
+      to: "/bookmarks",
+      icon: "fa-solid fa-bookmark",
+      title: "Bookmarks",
+      description: "Save important questions for faster, smarter exam revisions."
+    },
+    {
+      to: "/videos",
+      icon: "fa-solid fa-video",
+      title: "Videos",
+      description: "Watch engaging video lessons that simplify difficult concepts."
+    },
+    {
+      to: "/notes",
+      icon: "fa-solid fa-sticky-note",
+      title: "Notes",
+      description: "Access clear, concise notes tailored for effective studying."
+    },
+    {
+      to: "/materials",
+      icon: "fa-solid fa-file-lines",
+      title: "Materials",
+      description: "Download study materials for deeper insights and preparation."
+    },
+    {
+      to: "/results-history",
+      icon: "fa-solid fa-chart-line",
+      title: "Results History",
+      description: "Track progress with detailed reports on past performances."
+    },
+    {
+      to: "/AI-assistant",
+      icon: "fa-solid fa-robot",
+      title: "AI Assistant",
+      description: "Chat with AI for instant answers and study support."
+    },
+    {
+      to: "/question-search",
+      icon: "fa-solid fa-magnifying-glass",
+      title: "Question Search",
+      description: "Quickly find questions by topic, keyword, or subject."
+    },
+    {
+      to: "/competitions",
+      icon: "fa-solid fa-trophy",
+      title: "Competition",
+      description: "Compete with peers and climb leaderboards in real time."
+    }
+  ], [])
   
   // Initialize component - fetch user data and notifications
   useEffect(() => {
@@ -63,7 +138,7 @@ const Home = () => {
     
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
+  }, [contactPopupOpen, sidebarOpen, updateUser, user]);
   
   // Update notifications when user data changes
   useEffect(() => {
@@ -72,7 +147,7 @@ const Home = () => {
     }
   }, [user]);
   
-  const loadNotifications = async (userData) => {
+  const loadNotifications = useCallback(async (userData) => {
     try {
       const response = await api.get("/api/notifications");
       setNotifications(response.data);
@@ -90,9 +165,9 @@ const Home = () => {
     } catch (error) {
       console.error("Failed to load notifications:", error);
     }
-  };
+  }, [])
   
-  const markNotificationsAsRead = async () => {
+  const markNotificationsAsRead = useCallback(async () => {
     try {
       // Update lastNotificationView on server
       const response = await api.put("/api/users/last-notification-view");
@@ -109,16 +184,16 @@ const Home = () => {
     } catch (error) {
       console.error("Failed to mark notifications as read:", error);
     }
-  };
+  }, [updateUser])
   
-  const toggleNotificationPanel = async () => {
+  const toggleNotificationPanel = useCallback(async () => {
     const isOpening = !notificationPanelOpen;
     setNotificationPanelOpen(isOpening);
     
     if (isOpening) {
       await markNotificationsAsRead();
     }
-  };
+  }, [notificationPanelOpen, markNotificationsAsRead])
   
   // Check for stored lastNotificationView on component mount
   useEffect(() => {
@@ -132,9 +207,9 @@ const Home = () => {
         });
       }
     }
-  }, [user]);
+  }, [user, updateUser]);
   
-  const handleActivate = async () => {
+  const handleActivate = useCallback(async () => {
     if (user?.isSubscribed) {
       showMessage("You are already subscribed!", "info");
       return;
@@ -153,9 +228,9 @@ const Home = () => {
       console.error("Failed to check subscription options:", error);
       showMessage("Failed to check subscription options", "error");
     }
-  };
+  }, [user])
   
-  const initializePayment = async (subscriptionType, isRecurring, recurringMonths) => {
+  const initializePayment = useCallback(async (subscriptionType, isRecurring, recurringMonths) => {
     setLoading(true);
     try {
       const response = await api.post("/api/payments/initialize", {
@@ -175,9 +250,9 @@ const Home = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [])
   
-  const showMessage = (message, type = "info") => {
+  const showMessage = useCallback((message, type = "info") => {
     const messageEl = document.createElement("div");
     messageEl.className = `${styles.messageToast} ${styles[type]}`;
     messageEl.innerHTML = `
@@ -189,35 +264,35 @@ const Home = () => {
       messageEl.style.animation = "slideOutRight 0.3s ease forwards";
       setTimeout(() => messageEl.remove(), 300);
     }, 3000);
-  };
+  }, [])
   
-  const toggleSidebar = () => {
-    setSidebarOpen(!sidebarOpen);
-  };
+  const toggleSidebar = useCallback(() => {
+    setSidebarOpen(prev => !prev);
+  }, [])
   
-  const toggleContactPopup = () => {
-    setContactPopupOpen(!contactPopupOpen);
-  };
+  const toggleContactPopup = useCallback(() => {
+    setContactPopupOpen(prev => !prev);
+  }, [])
   
-  const toggleAboutModal = () => {
-    setAboutModalOpen(!aboutModalOpen);
-  };
+  const toggleAboutModal = useCallback(() => {
+    setAboutModalOpen(prev => !prev);
+  }, [])
   
-  const handleTouchStart = (e) => {
+  const handleTouchStart = useCallback((e) => {
     setTouchStartX(e.touches[0].clientX);
-  };
+  }, [])
   
-  const handleTouchMove = (e) => {
+  const handleTouchMove = useCallback((e) => {
     setTouchEndX(e.touches[0].clientX);
-  };
+  }, [])
   
-  const handleTouchEnd = () => {
+  const handleTouchEnd = useCallback(() => {
     if (touchStartX - touchEndX > 75) {
       setSidebarOpen(false);
     }
-  };
+  }, [touchStartX, touchEndX])
   
-  const handleShare = async () => {
+  const handleShare = useCallback(async () => {
     const shareData = {
       title: 'SmartDriller',
       text: 'Join SmartDriller, an educational website for first year university students!',
@@ -235,26 +310,19 @@ const Home = () => {
       console.error('Error sharing:', err);
       showMessage('Failed to share', 'error');
     }
-  };
+  }, [showMessage])
   
-  const getNotificationIcon = (type) => {
-    switch (type) {
-      case "success":
-        return "fa-check-circle";
-      case "error":
-        return "fa-exclamation-circle";
-      case "warning":
-        return "fa-exclamation-triangle";
-      default:
-        return "fa-info-circle";
-    }
-  };
-  
-  const isNotificationNew = (notification) => {
+  const isNotificationNew = useCallback((notification) => {
     if (!user?.lastNotificationView) return true;
     return new Date(notification.createdAt) > new Date(user.lastNotificationView);
-  };
+  }, [user])
   
+  // Handle profile click properly
+  const handleProfileClick = useCallback((e) => {
+    e.stopPropagation();
+    // Let the Link handle navigation
+  }, [])
+
   return (
     <div className={styles.homePage}>
       {loading && (
@@ -310,7 +378,7 @@ const Home = () => {
       >
         <div className={styles.sidebarHeader}>
           <div className={styles.userProfile}>
-            <Link to="/profile" style={{ textDecoration: "none", color: "white" }}>
+            <Link to="/profile" style={{ textDecoration: "none", color: "white" }} onClick={handleProfileClick}>
               <div className={styles.profileContainer}>
                 <i className={`fas fa-user-circle ${styles.profileIcon}`}></i>
                 <h2 className={styles.profileName}>{user?.fullName || "User"}</h2>
@@ -435,96 +503,17 @@ const Home = () => {
       
       <main className={styles.main}>
         <div className={styles.featureGrid}>
-          <Link to="/course-selection?type=study" className={styles.featureCard}>
-            <div className={styles.featureIcon}>
-              <i className="fa-solid fa-book-open-reader"></i>
-            </div>
-            <div className={styles.featureText}>
-              <h3>Study</h3>
-              <p>Master concepts with thousands of expertly explained questions.</p>
-            </div>
-          </Link>
-          <Link to="/course-selection?type=mock" className={styles.featureCard}>
-            <div className={styles.featureIcon}>
-              <i className="fa-solid fa-stopwatch"></i>
-            </div>
-            <div className={styles.featureText}>
-              <h3>Mock Test</h3>
-              <p>Simulate real exams and instantly identify your weaknesses.</p>
-            </div>
-          </Link>
-          <Link to="/bookmarks" className={styles.featureCard}>
-            <div className={styles.featureIcon}>
-              <i className="fa-solid fa-bookmark"></i>
-            </div>
-            <div className={styles.featureText}>
-              <h3>Bookmarks</h3>
-              <p>Save important questions for faster, smarter exam revisions.</p>
-            </div>
-          </Link>
-          <Link to="/results-history" className={styles.featureCard}>
-            <div className={styles.featureIcon}>
-              <i className="fa-solid fa-chart-line"></i>
-            </div>
-            <div className={styles.featureText}>
-              <h3>Results History</h3>
-              <p>Track progress with detailed reports on past performances.</p>
-            </div>
-          </Link>
-          <Link to="/notes" className={styles.featureCard}>
-            <div className={styles.featureIcon}>
-              <i className="fa-solid fa-sticky-note"></i>
-            </div>
-            <div className={styles.featureText}>
-              <h3>Notes</h3>
-              <p>Access clear, concise notes tailored for effective studying.</p>
-            </div>
-          </Link>
-          <Link to="/videos" className={styles.featureCard}>
-            <div className={styles.featureIcon}>
-              <i className="fa-solid fa-video"></i>
-            </div>
-            <div className={styles.featureText}>
-              <h3>Videos</h3>
-              <p>Watch engaging video lessons that simplify difficult concepts.</p>
-            </div>
-          </Link>
-          <Link to="/materials" className={styles.featureCard}>
-            <div className={styles.featureIcon}>
-              <i className="fa-solid fa-file-lines"></i>
-            </div>
-            <div className={styles.featureText}>
-              <h3>Materials</h3>
-              <p>Download study materials for deeper insights and preparation.</p>
-            </div>
-          </Link>
-          <Link to="/AI-assistant" className={styles.featureCard}>
-            <div className={styles.featureIcon}>
-              <i className="fa-solid fa-robot"></i>
-            </div>
-            <div className={styles.featureText}>
-              <h3>AI Assistant</h3>
-              <p>Chat with AI for instant answers and study support.</p>
-            </div>
-          </Link>
-          <Link to="/question-search" className={styles.featureCard}>
-            <div className={styles.featureIcon}>
-              <i className="fa-solid fa-magnifying-glass"></i>
-            </div>
-            <div className={styles.featureText}>
-              <h3>Question Search</h3>
-              <p>Quickly find questions by topic, keyword, or subject.</p>
-            </div>
-          </Link>
-          <Link to="/competitions" className={styles.featureCard}>
-            <div className={styles.featureIcon}>
-              <i className="fa-solid fa-trophy"></i>
-            </div>
-            <div className={styles.featureText}>
-              <h3>Competition</h3>
-              <p>Compete with peers and climb leaderboards in real time.</p>
-            </div>
-          </Link>
+          {featureCards.map((card, index) => (
+            <Link to={card.to} key={index} className={styles.featureCard}>
+              <div className={styles.featureIcon}>
+                <i className={card.icon}></i>
+              </div>
+              <div className={styles.featureText}>
+                <h3>{card.title}</h3>
+                <p>{card.description}</p>
+              </div>
+            </Link>
+          ))}
         </div>
       </main>
       

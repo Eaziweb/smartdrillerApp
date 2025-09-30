@@ -16,7 +16,7 @@ const storage = new CloudinaryStorage({
     const ext = file.originalname.split(".").pop().toLowerCase();
 
     return {
-      folder: "materials/approved",    // your folder
+folder: "materials",
       public_id: `${Date.now()}-${file.originalname.replace(/\.[^/.]+$/, "")}`,
       resource_type: "raw",            // keep as raw
       format: ext,
@@ -36,9 +36,7 @@ const upload = multer({
   },
 });
 
-// ==========================
-// Get all approved materials
-// ==========================
+
 router.get("/", auth, async (req, res) => {
   try {
     const { page = 1, limit = 12, search = "", course = "", type = "" } = req.query;
@@ -129,12 +127,13 @@ router.get("/:id/download", auth, async (req, res) => {
       return res.status(404).json({ success: false, message: "File not available" });
     }
 
-    // ✅ Generate signed URL for raw file download
-    const downloadUrl = cloudinary.utils.private_download_url(
-      material.cloudinaryPublicId,
-      process.env.CLOUDINARY_API_SECRET,
-      { attachment: material.originalName } // forces browser to download
-    );
+ 
+// Fixed
+const downloadUrl = cloudinary.utils.private_download_url(
+  material.cloudinaryPublicId,
+  material.originalName,
+  { resource_type: "raw", attachment: true }
+);
 
     res.json({ success: true, url: downloadUrl });
   } catch (error) {

@@ -18,11 +18,33 @@ const MaterialManagement = () => {
   const [approveModal, setApproveModal] = useState({ open: false, id: null })
   const [rejectModal, setRejectModal] = useState({ open: false, id: null, reason: "" })
   const [deleteModal, setDeleteModal] = useState({ open: false, id: null })
-
+const [courses, setCourses] = useState([]);
   useEffect(() => {
     loadMaterials()
   }, [currentPage, filters])
 
+
+useEffect(() => {
+  loadCourses();
+}, []);
+
+// Add this function
+const loadCourses = async () => {
+  try {
+    const token = localStorage.getItem("token");
+    const response = await api.get("/api/materials/courses", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    
+    if (response.data.success) {
+      setCourses(response.data.courses);
+    }
+  } catch (error) {
+    console.error("Error loading courses:", error);
+  }
+};
   const loadMaterials = async () => {
     setLoading(true)
     try {
@@ -133,24 +155,33 @@ const confirmDelete = async () => {
   }
 };
 
-const downloadMaterial = (publicId, filename) => {
-  if (!publicId) {
-    showNotification("File not available", "error");
-    return;
+
+// Fixed
+const downloadMaterial = async (materialId, filename) => {
+  try {
+    const token = localStorage.getItem("token");
+    const response = await api.get(`/api/admin/materials/${materialId}/download`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (response.data.success && response.data.url) {
+      const downloadUrl = response.data.url;
+      const link = document.createElement("a");
+      link.href = downloadUrl;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      showNotification("Download started", "success");
+    } else {
+      showNotification("File not available for download", "error");
+    }
+  } catch (error) {
+    console.error("Error downloading material:", error);
+    showNotification("Error downloading material", "error");
   }
-
-  // Construct the public Cloudinary URL
-  const downloadUrl = `https://res.cloudinary.com/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/raw/upload/${publicId}`;
-
-  // Create a temporary link to download
-  const link = document.createElement('a');
-  link.href = downloadUrl;
-  link.download = filename; // Suggests filename
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-
-  showNotification("Download started", "success");
 };
 
 
@@ -224,13 +255,18 @@ const downloadMaterial = (publicId, filename) => {
             <option value="approved">Approved</option>
             <option value="pending">Pending Approval</option>
           </select>
-          <select
-            value={filters.course}
-            onChange={(e) => handleFilterChange("course", e.target.value)}
-            className={styles.filterSelect}
-          >
-            <option value="">All Courses</option>
-          </select>
+<select
+  value={filters.course}
+  onChange={(e) => handleFilterChange("course", e.target.value)}
+  className={styles.filterSelect}
+>
+  <option value="">All Courses</option>
+  {courses.map((course) => (
+    <option key={course._id} value={course._id}>
+      {course.courseName} ({course.courseCode})
+    </option>
+  ))}
+</select>
           <select
             value={filters.type}
             onChange={(e) => handleFilterChange("type", e.target.value)}
@@ -293,7 +329,8 @@ const downloadMaterial = (publicId, filename) => {
                   <td>
                     <div className={styles.actionButtons}>
                      <button
-  onClick={() => downloadMaterial(material.cloudinaryPublicId, material.originalName)}
+// Fixed
+onClick={() => downloadMaterial(material._id, material.originalName)}
   className={styles.downloadBtn}
   title="Download"
 >

@@ -8,7 +8,7 @@ import SuperAdminRoute from "./components/SuperAdminRoute"
 import SubscriptionProtectedRoute from "./components/SubscriptionProtectedRoute"
 
 import LandingPage from './pages/LandingPage';
-// In your App.js file, add these routes
+
 
 import Company from './pages/Company';
 import Resources from './pages/Resources';
@@ -77,6 +77,7 @@ import Results from "./pages/user/Results"
 import Correction from "./pages/user/Correction"
 import AOS from 'aos';
 import 'aos/dist/aos.css';
+import './index.css';
 
 
 

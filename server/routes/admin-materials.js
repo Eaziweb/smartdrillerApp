@@ -116,13 +116,16 @@ router.get("/:id/download", adminAuth, async (req, res) => {
     if (!material) return res.status(404).json({ success: false, message: "Material not found" });
     if (!material.cloudinaryPublicId) return res.status(404).json({ success: false, message: "File not available" });
 
-    // Generate a signed URL valid for 60 seconds
-    const downloadUrl = cloudinary.utils.private_download_url(
-      material.cloudinaryPublicId, 
-      60, // expiration in seconds
-      'attachment', // forces browser download
-      material.originalName // suggested filename
-    );
+// Fixed
+const downloadUrl = cloudinary.utils.private_download_url(
+  material.cloudinaryPublicId,
+  material.originalName,
+  { 
+    resource_type: "raw", 
+    attachment: true,
+    expires_at: Math.floor(Date.now() / 1000) + 60 
+  }
+);
 
     res.json({ success: true, url: downloadUrl });
   } catch (error) {
