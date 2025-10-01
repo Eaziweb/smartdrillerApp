@@ -94,7 +94,7 @@ router.post("/courses/:courseId/notes", adminAuth, async (req, res) => {
 });
 
 // Update a note
-router.put("/notes/:id", adminAuth, async (req, res) => {
+router.put("/:id", adminAuth, async (req, res) => {
   try {
     const { title, description, content } = req.body;
     const note = await Note.findByIdAndUpdate(
@@ -113,7 +113,7 @@ router.put("/notes/:id", adminAuth, async (req, res) => {
 });
 
 // Delete a note
-router.delete("/notes/:id", adminAuth, async (req, res) => {
+router.delete("/:id", adminAuth, async (req, res) => {
   try {
     const note = await Note.findById(req.params.id);
     if (!note) {
