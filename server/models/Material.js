@@ -6,7 +6,8 @@ const materialSchema = new mongoose.Schema(
     description: { type: String, trim: true, maxlength: 1000 },
     cloudinaryUrl: { type: String, required: true, trim: true },
     cloudinaryPublicId: { type: String, required: true, trim: true },
-    cloudinaryVersion: { type: String, required: true },
+    // cloudinaryVersion: { type: String, required: true },
+
     cloudinaryResourceType: {
       type: String,
       enum: ["image", "raw", "video", "auto"],
@@ -29,6 +30,7 @@ const materialSchema = new mongoose.Schema(
     isDeleted: { type: Boolean, default: false },
   },
   { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } }
+
 );
 
 // Virtual for download URL

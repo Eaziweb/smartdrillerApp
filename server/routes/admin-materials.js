@@ -79,23 +79,25 @@ router.delete("/:id", adminAuth, async (req, res) => {
     res.status(500).json({ success: false, message: "Failed to delete material" });
   }
 });
-
+// admin/materials.js
 router.get("/:id/download", adminAuth, async (req, res) => {
   try {
     const material = await Material.findById(req.params.id);
     if (!material) return res.status(404).json({ success: false, message: "Material not found" });
 
-    const url = cloudinary.url(material.cloudinaryPublicId, {
-      resource_type: "raw",
-      version: material.cloudinaryVersion,
-      sign_url: true,
-      expires_at: Math.floor(Date.now() / 1000) + 300,
-      attachment: material.originalName,
-    });
+    // Extract version from the stored URL
+    const versionMatch = material.cloudinaryUrl.match(/\/v(\d+)\//);
+    const version = versionMatch ? versionMatch[1] : Date.now().toString();
+    
+    // Generate the exact URL format
+    const cloudName = cloudinary.config().cloud_name;
+    const url = `https://res.cloudinary.com/${cloudName}/raw/upload/v${version}/${material.cloudinaryPublicId}.${material.fileType}`;
 
+    console.log("Generated download URL:", url); // For debugging
+    
     res.json({ success: true, url });
   } catch (error) {
-    console.error(error);
+    console.error("Download error:", error);
     res.status(500).json({ success: false, message: "Failed to download" });
   }
 });

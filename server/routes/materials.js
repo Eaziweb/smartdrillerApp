@@ -31,24 +31,28 @@ const upload = multer({
     allowed.includes(ext) ? cb(null, true) : cb(new Error("Only PDF, DOCX, PPT allowed"));
   },
 });
-
+// materials.js (user routes)
 router.post("/upload", auth, upload.single("file"), async (req, res) => {
   try {
     const { title, description, course } = req.body;
     if (!req.file) return res.status(400).json({ success: false, message: "File is required" });
 
     const fileExtension = req.file.originalname.split(".").pop().toLowerCase();
-
-    // Extract version from Cloudinary URL
-    const versionMatch = req.file.path.match(/\/v(\d+)\//);
-    const version = versionMatch ? versionMatch[1] : null;
+    
+    // Log the file object for debugging
+    console.log("Cloudinary file object:", {
+      path: req.file.path,
+      filename: req.file.filename,
+      originalname: req.file.originalname,
+      size: req.file.size,
+      mimetype: req.file.mimetype
+    });
 
     const material = new Material({
       title,
       description,
       cloudinaryUrl: req.file.path,
       cloudinaryPublicId: req.file.filename,
-      cloudinaryVersion: version,   // ✅ fixed
       originalName: req.file.originalname,
       fileSize: req.file.size,
       fileType: fileExtension,
@@ -60,8 +64,24 @@ router.post("/upload", auth, upload.single("file"), async (req, res) => {
     await material.save();
     res.json({ success: true, message: "Uploaded (pending approval)", material });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ success: false, message: "Failed to upload" });
+    // Enhanced error logging
+    console.error("Upload error details:", {
+      message: error.message,
+      stack: error.stack,
+      body: req.body,
+      file: req.file ? {
+        originalname: req.file.originalname,
+        size: req.file.size,
+        mimetype: req.file.mimetype
+      } : null,
+      user: req.user ? req.user.id : null
+    });
+    
+    res.status(500).json({ 
+      success: false, 
+      message: "Failed to upload",
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
   }
 });
 
@@ -104,23 +124,25 @@ router.get("/", auth, async (req, res) => {
   }
 });
 
+// materials.js (user routes)
 router.get("/:id/download", auth, async (req, res) => {
   try {
     const material = await Material.findById(req.params.id);
     if (!material) return res.status(404).json({ success: false, message: "Material not found" });
 
-    // Generate the download URL with proper parameters
-    const url = cloudinary.url(material.cloudinaryPublicId, {
-      resource_type: "raw",
-      version: material.cloudinaryVersion, 
-      sign_url: true,
-      expires_at: Math.floor(Date.now() / 1000) + 300,
-      attachment: material.originalName,
-    });
+    // Extract version from the stored URL
+    const versionMatch = material.cloudinaryUrl.match(/\/v(\d+)\//);
+    const version = versionMatch ? versionMatch[1] : Date.now().toString();
+    
+    // Generate the exact URL format
+    const cloudName = cloudinary.config().cloud_name;
+    const url = `https://res.cloudinary.com/${cloudName}/raw/upload/v${version}/${material.cloudinaryPublicId}.${material.fileType}`;
 
+    console.log("Generated download URL:", url); // For debugging
+    
     res.json({ success: true, url });
   } catch (error) {
-    console.error(error);
+    console.error("Download error:", error);
     res.status(500).json({ success: false, message: "Failed to download" });
   }
 });
