@@ -1,8 +1,8 @@
 const express = require("express");
 const router = express.Router();
-const Material = require("../../models/Material");
-const { adminAuth } = require("../../middleware/auth");
-const cloudinary = require("../../config/cloudinary");
+const Material = require("../models/Material");
+const { adminAuth } = require("../middleware/auth");
+const cloudinary = require("../config/cloudinary");
 
 // List materials
 router.get("/", adminAuth, async (req, res) => {
