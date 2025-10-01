@@ -158,6 +158,7 @@ const confirmDelete = async () => {
 
 
 // MaterialManagement.jsx download function
+// MaterialManagement.jsx
 const downloadMaterial = async (materialId, filename) => {
   try {
     const response = await api.get(`/api/materials/${materialId}/download`);
@@ -166,6 +167,7 @@ const downloadMaterial = async (materialId, filename) => {
       const link = document.createElement("a");
       link.href = response.data.url;
       link.setAttribute("download", filename || "file");
+      link.style.display = 'none';
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);

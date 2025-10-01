@@ -134,9 +134,9 @@ router.get("/:id/download", auth, async (req, res) => {
     const versionMatch = material.cloudinaryUrl.match(/\/v(\d+)\//);
     const version = versionMatch ? versionMatch[1] : Date.now().toString();
     
-    // Generate the exact URL format
+    // Generate the exact URL format without adding extension
     const cloudName = cloudinary.config().cloud_name;
-    const url = `https://res.cloudinary.com/${cloudName}/raw/upload/v${version}/${material.cloudinaryPublicId}.${material.fileType}`;
+    const url = `https://res.cloudinary.com/${cloudName}/raw/upload/v${version}/${material.cloudinaryPublicId}`;
 
     console.log("Generated download URL:", url); // For debugging
     
