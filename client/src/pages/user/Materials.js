@@ -108,31 +108,26 @@ const Materials = () => {
       setUploading(false)
     }
   }
+const downloadMaterial = async (materialId, filename) => {
+  try {
+    const response = await api.get(`/api/materials/${materialId}/download`);
 
-  const downloadMaterial = async (materialId, filename) => {
-    try {
-      const response = await api.get(`/api/materials/${materialId}/download`);
-
-      if (response.data.success && response.data.url) {
-        const downloadUrl = response.data.url;
-
-        // Create a temporary <a> element to trigger browser download
-        const link = document.createElement("a");
-        link.href = downloadUrl;
-        link.download = filename; // Suggest the filename
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-
-        showNotification("Download started", "success");
-      } else {
-        showNotification("File not available for download", "error");
-      }
-    } catch (error) {
-      console.error("Error downloading material:", error);
-      showNotification("Error downloading material", "error");
+    if (response.data.success && response.data.url) {
+      const link = document.createElement("a");
+      link.href = response.data.url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } else {
+      showNotification("File not available for download", "error");
     }
-  };
+  } catch (error) {
+    console.error("Error downloading material:", error);
+    showNotification("Error downloading material", "error");
+  }
+};
+
 
   const handleFilterChange = (key, value) => {
     setFilters((prev) => ({ ...prev, [key]: value }))

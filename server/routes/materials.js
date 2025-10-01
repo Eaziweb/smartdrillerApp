@@ -86,16 +86,18 @@ router.post("/upload", auth, upload.single("file"), async (req, res) => {
       return res.status(400).json({ success: false, message: "File is required" });
     }
 
-    // Debug: see what multer-storage-cloudinary gives you
     console.log("Cloudinary upload result:", req.file);
 
     const fileExtension = req.file.originalname.split(".").pop().toLowerCase();
+
+    // Remove extension from public_id
+    const publicIdWithoutExt = req.file.filename.replace(/\.[^/.]+$/, "");
 
     const material = new Material({
       title,
       description,
       cloudinaryUrl: req.file.path,              // full CDN URL
-      cloudinaryPublicId: req.file.filename,     // correct public_id (includes folder)
+      cloudinaryPublicId: publicIdWithoutExt,    // correct public_id without extension
       originalName: req.file.originalname,
       fileSize: req.file.size,
       fileType: fileExtension,
@@ -118,28 +120,19 @@ router.post("/upload", auth, upload.single("file"), async (req, res) => {
 });
 
 
+
 router.get("/:id/download", auth, async (req, res) => {
   try {
     const material = await Material.findById(req.params.id);
-    if (!material) {
-      return res.status(404).json({ success: false, message: "Material not found" });
-    }
-
-    if (!material.cloudinaryPublicId) {
-      return res.status(404).json({ success: false, message: "File not available" });
-    }
+    if (!material) return res.status(404).json({ success: false, message: "Material not found" });
+    if (!material.cloudinaryPublicId) return res.status(404).json({ success: false, message: "File not available" });
 
     console.log("Downloading material:", material.cloudinaryPublicId);
 
-    // Generate a private signed download link (raw file)
     const downloadUrl = cloudinary.utils.private_download_url(
-      material.cloudinaryPublicId,   // must match what was saved on upload
-      material.originalName,         // file name for user
-      {
-        resource_type: "raw",
-        attachment: true,
-        expires_at: Math.floor(Date.now() / 1000) + 60 // 1 min expiry
-      }
+      material.cloudinaryPublicId,    // must NOT have extension
+      material.originalName,          // file name for user
+      { resource_type: "raw", attachment: true, expires_at: Math.floor(Date.now() / 1000) + 300 } // 5 min expiry
     );
 
     res.json({ success: true, url: downloadUrl });
@@ -148,6 +141,7 @@ router.get("/:id/download", auth, async (req, res) => {
     res.status(500).json({ success: false, message: "Failed to download material" });
   }
 });
+
 
 
 module.exports = router;
