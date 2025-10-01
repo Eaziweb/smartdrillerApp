@@ -32,21 +32,23 @@ const upload = multer({
   },
 });
 
-// Upload route changes
 router.post("/upload", auth, upload.single("file"), async (req, res) => {
   try {
     const { title, description, course } = req.body;
     if (!req.file) return res.status(400).json({ success: false, message: "File is required" });
 
     const fileExtension = req.file.originalname.split(".").pop().toLowerCase();
-    
-    // Store the version from Cloudinary response
+
+    // Extract version from Cloudinary URL
+    const versionMatch = req.file.path.match(/\/v(\d+)\//);
+    const version = versionMatch ? versionMatch[1] : null;
+
     const material = new Material({
       title,
       description,
       cloudinaryUrl: req.file.path,
-      cloudinaryPublicId: req.file.filename, // This already includes the version
-      cloudinaryVersion: req.file.version, // Add this line
+      cloudinaryPublicId: req.file.filename,
+      cloudinaryVersion: version,   // ✅ fixed
       originalName: req.file.originalname,
       fileSize: req.file.size,
       fileType: fileExtension,
@@ -62,6 +64,7 @@ router.post("/upload", auth, upload.single("file"), async (req, res) => {
     res.status(500).json({ success: false, message: "Failed to upload" });
   }
 });
+
 
 
 router.get("/courses", auth, async (req, res) => {
@@ -109,10 +112,10 @@ router.get("/:id/download", auth, async (req, res) => {
     // Generate the download URL with proper parameters
     const url = cloudinary.url(material.cloudinaryPublicId, {
       resource_type: "raw",
-      version: material.cloudinaryVersion, // Add version parameter
+      version: material.cloudinaryVersion, 
       sign_url: true,
       expires_at: Math.floor(Date.now() / 1000) + 300,
-      attachment: material.originalName, // Use attachment parameter instead of flags
+      attachment: material.originalName,
     });
 
     res.json({ success: true, url });

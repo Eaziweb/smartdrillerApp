@@ -34,7 +34,7 @@ router.get("/", adminAuth, async (req, res) => {
 // Approve
 router.put("/:id/approve", adminAuth, async (req, res) => {
   try {
-    const material = await Material.findById(req.params.id);
+    const material = await Material.findById(req.params.id);  
     if (!material) return res.status(404).json({ success: false, message: "Material not found" });
     material.isApproved = true;
     material.rejectionReason = "";
