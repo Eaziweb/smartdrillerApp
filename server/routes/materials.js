@@ -119,8 +119,6 @@ router.post("/upload", auth, upload.single("file"), async (req, res) => {
   }
 });
 
-
-
 router.get("/:id/download", auth, async (req, res) => {
   try {
     const material = await Material.findById(req.params.id);
@@ -129,10 +127,15 @@ router.get("/:id/download", auth, async (req, res) => {
 
     console.log("Downloading material:", material.cloudinaryPublicId);
 
+    // Correct private download URL for raw files
     const downloadUrl = cloudinary.utils.private_download_url(
-      material.cloudinaryPublicId,    // must NOT have extension
-      material.originalName,          // file name for user
-      { resource_type: "raw", attachment: true, expires_at: Math.floor(Date.now() / 1000) + 300 } // 5 min expiry
+      material.cloudinaryPublicId,   // include folder (e.g., "materials/xxxx"), NO extension
+      material.originalName,         // filename users will see
+      {
+        resource_type: "raw",
+        attachment: true,
+        expires_at: Math.floor(Date.now() / 1000) + 300, // 5 min expiry
+      }
     );
 
     res.json({ success: true, url: downloadUrl });
