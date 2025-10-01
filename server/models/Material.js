@@ -6,6 +6,7 @@ const materialSchema = new mongoose.Schema(
     description: { type: String, trim: true, maxlength: 1000 },
     cloudinaryUrl: { type: String, required: true, trim: true },
     cloudinaryPublicId: { type: String, required: true, trim: true },
+    cloudinaryVersion: { type: String, required: true },
     cloudinaryResourceType: {
       type: String,
       enum: ["image", "raw", "video", "auto"],

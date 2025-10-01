@@ -32,20 +32,21 @@ const upload = multer({
   },
 });
 
-// Upload
+// Upload route changes
 router.post("/upload", auth, upload.single("file"), async (req, res) => {
   try {
     const { title, description, course } = req.body;
     if (!req.file) return res.status(400).json({ success: false, message: "File is required" });
 
     const fileExtension = req.file.originalname.split(".").pop().toLowerCase();
-    const publicIdWithoutExt = req.file.filename.replace(/\.[^/.]+$/, "");
-
+    
+    // Store the version from Cloudinary response
     const material = new Material({
       title,
       description,
       cloudinaryUrl: req.file.path,
-      cloudinaryPublicId: publicIdWithoutExt,
+      cloudinaryPublicId: req.file.filename, // This already includes the version
+      cloudinaryVersion: req.file.version, // Add this line
       originalName: req.file.originalname,
       fileSize: req.file.size,
       fileType: fileExtension,
@@ -61,6 +62,8 @@ router.post("/upload", auth, upload.single("file"), async (req, res) => {
     res.status(500).json({ success: false, message: "Failed to upload" });
   }
 });
+
+
 router.get("/courses", auth, async (req, res) => {
   try {
     const courses = await Course.find({}, "courseName courseCode").sort({ courseName: 1 });
@@ -98,17 +101,18 @@ router.get("/", auth, async (req, res) => {
   }
 });
 
-// Download
 router.get("/:id/download", auth, async (req, res) => {
   try {
     const material = await Material.findById(req.params.id);
     if (!material) return res.status(404).json({ success: false, message: "Material not found" });
 
+    // Generate the download URL with proper parameters
     const url = cloudinary.url(material.cloudinaryPublicId, {
       resource_type: "raw",
-      flags: `attachment:${material.originalName}`,
+      version: material.cloudinaryVersion, // Add version parameter
       sign_url: true,
       expires_at: Math.floor(Date.now() / 1000) + 300,
+      attachment: material.originalName, // Use attachment parameter instead of flags
     });
 
     res.json({ success: true, url });

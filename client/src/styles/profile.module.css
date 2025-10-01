@@ -9,7 +9,7 @@
   --bg-primary: #ffffff;
   --bg-secondary: #f8fafc;
   --bg-accent: #f1f5f9;
-  --bg-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #002060, #0066ff);
   --text-primary: #1e293b;
   --text-secondary: #64748b;
   --text-tertiary: #94a3b8;
@@ -123,8 +123,8 @@
   gap: 0.5rem;
 }
 
-.profileEmail::before {
-  content: "✉️";
+.profileEmail i {
+  color: var(--primary-light);
 }
 
 .profileCourse {
@@ -137,8 +137,8 @@
   gap: 0.5rem;
 }
 
-.profileCourse::before {
-  content: "📚";
+.profileCourse i {
+  color: var(--info-color);
 }
 
 .profileUniversity {
@@ -151,8 +151,8 @@
   gap: 0.5rem;
 }
 
-.profileUniversity::before {
-  content: "🏫";
+.profileUniversity i {
+  color: var(--warning-color);
 }
 
 .subscribedBadge {
@@ -169,8 +169,8 @@
   box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
 }
 
-.subscribedBadge::before {
-  content: "✅";
+.subscribedBadge i {
+  color: var(--success-color);
 }
 
 .notSubscribedBadge {
@@ -187,8 +187,8 @@
   box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);
 }
 
-.notSubscribedBadge::before {
-  content: "❌";
+.notSubscribedBadge i {
+  color: var(--error-color);
 }
 
 .subscriptionType {
@@ -202,8 +202,8 @@
   gap: 0.5rem;
 }
 
-.subscriptionType::before {
-  content: "💳";
+.subscriptionType i {
+  color: var(--primary-light);
 }
 
 .recurringInfo {
@@ -216,8 +216,8 @@
   gap: 0.5rem;
 }
 
-.recurringInfo::before {
-  content: "🔄";
+.recurringInfo i {
+  color: var(--info-color);
 }
 
 .nextPaymentDate {
@@ -230,8 +230,8 @@
   gap: 0.5rem;
 }
 
-.nextPaymentDate::before {
-  content: "📅";
+.nextPaymentDate i {
+  color: var(--warning-color);
 }
 
 .expiryDate {
@@ -244,8 +244,8 @@
   gap: 0.5rem;
 }
 
-.expiryDate::before {
-  content: "⏱️";
+.expiryDate i {
+  color: var(--text-tertiary);
 }
 
 .profileForm {
@@ -410,8 +410,8 @@
   box-shadow: var(--shadow-md);
 }
 
-.successMessage::before {
-  content: "✅";
+.successMessage i {
+  color: var(--success-color);
   font-size: 1.2rem;
 }
 
@@ -431,8 +431,8 @@
   box-shadow: var(--shadow-md);
 }
 
-.errorMessage::before {
-  content: "❌";
+.errorMessage i {
+  color: var(--error-color);
   font-size: 1.2rem;
 }
 

@@ -452,9 +452,12 @@
     font-size: 0.85rem;
   }
   
-  .questionGrid {
-    grid-template-columns: repeat(auto-fill, minmax(30px, 1fr));
-    gap: 0.4rem;
+   .questionGrid {
+    padding: 0 1rem;
+      gap: 0.2rem;
+  max-width: 800px;
+  margin: 1.5rem auto;
+ 
   }
   
   .gridItem {

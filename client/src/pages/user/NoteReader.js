@@ -134,7 +134,7 @@ const NoteReader = () => {
     }
   }
 
-  // Watermark component
+
   const Watermark = () => {
     if (!user) return null
     

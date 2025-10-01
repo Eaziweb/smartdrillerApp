@@ -80,7 +80,6 @@ router.delete("/:id", adminAuth, async (req, res) => {
   }
 });
 
-// Download
 router.get("/:id/download", adminAuth, async (req, res) => {
   try {
     const material = await Material.findById(req.params.id);
@@ -88,9 +87,10 @@ router.get("/:id/download", adminAuth, async (req, res) => {
 
     const url = cloudinary.url(material.cloudinaryPublicId, {
       resource_type: "raw",
-      flags: `attachment:${material.originalName}`,
+      version: material.cloudinaryVersion,
       sign_url: true,
       expires_at: Math.floor(Date.now() / 1000) + 300,
+      attachment: material.originalName,
     });
 
     res.json({ success: true, url });

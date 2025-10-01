@@ -156,25 +156,27 @@ const confirmDelete = async () => {
 };
 
 
-const downloadMaterial = async (materialId, filename) => {
+
+// Admin download route (same changes)
+router.get("/:id/download", adminAuth, async (req, res) => {
   try {
-    const response = await api.get(`/api/materials/${materialId}/download`);
-    if (response.data.success && response.data.url) {
-      const link = document.createElement("a");
-      link.href = response.data.url;
-      link.setAttribute("download", filename || "file");
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      showNotification("Download started", "success");
-    } else {
-      showNotification("File not available", "error");
-    }
-  } catch (err) {
-    console.error(err);
-    showNotification("Error downloading file", "error");
+    const material = await Material.findById(req.params.id);
+    if (!material) return res.status(404).json({ success: false, message: "Material not found" });
+
+    const url = cloudinary.url(material.cloudinaryPublicId, {
+      resource_type: "raw",
+      version: material.cloudinaryVersion,
+      sign_url: true,
+      expires_at: Math.floor(Date.now() / 1000) + 300,
+      attachment: material.originalName,
+    });
+
+    res.json({ success: true, url });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: "Failed to download" });
   }
-};
+});
 
 
   const handleFilterChange = (key, value) => {

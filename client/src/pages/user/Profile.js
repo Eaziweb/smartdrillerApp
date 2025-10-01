@@ -127,35 +127,47 @@ const Profile = () => {
         <div className={styles.profileHeader}>
           <div className={styles.profileAvatar}>{getInitials(user?.fullName)}</div>
           <h2>{user?.fullName}</h2>
-          <p className={styles.profileEmail}>{user?.email}</p>
+          <p className={styles.profileEmail}>
+            <i className="fas fa-envelope"></i>
+            {user?.email}
+          </p>
           <p className={styles.profileCourse}>
+            <i className="fas fa-book"></i>
             {loadingCourse ? "Loading course..." : courseName}
           </p>
-          <p className={styles.profileUniversity}>{universityName}</p>
+          <p className={styles.profileUniversity}>
+            <i className="fas fa-university"></i>
+            {universityName}
+          </p>
           <div className={user?.isSubscribed ? styles.subscribedBadge : styles.notSubscribedBadge}>
+            <i className={`fas ${user?.isSubscribed ? 'fa-check-circle' : 'fa-times-circle'}`}></i>
             {user?.isSubscribed ? "Subscribed" : "Not Subscribed"}
           </div>
           
           {user?.subscriptionType && (
             <p className={styles.subscriptionType}>
+              <i className="fas fa-credit-card"></i>
               Subscription Type: {user?.subscriptionType === "monthly" ? "Monthly" : "Semester"}
             </p>
           )}
           
           {user?.isRecurring && (
             <p className={styles.recurringInfo}>
+              <i className="fas fa-sync-alt"></i>
               Recurring: {user?.remainingMonths} months remaining
             </p>
           )}
           
           {user?.subscriptionExpiry && (
             <p className={styles.expiryDate}>
+              <i className="fas fa-hourglass-half"></i>
               Expires: {formatDate(user.subscriptionExpiry)}
             </p>
           )}
           
           {user?.nextPaymentDate && (
             <p className={styles.nextPaymentDate}>
+              <i className="fas fa-calendar-alt"></i>
               Next Payment: {formatDate(user.nextPaymentDate)}
             </p>
           )}
@@ -166,6 +178,7 @@ const Profile = () => {
           
           {message && (
             <div className={message.includes("successfully") ? styles.successMessage : styles.errorMessage}>
+              <i className={`fas ${message.includes("successfully") ? 'fa-check-circle' : 'fa-times-circle'}`}></i>
               {message}
             </div>
           )}

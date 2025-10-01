@@ -108,26 +108,26 @@ const Materials = () => {
       setUploading(false)
     }
   }
-const downloadMaterial = async (materialId, filename) => {
-  try {
-    const response = await api.get(`/api/materials/${materialId}/download`);
-    if (response.data.success && response.data.url) {
-      const link = document.createElement("a");
-      link.href = response.data.url;
-      link.setAttribute("download", filename || "file");
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      showNotification("Download started", "success");
-    } else {
-      showNotification("File not available", "error");
-    }
-  } catch (err) {
-    console.error(err);
-    showNotification("Error downloading file", "error");
-  }
-};
 
+  const downloadMaterial = async (materialId, filename) => {
+    try {
+      const response = await api.get(`/api/materials/${materialId}/download`);
+      if (response.data.success && response.data.url) {
+        const link = document.createElement("a");
+        link.href = response.data.url;
+        link.setAttribute("download", filename || "file");
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        showNotification("Download started", "success");
+      } else {
+        showNotification("File not available", "error");
+      }
+    } catch (err) {
+      console.error(err);
+      showNotification("Error downloading file", "error");
+    }
+  };
 
   const handleFilterChange = (key, value) => {
     setFilters((prev) => ({ ...prev, [key]: value }))
@@ -267,7 +267,7 @@ const downloadMaterial = async (materialId, filename) => {
       
       {loading ? (
         <div className={styles.loading}>
-          <i className="fas fa-spinner"></i>
+          <i className="fas fa-spinner fa-spin"></i>
           <span>Loading materials...</span>
         </div>
       ) : materials.length === 0 ? (
@@ -290,12 +290,19 @@ const downloadMaterial = async (materialId, filename) => {
                     <span className={styles.materialCourse}>
                       {material.course?.courseCode || material.course?.courseName || "Unknown"}
                     </span>
-                    <span className={styles.materialSize}>{formatFileSize(material.fileSize)}</span>
+                    <span className={styles.materialSize}>
+                      <i className="fas fa-weight-hanging"></i>
+                      {formatFileSize(material.fileSize)}
+                    </span>
                   </div>
                 </div>
                 <div className={styles.materialDetails}>
-                  <span className={styles.uploader}>{material.uploadedBy?.fullName || "Unknown"}</span>
-                  <span className={styles.uploadDate}>{new Date(material.createdAt).toLocaleDateString()}</span>
+                  <span className={styles.uploader}>
+                    {material.uploadedBy?.fullName || "Unknown"}
+                  </span>
+                  <span className={styles.uploadDate}>
+                    {new Date(material.createdAt).toLocaleDateString()}
+                  </span>
                 </div>
               </div>
               <div className={styles.materialActions}>
@@ -336,7 +343,7 @@ const downloadMaterial = async (materialId, filename) => {
         </div>
       )}
       
-      {/* Upload Modal */}
+      {/* Enhanced Upload Modal */}
       {uploadModalOpen && (
         <div className={styles.modalOverlay} onClick={() => setUploadModalOpen(false)}>
           <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
@@ -354,6 +361,7 @@ const downloadMaterial = async (materialId, filename) => {
                   value={uploadForm.title}
                   onChange={(e) => setUploadForm((prev) => ({ ...prev, title: e.target.value }))}
                   required
+                  placeholder="Enter material title"
                 />
               </div>
               <div className={styles.formGroup}>
@@ -362,6 +370,7 @@ const downloadMaterial = async (materialId, filename) => {
                   value={uploadForm.description}
                   onChange={(e) => setUploadForm((prev) => ({ ...prev, description: e.target.value }))}
                   rows="3"
+                  placeholder="Enter a brief description"
                 />
               </div>
               <div className={styles.formGroup}>
