@@ -9,8 +9,10 @@
   --bg-primary: #ffffff;
   --bg-secondary: #f8fafc;
   --bg-accent: #f1f5f9;
+  --bg-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   --text-primary: #1e293b;
   --text-secondary: #64748b;
+  --text-tertiary: #94a3b8;
   --border-color: #e2e8f0;
   --border-hover: #cbd5e1;
   --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
@@ -20,11 +22,12 @@
   --radius-sm: 6px;
   --radius-md: 12px;
   --radius-lg: 16px;
+  --radius-xl: 20px;
 }
 
 .profilePage {
   min-height: 100vh;
-  background-color: var(--bg-secondary);
+  background: var(--bg-gradient);
   padding: 1rem;
   display: flex;
   justify-content: center;
@@ -44,151 +47,265 @@
   align-items: center;
   margin-bottom: 2rem;
   padding-bottom: 1rem;
-  border-bottom: 1px solid var(--border-color);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .backBtn {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 40px;
-  height: 40px;
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
-  background-color: var(--bg-accent);
-  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.15);
+  color: white;
   text-decoration: none;
   margin-right: 1rem;
   transition: all 0.3s ease;
+  box-shadow: var(--shadow-md);
 }
 
 .backBtn:hover {
-  background-color: var(--border-color);
+  background: rgba(255, 255, 255, 0.25);
   transform: translateX(-3px);
+  box-shadow: var(--shadow-lg);
 }
 
 .appLogo {
-  font-size: 1.5rem;
+  font-size: 1.8rem;
   font-weight: 700;
-  color: var(--primary-dark);
+  color: white;
   margin: 0;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 .profileHeader {
   text-align: center;
   margin-bottom: 2rem;
-  padding: 2rem;
-  background: var(--bg-primary);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-md);
+  padding: 2.5rem;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-xl);
+  border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .profileAvatar {
-  width: 80px;
-  height: 80px;
+  width: 100px;
+  height: 100px;
   border-radius: 50%;
   background: var(--primary-gradient);
   color: white;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.5rem;
+  font-size: 2rem;
   font-weight: bold;
-  margin: 0 auto 1rem;
-  box-shadow: var(--shadow-md);
+  margin: 0 auto 1.5rem;
+  box-shadow: var(--shadow-lg);
+  border: 4px solid white;
 }
 
 .profileHeader h2 {
-  font-size: 1.5rem;
+  font-size: 1.8rem;
   margin: 0 0 0.5rem 0;
   color: var(--text-primary);
+  font-weight: 700;
 }
 
-.profileEmail,
+.profileEmail {
+  color: var(--text-secondary);
+  margin: 0 0 0.5rem 0;
+  font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.profileEmail::before {
+  content: "✉️";
+}
+
 .profileCourse {
   color: var(--text-secondary);
   margin: 0 0 0.5rem 0;
+  font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.profileCourse::before {
+  content: "📚";
+}
+
+.profileUniversity {
+  color: var(--text-secondary);
+  font-size: 1.1rem;
+  margin: 0.5rem 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.profileUniversity::before {
+  content: "🏫";
 }
 
 .subscribedBadge {
-  display: inline-block;
-  margin-top: 1rem;
-  padding: 0.5rem 1rem;
-  border-radius: var(--radius-md);
-  background: rgba(16, 185, 129, 0.1);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 1.5rem;
+  padding: 0.7rem 1.2rem;
+  border-radius: 30px;
+  background: rgba(16, 185, 129, 0.15);
   color: var(--success-color);
-  font-weight: 500;
-  font-size: 0.9rem;
+  font-weight: 600;
+  font-size: 1rem;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
+}
+
+.subscribedBadge::before {
+  content: "✅";
 }
 
 .notSubscribedBadge {
-  display: inline-block;
-  margin-top: 1rem;
-  padding: 0.5rem 1rem;
-  border-radius: var(--radius-md);
-  background: rgba(239, 68, 68, 0.1);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 1.5rem;
+  padding: 0.7rem 1.2rem;
+  border-radius: 30px;
+  background: rgba(239, 68, 68, 0.15);
   color: var(--error-color);
-  font-weight: 500;
-  font-size: 0.9rem;
+  font-weight: 600;
+  font-size: 1rem;
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);
+}
+
+.notSubscribedBadge::before {
+  content: "❌";
+}
+
+.subscriptionType {
+  color: var(--primary-light);
+  font-weight: 600;
+  margin: 0.8rem 0 0.3rem 0;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.subscriptionType::before {
+  content: "💳";
+}
+
+.recurringInfo {
+  color: var(--info-color);
+  font-size: 0.95rem;
+  margin: 0.3rem 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.recurringInfo::before {
+  content: "🔄";
+}
+
+.nextPaymentDate {
+  color: var(--warning-color);
+  font-size: 0.95rem;
+  margin: 0.3rem 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.nextPaymentDate::before {
+  content: "📅";
 }
 
 .expiryDate {
-  color: var(--text-secondary);
-  font-size: 0.9rem;
+  color: var(--text-tertiary);
+  font-size: 0.95rem;
   margin-top: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.expiryDate::before {
+  content: "⏱️";
 }
 
 .profileForm {
-  background: var(--bg-primary);
-  border-radius: var(--radius-lg);
-  padding: 1.5rem;
-  box-shadow: var(--shadow-md);
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-radius: var(--radius-xl);
+  padding: 2rem;
+  box-shadow: var(--shadow-xl);
   margin-bottom: 2rem;
+  border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .profileForm h3 {
-  margin-bottom: 1.5rem;
+  margin-bottom: 2rem;
   color: var(--text-primary);
   text-align: center;
-  font-weight: 600;
+  font-weight: 700;
+  font-size: 1.5rem;
 }
 
 .inputGroup {
-  margin-bottom: 1.5rem;
+  margin-bottom: 1.8rem;
 }
 
 .inputGroup label {
   display: block;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.7rem;
   color: var(--text-primary);
-  font-weight: 500;
+  font-weight: 600;
+  font-size: 1rem;
 }
 
 .inputGroup input {
   width: 100%;
-  padding: 0.75rem 1rem;
-  border: 1px solid var(--border-color);
+  padding: 0.85rem 1.2rem;
+  border: 2px solid var(--border-color);
   border-radius: var(--radius-md);
   font-size: 1rem;
   transition: all 0.3s ease;
   background: var(--bg-primary);
   color: var(--text-primary);
+  box-shadow: var(--shadow-sm);
 }
 
 .inputGroup input:focus {
   outline: none;
   border-color: var(--primary-light);
-  box-shadow: 0 0 0 3px rgba(0, 102, 255, 0.1);
+  box-shadow: 0 0 0 4px rgba(0, 102, 255, 0.1);
+  background: white;
 }
 
 .submitBtn {
   width: 100%;
-  padding: 0.75rem 1rem;
+  padding: 0.9rem 1.2rem;
   background: var(--primary-gradient);
   color: white;
   border: none;
   border-radius: var(--radius-md);
-  font-size: 1rem;
-  font-weight: 600;
+  font-size: 1.1rem;
+  font-weight: 700;
   cursor: pointer;
   display: flex;
   justify-content: space-between;
@@ -196,21 +313,25 @@
   transition: all 0.3s ease;
   position: relative;
   overflow: hidden;
+  box-shadow: var(--shadow-md);
+  margin-top: 1rem;
 }
 
 .submitBtn:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-md);
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-lg);
 }
 
 .submitBtn:disabled {
   cursor: not-allowed;
-  opacity: 0.7;
+  opacity: 0.8;
 }
 
 .btnContent {
   display: flex;
   align-items: center;
+  justify-content: center;
+  width: 100%;
 }
 
 .btnLoader {
@@ -218,8 +339,8 @@
 }
 
 .spinner {
-  width: 18px;
-  height: 18px;
+  width: 20px;
+  height: 20px;
   border: 2px solid transparent;
   border-top: 2px solid white;
   border-radius: 50%;
@@ -245,100 +366,80 @@
 .deviceManagerLink {
   text-decoration: none;
   display: block;
-  margin-top: 1rem;
+  margin-top: 1.5rem;
 }
 
 .deviceManagerBtn {
   width: 100%;
-  padding: 0.75rem 1rem;
-  background: var(--bg-accent);
-  color: var(--text-primary);
-  border: 1px solid var(--border-color);
+  padding: 0.9rem 1.2rem;
+  background: rgba(255, 255, 255, 0.9);
+  color: var(--primary-dark);
+  border: 2px solid var(--primary-light);
   border-radius: var(--radius-md);
-  font-size: 1rem;
-  font-weight: 600;
+  font-size: 1.1rem;
+  font-weight: 700;
   cursor: pointer;
   transition: all 0.3s ease;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.5rem;
+  gap: 0.7rem;
+  box-shadow: var(--shadow-md);
 }
 
 .deviceManagerBtn:hover {
-  background: var(--bg-secondary);
-  border-color: var(--border-hover);
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-sm);
+  background: white;
+  border-color: var(--primary-dark);
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-lg);
 }
 
 .successMessage {
-  background: rgba(16, 185, 129, 0.1);
+  background: rgba(16, 185, 129, 0.15);
   color: var(--success-color);
-  padding: 1rem;
+  padding: 1.2rem;
   border-radius: var(--radius-md);
-  margin-bottom: 1rem;
+  margin-bottom: 1.5rem;
   text-align: center;
-  border-left: 4px solid var(--success-color);
+  border-left: 5px solid var(--success-color);
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.7rem;
+  box-shadow: var(--shadow-md);
+}
+
+.successMessage::before {
+  content: "✅";
+  font-size: 1.2rem;
 }
 
 .errorMessage {
-  background: rgba(239, 68, 68, 0.1);
+  background: rgba(239, 68, 68, 0.15);
   color: var(--error-color);
-  padding: 1rem;
+  padding: 1.2rem;
   border-radius: var(--radius-md);
-  margin-bottom: 1rem;
+  margin-bottom: 1.5rem;
   text-align: center;
-  border-left: 4px solid var(--error-color);
-}
-/* Add to profile.module.css */
-
-.profileUniversity {
-  color: var(--text-secondary);
-  font-size: 1rem;
-  margin: 0.5rem 0;
-}
-
-.subscriptionType {
-  color: var(--primary-color);
-  font-weight: 500;
-  margin: 0.5rem 0;
+  border-left: 5px solid var(--error-color);
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.7rem;
+  box-shadow: var(--shadow-md);
 }
 
-.recurringInfo {
-  color: var(--info-color);
-  font-size: 0.9rem;
-  margin: 0.25rem 0;
+.errorMessage::before {
+  content: "❌";
+  font-size: 1.2rem;
 }
 
-.nextPaymentDate {
-  color: var(--warning-color);
-  font-size: 0.9rem;
-  margin: 0.25rem 0;
-}
-
-/* Responsive adjustments */
-@media (max-width: 768px) {
-  .profileUniversity,
-  .subscriptionType,
-  .recurringInfo,
-  .nextPaymentDate {
-    font-size: 0.9rem;
-  }
-}
-
-@media (max-width: 480px) {
-  .profileUniversity,
-  .subscriptionType,
-  .recurringInfo,
-  .nextPaymentDate {
-    font-size: 0.85rem;
-  }
-}
 /* Responsive adjustments */
 @media (max-width: 768px) {
   .profilePage {
-    padding: 0.5rem;
+    padding: 0.8rem;
   }
   
   .profileContainer {
@@ -346,7 +447,7 @@
   }
   
   .profileForm {
-    padding: 1rem;
+    padding: 1.5rem;
   }
   
   .authHeader {
@@ -354,38 +455,57 @@
   }
   
   .appLogo {
-    font-size: 1.25rem;
+    font-size: 1.5rem;
   }
   
   .profileHeader {
-    padding: 1.5rem;
+    padding: 2rem;
   }
   
   .profileHeader h2 {
-    font-size: 1.25rem;
+    font-size: 1.5rem;
   }
   
   .profileAvatar {
-    width: 70px;
-    height: 70px;
-    font-size: 1.25rem;
+    width: 80px;
+    height: 80px;
+    font-size: 1.8rem;
+  }
+  
+  .profileEmail,
+  .profileCourse,
+  .profileUniversity {
+    font-size: 1rem;
   }
   
   .inputGroup input {
-    padding: 0.65rem 0.9rem;
-    font-size: 0.9rem;
+    padding: 0.75rem 1rem;
+    font-size: 0.95rem;
   }
   
   .submitBtn,
   .deviceManagerBtn {
-    padding: 0.65rem 0.9rem;
+    padding: 0.8rem 1rem;
+    font-size: 1rem;
+  }
+  
+  .subscribedBadge,
+  .notSubscribedBadge {
+    padding: 0.6rem 1rem;
+    font-size: 0.9rem;
+  }
+  
+  .subscriptionType,
+  .recurringInfo,
+  .nextPaymentDate,
+  .expiryDate {
     font-size: 0.9rem;
   }
 }
 
 @media (max-width: 480px) {
   .profilePage {
-    padding: 0.25rem;
+    padding: 0.5rem;
   }
   
   .profileContainer {
@@ -397,38 +517,38 @@
   }
   
   .appLogo {
-    font-size: 1.1rem;
+    font-size: 1.3rem;
   }
   
   .backBtn {
-    width: 36px;
-    height: 36px;
+    width: 40px;
+    height: 40px;
   }
   
   .profileHeader {
-    padding: 1rem;
+    padding: 1.5rem;
   }
   
   .profileHeader h2 {
-    font-size: 1.1rem;
+    font-size: 1.3rem;
   }
   
   .profileAvatar {
-    width: 60px;
-    height: 60px;
-    font-size: 1.1rem;
+    width: 70px;
+    height: 70px;
+    font-size: 1.5rem;
   }
   
   .profileForm {
-    padding: 0.75rem;
+    padding: 1.2rem;
   }
   
   .profileForm h3 {
-    font-size: 1.1rem;
+    font-size: 1.3rem;
   }
   
   .inputGroup {
-    margin-bottom: 1rem;
+    margin-bottom: 1.2rem;
   }
   
   .inputGroup label {
@@ -436,21 +556,32 @@
   }
   
   .inputGroup input {
-    padding: 0.6rem 0.8rem;
-    font-size: 0.85rem;
+    padding: 0.7rem 0.9rem;
+    font-size: 0.9rem;
   }
   
   .submitBtn,
   .deviceManagerBtn {
-    padding: 0.6rem 0.8rem;
-    font-size: 0.85rem;
+    padding: 0.7rem 0.9rem;
+    font-size: 0.9rem;
   }
   
   .subscribedBadge,
   .notSubscribedBadge {
-    padding: 0.4rem 0.8rem;
-    font-size: 0.8rem;
+    padding: 0.5rem 0.8rem;
+    font-size: 0.85rem;
+  }
+  
+  .successMessage,
+  .errorMessage {
+    padding: 1rem;
+    font-size: 0.9rem;
+  }
+  
+  .subscriptionType,
+  .recurringInfo,
+  .nextPaymentDate,
+  .expiryDate {
+    font-size: 0.85rem;
   }
 }
-
-

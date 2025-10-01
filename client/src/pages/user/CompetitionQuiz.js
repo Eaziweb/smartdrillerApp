@@ -5,8 +5,7 @@ import { useAuth } from "../../contexts/AuthContext"
 import styles from "../../styles/CompetitionQuiz.module.css"
 // Import KaTeX CSS
 import 'katex/dist/katex.min.css'
-import api from "../../utils/api";
-
+import api from "../../utils/api"
 
 const CompetitionQuiz = () => {
   const { user } = useAuth()
@@ -109,12 +108,10 @@ const CompetitionQuiz = () => {
       e.preventDefault()
       if (!isSubmitted) {
         setShowBackModal(true)
-        // Push a new state to prevent the user from going back without our modal
         window.history.pushState({ noBack: true }, '')
       }
     }
     
-    // Initial push state to enable popstate detection
     window.history.pushState({ noBack: true }, '')
     window.addEventListener('popstate', handlePopState)
     
@@ -544,6 +541,7 @@ const CompetitionQuiz = () => {
       
       {/* Question Content */}
       <div className={styles.questionContainer}>
+        {/* Question Image */}
         {currentQuestion.image && (
           <div className={styles.questionImageContainer}>
             <img 
@@ -554,9 +552,11 @@ const CompetitionQuiz = () => {
             />
           </div>
         )}
+        
         <div className={styles.questionText}>
           {renderContentWithMath(currentQuestion.question)}
         </div>
+        
         <div className={styles.optionsContainer}>
           {currentQuestion.options.map((option, index) => {
             const optionNumber = index + 1

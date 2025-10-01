@@ -1,12 +1,11 @@
-/* AboutSmartDriller.module.css */
 :root {
-  --about-color-primary: #0066ff;
-  --about-color-secondary: #003366;
-  --about-color-light: #f8f9fa;
-  --about-color-dark: #212529;
+  --primary-color: #0066ff;
+  --secondary-color: #003366;
+  --light-color: #f8f9fa;
+  --dark-color: #212529;
 }
 
-.aboutModalOverlay {
+.modalOverlay {
   position: fixed;
   top: 0;
   left: 0;
@@ -21,7 +20,7 @@
   overflow-y: auto;
 }
 
-.aboutModalContent {
+.modalContent {
   background-color: white;
   border-radius: 12px;
   max-width: 1200px;
@@ -32,7 +31,7 @@
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
 }
 
-.aboutCloseButton {
+.closeButton {
   position: absolute;
   top: 15px;
   right: 15px;
@@ -47,22 +46,22 @@
   cursor: pointer;
   z-index: 10;
   transition: all 0.3s ease;
-  color: var(--about-color-dark);
+  color: var(--dark-color);
 }
 
-.aboutCloseButton:hover {
+.closeButton:hover {
   background: rgba(0, 0, 0, 0.2);
   transform: rotate(90deg);
 }
 
-.aboutContainer {
+.container {
   width: 90%;
   max-width: 1200px;
   margin: 0 auto;
 }
 
-.aboutHeader {
-  background-color: var(--about-color-secondary);
+.header {
+  background-color: var(--secondary-color);
   color: white;
   padding: 1rem 0;
   position: sticky;
@@ -71,7 +70,7 @@
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
-.aboutAppLogo {
+.appLogo {
   text-decoration: none;
   font-size: 1.75rem;
   font-weight: 700;
@@ -81,16 +80,16 @@
   background-clip: text;
 }
 
-.aboutNavLinks {
+.navLinks {
   display: flex;
   list-style: none;
 }
 
-.aboutNavLinks li {
+.navLinks li {
   margin-left: 1.5rem;
 }
 
-.aboutNavLinks a {
+.navLinks a {
   color: white;
   text-decoration: none;
   font-weight: 500;
@@ -99,41 +98,41 @@
   padding: 0.5rem 0;
 }
 
-.aboutNavLinks a:hover {
-  color: var(--about-color-secondary);
+.navLinks a:hover {
+  color: var(--secondary-color);
 }
 
-.aboutHero {
-  background: linear-gradient(135deg, var(--about-color-secondary), var(--about-color-primary));
+.hero {
+  background: linear-gradient(135deg, var(--secondary-color), var(--primary-color));
   color: white;
   padding: 5rem 0;
   text-align: center;
 }
 
-.aboutHero h1 {
+.hero h1 {
   font-size: 2.5rem;
   margin-bottom: 1rem;
 }
 
-.aboutHero p {
+.hero p {
   font-size: 1.1rem;
   max-width: 700px;
   margin: 0 auto;
 }
 
-.aboutSection {
+.section {
   padding: 4rem 0;
 }
 
-.aboutSectionTitle {
+.sectionTitle {
   text-align: center;
   margin-bottom: 2rem;
-  color: var(--about-color-secondary);
+  color: var(--secondary-color);
   position: relative;
   padding-bottom: 10px;
 }
 
-.aboutSectionTitle::after {
+.sectionTitle::after {
   content: '';
   position: absolute;
   bottom: 0;
@@ -141,27 +140,27 @@
   transform: translateX(-50%);
   width: 80px;
   height: 3px;
-  background-color: var(--about-color-secondary);
+  background-color: var(--secondary-color);
 }
 
-.aboutContent {
+.content {
   max-width: 800px;
   margin: 0 auto;
   text-align: center;
 }
 
-.aboutContent p {
+.content p {
   margin-bottom: 1.5rem;
 }
 
-.aboutValues {
+.values {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   gap: 2rem;
   margin-top: 3rem;
 }
 
-.aboutValueCard {
+.valueCard {
   background-color: white;
   padding: 2rem;
   border-radius: 8px;
@@ -170,90 +169,90 @@
   transition: transform 0.3s, box-shadow 0.3s;
 }
 
-.aboutValueCard:hover {
+.valueCard:hover {
   transform: translateY(-5px);
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
 }
 
-.aboutValueCard i {
+.valueCard i {
   font-size: 2.5rem;
-  color: var(--about-color-secondary);
+  color: var(--secondary-color);
   margin-bottom: 1rem;
 }
 
-.aboutValueCard h3 {
-  color: var(--about-color-secondary);
+.valueCard h3 {
+  color: var(--secondary-color);
   margin-bottom: 1rem;
 }
 
-.aboutBlogSection {
+.blogSection {
   background-color: white;
 }
 
-.aboutBlogPosts {
+.blogPosts {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   gap: 2rem;
 }
 
-.aboutBlogCard {
-  background-color: var(--about-color-light);
+.blogCard {
+  background-color: var(--light-color);
   border-radius: 8px;
   overflow: hidden;
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
 }
 
-.aboutBlogContent {
+.blogContent {
   padding: 1.5rem;
 }
 
-.aboutBlogCard h3 {
-  color: var(--about-color-secondary);
+.blogCard h3 {
+  color: var(--secondary-color);
   margin-bottom: 0.5rem;
 }
 
-.aboutBlogMeta {
+.blogMeta {
   color: #666;
   font-size: 0.9rem;
   margin-bottom: 1rem;
 }
 
-.aboutReadMore {
-  color: var(--about-color-secondary);
+.readMore {
+  color: var(--secondary-color);
   text-decoration: none;
   font-weight: 500;
   display: inline-block;
   margin-top: 1rem;
 }
 
-.aboutReadMore:hover {
+.readMore:hover {
   text-decoration: underline;
 }
 
-.aboutFooter {
-  background-color: var(--about-color-secondary);
+.footer {
+  background-color: var(--secondary-color);
   color: white;
   padding: 3rem 0;
   text-align: center;
 }
 
-.aboutFooterContent {
+.footerContent {
   display: flex;
   flex-direction: column;
   align-items: center;
 }
 
-.aboutSocialLinks {
+.socialLinks {
   display: flex;
   list-style: none;
   margin: 1rem 0;
 }
 
-.aboutSocialLinks li {
+.socialLinks li {
   margin: 0 0.5rem;
 }
 
-.aboutSocialLinks a {
+.socialLinks a {
   color: white;
   font-size: 1.2rem;
   transition: color 0.3s;
@@ -261,58 +260,58 @@
 
 /* Responsive Design */
 @media (max-width: 768px) {
-  .aboutNavLinks {
+  .navLinks {
     display: none;
   }
   
-  .aboutHero h1 {
+  .hero h1 {
     font-size: 2rem;
   }
   
-  .aboutSection {
+  .section {
     padding: 3rem 0;
   }
   
-  .aboutValues {
+  .values {
     grid-template-columns: 1fr;
     gap: 1.5rem;
   }
   
-  .aboutBlogPosts {
+  .blogPosts {
     grid-template-columns: 1fr;
   }
 }
 
 @media (max-width: 480px) {
-  .aboutModalContent {
+  .modalContent {
     padding: 0;
   }
   
-  .aboutHero {
+  .hero {
     padding: 3rem 0;
   }
   
-  .aboutHero h1 {
+  .hero h1 {
     font-size: 1.8rem;
   }
   
-  .aboutHero p {
+  .hero p {
     font-size: 1rem;
   }
   
-  .aboutSectionTitle {
+  .sectionTitle {
     font-size: 1.5rem;
   }
   
-  .aboutValueCard {
+  .valueCard {
     padding: 1.5rem;
   }
   
-  .aboutValueCard i {
+  .valueCard i {
     font-size: 2rem;
   }
   
-  .aboutBlogContent {
+  .blogContent {
     padding: 1rem;
   }
 }

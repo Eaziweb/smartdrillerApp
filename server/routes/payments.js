@@ -59,7 +59,7 @@ router.post("/initialize", auth, async (req, res) => {
       customizations: {
         title: description,
         description: `Activate your ${subscriptionType === "semester" ? "semester" : "monthly"} SmartDriller subscription`,
-        logo: "https://yourdomain.com/logo.png",
+        logo: "https://ik.imagekit.io/ppenuno5v/SmartDrillerLogo.jpg?updatedAt=1759276992327",
       },
       meta: {
         subscriptionType: subscriptionType || "monthly",

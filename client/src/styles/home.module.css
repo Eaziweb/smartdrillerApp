@@ -265,6 +265,7 @@ list-style: none;
 .sidebarSection ul li {
   padding: 0;
   margin: 0;
+  transition: transform .3s;
 }
 .sidebarSection ul li a {
   display: flex;

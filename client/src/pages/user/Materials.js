@@ -1,4 +1,3 @@
-// Materials.jsx (Frontend)
 "use client"
 import { useState, useEffect } from "react"
 import { useAuth } from "../../contexts/AuthContext"
@@ -10,6 +9,7 @@ const Materials = () => {
   const [materials, setMaterials] = useState([])
   const [courses, setCourses] = useState([])
   const [loading, setLoading] = useState(false)
+  const [uploading, setUploading] = useState(false)
   const [coursesLoading, setCoursesLoading] = useState(true)
   const [uploadModalOpen, setUploadModalOpen] = useState(false)
   const [filters, setFilters] = useState({
@@ -83,6 +83,7 @@ const Materials = () => {
       return
     }
     
+    setUploading(true)
     const formData = new FormData()
     formData.append("title", uploadForm.title)
     formData.append("description", uploadForm.description)
@@ -103,33 +104,35 @@ const Materials = () => {
     } catch (error) {
       console.error("Error uploading material:", error)
       showNotification(error.response?.data?.message || "Error uploading material", "error")
+    } finally {
+      setUploading(false)
     }
   }
 
-const downloadMaterial = async (materialId, filename) => {
-  try {
-    const response = await api.get(`/api/materials/${materialId}/download`);
+  const downloadMaterial = async (materialId, filename) => {
+    try {
+      const response = await api.get(`/api/materials/${materialId}/download`);
 
-    if (response.data.success && response.data.url) {
-      const downloadUrl = response.data.url;
+      if (response.data.success && response.data.url) {
+        const downloadUrl = response.data.url;
 
-      // Create a temporary <a> element to trigger browser download
-      const link = document.createElement("a");
-      link.href = downloadUrl;
-      link.download = filename; // Suggest the filename
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+        // Create a temporary <a> element to trigger browser download
+        const link = document.createElement("a");
+        link.href = downloadUrl;
+        link.download = filename; // Suggest the filename
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
 
-      showNotification("Download started", "success");
-    } else {
-      showNotification("File not available for download", "error");
+        showNotification("Download started", "success");
+      } else {
+        showNotification("File not available for download", "error");
+      }
+    } catch (error) {
+      console.error("Error downloading material:", error);
+      showNotification("Error downloading material", "error");
     }
-  } catch (error) {
-    console.error("Error downloading material:", error);
-    showNotification("Error downloading material", "error");
-  }
-};
+  };
 
   const handleFilterChange = (key, value) => {
     setFilters((prev) => ({ ...prev, [key]: value }))
@@ -164,19 +167,43 @@ const downloadMaterial = async (materialId, filename) => {
   const showNotification = (message, type) => {
     const notification = document.createElement("div")
     notification.className = `notification ${type}`
-    notification.textContent = message
+    
+    // Add icon based on type
+    const icon = type === "success" ? "fa-check-circle" : "fa-exclamation-circle"
+    
+    notification.innerHTML = `
+      <i class="fas ${icon}"></i>
+      <span>${message}</span>
+    `
+    
     notification.style.cssText = `
       position: fixed;
       top: 20px;
       right: 20px;
-      padding: 12px 20px;
-      border-radius: 8px;
+      padding: 16px 24px;
+      border-radius: 12px;
       color: white;
       z-index: 1000;
-      background: ${type === "success" ? "#10b981" : type === "error" ? "#ef4444" : "#3b82f6"};
+      background: ${type === "success" ? "linear-gradient(45deg, #10b981, #059669)" : "linear-gradient(45deg, #ef4444, #dc2626)"};
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 600;
+      max-width: 400px;
     `
+    
     document.body.appendChild(notification)
-    setTimeout(() => notification.remove(), 3000)
+    
+    // Add animation
+    setTimeout(() => {
+      notification.style.animation = "slideInRight 0.4s ease forwards"
+    }, 10)
+    
+    setTimeout(() => {
+      notification.style.animation = "slideOutRight 0.3s ease forwards"
+      setTimeout(() => notification.remove(), 300)
+    }, 3000)
   }
 
   const goBack = () => {
@@ -193,9 +220,13 @@ const downloadMaterial = async (materialId, filename) => {
           <h1>Study Materials</h1>
           <p>Upload and access course materials</p>
         </div>
-        <button className={styles.uploadBtn} onClick={() => setUploadModalOpen(true)}>
+        <button 
+          className={`${styles.uploadBtn} ${uploading ? styles.loading : ''}`} 
+          onClick={() => setUploadModalOpen(true)}
+          disabled={uploading}
+        >
           <i className="fas fa-plus"></i>
-          Upload
+          {uploading ? 'Uploading...' : 'Upload Material'}
         </button>
       </div>
       
@@ -240,7 +271,10 @@ const downloadMaterial = async (materialId, filename) => {
       </div>
       
       {loading ? (
-        <div className={styles.loading}>Loading materials...</div>
+        <div className={styles.loading}>
+          <i className="fas fa-spinner"></i>
+          <span>Loading materials...</span>
+        </div>
       ) : materials.length === 0 ? (
         <div className={styles.emptyState}>
           <i className="fas fa-folder-open"></i>
@@ -265,7 +299,7 @@ const downloadMaterial = async (materialId, filename) => {
                   </div>
                 </div>
                 <div className={styles.materialDetails}>
-                  <span className={styles.uploader}>By: {material.uploadedBy?.fullName || "Unknown"}</span>
+                  <span className={styles.uploader}>{material.uploadedBy?.fullName || "Unknown"}</span>
                   <span className={styles.uploadDate}>{new Date(material.createdAt).toLocaleDateString()}</span>
                 </div>
               </div>
@@ -361,8 +395,8 @@ const downloadMaterial = async (materialId, filename) => {
                 />
               </div>
               <div className={styles.formActions}>
-                <button type="submit" className={styles.submitBtn}>
-                  Upload
+                <button type="submit" className={styles.submitBtn} disabled={uploading}>
+                  {uploading ? 'Uploading...' : 'Upload'}
                 </button>
                 <button type="button" onClick={() => setUploadModalOpen(false)} className={styles.cancelBtn}>
                   Cancel

@@ -17,12 +17,22 @@ router.post("/chat", auth, async (req, res) => {
     const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
     const GEMINI_API_URL = process.env.GEMINI_API_URL;
 
+    // Create the prompt text
+    let promptText = "";
+    
+    // Only include the user's name in the first message to establish context
+    if (userName) {
+      promptText = `You are a helpful AI assistant. The user's name is ${userName}. Please respond to their message without repeating their name in every response. Here is their message: ${message}`;
+    } else {
+      promptText = `You are a helpful AI assistant. Please respond to: ${message}`;
+    }
+
     const requestBody = {
       contents: [
         {
           parts: [
             {
-              text: `You are a helpful AI assistant. The user's name is ${userName}. Please respond to: ${message}`,
+              text: promptText,
             },
           ],
         },

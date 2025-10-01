@@ -79,21 +79,23 @@ router.get("/courses", auth, async (req, res) => {
   }
 });
 
-// ==========================
-// Upload material
-// ==========================
 router.post("/upload", auth, upload.single("file"), async (req, res) => {
   try {
     const { title, description, course } = req.body;
-    if (!req.file) return res.status(400).json({ success: false, message: "File is required" });
+    if (!req.file) {
+      return res.status(400).json({ success: false, message: "File is required" });
+    }
+
+    // Debug: see what multer-storage-cloudinary gives you
+    console.log("Cloudinary upload result:", req.file);
 
     const fileExtension = req.file.originalname.split(".").pop().toLowerCase();
 
     const material = new Material({
       title,
       description,
-      cloudinaryUrl: req.file.path,
-      cloudinaryPublicId: req.file.filename,
+      cloudinaryUrl: req.file.path,              // full CDN URL
+      cloudinaryPublicId: req.file.filename,     // correct public_id (includes folder)
       originalName: req.file.originalname,
       fileSize: req.file.size,
       fileType: fileExtension,
@@ -115,25 +117,30 @@ router.post("/upload", auth, upload.single("file"), async (req, res) => {
   }
 });
 
-// ==========================
-// Download material
-// ==========================
+
 router.get("/:id/download", auth, async (req, res) => {
   try {
     const material = await Material.findById(req.params.id);
-    if (!material) return res.status(404).json({ success: false, message: "Material not found" });
+    if (!material) {
+      return res.status(404).json({ success: false, message: "Material not found" });
+    }
 
     if (!material.cloudinaryPublicId) {
       return res.status(404).json({ success: false, message: "File not available" });
     }
 
- 
-// Fixed
-const downloadUrl = cloudinary.utils.private_download_url(
-  material.cloudinaryPublicId,
-  material.originalName,
-  { resource_type: "raw", attachment: true }
-);
+    console.log("Downloading material:", material.cloudinaryPublicId);
+
+    // Generate a private signed download link (raw file)
+    const downloadUrl = cloudinary.utils.private_download_url(
+      material.cloudinaryPublicId,   // must match what was saved on upload
+      material.originalName,         // file name for user
+      {
+        resource_type: "raw",
+        attachment: true,
+        expires_at: Math.floor(Date.now() / 1000) + 60 // 1 min expiry
+      }
+    );
 
     res.json({ success: true, url: downloadUrl });
   } catch (error) {
@@ -141,5 +148,6 @@ const downloadUrl = cloudinary.utils.private_download_url(
     res.status(500).json({ success: false, message: "Failed to download material" });
   }
 });
+
 
 module.exports = router;

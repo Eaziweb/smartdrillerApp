@@ -11,17 +11,24 @@ const AIAssistant = () => {
   const [isLoading, setIsLoading] = useState(false)
   const messagesEndRef = useRef(null)
 
+  // Get user's first name or full name if only one name exists
+  const getUserName = () => {
+    if (!user?.fullName) return "there"
+    const nameParts = user.fullName.trim().split(/\s+/)
+    return nameParts[0] // Always use the first name
+  }
+
   useEffect(() => {
     // Initial greeting when component mounts
-    if (user?.fullName) {
-      const greeting = {
-        id: Date.now(),
-        text: `Hi ${user.fullName.trim().split(/\s+/)[1]}! How can I help you today?`,
-        sender: "ai",
-        timestamp: new Date(),
-      }
-      setMessages([greeting])
+    const userName = getUserName()
+    const greeting = {
+      id: Date.now(),
+      text: `Hi ${userName}! How can I help you today?`,
+      sender: "ai",
+      timestamp: new Date(),
     }
+    setMessages([greeting])
+    
     // Clear history when component unmounts (user leaves)
     return () => {
       setMessages([])
@@ -55,7 +62,8 @@ const AIAssistant = () => {
         "/api/ai/chat",
         {
           message: inputMessage,
-          userName: user?.fullName,
+          // Only send userName for the first message to establish context
+          userName: messages.length <= 1 ? getUserName() : undefined,
         },
         {
           headers: {
@@ -98,9 +106,10 @@ const AIAssistant = () => {
   }
 
   const clearChat = () => {
+    const userName = getUserName()
     const greeting = {
       id: Date.now(),
-      text: `Hi ${user?.fullName}! How can I help you today?`,
+      text: `Hi ${userName}! How can I help you today?`,
       sender: "ai",
       timestamp: new Date(),
     }

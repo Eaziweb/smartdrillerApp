@@ -82,9 +82,12 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
 
+
 mongoose.connect(process.env.MONGODB_URI)
   .then(async () => {
     console.log("✅ MongoDB connected");
+    
+    // Create SuperAdministration course if it doesn't exist
     let superAdminCourse = await CourseofStudy.findOne({
       name: "SuperAdministration",
       category: "Administration"
@@ -96,6 +99,15 @@ mongoose.connect(process.env.MONGODB_URI)
       });
       await superAdminCourse.save();
       console.log("✅ SuperAdministration course created");
+    }
+
+    // Update maxDevices for existing users
+    const updateResult = await User.updateMany(
+      { maxDevices: { $lt: 8 } },
+      { $set: { maxDevices: 8 } }
+    );
+    if (updateResult.modifiedCount > 0) {
+      console.log(`✅ Updated ${updateResult.modifiedCount} users to maxDevices=8`);
     }
 
   })
@@ -136,7 +148,7 @@ app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 // ----------------------
 // Utility jobs
-// ----------------------
+// ---------------------- 
 require("./utils/updateVideoMetadata");
 
 // ----------------------

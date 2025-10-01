@@ -109,23 +109,29 @@ router.delete("/:id", adminAuth, async (req, res) => {
   }
 });
 
-
-router.get("/:id/download", adminAuth, async (req, res) => {
+router.get("/:id/download", auth, async (req, res) => {
   try {
     const material = await Material.findById(req.params.id);
-    if (!material) return res.status(404).json({ success: false, message: "Material not found" });
-    if (!material.cloudinaryPublicId) return res.status(404).json({ success: false, message: "File not available" });
+    if (!material) {
+      return res.status(404).json({ success: false, message: "Material not found" });
+    }
 
-// Fixed
-const downloadUrl = cloudinary.utils.private_download_url(
-  material.cloudinaryPublicId,
-  material.originalName,
-  { 
-    resource_type: "raw", 
-    attachment: true,
-    expires_at: Math.floor(Date.now() / 1000) + 60 
-  }
-);
+    if (!material.cloudinaryPublicId) {
+      return res.status(404).json({ success: false, message: "File not available" });
+    }
+
+    console.log("Downloading material:", material.cloudinaryPublicId);
+
+    // Generate a private signed download link (raw file)
+    const downloadUrl = cloudinary.utils.private_download_url(
+      material.cloudinaryPublicId,   // must match what was saved on upload
+      material.originalName,         // file name for user
+      {
+        resource_type: "raw",
+        attachment: true,
+        expires_at: Math.floor(Date.now() / 1000) + 60 // 1 min expiry
+      }
+    );
 
     res.json({ success: true, url: downloadUrl });
   } catch (error) {
@@ -133,5 +139,6 @@ const downloadUrl = cloudinary.utils.private_download_url(
     res.status(500).json({ success: false, message: "Failed to download material" });
   }
 });
+
 
 module.exports = router;

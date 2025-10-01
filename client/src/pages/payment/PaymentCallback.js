@@ -12,6 +12,7 @@ const PaymentCallback = () => {
   const [status, setStatus] = useState("verifying")
   const [message, setMessage] = useState("Verifying your payment...")
   const [retryCount, setRetryCount] = useState(0)
+  const [isAnimating, setIsAnimating] = useState(false)
   const maxRetries = 3
 
   useEffect(() => {
@@ -22,17 +23,19 @@ const PaymentCallback = () => {
     try {
       const transactionId = searchParams.get("transaction_id")
       const txRef = searchParams.get("tx_ref")
-      const status = searchParams.get("status")
+      const statusParam = searchParams.get("status")
 
       if (!txRef) {
         setStatus("error")
         setMessage("Invalid payment parameters")
+        setIsAnimating(true)
         return
       }
 
-      if (status === "cancelled") {
+      if (statusParam === "cancelled") {
         setStatus("cancelled")
         setMessage("Payment was cancelled")
+        setIsAnimating(true)
         setTimeout(() => navigate("/home"), 3000)
         return
       }
@@ -45,6 +48,7 @@ const PaymentCallback = () => {
       if (response.data.status === "success") {
         setStatus("success")
         setMessage("Payment successful! Your subscription has been activated.")
+        setIsAnimating(true)
         
         // Update user context with the latest user data
         if (response.data.user && updateUser) {
@@ -57,6 +61,7 @@ const PaymentCallback = () => {
       } else {
         setStatus("error")
         setMessage(response.data.message || "Payment verification failed. Please contact support.")
+        setIsAnimating(true)
       }
     } catch (error) {
       console.error("Payment verification error:", error)
@@ -72,6 +77,7 @@ const PaymentCallback = () => {
       } else {
         setStatus("error")
         setMessage("An error occurred while verifying payment. Please contact support.")
+        setIsAnimating(true)
       }
     }
   }
@@ -85,20 +91,7 @@ const PaymentCallback = () => {
       case "cancelled":
         return "fa-times-circle"
       default:
-        return "fa-spinner fa-spin"
-    }
-  }
-
-  const getStatusColor = () => {
-    switch (status) {
-      case "success":
-        return "#4CAF50"
-      case "error":
-        return "#f44336"
-      case "cancelled":
-        return "#ff9800"
-      default:
-        return "#2196F3"
+        return "fa-spinner"
     }
   }
 
@@ -106,82 +99,75 @@ const PaymentCallback = () => {
     setStatus("verifying")
     setMessage("Retrying payment verification...")
     setRetryCount(0)
+    setIsAnimating(false)
     verifyPayment()
   }
 
   return (
     <div className={styles.paymentContainer}>
-      <div className={styles.paymentCard}>
-        <div
-          className={styles.paymentStatus}
-          style={{ textAlign: "center", padding: "3rem 2rem" }}
-        >
-          <div
-            style={{
-              fontSize: "4rem",
-              color: getStatusColor(),
-              marginBottom: "2rem",
-            }}
-          >
-            <i className={`fas ${getStatusIcon()}`}></i>
+      <div className={`${styles.paymentCard} ${status} ${isAnimating ? styles[`${status}Animation`] : ""}`}>
+        <div className={styles.paymentStatus}>
+          <div className={styles.statusIcon}>
+            <i className={`fas ${getStatusIcon()} ${status === "verifying" ? styles.spinner : ""}`}></i>
           </div>
+          
           <h1 className={styles.statusTitle}>
             {status === "success" && "Payment Successful!"}
             {status === "error" && "Payment Failed"}
             {status === "cancelled" && "Payment Cancelled"}
             {status === "verifying" && "Verifying Payment..."}
           </h1>
+          
           <p className={styles.statusMessage}>{message}</p>
 
           {status === "error" && retryCount >= maxRetries && (
-            <div style={{ marginTop: "2rem" }}>
+            <div className={styles.actionButtons}>
               <button
                 onClick={handleRetry}
                 className={styles.payBtn}
-                style={{ marginRight: "1rem" }}
               >
-                <span className="btn-content">
-                  <span className="btn-text">Retry Verification</span>
-                </span>
-                <div className="btn-arrow">
-                  <i className="fas fa-redo"></i>
+                <div className={styles.btnContent}>
+                  <span className={styles.btnText}>Retry Verification</span>
+                  <div className={styles.btnArrow}>
+                    <i className="fas fa-redo"></i>
+                  </div>
                 </div>
               </button>
+              
               <button
                 onClick={() => navigate("/home")}
                 className={styles.payBtn}
               >
-                <span className="btn-content">
-                  <span className="btn-text">Continue to Dashboard</span>
-                </span>
-                <div className="btn-arrow">
-                  <i className="fas fa-arrow-right"></i>
+                <div className={styles.btnContent}>
+                  <span className={styles.btnText}>Continue to Dashboard</span>
+                  <div className={styles.btnArrow}>
+                    <i className="fas fa-arrow-right"></i>
+                  </div>
                 </div>
               </button>
             </div>
           )}
 
           {status !== "verifying" && status !== "error" && (
-            <div style={{ marginTop: "2rem" }}>
+            <div className={styles.actionButtons}>
               <button
                 onClick={() => navigate("/home")}
                 className={styles.payBtn}
               >
-                <span className="btn-content">
-                  <span className="btn-text">Continue to Dashboard</span>
-                </span>
-                <div className="btn-arrow">
-                  <i className="fas fa-arrow-right"></i>
+                <div className={styles.btnContent}>
+                  <span className={styles.btnText}>Continue to Dashboard</span>
+                  <div className={styles.btnArrow}>
+                    <i className="fas fa-arrow-right"></i>
+                  </div>
                 </div>
               </button>
             </div>
           )}
 
           {status === "error" && (
-            <div style={{ marginTop: "1rem" }}>
-              <p className={styles.errorNote}>
-                If you believe this is an error, please contact our support team with your transaction reference: {searchParams.get("tx_ref")}
-              </p>
+            <div className={styles.errorNote}>
+              <p>If you believe this is an error, please contact our support team with your transaction reference:</p>
+              <p><strong>{searchParams.get("tx_ref")}</strong></p>
             </div>
           )}
         </div>

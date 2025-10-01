@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react"
 import { Link, useParams } from "react-router-dom"
 import styles from "../../styles/AdminCompetitionDetails.module.css"
-import api from "../../utils/api";
+import api from "../../utils/api"
 
 const CompetitionDetails = () => {
   const { id } = useParams()
@@ -73,7 +73,6 @@ const CompetitionDetails = () => {
   // Set first course as default when competition loads
   useEffect(() => {
     if (competition && competition.courses && competition.courses.length > 0) {
-      // Only set if no course is selected or if the selected course doesn't exist
       if (!selectedCourse || !competition.courses.some(c => c.courseCode === selectedCourse)) {
         setSelectedCourse(competition.courses[0].courseCode)
       }
@@ -147,9 +146,7 @@ const CompetitionDetails = () => {
         courses: [...(prev.courses || []), response.data.course]
       }))
       
-      // Set newly added course as selected
       setSelectedCourse(response.data.course.courseCode)
-      
       setShowCourseModal(false)
       resetCourseForm()
       showToast("Course added successfully", "success")
@@ -170,7 +167,6 @@ const CompetitionDetails = () => {
         courses: prev.courses.filter(c => c.courseCode !== courseCode)
       }))
       
-      // Reset selected course if it was removed
       if (selectedCourse === courseCode) {
         const remainingCourses = competition.courses.filter(c => c.courseCode !== courseCode)
         if (remainingCourses.length > 0) {
@@ -191,7 +187,6 @@ const CompetitionDetails = () => {
   const handleAddQuestion = async (e) => {
     e.preventDefault()
     
-    // Validate correctOption is within the range of options
     if (questionForm.correctOption < 1 || questionForm.correctOption > questionForm.options.length) {
       showToast("Correct option must be between 1 and the number of options", "error")
       return
@@ -216,8 +211,8 @@ const CompetitionDetails = () => {
       
       setShowQuestionModal(false)
       resetQuestionForm()
-      fetchQuestions() // Refresh the questions list
-      fetchCompetitionDetails() // Update course question count
+      fetchQuestions()
+      fetchCompetitionDetails()
       showToast("Question added successfully", "success")
     } catch (error) {
       console.error("Error adding question:", error)
@@ -230,7 +225,6 @@ const CompetitionDetails = () => {
       const question = questions.find(q => q._id === questionId)
       if (!question) return
       
-      // Validate correctOption is within the range of options
       if (question.correctOption < 1 || question.correctOption > question.options.length) {
         showToast("Correct option must be between 1 and the number of options", "error")
         return
@@ -251,7 +245,7 @@ const CompetitionDetails = () => {
         },
       })
       
-      fetchQuestions() // Refresh the questions list
+      fetchQuestions()
       showToast("Question updated successfully", "success")
     } catch (error) {
       console.error("Error updating question:", error)
@@ -264,8 +258,8 @@ const CompetitionDetails = () => {
     
     try {
       await api.delete(`/api/admin/competitions/${id}/questions/${questionId}`)
-      fetchQuestions() // Refresh the questions list
-      fetchCompetitionDetails() // Update course question count
+      fetchQuestions()
+      fetchCompetitionDetails()
       showToast("Question deleted successfully", "success")
     } catch (error) {
       console.error("Error deleting question:", error)
@@ -274,60 +268,49 @@ const CompetitionDetails = () => {
   }
 
   const handleBulkImport = async (e) => {
-    e.preventDefault();
+    e.preventDefault()
     try {
-      let questions;
+      let questions
       try {
-        // First escape all single backslashes → double backslashes
-        const escaped = bulkQuestions.trim().replace(/\\/g, "\\\\");
-        questions = JSON.parse(escaped);
+        const escaped = bulkQuestions.trim().replace(/\\/g, "\\\\")
+        questions = JSON.parse(escaped)
       } catch (parseError) {
-        showToast(`Invalid JSON format: ${parseError.message}`, "error");
-        return;
+        showToast(`Invalid JSON format: ${parseError.message}`, "error")
+        return
       }
+      
       if (!Array.isArray(questions)) {
-        showToast("Questions data must be an array.", "error");
-        return;
+        showToast("Questions data must be an array.", "error")
+        return
       }
-      // Validate each question has required fields
-      const requiredFields = ["question", "options", "correctOption"];
+      
+      const requiredFields = ["question", "options", "correctOption"]
       for (let i = 0; i < questions.length; i++) {
-        const q = questions[i];
+        const q = questions[i]
         for (const field of requiredFields) {
           if (!q[field]) {
-            showToast(`Question ${i + 1}: Missing '${field}' field.`, "error");
-            return;
+            showToast(`Question ${i + 1}: Missing '${field}' field.`, "error")
+            return
           }
         }
       }
-      const response = await api.post(
-        `/api/admin/competitions/${id}/questions/bulk`,
-        {
-          questions,
-          courseCode: selectedCourse,
-        }
-      );
-      setShowBulkModal(false);
-      setBulkQuestions("");
-      fetchQuestions(); // Refresh the questions list
-      fetchCompetitionDetails(); // Update course question count
-      showToast(
-        `${response.data.questions.length} questions imported successfully`,
-        "success"
-      );
+      
+      const response = await api.post(`/api/admin/competitions/${id}/questions/bulk`, {
+        questions,
+        courseCode: selectedCourse,
+      })
+      
+      setShowBulkModal(false)
+      setBulkQuestions("")
+      fetchQuestions()
+      fetchCompetitionDetails()
+      showToast(`${response.data.questions.length} questions imported successfully`, "success")
     } catch (error) {
-      console.error("Error importing questions:", error);
+      console.error("Error importing questions:", error)
       if (error.response?.data?.errors) {
-        showToast(
-          `Validation errors: ${error.response.data.errors.join(", ")}`,
-          "error"
-        );
+        showToast(`Validation errors: ${error.response.data.errors.join(", ")}`, "error")
       } else {
-        showToast(
-          error.response?.data?.message ||
-            "Failed to import questions. Check JSON format.",
-          "error"
-        );
+        showToast(error.response?.data?.message || "Failed to import questions. Check JSON format.", "error")
       }
     }
   }

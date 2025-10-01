@@ -120,7 +120,7 @@ trustedDevices: [
 
     deviceOTP: { type: String, default: null },
     deviceOTPExpires: { type: Date, default: null },
-    maxDevices: { type: Number, default: 4 }
+    maxDevices: { type: Number, default: 8 }
   },
   {
     timestamps: true,
