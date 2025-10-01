@@ -108,6 +108,7 @@ router.delete("/:id", adminAuth, async (req, res) => {
     res.status(500).json({ success: false, message: "Failed to delete material" });
   }
 });
+// For both routes/materials.js and routes/admin/materials.js
 router.get("/:id/download", adminAuth, async (req, res) => {
   try {
     const material = await Material.findById(req.params.id);
@@ -116,16 +117,19 @@ router.get("/:id/download", adminAuth, async (req, res) => {
 
     console.log("Downloading material:", material.cloudinaryPublicId);
 
-    // Correct private download URL for raw files
-    const downloadUrl = cloudinary.utils.private_download_url(
-      material.cloudinaryPublicId,   // include folder (e.g., "materials/xxxx"), NO extension
-      material.originalName,         // filename users will see
-      {
-        resource_type: "raw",
-        attachment: true,
-        expires_at: Math.floor(Date.now() / 1000) + 300, // 5 min expiry
-      }
-    );
+    // Generate proper download URL
+    const downloadUrl = cloudinary.url(material.cloudinaryPublicId, {
+      resource_type: "raw",
+      format: material.fileType,
+      flags: "attachment",
+      sign_url: true,
+      expires_at: Math.floor(Date.now() / 1000) + 300, // 5 min expiry
+      transformation: [
+        { 
+          flags: `attachment:${material.originalName}` 
+        }
+      ]
+    });
 
     res.json({ success: true, url: downloadUrl });
   } catch (error) {

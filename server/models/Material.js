@@ -18,11 +18,14 @@ const materialSchema = new mongoose.Schema(
       required: true,
       trim: true
     },
-    cloudinaryPublicId: {
-      type: String,
-      required: true,
-      trim: true,
-    },
+  cloudinaryPublicId: {
+    type: String,
+    required: true,
+    trim: true,
+    get: function(publicId) {
+      return publicId ? `materials/${publicId}` : publicId;
+    }
+  },
     cloudinaryResourceType: {
       type: String,
       required: true,

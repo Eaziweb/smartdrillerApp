@@ -7,20 +7,21 @@ const { auth } = require("../middleware/auth");
 const Material = require("../models/Material");
 const Course = require("../models/Course");
 
-// ==========================
-// Multer + Cloudinary storage
-// ==========================
 const storage = new CloudinaryStorage({
   cloudinary,
   params: async (req, file) => {
     const ext = file.originalname.split(".").pop().toLowerCase();
-
+    const timestamp = Date.now();
+    const filename = file.originalname.replace(/\.[^/.]+$/, "");
+    
     return {
-folder: "materials",
-      public_id: `${Date.now()}-${file.originalname.replace(/\.[^/.]+$/, "")}`,
-      resource_type: "raw",            // keep as raw
+      folder: "materials",
+      public_id: `${timestamp}-${filename}`,
+      resource_type: "raw",
       format: ext,
-      type: "upload",                  // <-- ensures public
+      type: "upload",
+      // Add attachment flag during upload
+      flags: "attachment",
     };
   },
 });
@@ -119,6 +120,7 @@ router.post("/upload", auth, upload.single("file"), async (req, res) => {
   }
 });
 
+// For both routes/materials.js and routes/admin/materials.js
 router.get("/:id/download", auth, async (req, res) => {
   try {
     const material = await Material.findById(req.params.id);
@@ -127,16 +129,19 @@ router.get("/:id/download", auth, async (req, res) => {
 
     console.log("Downloading material:", material.cloudinaryPublicId);
 
-    // Correct private download URL for raw files
-    const downloadUrl = cloudinary.utils.private_download_url(
-      material.cloudinaryPublicId,   // include folder (e.g., "materials/xxxx"), NO extension
-      material.originalName,         // filename users will see
-      {
-        resource_type: "raw",
-        attachment: true,
-        expires_at: Math.floor(Date.now() / 1000) + 300, // 5 min expiry
-      }
-    );
+    // Generate proper download URL
+    const downloadUrl = cloudinary.url(material.cloudinaryPublicId, {
+      resource_type: "raw",
+      format: material.fileType,
+      flags: "attachment",
+      sign_url: true,
+      expires_at: Math.floor(Date.now() / 1000) + 300, // 5 min expiry
+      transformation: [
+        { 
+          flags: `attachment:${material.originalName}` 
+        }
+      ]
+    });
 
     res.json({ success: true, url: downloadUrl });
   } catch (error) {

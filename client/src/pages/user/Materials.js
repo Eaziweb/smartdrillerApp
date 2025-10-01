@@ -113,12 +113,16 @@ const downloadMaterial = async (materialId, filename) => {
     const response = await api.get(`/api/materials/${materialId}/download`);
 
     if (response.data.success && response.data.url) {
+      // Create a temporary link to force download
       const link = document.createElement("a");
       link.href = response.data.url;
-      link.download = filename;
+      link.setAttribute("download", filename);
+      link.style.display = "none";
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
+      
+      showNotification("Download started", "success");
     } else {
       showNotification("File not available for download", "error");
     }
@@ -127,7 +131,6 @@ const downloadMaterial = async (materialId, filename) => {
     showNotification("Error downloading material", "error");
   }
 };
-
 
   const handleFilterChange = (key, value) => {
     setFilters((prev) => ({ ...prev, [key]: value }))
