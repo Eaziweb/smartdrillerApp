@@ -109,7 +109,7 @@ router.delete("/:id", adminAuth, async (req, res) => {
   }
 });
 
-router.get("/:id/download", auth, async (req, res) => {
+router.get("/:id/download", adminAuth, async (req, res) => {
   try {
     const material = await Material.findById(req.params.id);
     if (!material) {
