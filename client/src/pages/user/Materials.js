@@ -313,7 +313,6 @@ const downloadMaterial = async (materialId, filename) => {
                   className={styles.downloadBtn}
                 >
                   <i className="fas fa-download"></i>
-                  Download
                 </button>
               </div>
             </div>

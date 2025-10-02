@@ -692,7 +692,7 @@
 
 @media (max-width: 480px) {
   .materialsHeader {
-    padding: 0.75rem 1rem;
+    padding: 0.85rem 1rem;
   }
   
   .headerContent h1 {
@@ -705,15 +705,17 @@
   
   .backBtn,
   .uploadBtn {
-    padding: 0.4rem 0.6rem;
-    font-size: 0.8rem;
+    padding: 0.3rem 0.4rem;
+    font-size: 0.5rem;
   }
   
   .filtersSection {
     padding: 0.75rem;
     margin: 0.75rem auto;
   }
-  
+  .uploader {
+font-size: .35rem;
+}
   .searchInput {
     padding: 0.6rem 0.8rem;
     font-size: 0.9rem;
@@ -731,7 +733,7 @@
   }
   
   .materialCard {
-    padding: 0.75rem;
+    padding: 0.6rem;
     flex-wrap: nowrap;
   }
   
@@ -751,11 +753,11 @@
   }
   
   .materialCourse {
-    font-size: 0.65rem;
+    font-size: 0.45rem;
   }
   
   .materialSize {
-    font-size: 0.75rem;
+    font-size: 0.5rem;
   }
   
   .materialDetails {
@@ -803,12 +805,12 @@
 @media (max-width: 360px) {
   .materialDetails {
     flex-direction: column;
-    gap: 0.5rem;
+    gap: 0.3rem;
   }
   
   .materialMeta {
     flex-direction: column;
     align-items: flex-start;
-    gap: 0.25rem;
+    gap: 0.2rem;
   }
 }
