@@ -777,9 +777,7 @@
 
 /* Add a new media query for very small screens (320px) */
 @media (max-width: 320px) {
-  .quizHeader {
-    padding: 0.3rem 0.4rem;
-  }
+
   
   .subjectInfo h2 {
     font-size: 0.75rem;
