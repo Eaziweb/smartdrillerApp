@@ -672,7 +672,6 @@
   }
 }
 
-// Update the media query for 480px in mock.module.css
 
 @media (max-width: 480px) {
   .quizHeader {
