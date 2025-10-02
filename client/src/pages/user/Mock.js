@@ -544,10 +544,11 @@ const Mock = () => {
           <button className={styles.backBtn} onClick={handleBack}>
             <i className="fa fa-arrow-left"></i>
           </button>
-          <div className={styles.subjectInfo}>
-            <h2>{examData.course.toUpperCase()}</h2>
-            <span>Question {currentQuestionIndex + 1} of {examData.questions.length}</span>
-          </div>
+      
+<div className={styles.subjectInfo}>
+  <h2 title={examData.course}>{examData.course.toUpperCase()}</h2>
+  <span>Question {currentQuestionIndex + 1} of {examData.questions.length}</span>
+</div>
         </div>
         <div className={styles.headerRight}>
           <div className={styles.timer}>

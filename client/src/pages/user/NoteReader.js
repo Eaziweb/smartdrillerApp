@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import { useParams, Link } from "react-router-dom"
 import { useAuth } from "../../contexts/AuthContext"
 import styles from "../../styles/NoteReader.module.css"
-import api from "../../utils/api";
+import api from "../../utils/api"
 
 const NoteReader = () => {
   const { noteId } = useParams()
@@ -66,6 +66,10 @@ const NoteReader = () => {
     if (window.MathJax && window.MathJax.typesetPromise) {
       window.MathJax.typesetPromise()
         .then(() => {
+          // Math rendering complete
+        })
+        .catch((err) => {
+          console.error("MathJax rendering error:", err)
         })
     }
   }
@@ -134,21 +138,38 @@ const NoteReader = () => {
     }
   }
 
-
   const Watermark = () => {
-    if (!user) return null
+    if (!user) return null;
     
-    const watermarkText = `${user.fullName} - ${user.email}`
+    const watermarkText = `${user.fullName} - ${user.email}`;
+    
+    // Generate a grid of watermark items for better coverage
+    const watermarkItems = [];
+    const rows = 15;
+    const cols = 10;
+    
+    for (let i = 0; i < rows; i++) {
+      for (let j = 0; j < cols; j++) {
+        watermarkItems.push(
+          <div
+            key={`${i}-${j}`}
+            className={styles.watermarkItem}
+            style={{
+              top: `${(i / rows) * 100}%`,
+              left: `${(j / cols) * 100}%`,
+            }}
+          >
+            {watermarkText}
+          </div>
+        );
+      }
+    }
     
     return (
       <div className={styles.watermarkContainer}>
-        {Array.from({ length: 50 }).map((_, i) => (
-          <div key={i} className={styles.watermarkItem}>
-            {watermarkText}
-          </div>
-        ))}
+        {watermarkItems}
       </div>
-    )
+    );
   }
 
   if (error) {
@@ -225,7 +246,12 @@ const NoteReader = () => {
               <p>{note.description}</p>
             </div>
           )}
-          <div className={styles.noteBody} dangerouslySetInnerHTML={{ __html: note.content }} />
+          <div 
+            className={styles.noteBody} 
+            dangerouslySetInnerHTML={{ 
+              __html: note.content 
+            }} 
+          />
           {!isCompleted && !progressLoading && (
             <div className={styles.completionSection}>
               <button className={styles.completeBtn} onClick={markAsCompleted}>
@@ -245,4 +271,4 @@ const NoteReader = () => {
   )
 }
 
-export default NoteReader
+export default NoteReader   

@@ -216,7 +216,6 @@ const downloadMaterial = async (materialId, filename) => {
         </button>
         <div className={styles.headerContent}>
           <h1>Study Materials</h1>
-          <p>Upload and access course materials</p>
         </div>
         <button 
           className={`${styles.uploadBtn} ${uploading ? styles.loading : ''}`} 

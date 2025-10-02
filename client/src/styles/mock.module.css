@@ -672,89 +672,151 @@
   }
 }
 
+// Update the media query for 480px in mock.module.css
+
 @media (max-width: 480px) {
   .quizHeader {
-    padding: 0.5rem 0.6rem; 
+    padding: 0.4rem 0.5rem; /* Further reduced padding */
   }
-     .questionGrid {
-    padding: 0 1rem;
-      gap: 0.2rem;
-  max-width: 800px;
-  margin: 1.5rem auto;
- 
-  }
+  
   .headerLeft {
-    gap: 0.4rem; 
+    gap: 0.4rem; /* Reduced gap */
   }
   
   .headerRight {
-    gap: 0.2rem; 
+    gap: 0.25rem; /* Reduced gap */
   }
   
   .backBtn {
-    padding: 0.35rem; 
-    font-size: 0.85rem; 
+    padding: 0.35rem; /* Further reduced padding */
+    font-size: 0.85rem; /* Smaller font size */
+    width: 28px; /* Fixed width */
+    height: 28px; /* Fixed height */
   }
   
   .subjectInfo h2 {
-    font-size: 0.9rem;
-    max-width: 80px;
-    
+    font-size: 0.85rem; /* Smaller font size */
+    max-width: 70px; /* Further reduced max width */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
   
   .subjectInfo span {
-    font-size: 0.7rem;
-    
+    font-size: 0.65rem; /* Smaller font size */
+    display: none; /* Hide on very small screens */
   }
   
   .timer {
-    padding: 0.25rem 0.4rem;
-       font-size: 0.75rem;
-    
+    padding: 0.25rem 0.35rem; /* Further reduced padding */
+    font-size: 0.7rem; /* Smaller font size */
   }
   
   .iconBtn {
-    padding: 0.35rem;
-       font-size: 0.85rem;
-    
-    width: 28px;
-     height: 28px;
+    padding: 0.35rem; /* Further reduced padding */
+    font-size: 0.85rem; /* Smaller font size */
+    width: 26px; /* Smaller width */
+    height: 26px; /* Smaller height */
   }
   
-  .questionImage img {
-    max-height: 200px;
-  }
-  
-  .questionText {
-    font-size: 1rem;
-    padding: 0.75rem;
-  }
-  
-  .optionText {
-    font-size: 0.85rem;
-  }
-  
-  .navBtn {
-    width: 40px;
-    height: 40px;
+  .questionGrid {
+    padding: 0 0.8rem; /* Reduced padding */
+    gap: 0.3rem; /* Smaller gap */
   }
   
   .gridItem {
-    width: 30px;
-    height: 30px;
-    font-size: 0.85rem;
+    width: 28px; /* Smaller width */
+    height: 28px; /* Smaller height */
+    font-size: 0.8rem; /* Smaller font size */
+  }
+  
+  .navigationContainer {
+    padding: 0.8rem; /* Reduced padding */
+  }
+  
+  .navBtn {
+    width: 38px; /* Smaller width */
+    height: 38px; /* Smaller height */
+  }
+  
+  .option {
+    padding: 0.6rem 0.8rem; /* Reduced padding */
+  }
+  
+  .optionLetter {
+    width: 26px; /* Smaller width */
+    height: 26px; /* Smaller height */
+    font-size: 0.85rem; /* Smaller font size */
+  }
+  
+  .questionImage img {
+    max-height: 180px; /* Smaller max height */
+  }
+  
+  .questionText {
+    font-size: 0.95rem; /* Smaller font size */
+    padding: 0.6rem; /* Reduced padding */
+  }
+  
+  .optionText {
+    font-size: 0.8rem; /* Smaller font size */
   }
   
   .btn {
-    padding: 0.5rem 1.2rem;
-    font-size: 0.85rem;
+    padding: 0.5rem 1rem; /* Reduced padding */
+    font-size: 0.85rem; /* Smaller font size */
   }
   
   .modal {
-    padding: 1rem;
+    padding: 1rem; /* Reduced padding */
   }
   
   .modalBody textarea {
-    min-height: 80px;
+    min-height: 80px; /* Smaller min height */
+  }
+}
+
+/* Add a new media query for very small screens (320px) */
+@media (max-width: 320px) {
+  .quizHeader {
+    padding: 0.3rem 0.4rem;
+  }
+  
+  .subjectInfo h2 {
+    font-size: 0.75rem;
+    max-width: 60px;
+  }
+  
+  .timer {
+    font-size: 0.65rem;
+    padding: 0.2rem 0.3rem;
+  }
+  
+  .iconBtn {
+    width: 24px;
+    height: 24px;
+    font-size: 0.75rem;
+  }
+  
+  .backBtn {
+    width: 24px;
+    height: 24px;
+    font-size: 0.75rem;
+  }
+  
+  .questionGrid {
+    grid-template-columns: repeat(auto-fill, minmax(25px, 1fr));
+    gap: 0.2rem;
+  }
+  
+  .gridItem {
+    width: 25px;
+    height: 25px;
+    font-size: 0.75rem;
+  }
+  
+  .navBtn {
+    width: 36px;
+    height: 36px;
   }
 }

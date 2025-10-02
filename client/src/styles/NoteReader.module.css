@@ -1,17 +1,22 @@
 /* styles/NoteReader.module.css */
+
+/* Base Styles */
 .noteReader {
   min-height: 100vh;
   background: #f5f7fa;
   color: #333;
   position: relative;
+  overflow-x: hidden; /* Prevent horizontal scrolling */
 }
 
+/* Header Styles */
 .noteHeader {
   background: white;
   box-shadow: 0 2px 10px rgba(0, 32, 96, 0.1);
   position: sticky;
   top: 0;
   z-index: 100;
+  width: 100%;
 }
 
 .headerContent {
@@ -19,8 +24,10 @@
   align-items: center;
   gap: 1rem;
   padding: 1rem;
-  max-width: 800px;
+  max-width: 1200px;
   margin: 0 auto;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .backBtn {
@@ -35,6 +42,8 @@
   text-decoration: none;
   transition: all 0.3s ease;
   flex-shrink: 0;
+  border: none;
+  cursor: pointer;
 }
 
 .backBtn:hover {
@@ -44,6 +53,7 @@
 
 .noteTitleSection {
   flex: 1;
+  min-width: 0; /* Prevent flex item from overflowing */
 }
 
 .noteTitleSection h1 {
@@ -52,12 +62,19 @@
   color: #002060;
   line-height: 1.3;
   font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .courseName {
   color: #0066ff;
   font-size: 0.9rem;
   font-weight: 500;
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .completedIndicator {
@@ -70,12 +87,16 @@
   background: rgba(40, 167, 69, 0.1);
   padding: 0.5rem 1rem;
   border-radius: 20px;
+  font-size: 0.85rem;
 }
 
+/* Content Styles */
 .noteContent {
   padding: 2rem 1rem;
   position: relative;
   z-index: 1;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .contentContainer {
@@ -85,11 +106,15 @@
   border-radius: 16px;
   padding: 2rem;
   box-shadow: 0 4px 15px rgba(0, 32, 96, 0.08);
+  width: 100%;
+  box-sizing: border-box;
+  overflow: hidden; /* Prevent content from overflowing */
 }
 
 .noteMeta {
   display: flex;
-  gap: 2rem;
+  flex-wrap: wrap;
+  gap: 1rem;
   margin-bottom: 2rem;
   padding-bottom: 1rem;
   border-bottom: 1px solid #e1ebf7;
@@ -105,6 +130,7 @@
 
 .metaItem i {
   color: #0066ff;
+  flex-shrink: 0;
 }
 
 .noteDescription {
@@ -122,10 +148,14 @@
   line-height: 1.6;
 }
 
+/* Note Body Typography */
 .noteBody {
   line-height: 1.8;
   color: #333;
   font-size: 1rem;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+  word-break: break-word;
 }
 
 .noteBody h1,
@@ -136,6 +166,8 @@
 .noteBody h6 {
   margin: 2rem 0 1rem 0;
   color: #002060;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
 }
 
 .noteBody h1 {
@@ -156,6 +188,8 @@
 .noteBody p {
   margin: 1rem 0;
   line-height: 1.8;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
 }
 
 .noteBody ul,
@@ -167,6 +201,8 @@
 .noteBody li {
   margin: 0.5rem 0;
   line-height: 1.6;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
 }
 
 .noteBody blockquote {
@@ -179,6 +215,7 @@
   color: #555;
 }
 
+/* Code Styling */
 .noteBody code {
   background: #f1f3f4;
   padding: 0.2rem 0.4rem;
@@ -186,6 +223,8 @@
   font-family: "Courier New", monospace;
   font-size: 0.9rem;
   color: #0066ff;
+  white-space: pre-wrap;
+  word-break: break-word;
 }
 
 .noteBody pre {
@@ -195,6 +234,8 @@
   overflow-x: auto;
   margin: 1rem 0;
   border: 1px solid #e1ebf7;
+  white-space: pre;
+  word-break: normal;
 }
 
 .noteBody pre code {
@@ -203,6 +244,7 @@
   color: #333;
 }
 
+/* Text Formatting */
 .noteBody strong {
   font-weight: 600;
   color: #002060;
@@ -213,7 +255,7 @@
   color: #555;
 }
 
-/* Math formula styling */
+/* Math Formula Styling */
 .noteBody .formula {
   background: rgba(0, 102, 255, 0.05);
   padding: 0.5rem;
@@ -228,7 +270,7 @@
   font-size: 1.1rem;
 }
 
-/* Fraction styling */
+/* Fraction Styling */
 .noteBody .fraction {
   display: inline-block;
   text-align: center;
@@ -246,11 +288,13 @@
   border-bottom: 1px solid #002060;
 }
 
-/* Table styling */
+/* Table Styling */
 .noteBody table {
   width: 100%;
   border-collapse: collapse;
   margin: 1rem 0;
+  table-layout: fixed;
+  overflow: hidden;
 }
 
 .noteBody table th,
@@ -258,6 +302,9 @@
   border: 1px solid #e1ebf7;
   padding: 0.75rem;
   text-align: left;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+  word-break: break-word;
 }
 
 .noteBody table th {
@@ -270,6 +317,25 @@
   background: #f9fbfd;
 }
 
+/* Media Elements */
+.noteBody img,
+.noteBody video,
+.noteBody iframe,
+.noteBody figure {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+  overflow: hidden;
+  margin: 1rem 0;
+}
+
+.noteBody img {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Completion Section */
 .completionSection {
   margin-top: 3rem;
   padding-top: 2rem;
@@ -298,6 +364,11 @@
   box-shadow: 0 6px 16px rgba(0, 102, 255, 0.4);
 }
 
+.completeBtn:active {
+  transform: translateY(0);
+}
+
+/* Toast Notification */
 .completionToast {
   position: fixed;
   top: 20px;
@@ -313,12 +384,14 @@
   transform: translateX(100%);
   transition: transform 0.3s ease;
   z-index: 1000;
+  max-width: 90%;
 }
 
 .completionToast.show {
   transform: translateX(0);
 }
 
+/* Loading Spinner */
 .loadingSpinner {
   display: flex;
   flex-direction: column;
@@ -336,9 +409,12 @@
   animation: spin 1s linear infinite;
 }
 
+/* Error Message */
 .errorMessage {
   text-align: center;
   padding: 3rem 1rem;
+  max-width: 600px;
+  margin: 0 auto;
 }
 
 .errorMessage h2 {
@@ -356,7 +432,7 @@
   text-decoration: underline;
 }
 
-/* Watermark styles */
+/* Watermark Styles */
 .watermarkContainer {
   position: fixed;
   top: 0;
@@ -368,96 +444,76 @@
   overflow: hidden;
   opacity: 0.07;
   user-select: none;
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  grid-template-rows: repeat(12, 1fr);
+  gap: 20px;
+  padding: 20px;
+  box-sizing: border-box;
 }
 
 .watermarkItem {
-  position: absolute;
   color: #000;
   font-size: 14px;
   font-weight: bold;
   white-space: nowrap;
   transform: rotate(-45deg);
   text-transform: capitalize;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.watermarkItem:nth-child(-5) { top: 5%; left: 5%; }
-.watermarkItem:nth-child(-4) { top: 5%; left: 5%; }
-.watermarkItem:nth-child(-3) { top: 5%; left: 5%; }
-.watermarkItem:nth-child(-2) { top: 5%; left: 5%; }
-.watermarkItem:nth-child(-1) { top: 5%; left: 5%; }
-.watermarkItem:nth-child(-6) { top: 5%; left: 5%; }
-.watermarkItem:nth-child(-7) { top: 5%; left: 5%; }
-.watermarkItem:nth-child(-8) { top: 5%; left: 5%; }
-.watermarkItem:nth-child(-9) { top: 5%; left: 5%; }
-.watermarkItem:nth-child(1) { top: 5%; left: 5%; }
-.watermarkItem:nth-child(2) { top: 5%; left: 25%; }
-.watermarkItem:nth-child(3) { top: 5%; left: 45%; }
-.watermarkItem:nth-child(4) { top: 5%; left: 65%; }
-.watermarkItem:nth-child(5) { top: 5%; left: 85%; }
-.watermarkItem:nth-child(6) { top: 20%; left: 15%; }
-.watermarkItem:nth-child(7) { top: 20%; left: 35%; }
-.watermarkItem:nth-child(8) { top: 20%; left: 55%; }
-.watermarkItem:nth-child(9) { top: 20%; left: 75%; }
-.watermarkItem:nth-child(10) { top: 20%; left: 95%; }
-.watermarkItem:nth-child(11) { top: 35%; left: 5%; }
-.watermarkItem:nth-child(12) { top: 35%; left: 25%; }
-.watermarkItem:nth-child(13) { top: 35%; left: 45%; }
-.watermarkItem:nth-child(14) { top: 35%; left: 65%; }
-.watermarkItem:nth-child(15) { top: 35%; left: 85%; }
-.watermarkItem:nth-child(16) { top: 50%; left: 15%; }
-.watermarkItem:nth-child(17) { top: 50%; left: 35%; }
-.watermarkItem:nth-child(18) { top: 50%; left: 55%; }
-.watermarkItem:nth-child(19) { top: 50%; left: 75%; }
-.watermarkItem:nth-child(20) { top: 50%; left: 95%; }
-.watermarkItem:nth-child(21) { top: 65%; left: 5%; }
-.watermarkItem:nth-child(22) { top: 65%; left: 25%; }
-.watermarkItem:nth-child(23) { top: 65%; left: 45%; }
-.watermarkItem:nth-child(24) { top: 65%; left: 65%; }
-.watermarkItem:nth-child(25) { top: 65%; left: 85%; }
-.watermarkItem:nth-child(26) { top: 80%; left: 15%; }
-.watermarkItem:nth-child(27) { top: 80%; left: 35%; }
-.watermarkItem:nth-child(28) { top: 80%; left: 55%; }
-.watermarkItem:nth-child(29) { top: 80%; left: 75%; }
-.watermarkItem:nth-child(30) { top: 80%; left: 95%; }
-.watermarkItem:nth-child(31) { top: 95%; left: 5%; }
-.watermarkItem:nth-child(32) { top: 95%; left: 25%; }
-.watermarkItem:nth-child(33) { top: 95%; left: 45%; }
-.watermarkItem:nth-child(34) { top: 95%; left: 65%; }
-.watermarkItem:nth-child(35) { top: 95%; left: 85%; }
-/* Additional watermark items for better coverage */
-.watermarkItem:nth-child(36) { top: 10%; left: 10%; }
-.watermarkItem:nth-child(37) { top: 10%; left: 30%; }
-.watermarkItem:nth-child(38) { top: 10%; left: 50%; }
-.watermarkItem:nth-child(39) { top: 10%; left: 70%; }
-.watermarkItem:nth-child(40) { top: 10%; left: 90%; }
-.watermarkItem:nth-child(41) { top: 25%; left: 20%; }
-.watermarkItem:nth-child(42) { top: 25%; left: 40%; }
-.watermarkItem:nth-child(43) { top: 25%; left: 60%; }
-.watermarkItem:nth-child(44) { top: 25%; left: 80%; }
-.watermarkItem:nth-child(45) { top: 40%; left: 10%; }
-.watermarkItem:nth-child(46) { top: 40%; left: 30%; }
-.watermarkItem:nth-child(47) { top: 40%; left: 50%; }
-.watermarkItem:nth-child(48) { top: 40%; left: 70%; }
-.watermarkItem:nth-child(49) { top: 40%; left: 90%; }
-.watermarkItem:nth-child(50) { top: 55%; left: 20%; }
-
+/* Animations */
 @keyframes spin {
-  0% {
-    transform: rotate(0deg);
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Responsive Styles */
+@media (max-width: 1024px) {
+  .contentContainer {
+    max-width: 90%;
+    padding: 1.5rem;
   }
-  100% {
-    transform: rotate(360deg);
+  
+  .noteBody h1 {
+    font-size: 1.8rem;
+  }
+  
+  .noteBody h2 {
+    font-size: 1.4rem;
+  }
+  
+  .noteBody h3 {
+    font-size: 1.2rem;
+  }
+  
+  .watermarkContainer {
+    grid-template-columns: repeat(6, 1fr);
+    grid-template-rows: repeat(10, 1fr);
+    gap: 15px;
+    padding: 15px;
+  }
+  
+  .watermarkItem {
+    font-size: 12px;
   }
 }
 
-/* Responsive styles */
 @media (max-width: 768px) {
   .headerContent {
     padding: 1rem 0.5rem;
+    flex-wrap: wrap;
   }
   
   .noteTitleSection h1 {
     font-size: 1.25rem;
+    white-space: normal;
+    overflow: visible;
+    text-overflow: clip;
   }
   
   .courseName {
@@ -498,6 +554,23 @@
   .noteBody code {
     font-size: 0.85rem;
   }
+  
+  .watermarkContainer {
+    grid-template-columns: repeat(4, 1fr);
+    grid-template-rows: repeat(8, 1fr);
+    gap: 10px;
+    padding: 10px;
+  }
+  
+  .watermarkItem {
+    font-size: 10px;
+  }
+  
+  .completionToast {
+    right: 10px;
+    top: 10px;
+    padding: 0.8rem 1.2rem;
+  }
 }
 
 @media (max-width: 480px) {
@@ -520,6 +593,7 @@
   
   .contentContainer {
     padding: 1rem;
+    margin: 0 0.25rem;
   }
   
   .noteMeta {
@@ -553,5 +627,73 @@
   .completeBtn {
     padding: 0.6rem 1.2rem;
     font-size: 0.85rem;
+  }
+  
+  .watermarkContainer {
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(6, 1fr);
+    gap: 8px;
+    padding: 8px;
+  }
+  
+  .watermarkItem {
+    font-size: 8px;
+  }
+  
+  .completionToast {
+    right: 5px;
+    top: 5px;
+    padding: 0.6rem 1rem;
+    font-size: 0.85rem;
+  }
+  
+  .errorMessage {
+    padding: 2rem 1rem;
+  }
+}
+
+/* Print Styles */
+@media print {
+  .noteReader {
+    background: white;
+  }
+  
+  .noteHeader,
+  .completionSection,
+  .watermarkContainer {
+    display: none;
+  }
+  
+  .contentContainer {
+    box-shadow: none;
+    padding: 0;
+    max-width: 100%;
+  }
+  
+  .noteBody {
+    font-size: 12pt;
+    line-height: 1.5;
+  }
+  
+  .noteBody h1 {
+    font-size: 18pt;
+  }
+  
+  .noteBody h2 {
+    font-size: 16pt;
+  }
+  
+  .noteBody h3 {
+    font-size: 14pt;
+  }
+  
+  .noteBody p {
+    margin-bottom: 0.5em;
+  }
+  
+  .noteBody blockquote {
+    border-left: 3pt solid #0066ff;
+    padding-left: 1em;
+    font-style: italic;
   }
 }
