@@ -675,7 +675,7 @@
 
 @media (max-width: 480px) {
   .quizHeader {
-    padding: 0.4rem 0.5rem; /* Further reduced padding */
+    padding: 0.4rem 0.65rem; 
   }
   
   .headerLeft {
@@ -719,13 +719,13 @@
   }
   
   .questionGrid {
-    padding: 0 0.8rem; /* Reduced padding */
-    gap: 0.3rem; /* Smaller gap */
+    padding: 0 0.8rem; 
+    gap: 0.2rem;
   }
   
   .gridItem {
-    width: 28px; /* Smaller width */
-    height: 28px; /* Smaller height */
+    width: 33px; /* Smaller width */
+    height: 33px; /* Smaller height */
     font-size: 0.8rem; /* Smaller font size */
   }
   

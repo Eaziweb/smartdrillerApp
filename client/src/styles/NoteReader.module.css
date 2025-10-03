@@ -6,88 +6,7 @@
   background: #f5f7fa;
   color: #333;
   position: relative;
-  overflow-x: hidden; /* Prevent horizontal scrolling */
-}
-
-/* Header Styles */
-.noteHeader {
-  background: white;
-  box-shadow: 0 2px 10px rgba(0, 32, 96, 0.1);
-  position: sticky;
-  top: 0;
-  z-index: 100;
-  width: 100%;
-}
-
-.headerContent {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  padding: 1rem;
-  max-width: 1200px;
-  margin: 0 auto;
-  width: 100%;
-  box-sizing: border-box;
-}
-
-.backBtn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background: #f0f4f8;
-  color: #002060;
-  text-decoration: none;
-  transition: all 0.3s ease;
-  flex-shrink: 0;
-  border: none;
-  cursor: pointer;
-}
-
-.backBtn:hover {
-  background: #e1ebf7;
-  transform: translateX(-3px);
-}
-
-.noteTitleSection {
-  flex: 1;
-  min-width: 0; /* Prevent flex item from overflowing */
-}
-
-.noteTitleSection h1 {
-  margin: 0 0 0.25rem 0;
-  font-size: 1.5rem;
-  color: #002060;
-  line-height: 1.3;
-  font-weight: 600;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.courseName {
-  color: #0066ff;
-  font-size: 0.9rem;
-  font-weight: 500;
-  display: block;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.completedIndicator {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  color: #28a745;
-  font-weight: 500;
-  flex-shrink: 0;
-  background: rgba(40, 167, 69, 0.1);
-  padding: 0.5rem 1rem;
-  border-radius: 20px;
-  font-size: 0.85rem;
+  /* Removed overflow-x: hidden to allow horizontal scrolling */
 }
 
 /* Content Styles */
@@ -97,6 +16,7 @@
   z-index: 1;
   width: 100%;
   box-sizing: border-box;
+  /* Removed overflow constraints */
 }
 
 .contentContainer {
@@ -108,193 +28,20 @@
   box-shadow: 0 4px 15px rgba(0, 32, 96, 0.08);
   width: 100%;
   box-sizing: border-box;
-  overflow: hidden; /* Prevent content from overflowing */
-}
-
-.noteMeta {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1rem;
-  margin-bottom: 2rem;
-  padding-bottom: 1rem;
-  border-bottom: 1px solid #e1ebf7;
-}
-
-.metaItem {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  color: #555;
-  font-size: 0.9rem;
-}
-
-.metaItem i {
-  color: #0066ff;
-  flex-shrink: 0;
-}
-
-.noteDescription {
-  margin-bottom: 2rem;
-  padding: 1rem;
-  background: #f5f7fa;
-  border-radius: 8px;
-  border-left: 4px solid #0066ff;
-}
-
-.noteDescription p {
-  margin: 0;
-  color: #555;
-  font-style: italic;
-  line-height: 1.6;
-}
-
-/* Note Body Typography */
-.noteBody {
-  line-height: 1.8;
-  color: #333;
-  font-size: 1rem;
-  overflow-wrap: break-word;
-  word-wrap: break-word;
-  word-break: break-word;
-}
-
-.noteBody h1,
-.noteBody h2,
-.noteBody h3,
-.noteBody h4,
-.noteBody h5,
-.noteBody h6 {
-  margin: 2rem 0 1rem 0;
-  color: #002060;
-  overflow-wrap: break-word;
-  word-wrap: break-word;
-}
-
-.noteBody h1 {
-  font-size: 2rem;
-  border-bottom: 2px solid #0066ff;
-  padding-bottom: 0.5rem;
-}
-
-.noteBody h2 {
-  font-size: 1.5rem;
-  color: #0066ff;
-}
-
-.noteBody h3 {
-  font-size: 1.25rem;
-}
-
-.noteBody p {
-  margin: 1rem 0;
-  line-height: 1.8;
-  overflow-wrap: break-word;
-  word-wrap: break-word;
-}
-
-.noteBody ul,
-.noteBody ol {
-  margin: 1rem 0;
-  padding-left: 2rem;
-}
-
-.noteBody li {
-  margin: 0.5rem 0;
-  line-height: 1.6;
-  overflow-wrap: break-word;
-  word-wrap: break-word;
-}
-
-.noteBody blockquote {
-  margin: 2rem 0;
-  padding: 1rem 1.5rem;
-  background: #f5f7fa;
-  border-left: 4px solid #0066ff;
-  border-radius: 0 8px 8px 0;
-  font-style: italic;
-  color: #555;
-}
-
-/* Code Styling */
-.noteBody code {
-  background: #f1f3f4;
-  padding: 0.2rem 0.4rem;
-  border-radius: 4px;
-  font-family: "Courier New", monospace;
-  font-size: 0.9rem;
-  color: #0066ff;
-  white-space: pre-wrap;
-  word-break: break-word;
-}
-
-.noteBody pre {
-  background: #f5f7fa;
-  padding: 1rem;
-  border-radius: 8px;
+  /* Changed overflow to allow horizontal scrolling */
   overflow-x: auto;
-  margin: 1rem 0;
-  border: 1px solid #e1ebf7;
-  white-space: pre;
-  word-break: normal;
+  overflow-y: visible;
+  min-width: 300px; /* Ensure minimum width on small screens */
 }
 
-.noteBody pre code {
-  background: none;
-  padding: 0;
-  color: #333;
-}
-
-/* Text Formatting */
-.noteBody strong {
-  font-weight: 600;
-  color: #002060;
-}
-
-.noteBody em {
-  font-style: italic;
-  color: #555;
-}
-
-/* Math Formula Styling */
-.noteBody .formula {
-  background: rgba(0, 102, 255, 0.05);
-  padding: 0.5rem;
-  border-radius: 8px;
-  margin: 0.5rem 0;
-  text-align: center;
-  overflow-x: auto;
-}
-
-.noteBody .MathJax {
-  color: #002060;
-  font-size: 1.1rem;
-}
-
-/* Fraction Styling */
-.noteBody .fraction {
-  display: inline-block;
-  text-align: center;
-  vertical-align: middle;
-  margin: 0 0.2em;
-}
-
-.noteBody .fraction .numerator,
-.noteBody .fraction .denominator {
-  display: block;
-  padding: 0 0.2em;
-}
-
-.noteBody .fraction .numerator {
-  border-bottom: 1px solid #002060;
-}
-
-/* Table Styling */
+/* Table Styling - Updated for horizontal scrolling */
 .noteBody table {
-  width: 100%;
+  width: auto; /* Changed from 100% to auto */
+  min-width: 100%; /* Ensure table takes at least full container width */
   border-collapse: collapse;
   margin: 1rem 0;
-  table-layout: fixed;
-  overflow: hidden;
+  /* Removed table-layout: fixed to allow natural width */
+  /* Removed overflow: hidden */
 }
 
 .noteBody table th,
@@ -302,22 +49,26 @@
   border: 1px solid #e1ebf7;
   padding: 0.75rem;
   text-align: left;
+  /* Reduced word-breaking to preserve table structure */
   overflow-wrap: break-word;
   word-wrap: break-word;
-  word-break: break-word;
+  /* Removed word-break: break-word */
 }
 
-.noteBody table th {
+/* Code Block Styling - Updated for horizontal scrolling */
+.noteBody pre {
   background: #f5f7fa;
-  font-weight: 600;
-  color: #002060;
+  padding: 1rem;
+  border-radius: 8px;
+  overflow-x: auto; /* Ensure horizontal scrolling for code */
+  margin: 1rem 0;
+  border: 1px solid #e1ebf7;
+  white-space: pre; /* Preserve whitespace */
+  word-break: normal; /* Prevent breaking of code */
+  min-width: 100%; /* Ensure code block takes at least full width */
 }
 
-.noteBody table tr:nth-child(even) {
-  background: #f9fbfd;
-}
-
-/* Media Elements */
+/* Media Elements - Updated for better responsive behavior */
 .noteBody img,
 .noteBody video,
 .noteBody iframe,
@@ -325,7 +76,7 @@
   max-width: 100%;
   height: auto;
   border-radius: 8px;
-  overflow: hidden;
+  overflow: hidden; /* Keep overflow hidden for media */
   margin: 1rem 0;
 }
 
@@ -335,324 +86,80 @@
   margin-right: auto;
 }
 
-/* Completion Section */
-.completionSection {
-  margin-top: 3rem;
-  padding-top: 2rem;
-  border-top: 1px solid #e1ebf7;
-  text-align: center;
-}
-
-.completeBtn {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 1rem 2rem;
-  background: linear-gradient(135deg, #0066ff 0%, #002060 70%);
-  color: white;
-  border: none;
-  border-radius: 25px;
-  font-size: 1rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 12px rgba(0, 102, 255, 0.3);
-}
-
-.completeBtn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(0, 102, 255, 0.4);
-}
-
-.completeBtn:active {
-  transform: translateY(0);
-}
-
-/* Toast Notification */
-.completionToast {
-  position: fixed;
-  top: 20px;
-  right: 20px;
-  background: #28a745;
-  color: white;
-  padding: 1rem 1.5rem;
+/* Math Formula Styling - Updated for horizontal scrolling */
+.noteBody .formula {
+  background: rgba(0, 102, 255, 0.05);
+  padding: 0.5rem;
   border-radius: 8px;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  transform: translateX(100%);
-  transition: transform 0.3s ease;
-  z-index: 1000;
-  max-width: 90%;
-}
-
-.completionToast.show {
-  transform: translateX(0);
-}
-
-/* Loading Spinner */
-.loadingSpinner {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 50vh;
-}
-
-.spinner {
-  width: 40px;
-  height: 40px;
-  border: 4px solid #f3f3f3;
-  border-top: 4px solid #0066ff;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-}
-
-/* Error Message */
-.errorMessage {
+  margin: 0.5rem 0;
   text-align: center;
-  padding: 3rem 1rem;
-  max-width: 600px;
-  margin: 0 auto;
+  overflow-x: auto; /* Allow horizontal scrolling for formulas */
+  white-space: nowrap; /* Prevent formulas from wrapping */
 }
 
-.errorMessage h2 {
-  color: #666;
-  margin-bottom: 1rem;
-}
-
-.backLink {
-  color: #0066ff;
-  text-decoration: none;
-  font-weight: 500;
-}
-
-.backLink:hover {
-  text-decoration: underline;
-}
-
-/* Watermark Styles */
-.watermarkContainer {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  z-index: 1000;
-  overflow: hidden;
-  opacity: 0.07;
-  user-select: none;
-  display: grid;
-  grid-template-columns: repeat(8, 1fr);
-  grid-template-rows: repeat(12, 1fr);
-  gap: 20px;
-  padding: 20px;
-  box-sizing: border-box;
-}
-
-.watermarkItem {
-  color: #000;
-  font-size: 14px;
-  font-weight: bold;
-  white-space: nowrap;
-  transform: rotate(-45deg);
-  text-transform: capitalize;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-/* Animations */
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-
-/* Responsive Styles */
+/* Responsive Styles - Updated for better table handling */
 @media (max-width: 1024px) {
   .contentContainer {
     max-width: 90%;
     padding: 1.5rem;
+    /* Ensure horizontal scrolling is maintained */
+    overflow-x: auto;
   }
   
-  .noteBody h1 {
-    font-size: 1.8rem;
+  /* Add table wrapper for horizontal scrolling on medium screens */
+  .noteBody table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
   }
   
-  .noteBody h2 {
-    font-size: 1.4rem;
-  }
-  
-  .noteBody h3 {
-    font-size: 1.2rem;
-  }
-  
-  .watermarkContainer {
-    grid-template-columns: repeat(6, 1fr);
-    grid-template-rows: repeat(10, 1fr);
-    gap: 15px;
-    padding: 15px;
-  }
-  
-  .watermarkItem {
-    font-size: 12px;
+  .noteBody table th,
+  .noteBody table td {
+    display: inline-block; /* Make table cells behave like blocks */
+    white-space: normal; /* Allow text to wrap within cells */
   }
 }
 
 @media (max-width: 768px) {
-  .headerContent {
-    padding: 1rem 0.5rem;
-    flex-wrap: wrap;
-  }
-  
-  .noteTitleSection h1 {
-    font-size: 1.25rem;
-    white-space: normal;
-    overflow: visible;
-    text-overflow: clip;
-  }
-  
-  .courseName {
-    font-size: 0.8rem;
-  }
-  
   .contentContainer {
     margin: 0 0.5rem;
     padding: 1.5rem;
+    /* Ensure horizontal scrolling is maintained */
+    overflow-x: auto;
   }
   
-  .noteMeta {
-    flex-direction: column;
-    gap: 0.5rem;
+  /* Further adjust table for small screens */
+  .noteBody table {
+    font-size: 0.9rem; /* Reduce font size for better fit */
   }
   
-  .completeBtn {
-    padding: 0.75rem 1.5rem;
-    font-size: 0.9rem;
-  }
-  
-  .noteBody h1 {
-    font-size: 1.75rem;
-  }
-  
-  .noteBody h2 {
-    font-size: 1.3rem;
-  }
-  
-  .noteBody h3 {
-    font-size: 1.1rem;
-  }
-  
-  .noteBody p {
-    font-size: 0.95rem;
-  }
-  
-  .noteBody code {
-    font-size: 0.85rem;
-  }
-  
-  .watermarkContainer {
-    grid-template-columns: repeat(4, 1fr);
-    grid-template-rows: repeat(8, 1fr);
-    gap: 10px;
-    padding: 10px;
-  }
-  
-  .watermarkItem {
-    font-size: 10px;
-  }
-  
-  .completionToast {
-    right: 10px;
-    top: 10px;
-    padding: 0.8rem 1.2rem;
+  .noteBody table th,
+  .noteBody table td {
+    padding: 0.5rem; /* Reduce padding */
   }
 }
 
 @media (max-width: 480px) {
-  .headerContent {
-    padding: 0.8rem 0.5rem;
-  }
-  
-  .backBtn {
-    width: 36px;
-    height: 36px;
-  }
-  
-  .noteTitleSection h1 {
-    font-size: 1.1rem;
-  }
-  
-  .courseName {
-    font-size: 0.75rem;
-  }
-  
   .contentContainer {
     padding: 1rem;
     margin: 0 0.25rem;
+    /* Ensure horizontal scrolling is maintained */
+    overflow-x: auto;
   }
   
-  .noteMeta {
-    font-size: 0.85rem;
+  /* Further adjust table for very small screens */
+  .noteBody table {
+    font-size: 0.8rem; /* Further reduce font size */
   }
   
-  .noteDescription {
-    padding: 0.8rem;
-  }
-  
-  .noteBody h1 {
-    font-size: 1.5rem;
-  }
-  
-  .noteBody h2 {
-    font-size: 1.2rem;
-  }
-  
-  .noteBody h3 {
-    font-size: 1rem;
-  }
-  
-  .noteBody p {
-    font-size: 0.9rem;
-  }
-  
-  .noteBody code {
-    font-size: 0.8rem;
-  }
-  
-  .completeBtn {
-    padding: 0.6rem 1.2rem;
-    font-size: 0.85rem;
-  }
-  
-  .watermarkContainer {
-    grid-template-columns: repeat(3, 1fr);
-    grid-template-rows: repeat(6, 1fr);
-    gap: 8px;
-    padding: 8px;
-  }
-  
-  .watermarkItem {
-    font-size: 8px;
-  }
-  
-  .completionToast {
-    right: 5px;
-    top: 5px;
-    padding: 0.6rem 1rem;
-    font-size: 0.85rem;
-  }
-  
-  .errorMessage {
-    padding: 2rem 1rem;
+  .noteBody table th,
+  .noteBody table td {
+    padding: 0.4rem; /* Further reduce padding */
+    min-width: 80px; /* Ensure minimum cell width */
   }
 }
 
-/* Print Styles */
+/* Print Styles - Updated for better table printing */
 @media print {
   .noteReader {
     background: white;
@@ -668,8 +175,14 @@
     box-shadow: none;
     padding: 0;
     max-width: 100%;
+    /* Allow tables to print at full width */
+    overflow-x: visible;
   }
   
+  .noteContent {
+    padding: 1rem 0.2rem;
+  }
+
   .noteBody {
     font-size: 12pt;
     line-height: 1.5;
@@ -695,5 +208,16 @@
     border-left: 3pt solid #0066ff;
     padding-left: 1em;
     font-style: italic;
+  }
+  
+  /* Ensure tables print correctly */
+  .noteBody table {
+    width: 100%;
+    page-break-inside: avoid;
+  }
+  
+  .noteBody table th,
+  .noteBody table td {
+    padding: 0.3em;
   }
 }
