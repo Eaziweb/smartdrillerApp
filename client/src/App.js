@@ -106,7 +106,7 @@ useEffect(() => {
             <Route path="/features" element={<Features />} />
 
             {/* Admin Routes */}
-            <Route path="/admin/login" element={<AdminLogin />} />
+            <Route path="/private/admin/login" element={<AdminLogin />} />
             <Route
               path="/admin/dashboard"
               element={
@@ -116,7 +116,7 @@ useEffect(() => {
               }
             />
 
-<Route path="/superadmin/login" element={<SuperAdminLogin />} />
+<Route path="/private/superadmin/login" element={<SuperAdminLogin />} />
 <Route path="/superadmin/dashboard" element={
   <SuperAdminRoute>
                 <SuperAdminDashboard />

@@ -118,7 +118,7 @@ const SuperAdminLogin = () => {
           </form>
           <div className={styles.formFooter}>
             <p>
-              <Link to="/admin/login" className={styles.link}>
+              <Link to="/private/admin/login" className={styles.link}>
                 Admin Login
               </Link>
             </p>
