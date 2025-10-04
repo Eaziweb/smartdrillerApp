@@ -31,7 +31,7 @@ class EmailService {
       }
     ];
 
-    // Create transporters for both accounts
+    // Create transporters for both accounts with improved configuration
     this.transporters = this.emailConfigs.map(config => 
       nodemailer.createTransport({
         host: config.host,
@@ -40,8 +40,17 @@ class EmailService {
         auth: config.auth,
         tls: {
           // Do not fail on invalid certificates
-          rejectUnauthorized: false
-        }
+          rejectUnauthorized: false,
+          minVersion: 'TLSv1.2'
+        },
+        connectionTimeout: 10000, // 10 seconds
+        greetingTimeout: 10000,    // 10 seconds
+        socketTimeout: 10000,      // 10 seconds
+        pool: true,                // Use connection pooling
+        maxConnections: 5,         // Max connections in pool
+        maxMessages: 100,          // Max messages per connection
+        rateDelta: 1000,           // Rate limiting time window in ms
+        rateLimit: 5               // Max messages per rateDelta
       })
     );
 
@@ -59,8 +68,28 @@ class EmailService {
       resetHour: 24       // Reset every 24 hours
     };
 
-
     this.currentTransporterIndex = 0;
+    this.connectionStatus = {
+      primary: false,
+      secondary: false
+    };
+    
+    // Initialize connection status
+    this.initializeConnections();
+  }
+
+  async initializeConnections() {
+    // Check initial connection status for both accounts
+    for (let i = 0; i < this.emailConfigs.length; i++) {
+      try {
+        await this.transporters[i].verify();
+        this.connectionStatus[this.emailConfigs[i].id] = true;
+        console.log(`✅ Initial connection to ${this.emailConfigs[i].id} account successful`);
+      } catch (error) {
+        this.connectionStatus[this.emailConfigs[i].id] = false;
+        console.error(`❌ Initial connection to ${this.emailConfigs[i].id} account failed:`, error.message);
+      }
+    }
   }
 
   getNextResetTime() {
@@ -96,66 +125,95 @@ class EmailService {
 
   getAvailableTransporter() {
     // Check primary transporter first
-    if (this.canSendEmail(0)) {
+    if (this.canSendEmail(0) && this.connectionStatus.primary) {
       return { transporter: this.transporters[0], index: 0, config: this.emailConfigs[0] };
     }
     
-    // If primary is at limit, try secondary
-    if (this.canSendEmail(1)) {
+    // If primary is at limit or offline, try secondary
+    if (this.canSendEmail(1) && this.connectionStatus.secondary) {
       return { transporter: this.transporters[1], index: 1, config: this.emailConfigs[1] };
     }
     
-    // Both accounts at limit
-    throw new Error('Both email accounts have reached their daily sending limit');
+    // Both accounts at limit or offline
+    throw new Error('Both email accounts have reached their daily sending limit or are unavailable');
   }
 
-  async sendEmail(mailOptions) {
-    let lastError = null;
+  async sendEmail(mailOptions, retryCount = 0) {
+    const maxRetries = 3;
     
-    // Try both email accounts if the first one fails
-    for (let attempt = 0; attempt < this.emailConfigs.length; attempt++) {
-      try {
-        const { transporter, index, config } = this.getAvailableTransporter();
-        
-        // Verify the connection before sending
-        await transporter.verify();
-        
-        // Set the from address to the current account
-        const emailOptions = {
-          ...mailOptions,
-          from: `${config.from} <${config.user}>`
-        };
+    try {
+      const { transporter, index, config } = this.getAvailableTransporter();
+      
+      // Set the from address to the current account
+      const emailOptions = {
+        ...mailOptions,
+        from: `${config.from} <${config.user}>`
+      };
 
-        const result = await transporter.sendMail(emailOptions);
+      const result = await transporter.sendMail(emailOptions);
+      
+      // Increment counter for the used account
+      const accountId = config.id;
+      this.emailCounters[accountId].count++;
+      
+      console.log(`Email sent successfully using ${accountId} account. Count: ${this.emailCounters[accountId].count}/${this.limits.dailyLimit}`);
+      
+      return {
+        success: true,
+        messageId: result.messageId,
+        accountUsed: accountId,
+        remainingQuota: this.limits.dailyLimit - this.emailCounters[accountId].count
+      };
+    } catch (error) {
+      console.error(`Email sending failed (attempt ${retryCount + 1}/${maxRetries + 1}):`, error.message);
+      
+      // If we have retries left, try again
+      if (retryCount < maxRetries) {
+        // Wait before retrying (exponential backoff)
+        const delay = Math.pow(2, retryCount) * 1000;
+        console.log(`Retrying in ${delay}ms...`);
         
-        // Increment counter for the used account
-        const accountId = config.id;
-        this.emailCounters[accountId].count++;
-        
-        console.log(`Email sent successfully using ${accountId} account. Count: ${this.emailCounters[accountId].count}/${this.limits.dailyLimit}`);
-        
-        return {
-          success: true,
-          messageId: result.messageId,
-          accountUsed: accountId,
-          remainingQuota: this.limits.dailyLimit - this.emailCounters[accountId].count
-        };
-      } catch (error) {
-        lastError = error;
-        console.error(`Email sending failed with ${this.emailConfigs[attempt]?.id} account:`, error.message);
-        
-        // If it's an authentication error, try the other account
-        if (error.code === 'EAUTH' && attempt < this.emailConfigs.length - 1) {
-          console.log('Authentication failed, trying next email account...');
-          continue;
-        }
-        
-        // If it's not an auth error or we've tried all accounts, throw the error
-        throw error;
+        await new Promise(resolve => setTimeout(resolve, delay));
+        return this.sendEmail(mailOptions, retryCount + 1);
       }
+      
+      // If all retries failed, try the other account if available
+      try {
+        const otherIndex = this.currentTransporterIndex === 0 ? 1 : 0;
+        const otherAccountId = this.emailConfigs[otherIndex].id;
+        
+        if (this.canSendEmail(otherIndex) && this.connectionStatus[otherAccountId]) {
+          console.log(`Trying with ${otherAccountId} account...`);
+          
+          const otherTransporter = this.transporters[otherIndex];
+          const otherConfig = this.emailConfigs[otherIndex];
+          
+          const emailOptions = {
+            ...mailOptions,
+            from: `${otherConfig.from} <${otherConfig.user}>`
+          };
+          
+          const result = await otherTransporter.sendMail(emailOptions);
+          
+          // Increment counter for the used account
+          this.emailCounters[otherAccountId].count++;
+          
+          console.log(`Email sent successfully using ${otherAccountId} account after retry. Count: ${this.emailCounters[otherAccountId].count}/${this.limits.dailyLimit}`);
+          
+          return {
+            success: true,
+            messageId: result.messageId,
+            accountUsed: otherAccountId,
+            remainingQuota: this.limits.dailyLimit - this.emailCounters[otherAccountId].count
+          };
+        }
+      } catch (otherError) {
+        console.error(`Fallback to other account also failed:`, otherError.message);
+      }
+      
+      // If we get here, all attempts failed
+      throw new Error(`Failed to send email after multiple attempts: ${error.message}`);
     }
-    
-    throw lastError || new Error('All email accounts failed');
   }
 
   // Get current status of both email accounts
@@ -168,7 +226,8 @@ class EmailService {
       sent: this.emailCounters[config.id].count,
       remaining: this.limits.dailyLimit - this.emailCounters[config.id].count,
       resetTime: new Date(this.emailCounters[config.id].resetTime),
-      canSend: this.canSendEmail(index)
+      canSend: this.canSendEmail(index),
+      connectionStatus: this.connectionStatus[config.id]
     }));
   }
 
@@ -195,6 +254,7 @@ class EmailService {
       
       try {
         await transporter.verify();
+        this.connectionStatus[config.id] = true;
         results.push({
           account: config.id,
           email: config.user,
@@ -203,6 +263,7 @@ class EmailService {
         });
         console.log(`✅ ${config.id} (${config.user}) - Connection successful`);
       } catch (error) {
+        this.connectionStatus[config.id] = false;
         results.push({
           account: config.id,
           email: config.user,
@@ -260,9 +321,20 @@ class EmailService {
       throw error;
     }
   }
+
+  // Periodic connection health check
+  startHealthCheck(interval = 300000) { // Default 5 minutes
+    setInterval(async () => {
+      console.log('Running email service health check...');
+      await this.testConnections();
+    }, interval);
+  }
 }
 
 // Create singleton instance
 const emailService = new EmailService();
+
+// Start health check
+emailService.startHealthCheck();
 
 module.exports = emailService;

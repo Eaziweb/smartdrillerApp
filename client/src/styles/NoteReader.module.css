@@ -9,14 +9,24 @@
   /* Removed overflow-x: hidden to allow horizontal scrolling */
 }
 
-/* Content Styles */
+/* Header Styles - unchanged */
+.noteHeader {
+  background: white;
+  box-shadow: 0 2px 10px rgba(0, 32, 96, 0.1);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  width: 100%;
+}
+
+/* Content Styles - modified for horizontal scrolling */
 .noteContent {
   padding: 2rem 1rem;
   position: relative;
   z-index: 1;
   width: 100%;
   box-sizing: border-box;
-  /* Removed overflow constraints */
+  overflow: visible; /* Allow content to overflow */
 }
 
 .contentContainer {
@@ -28,19 +38,41 @@
   box-shadow: 0 4px 15px rgba(0, 32, 96, 0.08);
   width: 100%;
   box-sizing: border-box;
-  /* Changed overflow to allow horizontal scrolling */
-  overflow-x: auto;
-  overflow-y: visible;
-  min-width: 300px; /* Ensure minimum width on small screens */
+  overflow-x: auto; /* Allow horizontal scrolling */
+  overflow-y: visible; /* Keep vertical content visible */
+  min-width: 300px; /* Ensure minimum width */
 }
 
-/* Table Styling - Updated for horizontal scrolling */
+/* Watermark Styles - fixed to not cause scrolling */
+.watermarkContainer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw; /* Use viewport width instead of percentage */
+  height: 100vh; /* Use viewport height instead of percentage */
+  pointer-events: none;
+  z-index: 1000;
+  overflow: hidden; /* Keep watermark contained */
+  opacity: 0.07;
+  user-select: none;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(12, 1fr);
+  gap: 20px;
+  padding: 20px;
+  box-sizing: border-box;
+  /* Ensure watermark doesn't affect layout */
+  transform: translateZ(0);
+  will-change: transform;
+}
+
+/* Table Styling - modified for proper horizontal scrolling */
 .noteBody table {
-  width: auto; /* Changed from 100% to auto */
+  width: auto; /* Allow table to be wider than container */
   min-width: 100%; /* Ensure table takes at least full container width */
   border-collapse: collapse;
   margin: 1rem 0;
-  /* Removed table-layout: fixed to allow natural width */
+  table-layout: auto; /* Allow natural table width */
   /* Removed overflow: hidden */
 }
 
@@ -49,44 +81,25 @@
   border: 1px solid #e1ebf7;
   padding: 0.75rem;
   text-align: left;
-  /* Reduced word-breaking to preserve table structure */
   overflow-wrap: break-word;
   word-wrap: break-word;
-  /* Removed word-break: break-word */
+  /* Removed word-break: break-word to preserve table structure */
 }
 
-/* Code Block Styling - Updated for horizontal scrolling */
+/* Code Styling - ensure proper horizontal scrolling */
 .noteBody pre {
   background: #f5f7fa;
   padding: 1rem;
   border-radius: 8px;
-  overflow-x: auto; /* Ensure horizontal scrolling for code */
+  overflow-x: auto; /* Ensure horizontal scrolling */
   margin: 1rem 0;
   border: 1px solid #e1ebf7;
   white-space: pre; /* Preserve whitespace */
   word-break: normal; /* Prevent breaking of code */
-  min-width: 100%; /* Ensure code block takes at least full width */
+  min-width: 100%; /* Ensure code block takes full width */
 }
 
-/* Media Elements - Updated for better responsive behavior */
-.noteBody img,
-.noteBody video,
-.noteBody iframe,
-.noteBody figure {
-  max-width: 100%;
-  height: auto;
-  border-radius: 8px;
-  overflow: hidden; /* Keep overflow hidden for media */
-  margin: 1rem 0;
-}
-
-.noteBody img {
-  display: block;
-  margin-left: auto;
-  margin-right: auto;
-}
-
-/* Math Formula Styling - Updated for horizontal scrolling */
+/* Math Formula Styling - ensure proper display */
 .noteBody .formula {
   background: rgba(0, 102, 255, 0.05);
   padding: 0.5rem;
@@ -97,16 +110,27 @@
   white-space: nowrap; /* Prevent formulas from wrapping */
 }
 
-/* Responsive Styles - Updated for better table handling */
+/* Media Elements - unchanged */
+.noteBody img,
+.noteBody video,
+.noteBody iframe,
+.noteBody figure {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+  overflow: hidden;
+  margin: 1rem 0;
+}
+
+/* Responsive Styles - modified for better table handling */
 @media (max-width: 1024px) {
   .contentContainer {
     max-width: 90%;
     padding: 1.5rem;
-    /* Ensure horizontal scrolling is maintained */
-    overflow-x: auto;
+    overflow-x: auto; /* Ensure horizontal scrolling */
   }
   
-  /* Add table wrapper for horizontal scrolling on medium screens */
+  /* Table adjustments for medium screens */
   .noteBody table {
     display: block;
     overflow-x: auto;
@@ -115,8 +139,8 @@
   
   .noteBody table th,
   .noteBody table td {
-    display: inline-block; /* Make table cells behave like blocks */
-    white-space: normal; /* Allow text to wrap within cells */
+    display: inline-block;
+    white-space: normal;
   }
 }
 
@@ -124,18 +148,17 @@
   .contentContainer {
     margin: 0 0.5rem;
     padding: 1.5rem;
-    /* Ensure horizontal scrolling is maintained */
-    overflow-x: auto;
+    overflow-x: auto; /* Ensure horizontal scrolling */
   }
   
-  /* Further adjust table for small screens */
+  /* Table adjustments for small screens */
   .noteBody table {
-    font-size: 0.9rem; /* Reduce font size for better fit */
+    font-size: 0.9rem;
   }
   
   .noteBody table th,
   .noteBody table td {
-    padding: 0.5rem; /* Reduce padding */
+    padding: 0.5rem;
   }
 }
 
@@ -143,23 +166,22 @@
   .contentContainer {
     padding: 1rem;
     margin: 0 0.25rem;
-    /* Ensure horizontal scrolling is maintained */
-    overflow-x: auto;
+    overflow-x: auto; /* Ensure horizontal scrolling */
   }
   
-  /* Further adjust table for very small screens */
+  /* Table adjustments for very small screens */
   .noteBody table {
-    font-size: 0.8rem; /* Further reduce font size */
+    font-size: 0.8rem;
   }
   
   .noteBody table th,
   .noteBody table td {
-    padding: 0.4rem; /* Further reduce padding */
-    min-width: 80px; /* Ensure minimum cell width */
+    padding: 0.4rem;
+    min-width: 80px;
   }
 }
 
-/* Print Styles - Updated for better table printing */
+/* Print Styles - ensure tables print correctly */
 @media print {
   .noteReader {
     background: white;
@@ -175,8 +197,7 @@
     box-shadow: none;
     padding: 0;
     max-width: 100%;
-    /* Allow tables to print at full width */
-    overflow-x: visible;
+    overflow-x: visible; /* Allow tables to print at full width */
   }
   
   .noteContent {

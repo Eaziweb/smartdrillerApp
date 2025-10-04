@@ -65,7 +65,7 @@
 
 @media (max-width: 768px) {
   .navbar {
-    padding: 0.8rem 1rem;
+    padding: 1rem;
   }
   
   .logo {
@@ -83,6 +83,9 @@
 }
 
 @media (max-width: 480px) {
+   .navbar {
+    padding: .97rem;
+  }
   .logo {
     font-size: 1.3rem;
   }
