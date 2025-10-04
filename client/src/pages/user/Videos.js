@@ -1,6 +1,7 @@
 "use client"
 import { useState, useEffect, useCallback } from "react"
-import { Link } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
+import { useAuth } from "../../contexts/AuthContext"
 import api from "../../utils/api"
 import styles from "../../styles/Videos.module.css"
 
@@ -16,6 +17,8 @@ const Videos = () => {
   const [selectedVideo, setSelectedVideo] = useState(null)
   const [error, setError] = useState(null)
   const [topicVideos, setTopicVideos] = useState({}) // Cache for topic videos
+  const { user } = useAuth()
+  const navigate = useNavigate()
 
   useEffect(() => {
     loadCourses()
@@ -42,11 +45,21 @@ const Videos = () => {
   }, [])
 
   const toggleCourse = useCallback((courseId) => {
+    if (!user?.isSubscribed) {
+      navigate("/subscription-required")
+      return
+    }
+    
     setOpenCourse(openCourse === courseId ? null : courseId)
     setOpenTopic(null)
-  }, [openCourse])
+  }, [openCourse, user, navigate])
 
   const toggleTopic = useCallback(async (topicId) => {
+    if (!user?.isSubscribed) {
+      navigate("/subscription-required")
+      return
+    }
+    
     if (openTopic === topicId) {
       setOpenTopic(null)
       return
@@ -71,11 +84,16 @@ const Videos = () => {
     } catch (error) {
       console.error("Failed to load videos:", error)
     }
-  }, [openTopic, topicVideos])
+  }, [openTopic, topicVideos, user, navigate])
 
   const openVideoPlayer = useCallback((video) => {
+    if (!user?.isSubscribed) {
+      navigate("/subscription-required")
+      return
+    }
+    
     setSelectedVideo(video)
-  }, [])
+  }, [user, navigate])
 
   const closeVideoPlayer = useCallback(() => {
     setSelectedVideo(null)
@@ -161,6 +179,22 @@ const Videos = () => {
         </div>
       </header>
       
+      {/* Subscription banner for unsubscribed users */}
+      {!user?.isSubscribed && (
+        <div className={styles.subscriptionBanner}>
+          <div className={styles.bannerContent}>
+            <i className="fas fa-lock"></i>
+            <p>Subscribe to access our full video library</p>
+            <button 
+              className={styles.subscribeBtn}
+              onClick={() => navigate("/subscription-required")}
+            >
+              Subscribe Now
+            </button>
+          </div>
+        </div>
+      )}
+      
       <div className={styles.searchSection}>
         <div className={styles.searchBar}>
           <i className="fas fa-search"></i>
@@ -193,7 +227,10 @@ const Videos = () => {
         ) : (
           filteredCourses.map((course) => (
             <div key={course._id} className={styles.courseItem}>
-              <div className={styles.courseHeader} onClick={() => toggleCourse(course._id)}>
+              <div 
+                className={`${styles.courseHeader} ${!user?.isSubscribed ? styles.disabled : ''}`} 
+                onClick={() => toggleCourse(course._id)}
+              >
                 <div className={styles.courseInfo}>
                   <h3>{course.title}</h3>
                   <span className={styles.topicCount}>
@@ -201,7 +238,12 @@ const Videos = () => {
                     {course.topics?.length || 0} topics
                   </span>
                 </div>
-                <i className={`${styles.courseChevron} fas fa-chevron-${openCourse === course._id ? "up" : "down"}`}></i>
+                <div className={styles.courseHeaderActions}>
+                  {!user?.isSubscribed && (
+                    <i className={`fas fa-lock ${styles.lockIcon}`}></i>
+                  )}
+                  <i className={`${styles.courseChevron} fas fa-chevron-${openCourse === course._id ? "up" : "down"}`}></i>
+                </div>
               </div>
               
               {openCourse === course._id && (
@@ -209,7 +251,10 @@ const Videos = () => {
                   {course.topics && course.topics.length > 0 ? (
                     course.topics.map((topic) => (
                       <div key={topic._id} className={styles.topicItem}>
-                        <div className={styles.topicHeader} onClick={() => toggleTopic(topic._id)}>
+                        <div 
+                          className={`${styles.topicHeader} ${!user?.isSubscribed ? styles.disabled : ''}`} 
+                          onClick={() => toggleTopic(topic._id)}
+                        >
                           <div className={styles.topicInfo}>
                             <h4>{topic.title}</h4>
                             <span className={styles.videoCount}>
@@ -217,13 +262,22 @@ const Videos = () => {
                               {topic.videoCount || 0} videos
                             </span>
                           </div>
-                          <i className={`${styles.topicChevron} fas fa-chevron-${openTopic === topic._id ? "up" : "down"}`}></i>
+                          <div className={styles.topicHeaderActions}>
+                            {!user?.isSubscribed && (
+                              <i className={`fas fa-lock ${styles.lockIcon}`}></i>
+                            )}
+                            <i className={`${styles.topicChevron} fas fa-chevron-${openTopic === topic._id ? "up" : "down"}`}></i>
+                          </div>
                         </div>
                         
                         {openTopic === topic._id && (
                           <div className={viewStyle === "grid" ? styles.videosGrid : styles.videosList}>
                             {(topicVideos[topic._id] || []).map((video) => (
-                              <div key={video._id} className={styles.videoCard} onClick={() => openVideoPlayer(video)}>
+                              <div 
+                                key={video._id} 
+                                className={`${styles.videoCard} ${!user?.isSubscribed ? styles.disabledVideoCard : ''}`} 
+                                onClick={() => openVideoPlayer(video)}
+                              >
                                 <div className={styles.videoThumbnail}>
                                   <img
                                     src={`https://img.youtube.com/vi/${getYouTubeVideoId(video.url)}/maxresdefault.jpg`}
@@ -234,7 +288,11 @@ const Videos = () => {
                                   />
                                   <div className={styles.playOverlay}>
                                     <div className={styles.playButton}>
-                                      <i className="fas fa-play"></i>
+                                      {!user?.isSubscribed ? (
+                                        <i className="fas fa-lock"></i>
+                                      ) : (
+                                        <i className="fas fa-play"></i>
+                                      )}
                                     </div>
                                   </div>
                                   <div className={styles.videoDuration}>
@@ -272,7 +330,8 @@ const Videos = () => {
         )}
       </div>
       
-      {selectedVideo && (
+      {/* Only show video modal for subscribed users */}
+      {user?.isSubscribed && selectedVideo && (
         <div className={styles.videoModal}>
           <div className={styles.modalBackdrop} onClick={closeVideoPlayer}></div>
           <div className={styles.modalContent}>

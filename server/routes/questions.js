@@ -244,7 +244,7 @@ router.delete("/study-progress/:course/:year", auth, subscriptionCheck, async (r
 });
 
 // Get available course years (only for active courses)
-router.get("/course-years", auth, subscriptionCheck, async (req, res) => {
+router.get("/course-years", auth, async (req, res) => {
   try {
     // Get active courses first
     const activeCourses = await Course.find({ isActive: true }).select('courseCode');
@@ -273,7 +273,7 @@ router.get("/course-years", auth, subscriptionCheck, async (req, res) => {
 });
 
 // Get available topics for a course
-router.get("/topics/:course", auth, subscriptionCheck, async (req, res) => {
+router.get("/topics/:course", auth, async (req, res) => {
   try {
     const { course } = req.params;
     const topics = await Question.distinct("topic", {

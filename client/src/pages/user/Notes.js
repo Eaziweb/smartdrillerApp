@@ -1,8 +1,10 @@
 "use client"
 import { useState, useEffect, useMemo } from "react"
-import { Link } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
+import { useAuth } from "../../contexts/AuthContext"
 import styles from "../../styles/Notes.module.css"
-import api from "../../utils/api";
+import api from "../../utils/api"
+
 const Notes = () => {
   const [courses, setCourses] = useState([])
   const [loading, setLoading] = useState(true)
@@ -10,11 +12,15 @@ const Notes = () => {
   const [openCourse, setOpenCourse] = useState(null)
   const [completedNotes, setCompletedNotes] = useState([])
   const [progressLoading, setProgressLoading] = useState(true)
+  const { user } = useAuth()
+  const navigate = useNavigate()
 
   useEffect(() => {
     loadCourses()
-    loadProgress()
-  }, [])
+    if (user?.isSubscribed) {
+      loadProgress()
+    }
+  }, [user])
 
   const loadCourses = async () => {
     try {
@@ -44,6 +50,10 @@ const Notes = () => {
   }
 
   const toggleCourse = (courseId) => {
+    if (!user?.isSubscribed) {
+      navigate("/subscription-required")
+      return
+    }
     setOpenCourse(openCourse === courseId ? null : courseId)
   }
 
@@ -94,27 +104,46 @@ const Notes = () => {
         </div>
       </header>
       
-      <div className={styles.progressSection}>
-        <div className={styles.progressCard}>
-          <div className={styles.progressInfo}>
-            <div className={styles.progressStats}>
-              <span className={styles.statNumber} id="completedNotes">
-                {completedVisibleCount}
-              </span>
-              <span className={styles.statTotal}>
-                / <span id="totalNotes">{totalVisibleNotes}</span>
-              </span>
-            </div>
-            <div className={styles.progressLabel}>Notes Completed</div>
-          </div>
-          <div className={styles.progressBar}>
-            <div
-              className={styles.progressFill}
-              style={{ width: `${totalVisibleNotes > 0 ? (completedVisibleCount / totalVisibleNotes) * 100 : 0}%` }}
-            ></div>
+      {/* Subscription banner for unsubscribed users */}
+      {!user?.isSubscribed && (
+        <div className={styles.subscriptionBanner}>
+          <div className={styles.bannerContent}>
+            <i className="fas fa-lock"></i>
+            <p>Subscribe to access study notes and track your progress</p>
+            <button 
+              className={styles.subscribeBtn}
+              onClick={() => navigate("/subscription-required")}
+            >
+              Subscribe Now
+            </button>
           </div>
         </div>
-      </div>
+      )}
+      
+      {/* Only show progress section for subscribed users */}
+      {user?.isSubscribed && (
+        <div className={styles.progressSection}>
+          <div className={styles.progressCard}>
+            <div className={styles.progressInfo}>
+              <div className={styles.progressStats}>
+                <span className={styles.statNumber} id="completedNotes">
+                  {completedVisibleCount}
+                </span>
+                <span className={styles.statTotal}>
+                  / <span id="totalNotes">{totalVisibleNotes}</span>
+                </span>
+              </div>
+              <div className={styles.progressLabel}>Notes Completed</div>
+            </div>
+            <div className={styles.progressBar}>
+              <div
+                className={styles.progressFill}
+                style={{ width: `${totalVisibleNotes > 0 ? (completedVisibleCount / totalVisibleNotes) * 100 : 0}%` }}
+              ></div>
+            </div>
+          </div>
+        </div>
+      )}
       
       <div className={styles.searchSection}>
         <div className={styles.searchBar}>
@@ -142,18 +171,28 @@ const Notes = () => {
         ) : (
           filteredCourses.map((course) => (
             <div key={course._id} className={styles.courseItem}>
-              <div className={styles.courseHeader} onClick={() => toggleCourse(course._id)}>
+              <div 
+                className={`${styles.courseHeader} ${!user?.isSubscribed ? styles.disabled : ''}`} 
+                onClick={() => toggleCourse(course._id)}
+              >
                 <div className={styles.courseInfo}>
                   <h3>{course.title}</h3>
                   <span className={styles.notesCount}>{course.notes.length} notes</span>
                 </div>
-                <i className={`fas fa-chevron-${openCourse === course._id ? "up" : "down"}`}></i>
+                <div className={styles.courseHeaderActions}>
+                  {!user?.isSubscribed && (
+                    <i className={`fas fa-lock ${styles.lockIcon}`}></i>
+                  )}
+                  <i className={`fas fa-chevron-${openCourse === course._id ? "up" : "down"}`}></i>
+                </div>
               </div>
+              
               {openCourse === course._id && (
                 <div className={styles.notesContainer}>
                   {course.notes.map((note) => {
                     const isCompleted = completedNotes.some(id => id.toString() === note._id.toString())
-                    return (
+                    
+                    return user?.isSubscribed ? (
                       <Link key={note._id} to={`/note-reader/${note._id}`} className={styles.noteCard}>
                         <div className={styles.noteContent}>
                           <h4>{note.title}</h4>
@@ -172,6 +211,27 @@ const Notes = () => {
                           <i className="fas fa-chevron-right"></i>
                         </div>
                       </Link>
+                    ) : (
+                      <div 
+                        key={note._id} 
+                        className={`${styles.noteCard} ${styles.disabledNoteCard}`}
+                        onClick={() => navigate("/subscription-required")}
+                      >
+                        <div className={styles.noteContent}>
+                          <h4>{note.title}</h4>
+                          <p>{note.description}</p>
+                          <div className={styles.noteMeta}>
+                            <span className={styles.noteDate}>{new Date(note.createdAt).toLocaleDateString()}</span>
+                            <span className={styles.lockBadge}>
+                              <i className="fas fa-lock"></i>
+                              Subscribe to access
+                            </span>
+                          </div>
+                        </div>
+                        <div className={styles.noteArrow}>
+                          <i className="fas fa-lock"></i>
+                        </div>
+                      </div>
                     )
                   })}
                 </div>

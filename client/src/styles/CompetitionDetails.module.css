@@ -30,7 +30,6 @@
   padding: 1rem;
 }
 
-/* Page Header */
 .pageHeader {
   display: flex;
   align-items: center;
@@ -111,7 +110,6 @@
   opacity: 0.9;
 }
 
-/* Competition Content */
 .competitionContent {
   max-width: 1200px;
   margin: 0 auto;
@@ -184,7 +182,6 @@
   font-weight: 600;
 }
 
-/* Course Selection */
 .courseSelection {
   background: var(--bg-primary);
   border-radius: var(--radius-lg);
@@ -331,7 +328,6 @@
   gap: 0.75rem;
 }
 
-/* Status Messages */
 .upcomingMessage,
 .endedMessage {
   background: var(--bg-primary);
@@ -361,7 +357,6 @@
   margin-bottom: 1.5rem;
 }
 
-/* Competition Completed */
 .competitionCompleted {
   min-height: 100vh;
   background: var(--bg-secondary);
@@ -438,7 +433,6 @@
   flex-wrap: wrap;
 }
 
-/* Buttons */
 .btn {
   display: inline-flex;
   align-items: center;
@@ -485,7 +479,6 @@
   font-weight: 600;
 }
 
-/* Loading Spinner */
 .spinnerSm {
   width: 16px;
   height: 16px;
@@ -501,7 +494,6 @@
   100% { transform: rotate(360deg); }
 }
 
-/* Loading Container */
 .loadingContainer {
   display: flex;
   flex-direction: column;
@@ -521,7 +513,6 @@
   animation: spin 1s linear infinite;
 }
 
-/* Error Container */
 .errorContainer {
   text-align: center;
   padding: 3rem;
@@ -538,7 +529,6 @@
   font-size: 1.5rem;
 }
 
-/* Message Toast */
 .messageToast {
   position: fixed;
   top: 1rem;
@@ -594,7 +584,6 @@
   }
 }
 
-/* Responsive Design */
 @media (max-width: 768px) {
   .competitionDetailsPage {
     padding: 0.5rem;
@@ -761,5 +750,48 @@
   .btn {
     padding: 0.6rem 1rem;
     font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 360px) {
+  .headerContent h1 {
+    font-size: 1.1rem;
+  }
+  
+  .infoSection h3 {
+    font-size: 1rem;
+  }
+  
+  .courseHeader h4 {
+    font-size: 0.9rem;
+  }
+  
+  .courseOption p {
+    font-size: 0.85rem;
+  }
+  
+  .courseStats {
+    font-size: 0.8rem;
+  }
+  
+  .selectionSummary h4 {
+    font-size: 0.9rem;
+  }
+  
+  .summaryItem {
+    font-size: 0.85rem;
+  }
+  
+  .completionCard h2 {
+    font-size: 1.1rem;
+  }
+  
+  .statValue {
+    font-size: 1.1rem;
+  }
+  
+  .btn {
+    font-size: 0.85rem;
+    padding: 0.5rem 0.8rem;
   }
 }

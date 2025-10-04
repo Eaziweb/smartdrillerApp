@@ -357,11 +357,17 @@ const loadAllStudyProgress = async () => {
     setShowTopicPopup(false)
   }
   
-  const handleStartExam = async () => {
-    if (!selectedCourse) {
-      showNotification("Please select a course", "error")
-      return
-    }
+// In CourseSelection component
+const handleStartExam = async () => {
+  // Check if user is subscribed first
+  if (!user?.isSubscribed) {
+    navigate("/subscription-required");
+    return;
+  }
+  if (!selectedCourse) {
+    showNotification("Please select a course", "error");
+    return;
+  }
     const courseDataObj = formData[selectedCourse]
     if (!courseDataObj?.year) {
       showNotification("Please select a year", "error")
@@ -435,11 +441,12 @@ const loadAllStudyProgress = async () => {
     fetchCourseYears()
   }, [user, navigate])
   
-  useEffect(() => {
-    if (!fetchingYears && Object.keys(courseYears).length > 0 && !isMockMode) {
-      loadAllStudyProgress()
-    }
-  }, [fetchingYears, courseYears, isMockMode])
+
+useEffect(() => {
+  if (!fetchingYears && Object.keys(courseYears).length > 0 && !isMockMode && user?.isSubscribed) {
+    loadAllStudyProgress();
+  }
+}, [fetchingYears, courseYears, isMockMode, user?.isSubscribed]);
   
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -552,6 +559,20 @@ const loadAllStudyProgress = async () => {
         {fetchingQuestions ? "Loading Questions..." : "Continue"}
       </button>
       
+{!user?.isSubscribed && (
+  <div className={styles.subscriptionBanner}>
+    <div className={styles.bannerContent}>
+      <i className="fas fa-lock"></i>
+      <p>Subscribe to access study materials and start practicing</p>
+      <button 
+        className={styles.subscribeBtn}
+        onClick={() => navigate("/subscription-required")}
+      >
+        Subscribe Now
+      </button>
+    </div>
+  </div>
+)}
       {/* Header */}
       <nav className={styles.header}>
         <button className={styles.backBtn} onClick={() => navigate("/home")}>

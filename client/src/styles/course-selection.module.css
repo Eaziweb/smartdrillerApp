@@ -674,3 +674,45 @@ transform: scale(1.05);
     padding: 10px 15px 10px 35px;
   }
 }
+/* In your CSS file */
+.subscriptionBanner {
+  background-color: #fff3cd;
+  border: 1px solid #ffeeba;
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin-bottom: 20px;
+  display: flex;
+  justify-content: center;
+}
+
+.bannerContent {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.bannerContent i {
+  color: #856404;
+  font-size: 1.2rem;
+}
+
+.bannerContent p {
+  color: #856404;
+  margin: 0;
+  font-weight: 500;
+}
+
+.subscribeBtn {
+  background-color: #ffc107;
+  color: #212529;
+  border: none;
+  border-radius: 4px;
+  padding: 6px 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.subscribeBtn:hover {
+  background-color: #e0a800;
+}

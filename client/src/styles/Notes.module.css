@@ -521,3 +521,83 @@
       font-size: 1rem;
     }
   }
+  /* Add to your Notes.module.css file */
+
+/* Subscription banner */
+.subscriptionBanner {
+  background-color: #fff3cd;
+  border: 1px solid #ffeeba;
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin-bottom: 20px;
+  display: flex;
+  justify-content: center;
+}
+
+.bannerContent {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  max-width: 800px;
+}
+
+.bannerContent i {
+  color: #856404;
+  font-size: 1.2rem;
+}
+
+.bannerContent p {
+  color: #856404;
+  margin: 0;
+  font-weight: 500;
+  flex-grow: 1;
+}
+
+.subscribeBtn {
+  background-color: #ffc107;
+  color: #212529;
+  border: none;
+  border-radius: 4px;
+  padding: 6px 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  white-space: nowrap;
+}
+
+.subscribeBtn:hover {
+  background-color: #e0a800;
+}
+
+/* Disabled course header */
+.courseHeader.disabled {
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.courseHeaderActions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.lockIcon {
+  color: #dc3545;
+}
+
+/* Disabled note card */
+.disabledNoteCard {
+  cursor: not-allowed;
+  opacity: 0.7;
+  background-color: #f8f9fa;
+}
+
+.lockBadge {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: #dc3545;
+  font-weight: 500;
+  font-size: 0.85rem;
+}

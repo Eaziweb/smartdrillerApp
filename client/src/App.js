@@ -287,17 +287,15 @@ useEffect(() => {
               }
             />
 
-            {/* Subscription Protected Routes */}
-            <Route
-              path="/course-selection"
-              element={
-                <ProtectedRoute>
-                  <SubscriptionProtectedRoute>
-                    <CourseSelection />
-                  </SubscriptionProtectedRoute>
-                </ProtectedRoute>
-              }
-            />
+
+<Route
+  path="/course-selection"
+  element={
+    <ProtectedRoute>
+      <CourseSelection />
+    </ProtectedRoute>
+  }
+/>
             <Route
               path="/study"
               element={
