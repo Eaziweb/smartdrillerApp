@@ -140,6 +140,7 @@ app.use("/api/users", require("./routes/users"));
 app.use("/api/courses", require("./routes/courses"));
 app.use("/api/courseofstudy", require("./routes/courseofstudy"));
 app.use("/api/universities", require("./routes/universities"));
+app.use("/api/test", require("./routes/test"));
 
 // ----------------------
 // Static Files
