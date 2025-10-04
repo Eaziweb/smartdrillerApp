@@ -1,0 +1,492 @@
+/* styles/NoteReader.module.css */
+.noteReader {
+  min-height: 100vh;
+  background-color: #ffffff;
+  color: #1e293b;
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* Watermark Styles */
+.watermarkContainer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1;
+  overflow: hidden;
+}
+
+.watermarkItem {
+  position: absolute;
+  transform: translate(-50%, -50%) rotate(-45deg);
+  color: rgba(148, 163, 184, 0.07);
+  font-size: 1.2rem;
+  font-weight: 600;
+  white-space: nowrap;
+  user-select: none;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* Header Styles */
+.noteHeader {
+  background: linear-gradient(45deg, #0099ff, #002060 70%);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  padding: 1rem 0;
+}
+
+.headerContent {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+}
+
+.backBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+
+.backBtn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateX(-3px);
+}
+
+.noteTitleSection {
+  flex: 1;
+  margin: 0 1.5rem;
+}
+
+.noteTitleSection h1 {
+  font-size: 1.75rem;
+  color: white;
+  margin: 0 0 0.25rem 0;
+  font-weight: 700;
+}
+
+.courseName {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+.completedIndicator {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(16, 185, 129, 0.2);
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+/* Content Styles */
+.noteContent {
+  position: relative;
+  z-index: 10;
+  padding: 2rem;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.contentContainer {
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  padding: 2rem;
+  position: relative;
+  z-index: 5;
+}
+
+.noteMeta {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.metaItem {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #64748b;
+  font-size: 0.9rem;
+}
+
+.metaItem i {
+  color: #0066ff;
+}
+
+.noteDescription {
+  margin-bottom: 1.5rem;
+}
+
+.noteDescription p {
+  font-size: 1.1rem;
+  color: #475569;
+  line-height: 1.6;
+}
+
+.noteBody {
+  font-size: 1.1rem;
+  line-height: 1.8;
+  color: #334155;
+}
+
+.noteBody p {
+  margin-bottom: 1rem;
+}
+
+.noteBody h1, 
+.noteBody h2, 
+.noteBody h3, 
+.noteBody h4, 
+.noteBody h5, 
+.noteBody h6 {
+  color: #002060;
+  margin: 1.5rem 0 0.75rem;
+  font-weight: 700;
+}
+
+.noteBody h1 { font-size: 1.8rem; }
+.noteBody h2 { font-size: 1.6rem; }
+.noteBody h3 { font-size: 1.4rem; }
+.noteBody h4 { font-size: 1.2rem; }
+.noteBody h5 { font-size: 1.1rem; }
+.noteBody h6 { font-size: 1rem; }
+
+.noteBody ul, 
+.noteBody ol {
+  margin-bottom: 1rem;
+  padding-left: 1.5rem;
+}
+
+.noteBody li {
+  margin-bottom: 0.5rem;
+}
+
+.noteBody blockquote {
+  border-left: 4px solid #0066ff;
+  padding-left: 1rem;
+  margin: 1.5rem 0;
+  color: #475569;
+  font-style: italic;
+}
+
+.noteBody a {
+  color: #0066ff;
+  text-decoration: underline;
+}
+
+.noteBody img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+  margin: 1.5rem 0;
+}
+
+.noteBody code {
+  background: #f1f5f9;
+  padding: 0.2rem 0.4rem;
+  border-radius: 4px;
+  font-family: "Courier New", monospace;
+  font-size: 0.9em;
+}
+
+.noteBody pre {
+  background: #f8fafc;
+  padding: 1rem;
+  border-radius: 8px;
+  overflow-x: auto;
+  margin: 1.5rem 0;
+}
+
+.noteBody pre code {
+  background: none;
+  padding: 0;
+}
+
+.noteBody table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.5rem 0;
+}
+
+.noteBody th, 
+.noteBody td {
+  border: 1px solid #e2e8f0;
+  padding: 0.75rem;
+  text-align: left;
+}
+
+.noteBody th {
+  background: #f8fafc;
+  font-weight: 600;
+}
+
+/* Completion Section */
+.completionSection {
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #e2e8f0;
+  text-align: center;
+}
+
+.completeBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: linear-gradient(45deg, #10b981, #059669);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.completeBtn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.completeBtn:active {
+  transform: translateY(0);
+}
+
+/* Toast Notification */
+.completionToast {
+  position: fixed;
+  bottom: 2rem;
+  left: 50%;
+  transform: translateX(-50%) translateY(100px);
+  background: white;
+  color: #10b981;
+  padding: 1rem 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  z-index: 1000;
+  opacity: 0;
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+.completionToast.show {
+  transform: translateX(-50%) translateY(0);
+  opacity: 1;
+}
+
+.completionToast i {
+  font-size: 1.25rem;
+}
+
+/* Loading Spinner */
+.loadingSpinner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 50vh;
+}
+
+.spinner {
+  width: 50px;
+  height: 50px;
+  border: 5px solid #f1f5f9;
+  border-top: 5px solid #0066ff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Error Message */
+.errorMessage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 50vh;
+  text-align: center;
+  padding: 2rem;
+}
+
+.errorMessage h2 {
+  color: #ef4444;
+  margin-bottom: 1.5rem;
+}
+
+.backLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #0066ff;
+  text-decoration: none;
+  font-weight: 600;
+  padding: 0.75rem 1.5rem;
+  border: 1px solid #0066ff;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.backLink:hover {
+  background: #0066ff;
+  color: white;
+}
+
+/* Responsive Styles */
+@media (max-width: 1024px) {
+  .noteContent {
+    padding: 1.5rem;
+  }
+  
+  .contentContainer {
+    padding: 1.5rem;
+  }
+  
+  .noteTitleSection h1 {
+    font-size: 1.5rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .headerContent {
+    padding: 0 1rem;
+  }
+  
+  .backBtn {
+    width: 40px;
+    height: 40px;
+  }
+  
+  .noteTitleSection {
+    margin: 0 1rem;
+  }
+  
+  .noteTitleSection h1 {
+    font-size: 1.3rem;
+  }
+  
+  .courseName {
+    font-size: 0.9rem;
+  }
+  
+  .completedIndicator {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.8rem;
+  }
+  
+  .noteContent {
+    padding: 1rem;
+  }
+  
+  .contentContainer {
+    padding: 1rem;
+  }
+  
+  .noteMeta {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+  
+  .noteBody {
+    font-size: 1rem;
+  }
+  
+  .noteBody h1 { font-size: 1.6rem; }
+  .noteBody h2 { font-size: 1.4rem; }
+  .noteBody h3 { font-size: 1.2rem; }
+  .noteBody h4 { font-size: 1.1rem; }
+  .noteBody h5 { font-size: 1rem; }
+  .noteBody h6 { font-size: 0.9rem; }
+  
+  .completeBtn {
+    padding: 0.6rem 1.2rem;
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .headerContent {
+    padding: 0 0.75rem;
+  }
+  
+  .backBtn {
+    width: 36px;
+    height: 36px;
+  }
+  
+  .noteTitleSection {
+    margin: 0 0.75rem;
+  }
+  
+  .noteTitleSection h1 {
+    font-size: 1.1rem;
+  }
+  
+  .courseName {
+    font-size: 0.8rem;
+  }
+  
+  .completedIndicator {
+    padding: 0.3rem 0.6rem;
+    font-size: 0.75rem;
+  }
+  
+  .noteContent {
+    padding: 0.75rem;
+  }
+  
+  .contentContainer {
+    padding: 0.75rem;
+  }
+  
+  .noteBody {
+    font-size: 0.95rem;
+  }
+  
+  .noteBody h1 { font-size: 1.4rem; }
+  .noteBody h2 { font-size: 1.2rem; }
+  .noteBody h3 { font-size: 1.1rem; }
+  .noteBody h4 { font-size: 1rem; }
+  .noteBody h5 { font-size: 0.9rem; }
+  .noteBody h6 { font-size: 0.85rem; }
+  
+  .completeBtn {
+    padding: 0.5rem 1rem;
+    font-size: 0.85rem;
+  }
+  
+  .watermarkItem {
+    font-size: 0.9rem;
+  }
+}
