@@ -90,7 +90,7 @@ router.post("/register", async (req, res) => {
     });
   } catch (error) {
     console.error("Registration error:", error);
-    if (error.message.includes('email accounts have reached their daily sending limit')) {
+    if (error.message.includes('email account has reached its daily sending limit')) {
       res.status(503).json({ 
         message: "Email service temporarily unavailable. Please try again later." 
       });
@@ -182,7 +182,7 @@ router.post("/resend-verification", async (req, res) => {
     });
   } catch (error) {
     console.error("Resend verification error:", error);
-    if (error.message.includes('email accounts have reached their daily sending limit')) {
+    if (error.message.includes('email account has reached its daily sending limit')) {
       res.status(503).json({ 
         success: false,
         message: "Email service temporarily unavailable. Please try again later." 
@@ -275,7 +275,7 @@ router.post("/login", async (req, res) => {
     });
   } catch (error) {
     console.error("Login error:", error);
-    if (error.message.includes('email accounts have reached their daily sending limit')) {
+    if (error.message.includes('email account has reached its daily sending limit')) {
       res.status(503).json({ 
         message: "Email service temporarily unavailable. Please try again later." 
       });
@@ -380,7 +380,7 @@ router.delete("/devices/:deviceId", auth, async (req, res) => {
   }
 });
 
-// routes/auth.js - Admin login route
+// Admin login route
 router.post("/admin-login", async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -440,38 +440,6 @@ router.post("/admin-login", async (req, res) => {
   }
 });
 
-
-// // SuperAdmin Login
-// router.post("/superadmin-login", async (req, res) => {
-//   try {
-//     const { email, password } = req.body;
-
-//     const superadmin = await User.findOne({ email, role: "superadmin" });
-//     if (!superadmin) {
-//       return res.status(400).json({ message: "Invalid superadmin credentials" });
-//     }
-
-//     const isMatch = await superadmin.comparePassword(password);
-//     if (!isMatch) {
-//       return res.status(400).json({ message: "Invalid superadmin credentials" });
-//     }
-
-//     const token = jwt.sign({ userId: superadmin._id }, process.env.JWT_SECRET, { expiresIn: "7d" });
-//     return res.json({
-//       token,
-//       user: {
-//         id: superadmin._id,
-//         fullName: superadmin.fullName,
-//         email: superadmin.email,
-//         role: superadmin.role,
-//       },
-//     });
-//   } catch (error) {
-//     console.error(error);
-//     res.status(500).json({ message: "Server error" });
-//   }
-// });
-
 // Forgot Password
 router.post("/forgot-password", async (req, res) => {
   try {
@@ -506,7 +474,7 @@ router.post("/forgot-password", async (req, res) => {
     res.json({ message: "Password reset email sent" });
   } catch (error) {
     console.error("Forgot password error:", error);
-    if (error.message.includes('email accounts have reached their daily sending limit')) {
+    if (error.message.includes('email account has reached its daily sending limit')) {
       res.status(503).json({ 
         message: "Email service temporarily unavailable. Please try again later." 
       });
@@ -646,5 +614,5 @@ router.get("/me", auth, async (req, res) => {
     res.status(500).json({ message: "Failed to fetch user data" });
   }
 });
-  
+
 module.exports = router;
