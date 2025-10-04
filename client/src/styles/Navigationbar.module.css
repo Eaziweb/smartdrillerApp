@@ -6,6 +6,8 @@
   position: sticky;
   top: 0;
   z-index: 1000;
+  overflow-x: hidden;
+
 }
 
 .navContainer {
@@ -84,7 +86,7 @@
 
 @media (max-width: 480px) {
    .navbar {
-    padding: .97rem;
+    padding: .7rem;
   }
   .logo {
     font-size: 1.3rem;
