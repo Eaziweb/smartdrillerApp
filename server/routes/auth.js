@@ -14,6 +14,373 @@ const generateVerificationCode = () => {
 };
 
 // Register
+// router.post("/register", async (req, res) => {
+//   try {
+//     const { fullName, email, password, course, university } = req.body;
+
+//     // Check if user exists
+//     const existingUser = await User.findOne({ email });
+
+//     if (existingUser) {
+//       // If user is verified, return error
+//       if (existingUser.isEmailVerified) {
+//         return res.status(400).json({ message: "User already exists" });
+//       }
+
+//       // If user is unverified, overwrite and resend verification
+//       try {
+//         const verificationCode = await existingUser.overwriteUnverifiedUser({
+//           fullName,
+//           password,
+//           course,
+//           university
+//         });
+
+//         // Send verification email using new email service
+//         await emailService.sendEmail({
+//           to: email,
+//           subject: "Verify Your SmartDriller Account",
+//           html: `
+//             <h2>Welcome to SmartDriller!</h2>
+//             <p>Your verification code is: <strong style="font-size: 24px; background: #f0f0f0; padding: 8px; border-radius: 4px;">${verificationCode}</strong></p>
+//             <p>This code expires in 1 hour.</p>
+//             <p>If you didn't create an account, please ignore this email.</p>
+//           `,
+//         });
+
+//         return res.status(200).json({
+//           success: true,
+//           message: "Registration successful. Please check your email for the verification code.",
+//         });
+//       } catch (error) {
+//         return res.status(400).json({ message: error.message });
+//       }
+//     }
+
+//     // Create new user if none exists
+//     const verificationCode = generateVerificationCode();
+
+//     const user = new User({
+//       fullName,
+//       email,
+//       password,
+//       course,
+//       university,
+//       emailVerificationCode: verificationCode,
+//       emailVerificationExpires: Date.now() + 3600000, // 1 hour
+//     });
+
+//     await user.save();
+
+//     // Send verification email using new email service
+//     await emailService.sendEmail({
+//       to: email,
+//       subject: "Verify Your SmartDriller Account",
+//       html: `
+//         <h2>Welcome to SmartDriller!</h2>
+//         <p>Your verification code is: <strong style="font-size: 24px; background: #f0f0f0; padding: 8px; border-radius: 4px;">${verificationCode}</strong></p>
+//         <p>This code expires in 1 hour.</p>
+//         <p>If you didn't create an account, please ignore this email.</p>
+//       `,
+//     });
+
+//     res.status(201).json({
+//       success: true,
+//       message: "User registered successfully. Please check your email for the verification code.",
+//     });
+//   } catch (error) {
+//     console.error("Registration error:", error);
+//     if (error.message.includes('email account has reached its daily sending limit')) {
+//       res.status(503).json({ 
+//         message: "Email service temporarily unavailable. Please try again later." 
+//       });
+//     } else {
+//       res.status(500).json({ message: "Server error" });
+//     }
+//   }
+// });
+
+// Verify email code
+// router.post("/verify-email", async (req, res) => {
+//   try {
+//     const { email, code } = req.body;
+
+//     // Find user by email and verification code
+//     const user = await User.findOne({
+//       email,
+//       emailVerificationCode: code,
+//       emailVerificationExpires: { $gt: Date.now() },
+//     });
+
+//     if (!user) {
+//       return res.status(400).json({
+//         success: false,
+//         message: "Invalid or expired verification code"
+//       });
+//     }
+
+//     // Update user verification status
+//     user.isEmailVerified = true;
+//     user.emailVerificationCode = null;
+//     user.emailVerificationExpires = null;
+//     await user.save();
+
+//     res.json({
+//       success: true,
+//       message: "Email verified successfully"
+//     });
+//   } catch (error) {
+//     console.error("Email verification error:", error);
+//     res.status(500).json({
+//       success: false,
+//       message: "Server error"
+//     });
+//   }
+// });
+
+// Resend verification code
+// router.post("/resend-verification", async (req, res) => {
+//   try {
+//     const { email } = req.body;
+
+//     // Find user by email
+//     const user = await User.findOne({ email });
+//     if (!user) {
+//       return res.status(404).json({
+//         success: false,
+//         message: "User not found"
+//       });
+//     }
+
+//     if (user.isEmailVerified) {
+//       return res.status(400).json({
+//         success: false,
+//         message: "Email is already verified"
+//       });
+//     }
+
+//     // Generate new verification code
+//     const verificationCode = generateVerificationCode();
+//     user.emailVerificationCode = verificationCode;
+//     user.emailVerificationExpires = Date.now() + 3600000; // 1 hour
+//     await user.save();
+
+//     // Send verification email using new email service
+//     await emailService.sendEmail({
+//       to: email,
+//       subject: "Resend Verification Code - SmartDriller",
+//       html: `
+//         <h2>Your New Verification Code</h2>
+//         <p>Your verification code is: <strong style="font-size: 24px; background: #f0f0f0; padding: 8px; border-radius: 4px;">${verificationCode}</strong></p>
+//         <p>This code expires in 1 hour.</p>
+//       `,
+//     });
+
+//     res.json({
+//       success: true,
+//       message: "Verification code resent successfully"
+//     });
+//   } catch (error) {
+//     console.error("Resend verification error:", error);
+//     if (error.message.includes('email account has reached its daily sending limit')) {
+//       res.status(503).json({ 
+//         success: false,
+//         message: "Email service temporarily unavailable. Please try again later." 
+//       });
+//     } else {
+//       res.status(500).json({
+//         success: false,
+//         message: "Failed to resend verification code"
+//       });
+//     }
+//   }
+// });
+
+// Login
+// router.post("/login", async (req, res) => {
+//   try {
+//     const { email, password, deviceId } = req.body;
+
+//     // Find user
+//     const user = await User.findOne({ email });
+//     if (!user) {
+//       return res.status(400).json({ message: "Invalid credentials" });
+//     }
+
+//     // Check password
+//     const isMatch = await user.comparePassword(password);
+//     if (!isMatch) {
+//       return res.status(400).json({ message: "Invalid credentials" });
+//     }
+
+//     // Check if email is verified
+//     if (!user.isEmailVerified) {
+//       return res.status(401).json({
+//         message: "Please verify your email first",
+//         requiresVerification: true
+//       });
+//     }
+
+//     // Check if device is trusted
+//     const isDeviceTrusted = user.trustedDevices.some(
+//       device => device.deviceId === deviceId
+//     );
+
+//     if (isDeviceTrusted) {
+//       // Update last used time
+//       await User.updateOne(
+//         { _id: user._id, "trustedDevices.deviceId": deviceId },
+//         { $set: { "trustedDevices.$.lastUsed": new Date() } }
+//       );
+
+//       // Generate token
+//       const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: "7d" });
+//       return res.json({
+//         token,
+//         user: {
+//           id: user._id,
+//           fullName: user.fullName,
+//           email: user.email,
+//           course: user.course,
+//           isSubscribed: user.isSubscribed,
+//           subscriptionExpiry: user.subscriptionExpiry,
+//           role: user.role,
+//         },
+//       });
+//     }
+
+//     // Device not trusted - generate OTP
+//     const otp = generateVerificationCode();
+//     user.deviceOTP = otp;
+//     user.deviceOTPExpires = Date.now() + 600000; // 10 minutes
+//     await user.save();
+
+//     // Send OTP email using new email service
+//     await emailService.sendEmail({
+//       to: email,
+//       subject: "Device Verification - SmartDriller",
+//       html: `
+//         <h2>New Device Sign In</h2>
+//         <p>We detected a sign in from a new device. Your verification code is:
+//         <strong style="font-size: 24px; background: #f0f0f0; padding: 8px; border-radius: 4px;">${otp}</strong>
+//         </p>
+//         <p>This code expires in 10 minutes.</p>
+//         <p>If you didn't try to sign in, please secure your account.</p>
+//       `,
+//     });
+
+//     res.status(200).json({
+//       requiresDeviceOTP: true,
+//       message: "Verification code sent to your email"
+//     });
+//   } catch (error) {
+//     console.error("Login error:", error);
+//     if (error.message.includes('email account has reached its daily sending limit')) {
+//       res.status(503).json({ 
+//         message: "Email service temporarily unavailable. Please try again later." 
+//       });
+//     } else {
+//       res.status(500).json({ message: "Server error" });
+//     }
+//   }
+// });
+
+// Verify device OTP route
+// router.post("/verify-device-otp", async (req, res) => {
+//   try {
+//     const { email, otp, deviceName, deviceId } = req.body;
+
+//     // Find user
+//     const user = await User.findOne({ email });
+//     if (!user) {
+//       return res.status(404).json({ message: "User not found" });
+//     }
+
+//     // Verify OTP
+//     if (user.deviceOTP !== otp || user.deviceOTPExpires < Date.now()) {
+//       return res.status(400).json({ message: "Invalid or expired verification code" });
+//     }
+
+//     // Check device limit
+//     if (user.trustedDevices.length >= user.maxDevices) {
+//       return res.status(400).json({
+//         message: `You've reached the maximum number of trusted devices (${user.maxDevices}). Please remove a device first.`,
+//         deviceLimitReached: true
+//       });
+//     }
+
+//     // Check if device ID already exists
+//     const existingDeviceIndex = user.trustedDevices.findIndex(
+//       device => device.deviceId === deviceId
+//     );
+
+//     if (existingDeviceIndex !== -1) {
+//       // Update existing device
+//       user.trustedDevices[existingDeviceIndex].deviceName = deviceName || "Unknown Device";
+//       user.trustedDevices[existingDeviceIndex].lastUsed = new Date();
+//     } else {
+//       // Add new device to trusted devices
+//       user.trustedDevices.push({
+//         deviceId,
+//         deviceName: deviceName || "Unknown Device",
+//         lastUsed: new Date()
+//       });
+//     }
+
+//     // Clear OTP
+//     user.deviceOTP = null;
+//     user.deviceOTPExpires = null;
+//     await user.save();
+
+//     // Generate token
+//     const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: "7d" });
+
+//     // Return token and user data for immediate login
+//     res.json({
+//       token,
+//       user: {
+//         id: user._id,
+//         fullName: user.fullName,
+//         email: user.email,
+//         course: user.course,
+//         isSubscribed: user.isSubscribed,
+//         subscriptionExpiry: user.subscriptionExpiry,
+//         role: user.role,
+//       },
+//     });
+//   } catch (error) {
+//     console.error("Device OTP verification error:", error);
+//     res.status(500).json({ message: "Server error" });
+//   }
+// });
+
+// Get user's trusted devices
+// router.get("/devices", auth, async (req, res) => {
+//   try {
+//     const user = await User.findById(req.user._id).select('trustedDevices');
+//     res.json({ devices: user.trustedDevices });
+//   } catch (error) {
+//     console.error("Get devices error:", error);
+//     res.status(500).json({ message: "Server error" });
+//   }
+// });
+
+// Remove a trusted device by deviceId
+// router.delete("/devices/:deviceId", auth, async (req, res) => {
+//   try {
+//     const user = await User.findById(req.user._id);
+//     user.trustedDevices = user.trustedDevices.filter(
+//       device => device.deviceId !== req.params.deviceId
+//     );
+//     await user.save();
+//     res.json({ message: "Device removed successfully" });
+//   } catch (error) {
+//     console.error("Remove device error:", error);
+//     res.status(500).json({ message: "Server error" });
+//   }
+// });
+
+// In auth routes, modify the register route
 router.post("/register", async (req, res) => {
   try {
     const { fullName, email, password, course, university } = req.body;
@@ -22,184 +389,36 @@ router.post("/register", async (req, res) => {
     const existingUser = await User.findOne({ email });
 
     if (existingUser) {
-      // If user is verified, return error
-      if (existingUser.isEmailVerified) {
-        return res.status(400).json({ message: "User already exists" });
-      }
-
-      // If user is unverified, overwrite and resend verification
-      try {
-        const verificationCode = await existingUser.overwriteUnverifiedUser({
-          fullName,
-          password,
-          course,
-          university
-        });
-
-        // Send verification email using new email service
-        await emailService.sendEmail({
-          to: email,
-          subject: "Verify Your SmartDriller Account",
-          html: `
-            <h2>Welcome to SmartDriller!</h2>
-            <p>Your verification code is: <strong style="font-size: 24px; background: #f0f0f0; padding: 8px; border-radius: 4px;">${verificationCode}</strong></p>
-            <p>This code expires in 1 hour.</p>
-            <p>If you didn't create an account, please ignore this email.</p>
-          `,
-        });
-
-        return res.status(200).json({
-          success: true,
-          message: "Registration successful. Please check your email for the verification code.",
-        });
-      } catch (error) {
-        return res.status(400).json({ message: error.message });
-      }
+      return res.status(400).json({ message: "User already exists" });
     }
 
-    // Create new user if none exists
-    const verificationCode = generateVerificationCode();
-
+    // Create new user with email verified by default
     const user = new User({
       fullName,
       email,
       password,
       course,
       university,
-      emailVerificationCode: verificationCode,
-      emailVerificationExpires: Date.now() + 3600000, // 1 hour
+      isEmailVerified: true, // Set to true for now
     });
 
     await user.save();
-
-    // Send verification email using new email service
-    await emailService.sendEmail({
-      to: email,
-      subject: "Verify Your SmartDriller Account",
-      html: `
-        <h2>Welcome to SmartDriller!</h2>
-        <p>Your verification code is: <strong style="font-size: 24px; background: #f0f0f0; padding: 8px; border-radius: 4px;">${verificationCode}</strong></p>
-        <p>This code expires in 1 hour.</p>
-        <p>If you didn't create an account, please ignore this email.</p>
-      `,
-    });
 
     res.status(201).json({
       success: true,
-      message: "User registered successfully. Please check your email for the verification code.",
+      message: "User registered successfully.",
     });
   } catch (error) {
     console.error("Registration error:", error);
-    if (error.message.includes('email account has reached its daily sending limit')) {
-      res.status(503).json({ 
-        message: "Email service temporarily unavailable. Please try again later." 
-      });
-    } else {
-      res.status(500).json({ message: "Server error" });
-    }
+    res.status(500).json({ message: "Server error" });
   }
 });
 
-// Verify email code
-router.post("/verify-email", async (req, res) => {
-  try {
-    const { email, code } = req.body;
 
-    // Find user by email and verification code
-    const user = await User.findOne({
-      email,
-      emailVerificationCode: code,
-      emailVerificationExpires: { $gt: Date.now() },
-    });
-
-    if (!user) {
-      return res.status(400).json({
-        success: false,
-        message: "Invalid or expired verification code"
-      });
-    }
-
-    // Update user verification status
-    user.isEmailVerified = true;
-    user.emailVerificationCode = null;
-    user.emailVerificationExpires = null;
-    await user.save();
-
-    res.json({
-      success: true,
-      message: "Email verified successfully"
-    });
-  } catch (error) {
-    console.error("Email verification error:", error);
-    res.status(500).json({
-      success: false,
-      message: "Server error"
-    });
-  }
-});
-
-// Resend verification code
-router.post("/resend-verification", async (req, res) => {
-  try {
-    const { email } = req.body;
-
-    // Find user by email
-    const user = await User.findOne({ email });
-    if (!user) {
-      return res.status(404).json({
-        success: false,
-        message: "User not found"
-      });
-    }
-
-    if (user.isEmailVerified) {
-      return res.status(400).json({
-        success: false,
-        message: "Email is already verified"
-      });
-    }
-
-    // Generate new verification code
-    const verificationCode = generateVerificationCode();
-    user.emailVerificationCode = verificationCode;
-    user.emailVerificationExpires = Date.now() + 3600000; // 1 hour
-    await user.save();
-
-    // Send verification email using new email service
-    await emailService.sendEmail({
-      to: email,
-      subject: "Resend Verification Code - SmartDriller",
-      html: `
-        <h2>Your New Verification Code</h2>
-        <p>Your verification code is: <strong style="font-size: 24px; background: #f0f0f0; padding: 8px; border-radius: 4px;">${verificationCode}</strong></p>
-        <p>This code expires in 1 hour.</p>
-      `,
-    });
-
-    res.json({
-      success: true,
-      message: "Verification code resent successfully"
-    });
-  } catch (error) {
-    console.error("Resend verification error:", error);
-    if (error.message.includes('email account has reached its daily sending limit')) {
-      res.status(503).json({ 
-        success: false,
-        message: "Email service temporarily unavailable. Please try again later." 
-      });
-    } else {
-      res.status(500).json({
-        success: false,
-        message: "Failed to resend verification code"
-      });
-    }
-  }
-});
-
-// Login
+// Modify the login route to remove OTP verification
 router.post("/login", async (req, res) => {
   try {
-    const { email, password, deviceId } = req.body;
+    const { email, password } = req.body;
 
     // Find user
     const user = await User.findOne({ email });
@@ -213,130 +432,9 @@ router.post("/login", async (req, res) => {
       return res.status(400).json({ message: "Invalid credentials" });
     }
 
-    // Check if email is verified
-    if (!user.isEmailVerified) {
-      return res.status(401).json({
-        message: "Please verify your email first",
-        requiresVerification: true
-      });
-    }
-
-    // Check if device is trusted
-    const isDeviceTrusted = user.trustedDevices.some(
-      device => device.deviceId === deviceId
-    );
-
-    if (isDeviceTrusted) {
-      // Update last used time
-      await User.updateOne(
-        { _id: user._id, "trustedDevices.deviceId": deviceId },
-        { $set: { "trustedDevices.$.lastUsed": new Date() } }
-      );
-
-      // Generate token
-      const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: "7d" });
-      return res.json({
-        token,
-        user: {
-          id: user._id,
-          fullName: user.fullName,
-          email: user.email,
-          course: user.course,
-          isSubscribed: user.isSubscribed,
-          subscriptionExpiry: user.subscriptionExpiry,
-          role: user.role,
-        },
-      });
-    }
-
-    // Device not trusted - generate OTP
-    const otp = generateVerificationCode();
-    user.deviceOTP = otp;
-    user.deviceOTPExpires = Date.now() + 600000; // 10 minutes
-    await user.save();
-
-    // Send OTP email using new email service
-    await emailService.sendEmail({
-      to: email,
-      subject: "Device Verification - SmartDriller",
-      html: `
-        <h2>New Device Sign In</h2>
-        <p>We detected a sign in from a new device. Your verification code is:
-        <strong style="font-size: 24px; background: #f0f0f0; padding: 8px; border-radius: 4px;">${otp}</strong>
-        </p>
-        <p>This code expires in 10 minutes.</p>
-        <p>If you didn't try to sign in, please secure your account.</p>
-      `,
-    });
-
-    res.status(200).json({
-      requiresDeviceOTP: true,
-      message: "Verification code sent to your email"
-    });
-  } catch (error) {
-    console.error("Login error:", error);
-    if (error.message.includes('email account has reached its daily sending limit')) {
-      res.status(503).json({ 
-        message: "Email service temporarily unavailable. Please try again later." 
-      });
-    } else {
-      res.status(500).json({ message: "Server error" });
-    }
-  }
-});
-
-// Verify device OTP route
-router.post("/verify-device-otp", async (req, res) => {
-  try {
-    const { email, otp, deviceName, deviceId } = req.body;
-
-    // Find user
-    const user = await User.findOne({ email });
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
-    }
-
-    // Verify OTP
-    if (user.deviceOTP !== otp || user.deviceOTPExpires < Date.now()) {
-      return res.status(400).json({ message: "Invalid or expired verification code" });
-    }
-
-    // Check device limit
-    if (user.trustedDevices.length >= user.maxDevices) {
-      return res.status(400).json({
-        message: `You've reached the maximum number of trusted devices (${user.maxDevices}). Please remove a device first.`,
-        deviceLimitReached: true
-      });
-    }
-
-    // Check if device ID already exists
-    const existingDeviceIndex = user.trustedDevices.findIndex(
-      device => device.deviceId === deviceId
-    );
-
-    if (existingDeviceIndex !== -1) {
-      // Update existing device
-      user.trustedDevices[existingDeviceIndex].deviceName = deviceName || "Unknown Device";
-      user.trustedDevices[existingDeviceIndex].lastUsed = new Date();
-    } else {
-      // Add new device to trusted devices
-      user.trustedDevices.push({
-        deviceId,
-        deviceName: deviceName || "Unknown Device",
-        lastUsed: new Date()
-      });
-    }
-
-    // Clear OTP
-    user.deviceOTP = null;
-    user.deviceOTPExpires = null;
-    await user.save();
-
-    // Generate token
+    // Generate token without device verification
     const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: "7d" });
-
-    // Return token and user data for immediate login
-    res.json({
+    return res.json({
       token,
       user: {
         id: user._id,
@@ -349,33 +447,7 @@ router.post("/verify-device-otp", async (req, res) => {
       },
     });
   } catch (error) {
-    console.error("Device OTP verification error:", error);
-    res.status(500).json({ message: "Server error" });
-  }
-});
-
-// Get user's trusted devices
-router.get("/devices", auth, async (req, res) => {
-  try {
-    const user = await User.findById(req.user._id).select('trustedDevices');
-    res.json({ devices: user.trustedDevices });
-  } catch (error) {
-    console.error("Get devices error:", error);
-    res.status(500).json({ message: "Server error" });
-  }
-});
-
-// Remove a trusted device by deviceId
-router.delete("/devices/:deviceId", auth, async (req, res) => {
-  try {
-    const user = await User.findById(req.user._id);
-    user.trustedDevices = user.trustedDevices.filter(
-      device => device.deviceId !== req.params.deviceId
-    );
-    await user.save();
-    res.json({ message: "Device removed successfully" });
-  } catch (error) {
-    console.error("Remove device error:", error);
+    console.error("Login error:", error);
     res.status(500).json({ message: "Server error" });
   }
 });

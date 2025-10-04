@@ -22,6 +22,7 @@ import ForgotPassword from "./pages/auth/ForgotPassword"
 import ResetPassword from "./pages/auth/ResetPassword"
 import VerifyEmail from "./pages/auth/VerifyEmail"
 import DeviceManagement from "./pages/auth/DeviceMangement"
+import Congratulations from "./pages/auth/Congratulations"
 
 // Add this route
 // User Pages
@@ -102,8 +103,8 @@ useEffect(() => {
             <Route path="/register" element={<Register />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/reset-password/:token" element={<ResetPassword />} />
-            <Route path="/verify-email" element={<VerifyEmail />} />
-            <Route path="/features" element={<Features />} />
+            {/* <Route path="/verify-email" element={<VerifyEmail />} /> */}
+<Route path="/congratulations" element={<Congratulations />} />
 
             {/* Admin Routes */}
             <Route path="/private/admin/login" element={<AdminLogin />} />
@@ -228,14 +229,14 @@ useEffect(() => {
                 </ProtectedRoute>
               }
             />
-               <Route
+               {/* <Route
               path="/device-manager"
               element={
                 <ProtectedRoute>
                   <DeviceManagement />
                 </ProtectedRoute>
               }
-            />
+            /> */}
             <Route
               path="/competitions"
               element={
@@ -372,9 +373,9 @@ useEffect(() => {
               path="/videos"
               element={
                 <ProtectedRoute>
-                  <SubscriptionProtectedRoute>
+             
                     <Videos />
-                  </SubscriptionProtectedRoute>
+             
                 </ProtectedRoute>
               }
             />
@@ -382,9 +383,9 @@ useEffect(() => {
               path="/notes"
               element={
                 <ProtectedRoute>
-                  <SubscriptionProtectedRoute>
+          
                     <Notes />
-                  </SubscriptionProtectedRoute>
+       
                 </ProtectedRoute>
               }
             />

@@ -217,48 +217,86 @@ const Register = () => {
     }
   }
   
-  const handleSubmit = async (e) => {
-    e.preventDefault()
+  // const handleSubmit = async (e) => {
+  //   e.preventDefault()
     
-    // Validate final section
-    if (!formData.university) {
-      setError("Please select your university")
-      return
-    }
-    if (!formData.course) {
-      setError("Please select your course")
-      return
-    }
+  //   // Validate final section
+  //   if (!formData.university) {
+  //     setError("Please select your university")
+  //     return
+  //   }
+  //   if (!formData.course) {
+  //     setError("Please select your course")
+  //     return
+  //   }
     
-    setLoading(true)
-    setError("")
+  //   setLoading(true)
+  //   setError("")
     
-    try {
-      const result = await register({
-        fullName: formData.fullName,
-        email: formData.email,
-        password: formData.password,
-        university: formData.university,
-        course: formData.course,
-      })
+  //   try {
+  //     const result = await register({
+  //       fullName: formData.fullName,
+  //       email: formData.email,
+  //       password: formData.password,
+  //       university: formData.university,
+  //       course: formData.course,
+  //     })
       
-      if (result.success) {
-        setSuccess(result.message || "Registration successful! Please check your email for verification.")
-        // Redirect to verification page after a short delay
-        setTimeout(() => {
-          navigate("/verify-email", { 
-            state: { email: formData.email } 
-          })
-        }, 2000)
-      } else {
-        setError(result.message)
-      }
-    } catch (error) {
-      setError(error.response?.data?.message || "Registration failed. Please try again.")
-    } finally {
-      setLoading(false)
-    }
+  //     if (result.success) {
+  //       setSuccess(result.message || "Registration successful! Please check your email for verification.")
+  //       // Redirect to verification page after a short delay
+  //       setTimeout(() => {
+  //         navigate("/verify-email", { 
+  //           state: { email: formData.email } 
+  //         })
+  //       }, 2000)
+  //     } else {
+  //       setError(result.message)
+  //     }
+  //   } catch (error) {
+  //     setError(error.response?.data?.message || "Registration failed. Please try again.")
+  //   } finally {
+  //     setLoading(false)
+  //   }
+  // }
+  // In Register.js, modify the handleSubmit function
+const handleSubmit = async (e) => {
+  e.preventDefault()
+  
+  // Validate final section
+  if (!formData.university) {
+    setError("Please select your university")
+    return
   }
+  if (!formData.course) {
+    setError("Please select your course")
+    return
+  }
+  
+  setLoading(true)
+  setError("")
+  
+  try {
+    const result = await register({
+      fullName: formData.fullName,
+      email: formData.email,
+      password: formData.password,
+      university: formData.university,
+      course: formData.course,
+    })
+    
+    if (result.success) {
+      // Redirect to congratulations page instead of showing success message
+      navigate("/congratulations")
+    } else {
+      setError(result.message)
+    }
+  } catch (error) {
+    setError(error.response?.data?.message || "Registration failed. Please try again.")
+  } finally {
+    setLoading(false)
+  }
+}
   
   const isValidEmail = (email) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/

@@ -908,3 +908,34 @@
     padding: 0.75rem;
   }
 }
+
+/* Add to auth.module.css */
+.congratulationsContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 2rem;
+}
+
+.congratulationsIcon {
+  font-size: 4rem;
+  color: #51cf66;
+  margin-bottom: 1rem;
+}
+
+.congratulationsContainer h1 {
+  font-size: 2rem;
+  margin-bottom: 1rem;
+  color: #333;
+}
+
+.congratulationsContainer p {
+  margin-bottom: 0.5rem;
+  color: #666;
+}
+
+.congratulationsContainer .submitBtn {
+  margin-top: 2rem;
+}
