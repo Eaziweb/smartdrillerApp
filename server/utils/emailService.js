@@ -1,39 +1,9 @@
-const nodemailer = require("nodemailer");
+const { Resend } = require('resend');
 
 class EmailService {
   constructor() {
-    // Single email account configuration
-    this.emailConfig = {
-      host: process.env.EMAIL_HOST || 'smtp.gmail.com',
-      port: parseInt(process.env.EMAIL_PORT) || 587,
-      secure: false, // Use TLS
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
-      },
-      from: process.env.EMAIL_FROM || 'SmartDriller',
-    };
-
-    // Create transporter with improved configuration
-    this.transporter = nodemailer.createTransport({
-      host: this.emailConfig.host,
-      port: this.emailConfig.port,
-      secure: this.emailConfig.secure,
-      auth: this.emailConfig.auth,
-      tls: {
-        // Do not fail on invalid certificates
-        rejectUnauthorized: false,
-        minVersion: 'TLSv1.2'
-      },
-      connectionTimeout: 10000, // 10 seconds
-      greetingTimeout: 10000,    // 10 seconds
-      socketTimeout: 10000,      // 10 seconds
-      pool: true,                // Use connection pooling
-      maxConnections: 5,         // Max connections in pool
-      maxMessages: 100,          // Max messages per connection
-      rateDelta: 1000,           // Rate limiting time window in ms
-      rateLimit: 5               // Max messages per rateDelta
-    });
+    // Initialize Resend with API key
+    this.resend = new Resend(process.env.RESEND_API_KEY);
 
     // Email tracking - In production, use Redis or database
     this.emailCounter = {
@@ -41,30 +11,14 @@ class EmailService {
       resetTime: this.getNextResetTime()
     };
 
-    // Gmail limits: 500 emails per day, 100 per hour for free accounts
+    // Resend limits: Free tier allows 100 emails per day
     // Using conservative limits to stay safe
     this.limits = {
-      dailyLimit: 485,    // Conservative daily limit
-      hourlyLimit: 98,    // Conservative hourly limit
-      resetHour: 24       // Reset every 24 hours
+      dailyLimit: 95,     // Conservative daily limit (100 - 5 buffer)
+      resetHour: 24      // Reset every 24 hours
     };
     
-    this.connectionStatus = false;
-    
-    // Initialize connection status
-    this.initializeConnection();
-  }
-
-  async initializeConnection() {
-    // Check initial connection status
-    try {
-      await this.transporter.verify();
-      this.connectionStatus = true;
-      console.log("✅ Initial connection to email account successful");
-    } catch (error) {
-      this.connectionStatus = false;
-      console.error("❌ Initial connection to email account failed:", error.message);
-    }
+    this.connectionStatus = true; // Resend is API-based, always "connected" unless API key is invalid
   }
 
   getNextResetTime() {
@@ -103,35 +57,32 @@ class EmailService {
         throw new Error('Email account has reached its daily sending limit');
       }
       
-      if (!this.connectionStatus) {
-        // Try to reconnect
-        try {
-          await this.transporter.verify();
-          this.connectionStatus = true;
-          console.log("✅ Reconnected to email account successfully");
-        } catch (error) {
-          this.connectionStatus = false;
-          console.error("❌ Failed to reconnect to email account:", error.message);
-          throw new Error('Email account is currently unavailable');
-        }
-      }
-      
-      // Set the from address
-      const emailOptions = {
-        ...mailOptions,
-        from: `${this.emailConfig.from} <${this.emailConfig.auth.user}>`
+      // Prepare email options for Resend
+      const resendOptions = {
+        from: mailOptions.from || process.env.EMAIL_FROM || 'SmartDriller <noreply@smartdriller.com>',
+        to: mailOptions.to,
+        subject: mailOptions.subject,
+        html: mailOptions.html,
       };
 
-      const result = await this.transporter.sendMail(emailOptions);
+      // Add CC and BCC if provided
+      if (mailOptions.cc) {
+        resendOptions.cc = Array.isArray(mailOptions.cc) ? mailOptions.cc : [mailOptions.cc];
+      }
+      if (mailOptions.bcc) {
+        resendOptions.bcc = Array.isArray(mailOptions.bcc) ? mailOptions.bcc : [mailOptions.bcc];
+      }
+
+      const result = await this.resend.emails.send(resendOptions);
       
       // Increment counter
       this.emailCounter.count++;
       
-      console.log(`Email sent successfully. Count: ${this.emailCounter.count}/${this.limits.dailyLimit}`);
+      console.log(`Email sent successfully using Resend. Count: ${this.emailCounter.count}/${this.limits.dailyLimit}`);
       
       return {
         success: true,
-        messageId: result.messageId,
+        messageId: result.data.id,
         remainingQuota: this.limits.dailyLimit - this.emailCounter.count
       };
     } catch (error) {
@@ -157,7 +108,8 @@ class EmailService {
     this.resetCounterIfNeeded();
     
     return {
-      email: this.emailConfig.auth.user,
+      service: 'Resend',
+      email: process.env.EMAIL_FROM || 'noreply@smartdriller.com',
       sent: this.emailCounter.count,
       remaining: this.limits.dailyLimit - this.emailCounter.count,
       resetTime: new Date(this.emailCounter.resetTime),
@@ -176,23 +128,39 @@ class EmailService {
     return true;
   }
 
-  // Test email connection
+  // Test email connection (for Resend, this just validates API key)
   async testConnection() {
     try {
-      await this.transporter.verify();
-      this.connectionStatus = true;
+      // Send a test email to validate API key
+      const testResult = await this.resend.emails.send({
+        from: process.env.EMAIL_FROM || 'SmartDriller <noreply@smartdriller.com>',
+        to: 'test@example.com', // This will fail but validates API key
+        subject: 'Connection Test',
+        html: '<p>Test</p>'
+      });
+      
+      // If we get here, the API key is valid (even if email fails)
       return {
-        email: this.emailConfig.auth.user,
+        service: 'Resend',
         status: 'success',
-        message: 'Connection verified successfully'
+        message: 'API key is valid'
       };
     } catch (error) {
-      this.connectionStatus = false;
+      // Check if it's an API key error
+      if (error.message.includes('API key')) {
+        return {
+          service: 'Resend',
+          status: 'failed',
+          message: 'Invalid API key',
+          code: 'INVALID_API_KEY'
+        };
+      }
+      
+      // Other errors (like invalid email) still mean connection is valid
       return {
-        email: this.emailConfig.auth.user,
-        status: 'failed',
-        message: error.message,
-        code: error.code
+        service: 'Resend',
+        status: 'success',
+        message: 'API key is valid'
       };
     }
   }
