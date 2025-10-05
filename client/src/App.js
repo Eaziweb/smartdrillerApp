@@ -6,6 +6,7 @@ import ProtectedRoute from "./components/ProtectedRoute"
 import AdminRoute from "./components/AdminRoute"
 import SuperAdminRoute from "./components/SuperAdminRoute"
 import SubscriptionProtectedRoute from "./components/SubscriptionProtectedRoute"
+import SubscriptionRequired from "./components/SubscriptionRequired"
 
 import LandingPage from './pages/LandingPage';
 
@@ -226,6 +227,14 @@ useEffect(() => {
               element={
                 <ProtectedRoute>
                   <Profile />
+                </ProtectedRoute>
+              }
+            />
+                 <Route
+              path="/subscription-required"
+              element={
+                <ProtectedRoute>
+                  <subscriptionRequired />
                 </ProtectedRoute>
               }
             />

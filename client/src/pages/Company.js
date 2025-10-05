@@ -106,7 +106,7 @@ const Company = ({ isOpen, onClose }) => {
               <div className={styles.blogCard}>
                 <div className={styles.blogContent}>
                   <h3>Navigating the CCMAS Curriculum</h3>
-                  <p className={styles.blogMeta}>June 15, 2023</p>
+                  <p className={styles.blogMeta}>June 15, 2025</p>
                   <p>Practical tips for first-year students adapting to the new CCMAS curriculum structure and expectations...</p>
                   <a href="#" className={styles.readMore}>Read More <i className="fas fa-arrow-right"></i></a>
                 </div>
@@ -114,7 +114,7 @@ const Company = ({ isOpen, onClose }) => {
               <div className={styles.blogCard}>
                 <div className={styles.blogContent}>
                   <h3>Time Management for University Success</h3>
-                  <p className={styles.blogMeta}>May 28, 2023</p>
+                  <p className={styles.blogMeta}>May 28, 2025</p>
                   <p>Learn how to balance coursework, social life, and self-care during your crucial first year...</p>
                   <a href="#" className={styles.readMore}>Read More <i className="fas fa-arrow-right"></i></a>
                 </div>
@@ -122,7 +122,7 @@ const Company = ({ isOpen, onClose }) => {
               <div className={styles.blogCard}>
                 <div className={styles.blogContent}>
                   <h3>Study Techniques That Actually Work</h3>
-                  <p className={styles.blogMeta}>April 10, 2023</p>
+                  <p className={styles.blogMeta}>Sept 29, 2025</p>
                   <p>Evidence-based study methods to help you retain information better and perform excellently in exams...</p>
                   <a href="#" className={styles.readMore}>Read More <i className="fas fa-arrow-right"></i></a>
                 </div>

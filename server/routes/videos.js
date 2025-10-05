@@ -1,3 +1,4 @@
+// routes/videos.js
 const express = require("express")
 const router = express.Router()
 const { auth } = require("../middleware/auth")
@@ -7,9 +8,7 @@ const VideoTopic = require("../models/VideoTopic")
 const Video = require("../models/Video")
 const UserProgress = require("../models/UserProgress")
 
-// routes/videos.js
-
-// Get all courses with topics (for user)
+// Get all courses with topics (available to all authenticated users)
 router.get("/courses", auth, async (req, res) => {
   try {
     const courses = await VideoCourse.find({ isVisible: true })
@@ -26,6 +25,7 @@ router.get("/courses", auth, async (req, res) => {
   }
 })
 
+// Get videos for a topic (only for subscribed users)
 router.get("/topic/:topicId", auth, subscriptionCheck, async (req, res) => {
   try {
     const { topicId } = req.params
@@ -39,7 +39,7 @@ router.get("/topic/:topicId", auth, subscriptionCheck, async (req, res) => {
   }
 })
 
-// Update video progress
+// Update video progress (only for subscribed users)
 router.post("/progress/:videoId", auth, subscriptionCheck, async (req, res) => {
   try {
     const { videoId } = req.params
@@ -72,6 +72,5 @@ router.post("/progress/:videoId", auth, subscriptionCheck, async (req, res) => {
     res.status(500).json({ message: "Server error" })
   }
 })
-
 
 module.exports = router

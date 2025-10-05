@@ -4,6 +4,7 @@ import { useNavigate, useLocation } from "react-router-dom"
 import { useAuth } from "../../contexts/AuthContext"
 import { useNotification } from "../../contexts/NotificationContext"
 import ProgressRing from '../../components/ProgressRing'
+import SubscriptionModal from "./SubscriptionModal"
 import styles from "../../styles/course-selection.module.css"
 import api from "../../utils/api"
 
@@ -52,6 +53,8 @@ const CourseSelection = () => {
   const [fetchingCourses, setFetchingCourses] = useState(false)
   const [progressLoading, setProgressLoading] = useState(true)
   const [progressError, setProgressError] = useState(null)
+  const [showSubscriptionModal, setShowSubscriptionModal] = useState(false)
+  const [loadingPayment, setLoadingPayment] = useState(false)
   
   // Simplified dropdown state
   const [openDropdown, setOpenDropdown] = useState({ courseCode: null, type: null })
@@ -207,7 +210,7 @@ const CourseSelection = () => {
 
   const handleCourseSelect = useCallback((courseCode, isSelected) => {
     if (!isSubscribed) {
-      navigate("/subscription-required")
+      setShowSubscriptionModal(true)
       return false
     }
     
@@ -260,7 +263,7 @@ const CourseSelection = () => {
       setSelectedTopics(new Set());
     }
     return true;
-  }, [isSubscribed, selectedCourse, courseYears, fetchTopics, showNotification, navigate, isMockMode])
+  }, [isSubscribed, selectedCourse, courseYears, fetchTopics, showNotification, isMockMode])
   
   const calculateDropdownPosition = useCallback((courseCode, type) => {
     const triggerElement = dropdownTriggerRefs.current[`${courseCode}-${type}`];
@@ -277,7 +280,7 @@ const CourseSelection = () => {
   
   const handleDropdownClick = useCallback((courseCode, type) => {
     if (!isSubscribed) {
-      navigate("/subscription-required")
+      setShowSubscriptionModal(true)
       return
     }
     
@@ -355,7 +358,7 @@ const CourseSelection = () => {
   
   const handleStartExam = useCallback(async () => {
     if (!isSubscribed) {
-      navigate("/subscription-required")
+      setShowSubscriptionModal(true)
       return
     }
     
@@ -426,6 +429,39 @@ const CourseSelection = () => {
       setFetchingQuestions(false)
     }
   }, [isSubscribed, selectedCourse, formData, courseTopics, examType, isMockMode, showNotification, navigate])
+  
+  // Handle activate functionality - show subscription modal
+  const handleActivate = useCallback(async () => {
+    if (user?.isSubscribed) {
+      showNotification("You are already subscribed!", "info");
+      return;
+    }
+    
+    setShowSubscriptionModal(true);
+  }, [user, showNotification])
+  
+  // Initialize payment
+  const initializePayment = useCallback(async (subscriptionType, isRecurring, recurringMonths) => {
+    setLoadingPayment(true);
+    try {
+      const response = await api.post("/api/payments/initialize", {
+        subscriptionType,
+        isRecurring,
+        recurringMonths,
+      });
+      
+      if (response.data.status === "success") {
+        window.location.href = response.data.data.link;
+      } else {
+        showNotification("Failed to initialize payment", "error");
+      }
+    } catch (error) {
+      console.error("Payment initialization failed:", error);
+      showNotification(error.response?.data?.message || "Failed to initialize payment", "error");
+    } finally {
+      setLoadingPayment(false);
+    }
+  }, [showNotification])
   
   // Initialize data
   useEffect(() => {
@@ -548,7 +584,7 @@ const CourseSelection = () => {
             <p>Subscribe to access study materials and start practicing</p>
             <button 
               className={styles.subscribeBtn}
-              onClick={() => navigate("/subscription-required")}
+              onClick={handleActivate}
             >
               Subscribe Now
             </button>
@@ -556,16 +592,14 @@ const CourseSelection = () => {
         </div>
       )}
       
-      {/* Continue Button - Only for Subscribed Users */}
-      {isSubscribed && (
-        <button 
-          className={styles.continueBtn} 
-          onClick={handleStartExam} 
-          disabled={fetchingQuestions || fetchingTopics}
-        >
-          {fetchingQuestions ? "Loading Questions..." : "Continue"}
-        </button>
-      )}
+      {/* Continue Button */}
+      <button 
+        className={styles.continueBtn} 
+        onClick={handleStartExam} 
+        disabled={fetchingQuestions || fetchingTopics}
+      >
+        {fetchingQuestions ? "Loading Questions..." : "Continue"}
+      </button>
       
       {/* Header */}
       <nav className={styles.header}>
@@ -603,7 +637,7 @@ const CourseSelection = () => {
                 className={styles.courseName} 
                 onClick={() => {
                   if (!isSubscribed) {
-                    navigate("/subscription-required")
+                    setShowSubscriptionModal(true)
                     return
                   }
                   const checkbox = document.getElementById(`checkbox-${course.courseCode}`)
@@ -738,7 +772,7 @@ const CourseSelection = () => {
                 className={styles.courseName} 
                 onClick={() => {
                   if (!isSubscribed) {
-                    navigate("/subscription-required")
+                    setShowSubscriptionModal(true)
                     return
                   }
                   const checkbox = document.getElementById(`checkbox-${course.courseCode}`)
@@ -969,6 +1003,15 @@ const CourseSelection = () => {
           <p>Debug: Study Progress Error - {progressError}</p>
         </div>
       )}
+      
+      {/* Subscription Modal */}
+      <SubscriptionModal
+        isOpen={showSubscriptionModal}
+        onClose={() => setShowSubscriptionModal(false)}
+        user={user}
+        onSubscribe={initializePayment}
+        loading={loadingPayment}
+      />
     </div>
   )
 }
