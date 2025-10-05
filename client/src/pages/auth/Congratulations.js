@@ -8,11 +8,19 @@ const Congratulations = () => {
     <div className={styles.authPage}>
       <div className={styles.authContainer}>
         <div className={styles.authHeader}>
+          <Link to="/" className={styles.backBtn}>
+            <i className="fas fa-arrow-left"></i>
+          </Link>
           <h1 className={styles.appLogo}>SmartDriller</h1>
         </div>
         
         <div className={styles.formContainer}>
           <div className={styles.congratulationsContainer}>
+            {/* Confetti animation elements */}
+            {[...Array(13)].map((_, i) => (
+              <div key={i} className={`confetti confetti-${i + 1}`}></div>
+            ))}
+            
             <div className={styles.congratulationsIcon}>
               <i className="fas fa-check-circle"></i>
             </div>
