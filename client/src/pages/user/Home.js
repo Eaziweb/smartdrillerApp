@@ -293,9 +293,7 @@ const Home = () => {
   }, [touchStartX, touchEndX])
   
 const handleShare = useCallback(async () => {
-  const shareData = {
-    title: 'SmartDriller - Your Ultimate Study Companion',
-    text: `🎓 Unlock Your Academic Potential with SmartDriller! 🚀
+  const fullText = `🎓 Unlock Your Academic Potential with SmartDriller! 🚀
 
 Join thousands of first-year university students mastering their courses with our premium learning platform.
 
@@ -310,16 +308,29 @@ Join thousands of first-year university students mastering their courses with ou
 
 🌟 Transform your learning experience and ace your exams with SmartDriller!
 
-Join now: https://smartdriller.vercel.app/`,
+Join now: https://smartdriller.vercel.app/`;
+
+  const shareData = {
+    title: 'SmartDriller - Your Ultimate Study Companion',
+    text: fullText,
     url: 'https://smartdriller.vercel.app/'
   };
 
   try {
     if (navigator.share) {
-      await navigator.share(shareData);
+      try {
+        await navigator.share(shareData);
+        showMessage('Shared successfully!', 'success');
+      } catch (shareError) {
+        console.log('Web Share failed, falling back to clipboard:', shareError);
+        // If Web Share fails or is cancelled, copy to clipboard
+        await navigator.clipboard.writeText(fullText);
+        showMessage('Full message copied to clipboard!', 'success');
+      }
     } else {
-      await navigator.clipboard.writeText(shareData.text + '\n\n' + shareData.url);
-      showMessage('Link copied to clipboard!', 'success');
+      // If Web Share API is not available, copy to clipboard
+      await navigator.clipboard.writeText(fullText);
+      showMessage('Full message copied to clipboard!', 'success');
     }
   } catch (err) {
     console.error('Error sharing:', err);
@@ -327,6 +338,19 @@ Join now: https://smartdriller.vercel.app/`,
   }
 }, [showMessage]);
   
+  function openWhatsAppChannel() {
+    const channelLink = "0029VbBLtIyKbYMQYmgnDh2o";
+    const appLink = `whatsapp://channel/${channelLink}`;
+    const webLink = `https://whatsapp.com/channel/${channelLink}`;
+
+    // Try to open in app first
+    window.location.href = appLink;
+
+    // Fallback to web after 1 second
+    setTimeout(() => {
+      window.open(webLink, "_blank");
+    }, 1000);
+  }
   const isNotificationNew = useCallback((notification) => {
     if (!user?.lastNotificationView) return true;
     return new Date(notification.createdAt) > new Date(user.lastNotificationView);
@@ -432,11 +456,11 @@ Join now: https://smartdriller.vercel.app/`,
           <div className={styles.sidebarSection}>
             <h3>Community & Contact</h3>
             <ul>
-              <li>
-                <a href="https://whatsapp.com/channel/0029VbBLtIyKbYMQYmgnDh2o" target="_blank" rel="noopener noreferrer">
-                  <i className="fas fa-thumbs-up"></i> Follow us on WhatsApp
-                </a>
-              </li>
+<li>
+  <a href="#" onclick="openWhatsAppChannel(); return false;">
+    <i className="fas fa-thumbs-up"></i> Follow us on WhatsApp
+  </a>
+</li>
               <li>
                 <a href="#" onClick={handleShare}>
                   <i className="fas fa-share-alt"></i> Share

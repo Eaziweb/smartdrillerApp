@@ -1,7 +1,7 @@
 // pages/auth/Congratulations.js
 "use client"
 import { Link } from "react-router-dom"
-import styles from "../../styles/auth.module.css"
+import styles from "../../styles/Reg-Congratulation.module.css"
 
 const Congratulations = () => {
   return (
