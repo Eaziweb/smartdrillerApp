@@ -382,9 +382,11 @@ useEffect(() => {
               path="/videos"
               element={
                 <ProtectedRoute>
+                  <SubscriptionProtectedRoute>
              
                     <Videos />
-             
+                               </SubscriptionProtectedRoute>
+
                 </ProtectedRoute>
               }
             />
@@ -392,8 +394,10 @@ useEffect(() => {
               path="/notes"
               element={
                 <ProtectedRoute>
+                  <SubscriptionProtectedRoute>
           
                     <Notes />
+                  </SubscriptionProtectedRoute>
        
                 </ProtectedRoute>
               }

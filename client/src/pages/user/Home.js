@@ -292,25 +292,40 @@ const Home = () => {
     }
   }, [touchStartX, touchEndX])
   
-  const handleShare = useCallback(async () => {
-    const shareData = {
-      title: 'SmartDriller',
-      text: 'Join SmartDriller, an educational website for first year university students!',
-      url: 'https://smartdriller.vercel.app/'
-    };
+const handleShare = useCallback(async () => {
+  const shareData = {
+    title: 'SmartDriller - Your Ultimate Study Companion',
+    text: `🎓 Unlock Your Academic Potential with SmartDriller! 🚀
 
-    try {
-      if (navigator.share) {
-        await navigator.share(shareData);
-      } else {
-        await navigator.clipboard.writeText(`${shareData.text} ${shareData.url}`);
-        showMessage('Link copied to clipboard!', 'success');
-      }
-    } catch (err) {
-      console.error('Error sharing:', err);
-      showMessage('Failed to share', 'error');
+Join thousands of first-year university students mastering their courses with our premium learning platform.
+
+✨ PREMIUM FEATURES:
+• Study Mode with unlimited practice questions
+• Mock Tests with detailed analytics & insights
+• Bookmark important questions for quick revision
+• Comprehensive video lessons & study notes
+• AI-powered study assistant for instant help
+• Progress tracking & results history
+• Access to all courses and academic years
+
+🌟 Transform your learning experience and ace your exams with SmartDriller!
+
+Join now: https://smartdriller.vercel.app/`,
+    url: 'https://smartdriller.vercel.app/'
+  };
+
+  try {
+    if (navigator.share) {
+      await navigator.share(shareData);
+    } else {
+      await navigator.clipboard.writeText(shareData.text + '\n\n' + shareData.url);
+      showMessage('Link copied to clipboard!', 'success');
     }
-  }, [showMessage])
+  } catch (err) {
+    console.error('Error sharing:', err);
+    showMessage('Failed to share', 'error');
+  }
+}, [showMessage]);
   
   const isNotificationNew = useCallback((notification) => {
     if (!user?.lastNotificationView) return true;
@@ -418,7 +433,7 @@ const Home = () => {
             <h3>Community & Contact</h3>
             <ul>
               <li>
-                <a href="https://whatsapp.com/channel/0029VbAS8umBadma5VAxix2R" target="_blank" rel="noopener noreferrer">
+                <a href="https://whatsapp.com/channel/0029VbBLtIyKbYMQYmgnDh2o" target="_blank" rel="noopener noreferrer">
                   <i className="fas fa-thumbs-up"></i> Follow us on WhatsApp
                 </a>
               </li>

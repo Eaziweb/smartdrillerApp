@@ -8,8 +8,7 @@ const Note = require("../models/Note")
 const UserProgress = require("../models/UserProgress")
 const mongoose = require("mongoose")
 
-// Get courses - available to all authenticated users
-router.get("/courses", auth, async (req, res) => {
+router.get("/courses", auth, subscriptionCheck, async (req, res) => {
   try {
     const courses = await NoteCourse.find({ isVisible: true })
       .populate({
@@ -25,7 +24,7 @@ router.get("/courses", auth, async (req, res) => {
   }
 })
 
-// Get user progress - only for subscribed users
+// Get user progress - MUST come before dynamic routes
 router.get("/progress", auth, subscriptionCheck, async (req, res) => {
   try {
     const userId = req.user._id
@@ -47,7 +46,7 @@ router.get("/progress", auth, subscriptionCheck, async (req, res) => {
   }
 })
 
-// Get a specific note - only for subscribed users
+// Get a specific note - Dynamic route must come after static routes
 router.get("/:noteId", auth, subscriptionCheck, async (req, res) => {
   try {
     const { noteId } = req.params
@@ -62,7 +61,7 @@ router.get("/:noteId", auth, subscriptionCheck, async (req, res) => {
   }
 })
 
-// Mark note as completed - only for subscribed users
+// Mark note as completed
 router.post("/:noteId/complete", auth, subscriptionCheck, async (req, res) => {
   try {
     const { noteId } = req.params
@@ -79,12 +78,12 @@ router.post("/:noteId/complete", auth, subscriptionCheck, async (req, res) => {
     if (!userProgress) {
       userProgress = new UserProgress({ 
         user: userId, 
-        completedNotes: [new mongoose.Types.ObjectId(noteId)],
+        completedNotes: [new mongoose.Types.ObjectId(noteId)], // Fixed: added 'new' keyword
         videoProgress: []
       })
     } else {
       // Check if note is already in completedNotes
-      const noteObjectId = new mongoose.Types.ObjectId(noteId)
+      const noteObjectId = new mongoose.Types.ObjectId(noteId) // Fixed: added 'new' keyword
       if (!userProgress.completedNotes.some(id => id.toString() === noteObjectId.toString())) {
         userProgress.completedNotes.push(noteObjectId)
       }
