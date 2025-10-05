@@ -10,7 +10,7 @@ const UserProgress = require("../models/UserProgress")
 // routes/videos.js
 
 // Get all courses with topics (for user)
-router.get("/courses", auth, subscriptionCheck, async (req, res) => {
+router.get("/courses", auth, async (req, res) => {
   try {
     const courses = await VideoCourse.find({ isVisible: true })
       .populate({

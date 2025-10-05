@@ -1,12 +1,11 @@
 "use client"
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect, useRef, useCallback, useMemo } from "react"
 import { useNavigate, useLocation } from "react-router-dom"
 import { useAuth } from "../../contexts/AuthContext"
 import { useNotification } from "../../contexts/NotificationContext"
 import ProgressRing from '../../components/ProgressRing'
 import styles from "../../styles/course-selection.module.css"
-import api from "../../utils/api";
-import axios from "axios";
+import api from "../../utils/api"
 
 // Portal component for rendering dropdowns outside the main DOM hierarchy
 const Portal = ({ children, className }) => {
@@ -52,9 +51,9 @@ const CourseSelection = () => {
   const [fetchingTopics, setFetchingTopics] = useState(false)
   const [fetchingCourses, setFetchingCourses] = useState(false)
   const [progressLoading, setProgressLoading] = useState(true)
-  const [progressError, setProgressError] = useState(null) // Add error state for progress
+  const [progressError, setProgressError] = useState(null)
   
-  // Simplified dropdown state - track which dropdown is open for which course
+  // Simplified dropdown state
   const [openDropdown, setOpenDropdown] = useState({ courseCode: null, type: null })
   const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0, width: 0 })
   
@@ -67,70 +66,67 @@ const CourseSelection = () => {
   const dropdownRefs = useRef({})
   const dropdownTriggerRefs = useRef({})
   
-  // Fetch study progress for all courses
-const loadAllStudyProgress = async () => {
-  if (isMockMode) return;
+  // Check if user is subscribed
+  const isSubscribed = user?.isSubscribed || false
+  
+  // Fetch study progress for all courses (only for subscribed users)
+  const loadAllStudyProgress = useCallback(async () => {
+    if (isMockMode || !isSubscribed) return;
 
-  setProgressLoading(true);
-  setProgressError(null);
+    setProgressLoading(true);
+    setProgressError(null);
 
-  try {
-    const token = localStorage.getItem("token");
-    if (!token) {
-      throw new Error("Authentication token not found");
-    }
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        throw new Error("Authentication token not found");
+      }
 
-    const response = await api.get("/api/questions/study-progress", {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
+      const response = await api.get("/api/questions/study-progress", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
-    console.log("Study progress response:", response);
+      if (response.data.success) {
+        setStudyProgress(response.data.progress);
+      } else {
+        throw new Error(response.data.message || "Failed to load study progress");
+      }
+    } catch (error) {
+      console.error("Failed to load study progress:", error);
+      setProgressError(error.message);
+      setStudyProgress({});
 
-    if (response.data.success) {
-      setStudyProgress(response.data.progress);
-    } else {
-      throw new Error(response.data.message || "Failed to load study progress");
-    }
-  } catch (error) {
-    console.error("Failed to load study progress:", error);
-    setProgressError(error.message);
-    setStudyProgress({}); // Avoid breaking UI
-
-    if (error.response) {
-      console.error("Error response data:", error.response.data);
-      console.error("Error response status:", error.response.status);
-
-      if (error.response.status === 404) {
+      if (error.response) {
+        if (error.response.status === 404) {
+          showNotification(
+            "Study progress endpoint not found. This feature may be temporarily unavailable.",
+            "warning"
+          );
+        } else {
+          showNotification(
+            `Failed to load study progress: ${error.response.data.message || error.message}`,
+            "error"
+          );
+        }
+      } else if (error.request) {
         showNotification(
-          "Study progress endpoint not found. This feature may be temporarily unavailable.",
-          "warning"
+          "Network error. Please check your connection and try again.",
+          "error"
         );
       } else {
         showNotification(
-          `Failed to load study progress: ${error.response.data.message || error.message}`,
+          `Failed to load study progress: ${error.message}`,
           "error"
         );
       }
-    } else if (error.request) {
-      console.error("Error request:", error.request);
-      showNotification(
-        "Network error. Please check your connection and try again.",
-        "error"
-      );
-    } else {
-      showNotification(
-        `Failed to load study progress: ${error.message}`,
-        "error"
-      );
+    } finally {
+      setProgressLoading(false);
     }
-  } finally {
-    setProgressLoading(false);
-  }
-};
+  }, [isMockMode, isSubscribed, showNotification])
   
-  const fetchCourses = async () => {
+  const fetchCourses = useCallback(async () => {
     setFetchingCourses(true)
     try {
       const token = localStorage.getItem("token")
@@ -147,9 +143,9 @@ const loadAllStudyProgress = async () => {
     } finally {
       setFetchingCourses(false)
     }
-  }
+  }, [])
   
-  const fetchCourseYears = async () => {
+  const fetchCourseYears = useCallback(async () => {
     setFetchingYears(true)
     setError(null)
     try {
@@ -173,9 +169,11 @@ const loadAllStudyProgress = async () => {
       setFetchingYears(false)
       setLoading(false)
     }
-  }
+  }, [])
   
-  const fetchTopics = async (courseCode) => {
+  const fetchTopics = useCallback(async (courseCode) => {
+    if (!isSubscribed) return;
+    
     setFetchingTopics(true)
     try {
       const token = localStorage.getItem("token")
@@ -189,7 +187,7 @@ const loadAllStudyProgress = async () => {
       
       if (!topics || topics.length === 0) {
         showNotification(`No topics available for ${courseCode}. Please select another course.`, "error")
-        handleCourseSelect(courseCode, false) // Deselect the course
+        handleCourseSelect(courseCode, false)
         return
       }
       
@@ -197,22 +195,24 @@ const loadAllStudyProgress = async () => {
         ...prev,
         [courseCode]: topics,
       }))
-      // Initialize all topics as selected
       setSelectedTopics(new Set(topics))
     } catch (error) {
       console.error("Failed to fetch topics:", error)
       showNotification(`Failed to load topics for ${courseCode}. Please try again.`, "error")
-      handleCourseSelect(courseCode, false) // Deselect the course
+      handleCourseSelect(courseCode, false)
     } finally {
       setFetchingTopics(false)
     }
-  }
+  }, [isSubscribed, showNotification])
 
-  const handleCourseSelect = (courseCode, isSelected) => {
+  const handleCourseSelect = useCallback((courseCode, isSelected) => {
+    if (!isSubscribed) {
+      navigate("/subscription-required")
+      return false
+    }
+    
     if (isSelected) {
-      // If selecting a new course and another is already selected, deselect the previous one
       if (selectedCourse && selectedCourse !== courseCode) {
-        // Clear the previous course's data
         setFormData((prev) => {
           const newData = { ...prev };
           delete newData[selectedCourse];
@@ -225,7 +225,6 @@ const loadAllStudyProgress = async () => {
         });
       }
       
-      // Check if there are any years available for this course
       if (!courseYears[courseCode] || courseYears[courseCode].length === 0) {
         showNotification(`No questions available for ${courseCode}. Please select another course.`, "error")
         return false;
@@ -234,7 +233,6 @@ const loadAllStudyProgress = async () => {
       setSelectedCourse(courseCode);
       fetchTopics(courseCode);
       
-      // Initialize form data for this course
       setFormData((prev) => ({
         ...prev,
         [courseCode]: {
@@ -262,9 +260,9 @@ const loadAllStudyProgress = async () => {
       setSelectedTopics(new Set());
     }
     return true;
-  };
+  }, [isSubscribed, selectedCourse, courseYears, fetchTopics, showNotification, navigate, isMockMode])
   
-  const calculateDropdownPosition = (courseCode, type) => {
+  const calculateDropdownPosition = useCallback((courseCode, type) => {
     const triggerElement = dropdownTriggerRefs.current[`${courseCode}-${type}`];
     if (triggerElement) {
       const rect = triggerElement.getBoundingClientRect();
@@ -275,19 +273,21 @@ const loadAllStudyProgress = async () => {
       };
     }
     return { top: 0, left: 0, width: 0 };
-  };
+  }, [])
   
-  const handleDropdownClick = (courseCode, type) => {
-    // If clicking on the same dropdown that's already open, close it
+  const handleDropdownClick = useCallback((courseCode, type) => {
+    if (!isSubscribed) {
+      navigate("/subscription-required")
+      return
+    }
+    
     if (openDropdown.courseCode === courseCode && openDropdown.type === type) {
       setOpenDropdown({ courseCode: null, type: null });
       return;
     }
     
-    // Close any open dropdown first
     setOpenDropdown({ courseCode: null, type: null });
     
-    // For topics, show the popup instead
     if (type === "topics") {
       if (!courseTopics[courseCode] || courseTopics[courseCode].length === 0) {
         showNotification(`No topics available for ${courseCode}. Please select another course.`, "error")
@@ -298,18 +298,15 @@ const loadAllStudyProgress = async () => {
       return
     }
     
-    // Set the position and open the new dropdown
     const position = calculateDropdownPosition(courseCode, type);
     setDropdownPosition(position);
     
-    // Use timeout to ensure the previous dropdown is closed before opening the new one
     setTimeout(() => {
       setOpenDropdown({ courseCode, type });
     }, 10);
-  }
+  }, [isSubscribed, openDropdown, courseTopics, showNotification, navigate, calculateDropdownPosition])
   
-  const handleOptionSelect = (courseCode, type, value, label) => {
-    // Update form data with both value and label
+  const handleOptionSelect = useCallback((courseCode, type, value, label) => {
     setFormData((prev) => ({
       ...prev,
       [courseCode]: {
@@ -319,11 +316,10 @@ const loadAllStudyProgress = async () => {
       },
     }))
     
-    // Close the dropdown
     setOpenDropdown({ courseCode: null, type: null });
-  }
+  }, [])
   
-  const handleTopicSelection = (topic, isSelected) => {
+  const handleTopicSelection = useCallback((topic, isSelected) => {
     setSelectedTopics((prev) => {
       const newSet = new Set(prev)
       if (isSelected) {
@@ -333,9 +329,9 @@ const loadAllStudyProgress = async () => {
       }
       return newSet
     })
-  }
+  }, [])
   
-  const handleTopicConfirm = () => {
+  const handleTopicConfirm = useCallback(() => {
     const topicsArray = Array.from(selectedTopics)
     const allTopics = courseTopics[currentTopicDropdown] || []
     let topicsText
@@ -355,19 +351,19 @@ const loadAllStudyProgress = async () => {
       },
     }))
     setShowTopicPopup(false)
-  }
+  }, [selectedTopics, courseTopics, currentTopicDropdown])
   
-// In CourseSelection component
-const handleStartExam = async () => {
-  // Check if user is subscribed first
-  if (!user?.isSubscribed) {
-    navigate("/subscription-required");
-    return;
-  }
-  if (!selectedCourse) {
-    showNotification("Please select a course", "error");
-    return;
-  }
+  const handleStartExam = useCallback(async () => {
+    if (!isSubscribed) {
+      navigate("/subscription-required")
+      return
+    }
+    
+    if (!selectedCourse) {
+      showNotification("Please select a course", "error")
+      return
+    }
+    
     const courseDataObj = formData[selectedCourse]
     if (!courseDataObj?.year) {
       showNotification("Please select a year", "error")
@@ -413,7 +409,6 @@ const handleStartExam = async () => {
         throw new Error("No questions found for the selected criteria. Please try different options.")
       }
       
-      // Store exam data
       localStorage.setItem(
         "currentExam",
         JSON.stringify({
@@ -422,7 +417,7 @@ const handleStartExam = async () => {
           examType: examType,
         }),
       )
-      // Navigate to appropriate page
+      
       navigate(isMockMode ? "/mock" : "/study")
     } catch (error) {
       console.error("Failed to start exam:", error)
@@ -430,37 +425,32 @@ const handleStartExam = async () => {
     } finally {
       setFetchingQuestions(false)
     }
-  }
+  }, [isSubscribed, selectedCourse, formData, courseTopics, examType, isMockMode, showNotification, navigate])
   
+  // Initialize data
   useEffect(() => {
-    if (!user?.isSubscribed) {
-      navigate("/home")
-      return
-    }
     fetchCourses()
     fetchCourseYears()
-  }, [user, navigate])
+  }, [fetchCourses, fetchCourseYears])
   
-
-useEffect(() => {
-  if (!fetchingYears && Object.keys(courseYears).length > 0 && !isMockMode && user?.isSubscribed) {
-    loadAllStudyProgress();
-  }
-}, [fetchingYears, courseYears, isMockMode, user?.isSubscribed]);
+  // Load study progress when data is ready
+  useEffect(() => {
+    if (!fetchingYears && Object.keys(courseYears).length > 0 && !isMockMode && isSubscribed) {
+      loadAllStudyProgress();
+    }
+  }, [fetchingYears, courseYears, isMockMode, isSubscribed, loadAllStudyProgress])
   
+  // Handle clicks outside dropdowns
   useEffect(() => {
     const handleClickOutside = (event) => {
-      // Check if click is outside any dropdown
       let clickedOutside = true;
       
-      // Check if the click is inside any dropdown trigger
       Object.keys(dropdownTriggerRefs.current).forEach(key => {
         if (dropdownTriggerRefs.current[key] && dropdownTriggerRefs.current[key].contains(event.target)) {
           clickedOutside = false;
         }
       });
       
-      // Check if the click is inside any dropdown
       const dropdowns = document.querySelectorAll(`.${styles.dropdownOptions}`);
       dropdowns.forEach(dropdown => {
         if (dropdown.contains(event.target)) {
@@ -478,17 +468,17 @@ useEffect(() => {
   }, [openDropdown])
   
   // Filter courses based on search term
-  const filteredCourses = (semesterCourses) => {
+  const filteredCourses = useCallback((semesterCourses) => {
     if (!searchTerm) return semesterCourses
     return semesterCourses.filter(
       (course) =>
         course.courseName.toLowerCase().includes(searchTerm.toLowerCase()) ||
         course.courseCode.toLowerCase().includes(searchTerm.toLowerCase())
     )
-  }
+  }, [searchTerm])
   
   // Get dropdown options based on type
-  const getDropdownOptions = (courseCode, type) => {
+  const getDropdownOptions = useCallback((courseCode, type) => {
     switch (type) {
       case "year":
         const years = courseYears[courseCode] || []
@@ -520,7 +510,7 @@ useEffect(() => {
       default:
         return []
     }
-  }
+  }, [courseYears, showNotification])
   
   if (loading) {
     return (
@@ -550,29 +540,33 @@ useEffect(() => {
   
   return (
     <div className={styles.courseSelectionPage}>
-      {/* Continue Button */}
-      <button 
-        className={styles.continueBtn} 
-        onClick={handleStartExam} 
-        disabled={fetchingQuestions || fetchingTopics}
-      >
-        {fetchingQuestions ? "Loading Questions..." : "Continue"}
-      </button>
+      {/* Subscription Banner for Unsubscribed Users */}
+      {!isSubscribed && (
+        <div className={styles.subscriptionBanner}>
+          <div className={styles.bannerContent}>
+            <i className="fas fa-lock"></i>
+            <p>Subscribe to access study materials and start practicing</p>
+            <button 
+              className={styles.subscribeBtn}
+              onClick={() => navigate("/subscription-required")}
+            >
+              Subscribe Now
+            </button>
+          </div>
+        </div>
+      )}
       
-{!user?.isSubscribed && (
-  <div className={styles.subscriptionBanner}>
-    <div className={styles.bannerContent}>
-      <i className="fas fa-lock"></i>
-      <p>Subscribe to access study materials and start practicing</p>
-      <button 
-        className={styles.subscribeBtn}
-        onClick={() => navigate("/subscription-required")}
-      >
-        Subscribe Now
-      </button>
-    </div>
-  </div>
-)}
+      {/* Continue Button - Only for Subscribed Users */}
+      {isSubscribed && (
+        <button 
+          className={styles.continueBtn} 
+          onClick={handleStartExam} 
+          disabled={fetchingQuestions || fetchingTopics}
+        >
+          {fetchingQuestions ? "Loading Questions..." : "Continue"}
+        </button>
+      )}
+      
       {/* Header */}
       <nav className={styles.header}>
         <button className={styles.backBtn} onClick={() => navigate("/home")}>
@@ -602,23 +596,34 @@ useEffect(() => {
           {filteredCourses(courses.first).map((course) => (
             <div 
               key={course.courseCode} 
-              className={`${styles.singleCourse} ${selectedCourse === course.courseCode ? styles.active : ""}`}
+              className={`${styles.singleCourse} ${selectedCourse === course.courseCode ? styles.active : ''} ${!isSubscribed ? styles.disabled : ''}`}
               ref={el => dropdownRefs.current[course.courseCode] = el}
             >
-              <div className={styles.courseName} onClick={() => {
-                const checkbox = document.getElementById(`checkbox-${course.courseCode}`)
-                checkbox.checked = !checkbox.checked
-                handleCourseSelect(course.courseCode, checkbox.checked)
-              }}>
+              <div 
+                className={styles.courseName} 
+                onClick={() => {
+                  if (!isSubscribed) {
+                    navigate("/subscription-required")
+                    return
+                  }
+                  const checkbox = document.getElementById(`checkbox-${course.courseCode}`)
+                  checkbox.checked = !checkbox.checked
+                  handleCourseSelect(course.courseCode, checkbox.checked)
+                }}
+              >
                 <span className={styles.select}>
                   <input 
                     type="checkbox" 
                     id={`checkbox-${course.courseCode}`} 
                     checked={selectedCourse === course.courseCode} 
                     onChange={(e) => handleCourseSelect(course.courseCode, e.target.checked)} 
+                    disabled={!isSubscribed}
                   />
                 </span>
                 {course.courseCode.toUpperCase()} - {course.courseName}
+                {!isSubscribed && (
+                  <i className={`fas fa-lock ${styles.lockIcon}`}></i>
+                )}
               </div>
               
               {/* Course options appear directly under the selected course */}
@@ -726,23 +731,34 @@ useEffect(() => {
           {filteredCourses(courses.second).map((course) => (
             <div 
               key={course.courseCode} 
-              className={`${styles.singleCourse} ${selectedCourse === course.courseCode ? styles.active : ""}`}
+              className={`${styles.singleCourse} ${selectedCourse === course.courseCode ? styles.active : ''} ${!isSubscribed ? styles.disabled : ''}`}
               ref={el => dropdownRefs.current[course.courseCode] = el}
             >
-              <div className={styles.courseName} onClick={() => {
-                const checkbox = document.getElementById(`checkbox-${course.courseCode}`)
-                checkbox.checked = !checkbox.checked
-                handleCourseSelect(course.courseCode, checkbox.checked)
-              }}>
+              <div 
+                className={styles.courseName} 
+                onClick={() => {
+                  if (!isSubscribed) {
+                    navigate("/subscription-required")
+                    return
+                  }
+                  const checkbox = document.getElementById(`checkbox-${course.courseCode}`)
+                  checkbox.checked = !checkbox.checked
+                  handleCourseSelect(course.courseCode, checkbox.checked)
+                }}
+              >
                 <span className={styles.select}>
                   <input 
                     type="checkbox" 
                     id={`checkbox-${course.courseCode}`} 
                     checked={selectedCourse === course.courseCode} 
                     onChange={(e) => handleCourseSelect(course.courseCode, e.target.checked)} 
+                    disabled={!isSubscribed}
                   />
                 </span>
                 {course.courseCode.toUpperCase()} - {course.courseName}
+                {!isSubscribed && (
+                  <i className={`fas fa-lock ${styles.lockIcon}`}></i>
+                )}
               </div>
               
               {/* Course options appear directly under the selected course */}
@@ -871,7 +887,7 @@ useEffect(() => {
                     onClick={() => handleOptionSelect(openDropdown.courseCode, openDropdown.type, option.value, option.label)}
                   >
                     <span>{option.label}</span>
-                    {!isMockMode && (
+                    {!isMockMode && isSubscribed && (
                       <div className={styles.progressIndicator}>
                         {progressLoading ? (
                           <div className={styles.spinnerMini}></div>

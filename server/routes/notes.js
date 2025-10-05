@@ -8,7 +8,7 @@ const Note = require("../models/Note")
 const UserProgress = require("../models/UserProgress")
 const mongoose = require("mongoose")
 
-router.get("/courses", auth, subscriptionCheck, async (req, res) => {
+router.get("/courses", auth, async (req, res) => {
   try {
     const courses = await NoteCourse.find({ isVisible: true })
       .populate({
@@ -47,7 +47,7 @@ router.get("/progress", auth, subscriptionCheck, async (req, res) => {
 })
 
 // Get a specific note - Dynamic route must come after static routes
-router.get("/:noteId", auth, subscriptionCheck, async (req, res) => {
+router.get("/:noteId", auth, async (req, res) => {
   try {
     const { noteId } = req.params
     const note = await Note.findById(noteId).populate("course", "title")
