@@ -176,6 +176,7 @@ router.post("/verify/:txRef", async (req, res) => {
       // Update payment record
       payment.status = "successful";
       payment.flutterwaveRef = data.id;
+      payment.paidAt = new Date();
       await payment.save();
       console.log("Payment updated to successful:", payment);
       
@@ -188,7 +189,7 @@ router.post("/verify/:txRef", async (req, res) => {
       
       if (payment.subscriptionType === "semester") {
         // For semester subscription, use university's global end date
-        subscriptionExpiry = user.university.globalSubscriptionEnd;
+        subscriptionExpiry = new Date(user.university.globalSubscriptionEnd);
         universitySubscriptionEnd = subscriptionExpiry;
       } else {
         // For monthly subscription, add 30 days for the first payment
@@ -240,12 +241,15 @@ router.post("/verify/:txRef", async (req, res) => {
     } else {
       // Mark payment as failed if verification fails
       payment.status = "failed";
+      payment.failedAt = new Date();
+      payment.failureReason = data.processor_response || "Payment verification failed";
       await payment.save();
       console.log("Payment marked as failed");
       
       return res.status(400).json({
         status: "failed",
         message: "Payment verification failed",
+        reason: data.processor_response || "Unknown error"
       });
     }
   } catch (error) {
@@ -256,6 +260,8 @@ router.post("/verify/:txRef", async (req, res) => {
       const payment = await Payment.findOne({ transactionId: req.params.txRef });
       if (payment) {
         payment.status = "failed";
+        payment.failedAt = new Date();
+        payment.failureReason = error.message;
         await payment.save();
       }
     } catch (saveError) {
@@ -337,7 +343,235 @@ router.post("/webhook", async (req, res) => {
     res.status(500).json({ message: "Webhook processing failed" });
   }
 });
+// routes/payments.js
 
+router.post("/retry/:paymentId", auth, async (req, res) => {
+  try {
+    const { paymentId } = req.params;
+    
+    // Find the payment
+    const payment = await Payment.findById(paymentId);
+    if (!payment) {
+      return res.status(404).json({ message: "Payment not found" });
+    }
+    
+    // Check if payment can be retried
+    if (payment.status === "successful") {
+      return res.status(400).json({ message: "Payment already successful" });
+    }
+    
+    // Get user with university details
+    const user = await User.findById(payment.user).populate("university");
+    
+    // Determine amount based on subscription type
+    let amount;
+    let description;
+    let paymentPlan;
+    
+    if (payment.subscriptionType === "semester") {
+      amount = user.university.semesterPrice;
+      description = "SmartDriller Semester Subscription";
+      paymentPlan = "one-time";
+    } else {
+      amount = user.university.monthlyPrice;
+      description = "SmartDriller Monthly Subscription";
+      paymentPlan = payment.meta.isRecurring ? "recurring" : "one-time";
+    }
+    
+    // Create new payment data for Flutterwave
+    const paymentData = {
+      tx_ref: `smartdriller_retry_${Date.now()}_${req.user._id}`,
+      amount: amount,
+      currency: "NGN",
+      payment_options: "card, banktransfer, ussd",
+      redirect_url: `${process.env.FRONTEND_URL}/payment/callback`,
+      customer: {
+        email: req.user.email,
+        name: req.user.fullName,
+      },
+      customizations: {
+        title: description,
+        description: `Retry your ${payment.subscriptionType} SmartDriller subscription`,
+        logo: "https://ik.imagekit.io/ppenuno5v/smartdriller.jpg",
+      },
+      meta: {
+        subscriptionType: payment.subscriptionType,
+        isRecurring: payment.meta.isRecurring,
+        recurringMonths: payment.meta.recurringMonths,
+        paymentPlan: paymentPlan,
+        userId: req.user._id.toString(),
+        isRetry: true,
+        originalPaymentId: paymentId,
+      },
+    };
+    
+    // For recurring payments, set up subscription plan
+    if (payment.meta.isRecurring && payment.subscriptionType === "monthly") {
+      paymentData.subscription = {
+        id: `smartdriller_sub_retry_${Date.now()}_${req.user._id}`,
+        name: "SmartDriller Monthly Subscription",
+        amount: amount,
+        interval: "monthly",
+        duration: payment.meta.recurringMonths,
+      };
+    }
+    
+    // Make request to Flutterwave
+    const response = await axios.post("https://api.flutterwave.com/v3/payments", paymentData, {
+      headers: {
+        Authorization: `Bearer ${process.env.FLUTTERWAVE_SECRET_KEY}`,
+        "Content-Type": "application/json",
+      },
+    });
+    
+    // Update original payment record
+    payment.retryPaymentId = paymentData.tx_ref;
+    payment.retryAt = new Date();
+    await payment.save();
+    
+    // Create new payment record
+    const newPayment = new Payment({
+      user: req.user._id,
+      amount: paymentData.amount,
+      transactionId: paymentData.tx_ref,
+      subscriptionType: payment.subscriptionType,
+      status: "pending",
+      meta: {
+        isRecurring: payment.meta.isRecurring,
+        recurringMonths: payment.meta.recurringMonths,
+        paymentPlan: paymentPlan,
+        isRetry: true,
+        originalPaymentId: paymentId,
+      }
+    });
+    await newPayment.save();
+    
+    // Return Flutterwave response
+    res.json({
+      status: "success",
+      message: "Payment retry initialized successfully",
+      data: response.data.data,
+    });
+  } catch (error) {
+    console.error("Payment retry error:", error);
+    res.status(500).json({ 
+      message: "Payment retry failed",
+      error: error.message 
+    });
+  }
+});
+
+
+router.get("/status/:txRef", auth, async (req, res) => {
+  try {
+    const { txRef } = req.params;
+    
+    // Find payment by transaction reference
+    const payment = await Payment.findOne({ transactionId: txRef });
+    if (!payment) {
+      return res.status(404).json({ 
+        status: "failed", 
+        message: "Payment record not found" 
+      });
+    }
+
+    if (payment.status === "pending") {
+      try {
+        const response = await axios.get(
+          `https://api.flutterwave.com/v3/transactions/verify_by_reference?tx_ref=${txRef}`,
+          {
+            headers: {
+              Authorization: `Bearer ${process.env.FLUTTERWAVE_SECRET_KEY}`,
+            },
+          }
+        );
+        
+        const { data, status } = response.data;
+        
+        if (status === "success") {
+          // Update payment record
+          payment.status = "successful";
+          payment.flutterwaveRef = data.id;
+          payment.paidAt = new Date();
+          await payment.save();
+          
+          // Update user subscription
+          const user = await User.findById(payment.user);
+          
+          // Calculate subscription expiry based on subscription type
+          let subscriptionExpiry;
+          
+          if (payment.subscriptionType === "semester") {
+            subscriptionExpiry = new Date(user.university.globalSubscriptionEnd);
+          } else {
+            subscriptionExpiry = new Date();
+            subscriptionExpiry.setDate(subscriptionExpiry.getDate() + 30);
+          }
+          
+          await User.findByIdAndUpdate(
+            payment.user,
+            {
+              isSubscribed: true,
+              subscriptionExpiry,
+              subscriptionType: payment.subscriptionType,
+              isRecurring: payment.meta.isRecurring,
+              recurringMonths: payment.meta.recurringMonths,
+              nextPaymentDate: payment.meta.isRecurring ? subscriptionExpiry : null,
+            }
+          );
+        } else {
+          // Mark payment as failed if verification fails
+          payment.status = "failed";
+          payment.failedAt = new Date();
+          payment.failureReason = data.processor_response || "Payment verification failed";
+          await payment.save();
+        }
+      } catch (verifyError) {
+        console.error("Error verifying payment:", verifyError);
+      }
+    }
+    
+    // Get updated payment
+    const updatedPayment = await Payment.findById(payment._id);
+    
+    // Get user data
+    const user = await User.findById(payment.user).populate("university");
+    
+    res.json({
+      status: updatedPayment.status,
+      payment: {
+        id: updatedPayment._id,
+        status: updatedPayment.status,
+        subscriptionType: updatedPayment.subscriptionType,
+        amount: updatedPayment.amount,
+        paidAt: updatedPayment.paidAt,
+        failedAt: updatedPayment.failedAt,
+        failureReason: updatedPayment.failureReason,
+        isRetry: updatedPayment.meta?.isRetry || false,
+        originalPaymentId: updatedPayment.meta?.originalPaymentId,
+      },
+      user: {
+        id: user._id,
+        fullName: user.fullName,
+        email: user.email,
+        isSubscribed: user.isSubscribed,
+        subscriptionExpiry: user.subscriptionExpiry,
+        subscriptionType: user.subscriptionType,
+        isRecurring: user.isRecurring,
+        remainingMonths: user.remainingMonths,
+        nextPaymentDate: user.nextPaymentDate,
+        universitySubscriptionEnd: user.universitySubscriptionEnd,
+        university: user.university,
+      }
+    });
+  } catch (error) {
+    console.error("Error checking payment status:", error);
+    res.status(500).json({ 
+      message: "Failed to check payment status",
+      error: error.message 
+    });
+  }
+});
 // Get subscription options for user
 router.get("/subscription-options", auth, async (req, res) => {
   try {

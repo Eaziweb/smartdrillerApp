@@ -1,3 +1,5 @@
+// models/Payment.js
+
 const mongoose = require("mongoose");
 
 const paymentSchema = new mongoose.Schema(
@@ -23,6 +25,7 @@ const paymentSchema = new mongoose.Schema(
     transactionId: {
       type: String,
       required: true,
+      unique: true,
     },
     flutterwaveRef: String,
     subscriptionType: {
@@ -49,6 +52,9 @@ const paymentSchema = new mongoose.Schema(
         default: false,
       },
     },
+    paidAt: Date,
+    failedAt: Date,
+    failureReason: String,
   },
   {
     timestamps: true,
