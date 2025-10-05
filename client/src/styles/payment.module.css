@@ -263,6 +263,104 @@
   20%, 40%, 60%, 80% { transform: translateX(5px); }
 }
 
+/* Subscription Details */
+.subscriptionDetails {
+  margin-top: 2rem;
+  text-align: left;
+  background: rgba(0, 102, 255, 0.05);
+  border-radius: var(--radius-md);
+  padding: 1.5rem;
+  border: 1px solid rgba(0, 102, 255, 0.1);
+}
+
+.subscriptionDetails h3 {
+  margin-top: 0;
+  margin-bottom: 1rem;
+  color: var(--text-primary);
+  font-size: 1.2rem;
+  text-align: center;
+}
+
+.detailsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+.detailItem {
+  display: flex;
+  flex-direction: column;
+}
+
+.detailLabel {
+  font-size: 0.85rem;
+  color: var(--text-tertiary);
+  margin-bottom: 0.3rem;
+}
+
+.detailValue {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+/* Support Button */
+.supportBtn {
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+  padding: 1rem 2rem;
+  border-radius: var(--radius-md);
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.8rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.supportBtn:hover {
+  background: var(--bg-accent);
+  border-color: var(--border-hover);
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-md);
+}
+
+/* Transaction Info */
+.transactionInfo {
+  margin-top: 2rem;
+  text-align: left;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  padding: 1rem;
+  background: rgba(0, 0, 0, 0.03);
+  border-radius: var(--radius-md);
+}
+
+.transactionRef {
+  display: flex;
+  flex-direction: column;
+  margin-top: 0.5rem;
+}
+
+.refLabel {
+  font-weight: 600;
+  margin-bottom: 0.2rem;
+  color: var(--text-primary);
+}
+
+.refValue {
+  font-family: monospace;
+  background: var(--bg-accent);
+  padding: 0.5rem;
+  border-radius: var(--radius-sm);
+  word-break: break-all;
+  color: var(--text-primary);
+}
+
 /* Responsive adjustments */
 @media (max-width: 768px) {
   .paymentContainer {
@@ -291,7 +389,7 @@
     margin-bottom: 2rem;
   }
   
-  .payBtn {
+  .payBtn, .supportBtn {
     padding: 0.9rem 1.8rem;
     font-size: 0.95rem;
   }
@@ -305,6 +403,21 @@
     font-size: 0.85rem;
     padding: 0.8rem;
     margin-top: 1rem;
+  }
+
+  .subscriptionDetails {
+    padding: 1.2rem;
+    margin-top: 1.5rem;
+  }
+
+  .detailsGrid {
+    grid-template-columns: 1fr;
+    gap: 0.8rem;
+  }
+
+  .transactionInfo {
+    padding: 0.8rem;
+    margin-top: 1.5rem;
   }
 }
 
@@ -334,7 +447,7 @@
     margin-bottom: 1.5rem;
   }
   
-  .payBtn {
+  .payBtn, .supportBtn {
     padding: 0.8rem 1.5rem;
     font-size: 0.9rem;
   }
@@ -348,5 +461,32 @@
     font-size: 0.8rem;
     padding: 0.7rem;
     margin-top: 0.8rem;
+  }
+
+  .subscriptionDetails {
+    padding: 1rem;
+    margin-top: 1.2rem;
+  }
+
+  .subscriptionDetails h3 {
+    font-size: 1.1rem;
+  }
+
+  .detailLabel {
+    font-size: 0.8rem;
+  }
+
+  .detailValue {
+    font-size: 0.9rem;
+  }
+
+  .transactionInfo {
+    font-size: 0.85rem;
+    padding: 0.7rem;
+    margin-top: 1.2rem;
+  }
+
+  .refValue {
+    font-size: 0.8rem;
   }
 }
