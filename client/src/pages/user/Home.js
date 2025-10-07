@@ -436,59 +436,59 @@ const openWhatsAppChannel = useCallback((event) => {
           </button>
         </div>
      <div className={styles.sidebarContent}>
-  <div className={styles.sidebarSection}>
-    <h3>Quick Access</h3>
-    <ul>
-      <li>
-        <a href="#" onClick={handleActivate}>
-          <i className="fas fa-plus-circle"></i> Activate
-        </a>
-      </li>
-      <li>
-        <Link to="/competition-history">
-          <i className="fas fa-trophy"></i> Leaderboard
-        </Link>
-      </li>
-      <li>
-        <Link to="/bookmarks">
-          <i className="fas fa-bookmark"></i> Bookmarks
-        </Link>
-      </li>
-    </ul>
-  </div>
-
-  <div className={styles.sidebarSection}>
-    <h3>Community & Contact</h3>
-    <ul>
-      <li>
-        <a href="#" onClick={openWhatsAppChannel}>
-          <i className="fas fa-thumbs-up"></i> Follow us on WhatsApp
-        </a>
-      </li>
-      <li>
-        <a href="#" onClick={handleShare}>
-          <i className="fas fa-share-alt"></i> Share
-        </a>
-      </li>
-      <li>
-        <a href="#" onClick={toggleAboutModal}>
-          <i className="fas fa-info-circle"></i> About SmartDriller
-        </a>
-      </li>
-    </ul>
-  </div>
-
-  <div className={styles.sidebarSection}>
-    <h3>Account</h3>
-    <ul>
-      <li>
-        <a href="#" onClick={logout}>
-          <i className="fas fa-sign-out-alt"></i> Logout
-        </a>
-      </li>
-    </ul>
-  </div>
+<div className={styles.sidebarSection}>
+  <h3>Quick Access</h3>
+  <ul>
+    <li>
+      <button onClick={handleActivate} className={styles.sidebarItem}>
+        <i className="fas fa-plus-circle"></i> Activate
+      </button>
+    </li>
+    <li>
+      <Link to="/competition-history" className={styles.sidebarItem}>
+        <i className="fas fa-trophy"></i> Leaderboard
+      </Link>
+    </li>
+    <li>
+      <Link to="/bookmarks" className={styles.sidebarItem}>
+        <i className="fas fa-bookmark"></i> Bookmarks
+      </Link>
+    </li>
+  </ul>
 </div>
+
+<div className={styles.sidebarSection}>
+  <h3>Community & Contact</h3>
+  <ul>
+    <li>
+      <button onClick={openWhatsAppChannel} className={styles.sidebarItem}>
+        <i className="fas fa-thumbs-up"></i> Follow us on WhatsApp
+      </button>
+    </li>
+    <li>
+      <button onClick={handleShare} className={styles.sidebarItem}>
+        <i className="fas fa-share-alt"></i> Share
+      </button>
+    </li>
+    <li>
+      <button onClick={toggleAboutModal} className={styles.sidebarItem}>
+        <i className="fas fa-info-circle"></i> About SmartDriller
+      </button>
+    </li>
+  </ul>
+</div>
+
+<div className={styles.sidebarSection}>
+  <h3>Account</h3>
+  <ul>
+    <li>
+      <button onClick={logout} className={styles.sidebarItem}>
+        <i className="fas fa-sign-out-alt"></i> Logout
+      </button>
+    </li>
+  </ul>
+</div>
+
 
       </div>
       
