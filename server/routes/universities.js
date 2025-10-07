@@ -3,7 +3,6 @@ const express = require("express");
 const axios = require("axios");
 const University = require("../models/University");
 const { adminAuth } = require("../middleware/auth");
-const University = require("../models/University");
 const User = require("../models/User"); 
 const router = express.Router();
 

@@ -435,66 +435,61 @@ const openWhatsAppChannel = useCallback((event) => {
             <i className="fas fa-times"></i>
           </button>
         </div>
-        <div className={styles.sidebarContent}>
-          <div className={styles.sidebarSection}>
-            <h3>Quick Access</h3>
-            <ul>
-                <a href="#" onClick={handleActivate}>
-              <li>
-              
-                  <i className="fas fa-plus-circle"></i> Activate
-              </li>
-                </a>
+     <div className={styles.sidebarContent}>
+  <div className={styles.sidebarSection}>
+    <h3>Quick Access</h3>
+    <ul>
+      <li>
+        <a href="#" onClick={handleActivate}>
+          <i className="fas fa-plus-circle"></i> Activate
+        </a>
+      </li>
+      <li>
+        <Link to="/competition-history">
+          <i className="fas fa-trophy"></i> Leaderboard
+        </Link>
+      </li>
+      <li>
+        <Link to="/bookmarks">
+          <i className="fas fa-bookmark"></i> Bookmarks
+        </Link>
+      </li>
+    </ul>
+  </div>
 
-              <li>
-                <Link to="/competition-history">
-                  <i className="fas fa-trophy"></i> Leaderboard
-                </Link>
-              </li>
-              <li>
-                <Link to="/bookmarks">
-                  <i className="fas fa-bookmark"></i> Bookmarks
-                </Link>
-              </li>
-            </ul>
-          </div>
-          <div className={styles.sidebarSection}>
-            <h3>Community & Contact</h3>
-            <ul>
-  <a href="#" onClick={openWhatsAppChannel}>
+  <div className={styles.sidebarSection}>
+    <h3>Community & Contact</h3>
+    <ul>
+      <li>
+        <a href="#" onClick={openWhatsAppChannel}>
+          <i className="fas fa-thumbs-up"></i> Follow us on WhatsApp
+        </a>
+      </li>
+      <li>
+        <a href="#" onClick={handleShare}>
+          <i className="fas fa-share-alt"></i> Share
+        </a>
+      </li>
+      <li>
+        <a href="#" onClick={toggleAboutModal}>
+          <i className="fas fa-info-circle"></i> About SmartDriller
+        </a>
+      </li>
+    </ul>
+  </div>
 
-<li>
-    <i className="fas fa-thumbs-up"></i> Follow us on WhatsApp
-</li>
-  </a>
-  <a href="#" onClick={handleShare}>
+  <div className={styles.sidebarSection}>
+    <h3>Account</h3>
+    <ul>
+      <li>
+        <a href="#" onClick={logout}>
+          <i className="fas fa-sign-out-alt"></i> Logout
+        </a>
+      </li>
+    </ul>
+  </div>
+</div>
 
-<li>
-    <i className="fas fa-share-alt"></i> Share
-</li>
-  </a>
-                <a href="#" onClick={toggleAboutModal}>
-
-              <li>
-                  <i className="fas fa-info-circle"></i> About SmartDriller
-              </li>
-                </a>
-
-            </ul>
-          </div>
-          <div className={styles.sidebarSection}>
-            <h3>Account</h3>
-            <ul>
-                <a href="#" onClick={logout}>
-
-              <li>
-                  <i className="fas fa-sign-out-alt"></i> Logout
-              </li>
-                </a>
-
-            </ul>
-          </div>
-        </div>
       </div>
       
       <div className={`${styles.notificationPanel} ${notificationPanelOpen ? styles.active : ""}`}>
