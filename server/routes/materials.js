@@ -24,7 +24,7 @@ const storage = new CloudinaryStorage({
 
 const upload = multer({
   storage,
-  limits: { fileSize: 100 * 1024 * 1024 },
+  limits: { fileSize: 70 * 1024 * 1024 },
   fileFilter: (req, file, cb) => {
     const allowed = ["pdf", "docx", "ppt"];
     const ext = file.originalname.split(".").pop().toLowerCase();

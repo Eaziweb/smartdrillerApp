@@ -271,6 +271,7 @@ list-style: none;
   display: flex;
   align-items: center;
   padding: 12px 16px;
+  padding-left: 5px;
   margin-bottom: 4px;
   border-radius: 8px;
   transition: var(--transition);
@@ -280,7 +281,7 @@ list-style: none;
   box-sizing: border-box;
 }
 
-.sidebarSection ul li:hover {
+.sidebarSection ul li a:hover {
   background: rgba(0, 153, 255, 0.1);
   color: var(--text-primary);
   transform: translateX(5px);

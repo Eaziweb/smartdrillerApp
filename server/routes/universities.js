@@ -3,6 +3,8 @@ const express = require("express");
 const axios = require("axios");
 const University = require("../models/University");
 const { adminAuth } = require("../middleware/auth");
+const University = require("../models/University");
+const User = require("../models/User"); 
 const router = express.Router();
 
 // Fetch Nigerian universities from external API
@@ -80,7 +82,7 @@ router.post("/", adminAuth, async (req, res) => {
   }
 });
 
-// Update university settings (admin only)
+
 router.put("/:id", adminAuth, async (req, res) => {
   try {
     const { id } = req.params;
@@ -90,14 +92,53 @@ router.put("/:id", adminAuth, async (req, res) => {
       semesterActive,
       globalSubscriptionEnd,
     } = req.body;
+    
+    // Get the current university to compare dates
+    const currentUniversity = await University.findById(id);
+    if (!currentUniversity) {
+      return res.status(404).json({ message: "University not found" });
+    }
+    
+    // Check if globalSubscriptionEnd is being changed
+    let isDateChanged = false;
+    if (globalSubscriptionEnd) {
+      const oldDate = new Date(currentUniversity.globalSubscriptionEnd);
+      const newDate = new Date(globalSubscriptionEnd);
+      
+      // Compare dates (ignoring time)
+      isDateChanged = 
+        oldDate.getUTCFullYear() !== newDate.getUTCFullYear() ||
+        oldDate.getUTCMonth() !== newDate.getUTCMonth() ||
+        oldDate.getUTCDate() !== newDate.getUTCDate();
+    }
+    
+    // Update the university
     const university = await University.findByIdAndUpdate(
       id,
       { monthlyPrice, semesterPrice, semesterActive, globalSubscriptionEnd },
       { new: true }
     );
-    if (!university) {
-      return res.status(404).json({ message: "University not found" });
+    
+    // If globalSubscriptionEnd was changed, update all semester-subscribed users
+    if (isDateChanged) {
+      const newEndDate = new Date(globalSubscriptionEnd);
+      
+      // Update all users with semester subscription for this university
+      const updateResult = await User.updateMany(
+        {
+          university: id,
+          subscriptionType: "semester",
+          isSubscribed: true
+        },
+        {
+          subscriptionExpiry: newEndDate,
+          universitySubscriptionEnd: newEndDate
+        }
+      );
+      
+      console.log(`Updated ${updateResult.modifiedCount} users with new semester end date: ${newEndDate.toISOString()}`);
     }
+    
     res.json({ success: true, university });
   } catch (error) {
     console.error("Error updating university:", error);

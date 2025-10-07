@@ -26,7 +26,7 @@ const SuperAdminRoute = ({ children }) => {
   }
 
   if (!user || user.role !== "superadmin") {
-    return <Navigate to="/superadmin/login" replace />
+    return <Navigate to="/private/superadmin/login" replace />
   }
 
   return children

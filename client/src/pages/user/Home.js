@@ -338,19 +338,22 @@ Join now: https://smartdriller.vercel.app/`;
   }
 }, [showMessage]);
   
-  function openWhatsAppChannel() {
-    const channelLink = "0029VbBLtIyKbYMQYmgnDh2o";
-    const appLink = `whatsapp://channel/${channelLink}`;
-    const webLink = `https://whatsapp.com/channel/${channelLink}`;
+const openWhatsAppChannel = useCallback((event) => {
+  event.preventDefault();
 
-    // Try to open in app first
-    window.location.href = appLink;
+  const channelId = "0029VbBLtIyKbYMQYmgnDh2o";
+  const webLink = `https://whatsapp.com/channel/${channelId}`;
+  const appLink = `https://wa.me/channel/${channelId}`;
 
-    // Fallback to web after 1 second
-    setTimeout(() => {
-      window.open(webLink, "_blank");
-    }, 1000);
-  }
+ 
+  window.location.href = appLink;
+
+  setTimeout(() => {
+    window.open(webLink, "_blank");
+  }, 800);
+}, []);
+
+
   const isNotificationNew = useCallback((notification) => {
     if (!user?.lastNotificationView) return true;
     return new Date(notification.createdAt) > new Date(user.lastNotificationView);
@@ -436,11 +439,13 @@ Join now: https://smartdriller.vercel.app/`;
           <div className={styles.sidebarSection}>
             <h3>Quick Access</h3>
             <ul>
-              <li>
                 <a href="#" onClick={handleActivate}>
+              <li>
+              
                   <i className="fas fa-plus-circle"></i> Activate
-                </a>
               </li>
+                </a>
+
               <li>
                 <Link to="/competition-history">
                   <i className="fas fa-trophy"></i> Leaderboard
@@ -456,31 +461,37 @@ Join now: https://smartdriller.vercel.app/`;
           <div className={styles.sidebarSection}>
             <h3>Community & Contact</h3>
             <ul>
+  <a href="#" onClick={openWhatsAppChannel}>
+
 <li>
-  <a href="#" onclick="openWhatsAppChannel(); return false;">
     <i className="fas fa-thumbs-up"></i> Follow us on WhatsApp
-  </a>
 </li>
-              <li>
-                <a href="#" onClick={handleShare}>
-                  <i className="fas fa-share-alt"></i> Share
-                </a>
-              </li>
-              <li>
+  </a>
+  <a href="#" onClick={handleShare}>
+
+<li>
+    <i className="fas fa-share-alt"></i> Share
+</li>
+  </a>
                 <a href="#" onClick={toggleAboutModal}>
+
+              <li>
                   <i className="fas fa-info-circle"></i> About SmartDriller
-                </a>
               </li>
+                </a>
+
             </ul>
           </div>
           <div className={styles.sidebarSection}>
             <h3>Account</h3>
             <ul>
-              <li>
                 <a href="#" onClick={logout}>
+
+              <li>
                   <i className="fas fa-sign-out-alt"></i> Logout
-                </a>
               </li>
+                </a>
+
             </ul>
           </div>
         </div>
