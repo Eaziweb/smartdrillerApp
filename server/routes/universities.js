@@ -82,8 +82,11 @@ router.post("/", adminAuth, async (req, res) => {
   }
 });
 
-
+// Update university settings (admin only)
 router.put("/:id", adminAuth, async (req, res) => {
+  const session = await User.startSession();
+  session.startTransaction();
+
   try {
     const { id } = req.params;
     const {
@@ -92,64 +95,55 @@ router.put("/:id", adminAuth, async (req, res) => {
       semesterActive,
       globalSubscriptionEnd,
     } = req.body;
-    
-    // Find the existing university first
-    const existingUniversity = await University.findById(id);
+
+    // Find the existing university
+    const existingUniversity = await University.findById(id).session(session);
     if (!existingUniversity) {
+      await session.abortTransaction();
       return res.status(404).json({ message: "University not found" });
     }
 
-    // Convert date strings to Date objects
+    const oldGlobalEndDate = existingUniversity.globalSubscriptionEnd;
     const newGlobalEndDate = new Date(globalSubscriptionEnd);
-    const existingGlobalEndDate = existingUniversity.globalSubscriptionEnd;
 
-    // Prepare update fields
-    const updateFields = {
-      monthlyPrice,
-      semesterPrice,
-      semesterActive,
-    };
-    
-    let shouldUpdateUsers = false;
-    
-    // Check if globalSubscriptionEnd has changed
-    if (existingGlobalEndDate.getTime() !== newGlobalEndDate.getTime()) {
-      updateFields.globalSubscriptionEnd = newGlobalEndDate;
-      shouldUpdateUsers = true;
-    }
-
-    // Update the university
+    // Update university
     const university = await University.findByIdAndUpdate(
       id,
-      updateFields,
-      { new: true }
+      {
+        monthlyPrice,
+        semesterPrice,
+        semesterActive,
+        globalSubscriptionEnd: newGlobalEndDate,
+      },
+      { new: true, session }
     );
 
-    // If globalSubscriptionEnd changed, update all users of this university
-    if (shouldUpdateUsers) {
-      await User.updateMany(
-        { university: id },
-        { 
-          universitySubscriptionEnd: newGlobalEndDate,
-          // Also update subscriptionExpiry if it was tied to the previous global date
-          $set: {
-            subscriptionExpiry: {
-              $cond: {
-                if: { $eq: ["$subscriptionExpiry", existingGlobalEndDate] },
-                then: newGlobalEndDate,
-                else: "$subscriptionExpiry"
-              }
-            }
-          }
-        }
-      );
-    }
+    // Update all users under this university
+    // 1️⃣ Update universitySubscriptionEnd for all users
+    await User.updateMany(
+      { university: id },
+      { universitySubscriptionEnd: newGlobalEndDate },
+      { session }
+    );
 
+    // 2️⃣ Update subscriptionExpiry only for users whose expiry matched old global end date
+    await User.updateMany(
+      { university: id, subscriptionExpiry: oldGlobalEndDate },
+      { subscriptionExpiry: newGlobalEndDate },
+      { session }
+    );
+
+    await session.commitTransaction();
     res.json({ success: true, university });
   } catch (error) {
+    await session.abortTransaction();
     console.error("Error updating university:", error);
     res.status(500).json({ message: "Failed to update university" });
+  } finally {
+    session.endSession();
   }
 });
+
+module.exports = router;
 
 module.exports = router;
