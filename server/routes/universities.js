@@ -2,8 +2,9 @@
 const express = require("express");
 const axios = require("axios");
 const University = require("../models/University");
-const { adminAuth } = require("../middleware/auth");
 const User = require("../models/User"); 
+const { adminAuth } = require("../middleware/auth");
+
 const router = express.Router();
 
 // Fetch Nigerian universities from external API
@@ -92,52 +93,58 @@ router.put("/:id", adminAuth, async (req, res) => {
       globalSubscriptionEnd,
     } = req.body;
     
-    // Get the current university to compare dates
-    const currentUniversity = await University.findById(id);
-    if (!currentUniversity) {
+    // Find the existing university first
+    const existingUniversity = await University.findById(id);
+    if (!existingUniversity) {
       return res.status(404).json({ message: "University not found" });
     }
+
+    // Convert date strings to Date objects
+    const newGlobalEndDate = new Date(globalSubscriptionEnd);
+    const existingGlobalEndDate = existingUniversity.globalSubscriptionEnd;
+
+    // Prepare update fields
+    const updateFields = {
+      monthlyPrice,
+      semesterPrice,
+      semesterActive,
+    };
     
-    // Check if globalSubscriptionEnd is being changed
-    let isDateChanged = false;
-    if (globalSubscriptionEnd) {
-      const oldDate = new Date(currentUniversity.globalSubscriptionEnd);
-      const newDate = new Date(globalSubscriptionEnd);
-      
-      // Compare dates (ignoring time)
-      isDateChanged = 
-        oldDate.getUTCFullYear() !== newDate.getUTCFullYear() ||
-        oldDate.getUTCMonth() !== newDate.getUTCMonth() ||
-        oldDate.getUTCDate() !== newDate.getUTCDate();
+    let shouldUpdateUsers = false;
+    
+    // Check if globalSubscriptionEnd has changed
+    if (existingGlobalEndDate.getTime() !== newGlobalEndDate.getTime()) {
+      updateFields.globalSubscriptionEnd = newGlobalEndDate;
+      shouldUpdateUsers = true;
     }
-    
+
     // Update the university
     const university = await University.findByIdAndUpdate(
       id,
-      { monthlyPrice, semesterPrice, semesterActive, globalSubscriptionEnd },
+      updateFields,
       { new: true }
     );
-    
-    // If globalSubscriptionEnd was changed, update all semester-subscribed users
-    if (isDateChanged) {
-      const newEndDate = new Date(globalSubscriptionEnd);
-      
-      // Update all users with semester subscription for this university
-      const updateResult = await User.updateMany(
-        {
-          university: id,
-          subscriptionType: "semester",
-          isSubscribed: true
-        },
-        {
-          subscriptionExpiry: newEndDate,
-          universitySubscriptionEnd: newEndDate
+
+    // If globalSubscriptionEnd changed, update all users of this university
+    if (shouldUpdateUsers) {
+      await User.updateMany(
+        { university: id },
+        { 
+          universitySubscriptionEnd: newGlobalEndDate,
+          // Also update subscriptionExpiry if it was tied to the previous global date
+          $set: {
+            subscriptionExpiry: {
+              $cond: {
+                if: { $eq: ["$subscriptionExpiry", existingGlobalEndDate] },
+                then: newGlobalEndDate,
+                else: "$subscriptionExpiry"
+              }
+            }
+          }
         }
       );
-      
-      console.log(`Updated ${updateResult.modifiedCount} users with new semester end date: ${newEndDate.toISOString()}`);
     }
-    
+
     res.json({ success: true, university });
   } catch (error) {
     console.error("Error updating university:", error);
