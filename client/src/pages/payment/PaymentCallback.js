@@ -43,7 +43,7 @@ const PaymentCallback = () => {
   const verifyPayment = async (paymentRef) => {
     try {
       console.log("Verifying payment with reference:", paymentRef)
-      
+
       const response = await api.post(`/api/payments/verify/${paymentRef}`)
       console.log("Payment verification response:", response.data)
 
@@ -52,13 +52,13 @@ const PaymentCallback = () => {
         setMessage("Payment successful! Your subscription has been activated.")
         setIsAnimating(true)
         setPaymentDetails(response.data.user)
-        
+
         // Update user context with the latest user data
         if (response.data.user && updateUser) {
           console.log("Updating user context with:", response.data.user)
           updateUser(response.data.user)
         }
-        
+
         // Redirect to home after a short delay
         setTimeout(() => navigate("/home"), 3000)
       } else {
@@ -68,25 +68,25 @@ const PaymentCallback = () => {
       }
     } catch (error) {
       console.error("Payment verification error:", error)
-      
+
       // Check if we should retry
       if (shouldRetry(error)) {
         if (retryCount < maxRetries) {
-          setRetryCount(prevCount => prevCount + 1)
+          setRetryCount((prevCount) => prevCount + 1)
           setMessage(`Payment verification failed. Retrying... (Attempt ${retryCount + 1} of ${maxRetries})`)
-          
+
           // Exponential backoff for retries
           const delay = Math.pow(2, retryCount) * 1000
           setTimeout(() => verifyPayment(paymentRef), delay)
           return
         }
       }
-      
+
       // If we can't retry or have exhausted retries
       setStatus("error")
       setMessage(
-        error.response?.data?.message || 
-        "An error occurred while verifying payment. Please contact support with your transaction reference."
+        error.response?.data?.message ||
+          "An error occurred while verifying payment. Please contact support with your transaction reference.",
       )
       setIsAnimating(true)
     }
@@ -99,12 +99,12 @@ const PaymentCallback = () => {
       const status = error.response.status
       return status === 408 || status === 429 || status >= 500
     }
-    
+
     // Retry on network errors
-    if (error.code === 'ECONNABORTED' || error.code === 'ETIMEDOUT') {
+    if (error.code === "ECONNABORTED" || error.code === "ETIMEDOUT") {
       return true
     }
-    
+
     return false
   }
 
@@ -134,15 +134,15 @@ const PaymentCallback = () => {
     const txRef = searchParams.get("tx_ref") || searchParams.get("transaction_id")
     const subject = encodeURIComponent("Payment Verification Issue")
     const body = encodeURIComponent(
-      `Hi Support Team,\n\nI'm having an issue with my payment verification.\n\nTransaction Reference: ${txRef}\nUser ID: ${user?._id}\nEmail: ${user?.email}\n\nError Message: ${message}\n\nPlease assist me with this issue.`
+      `Hi Support Team,\n\nI'm having an issue with my payment verification.\n\nTransaction Reference: ${txRef}\nUser ID: ${user?._id}\nEmail: ${user?.email}\n\nError Message: ${message}\n\nPlease assist me with this issue.`,
     )
-    
-    window.location.href = `mailto:support@smartdriller.com?subject=${subject}&body=${body}`
+
+    window.location.href = `mailto:smartdrillerhelp@gmail.com?subject=${subject}&body=${body}`
   }
 
   const formatSubscriptionDetails = () => {
     if (!paymentDetails) return null
-    
+
     return (
       <div className={styles.subscriptionDetails}>
         <h3>Subscription Details</h3>
@@ -153,9 +153,7 @@ const PaymentCallback = () => {
           </div>
           <div className={styles.detailItem}>
             <span className={styles.detailLabel}>Status:</span>
-            <span className={styles.detailValue}>
-              {paymentDetails.isSubscribed ? "Active" : "Inactive"}
-            </span>
+            <span className={styles.detailValue}>{paymentDetails.isSubscribed ? "Active" : "Inactive"}</span>
           </div>
           {paymentDetails.subscriptionExpiry && (
             <div className={styles.detailItem}>
@@ -183,14 +181,14 @@ const PaymentCallback = () => {
           <div className={styles.statusIcon}>
             <i className={`fas ${getStatusIcon()} ${status === "verifying" ? styles.spinner : ""}`}></i>
           </div>
-          
+
           <h1 className={styles.statusTitle}>
             {status === "success" && "Payment Successful!"}
             {status === "error" && "Payment Failed"}
             {status === "cancelled" && "Payment Cancelled"}
             {status === "verifying" && "Verifying Payment..."}
           </h1>
-          
+
           <p className={styles.statusMessage}>{message}</p>
 
           {/* Show subscription details on success */}
@@ -200,10 +198,7 @@ const PaymentCallback = () => {
           <div className={styles.actionButtons}>
             {status === "error" && retryCount >= maxRetries && (
               <>
-                <button
-                  onClick={handleRetry}
-                  className={styles.payBtn}
-                >
+                <button onClick={handleRetry} className={styles.payBtn}>
                   <div className={styles.btnContent}>
                     <span className={styles.btnText}>Retry Verification</span>
                     <div className={styles.btnArrow}>
@@ -211,10 +206,7 @@ const PaymentCallback = () => {
                     </div>
                   </div>
                 </button>
-                <button
-                  onClick={handleContactSupport}
-                  className={styles.supportBtn}
-                >
+                <button onClick={handleContactSupport} className={styles.supportBtn}>
                   <div className={styles.btnContent}>
                     <span className={styles.btnText}>Contact Support</span>
                     <div className={styles.btnArrow}>
@@ -224,13 +216,9 @@ const PaymentCallback = () => {
                 </button>
               </>
             )}
-            
-            {(status === "success" || status === "cancelled" || 
-              (status === "error" && retryCount < maxRetries)) && (
-              <button
-                onClick={() => navigate("/home")}
-                className={styles.payBtn}
-              >
+
+            {(status === "success" || status === "cancelled" || (status === "error" && retryCount < maxRetries)) && (
+              <button onClick={() => navigate("/home")} className={styles.payBtn}>
                 <div className={styles.btnContent}>
                   <span className={styles.btnText}>
                     {status === "success" ? "Continue to Dashboard" : "Go to Home"}

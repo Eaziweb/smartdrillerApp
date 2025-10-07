@@ -83,43 +83,49 @@ router.post("/", adminAuth, async (req, res) => {
 });
 
 // Update university settings (admin only)
-// Update university settings (admin only)
 router.put("/:id", adminAuth, async (req, res) => {
-  const session = await User.startSession();
-  session.startTransaction();
+  const session = await User.startSession()
+  session.startTransaction()
 
   try {
-    const { id } = req.params;
+    const { id } = req.params
     const {
       monthlyPrice,
       semesterPrice,
       semesterActive,
       globalSubscriptionEnd,
-    } = req.body;
+      confirmPastDate, // Added confirmation flag for past dates
+    } = req.body
 
     // Validate globalSubscriptionEnd
     if (!globalSubscriptionEnd) {
-      await session.abortTransaction();
-      return res.status(400).json({ message: "globalSubscriptionEnd is required" });
+      await session.abortTransaction()
+      return res.status(400).json({ message: "globalSubscriptionEnd is required" })
     }
 
-    const newGlobalEndDate = new Date(globalSubscriptionEnd);
+    const newGlobalEndDate = new Date(globalSubscriptionEnd)
     if (isNaN(newGlobalEndDate.getTime())) {
-      await session.abortTransaction();
-      return res.status(400).json({ message: "Invalid date format for globalSubscriptionEnd" });
+      await session.abortTransaction()
+      return res.status(400).json({ message: "Invalid date format for globalSubscriptionEnd" })
     }
 
-    // Find the existing university
-    const existingUniversity = await University.findById(id).session(session);
+    const now = new Date()
+
+    if (newGlobalEndDate < now && !confirmPastDate) {
+      await session.abortTransaction()
+      return res.status(400).json({
+        requiresConfirmation: true,
+        message:
+          "The date you selected has already passed. All users will be marked as unsubscribed. Do you want to continue?",
+      })
+    }
+
+    const existingUniversity = await University.findById(id).session(session)
     if (!existingUniversity) {
-      await session.abortTransaction();
-      return res.status(404).json({ message: "University not found" });
+      await session.abortTransaction()
+      return res.status(404).json({ message: "University not found" })
     }
 
-    const oldGlobalEndDate = existingUniversity.globalSubscriptionEnd;
-    const now = new Date();
-
-    // ✅ 1️⃣ Update university details
     const university = await University.findByIdAndUpdate(
       id,
       {
@@ -128,54 +134,56 @@ router.put("/:id", adminAuth, async (req, res) => {
         semesterActive,
         globalSubscriptionEnd: newGlobalEndDate,
       },
-      { new: true, session }
-    );
+      { new: true, session },
+    )
 
-    // ✅ 2️⃣ Update universitySubscriptionEnd for ALL users
-    await User.updateMany(
-      { university: id },
-      { universitySubscriptionEnd: newGlobalEndDate },
-      { session }
-    );
+    await User.updateMany({ university: id }, { universitySubscriptionEnd: newGlobalEndDate }, { session })
 
-    // ✅ 3️⃣ Update subscriptionExpiry ONLY for semester-plan users
-    //     (and only if their expiry matched the old global end date)
     await User.updateMany(
       {
         university: id,
         subscriptionType: "semester",
-        subscriptionExpiry: oldGlobalEndDate,
       },
       { subscriptionExpiry: newGlobalEndDate },
-      { session }
-    );
+      { session },
+    )
 
-    // ✅ 4️⃣ If the new global date is already in the past, unsubscribe everyone
     if (newGlobalEndDate < now) {
       await User.updateMany(
         { university: id },
-        { isSubscribed: false },
-        { session }
-      );
+        {
+          isSubscribed: false,
+          subscriptionExpiry: newGlobalEndDate,
+        },
+        { session },
+      )
+    } else {
+      await User.updateMany(
+        {
+          university: id,
+          subscriptionExpiry: { $gte: now },
+        },
+        { isSubscribed: true },
+        { session },
+      )
     }
 
-    await session.commitTransaction();
+    await session.commitTransaction()
 
     res.json({
       success: true,
-      message: "University and user subscriptions updated successfully",
+      message: "University and all user subscriptions updated successfully",
       university,
-    });
+      affectedUsers: await User.countDocuments({ university: id }),
+    })
   } catch (error) {
-    await session.abortTransaction();
-    console.error("Error updating university:", error);
-    res.status(500).json({ message: "Failed to update university" });
+    await session.abortTransaction()
+    console.error("Error updating university:", error)
+    res.status(500).json({ message: "Failed to update university" })
   } finally {
-    session.endSession();
+    session.endSession()
   }
-});
+})
 
-
-module.exports = router;
 
 module.exports = router;

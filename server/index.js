@@ -141,6 +141,8 @@ app.use("/api/courses", require("./routes/courses"));
 app.use("/api/courseofstudy", require("./routes/courseofstudy"));
 app.use("/api/universities", require("./routes/universities"));
 app.use("/api/test", require("./routes/test"));
+app.use("/api/payments/webhook", require("./middleware/webhookLogger"))
+
 
 // ----------------------
 // Static Files

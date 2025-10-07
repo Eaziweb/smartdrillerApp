@@ -1,492 +1,411 @@
-:root {
-  --primary-dark: #002060;
-  --primary-light: #0066ff;
-  --primary-gradient: linear-gradient(45deg, #0099ff, #002060 70%);
-  --success-gradient: linear-gradient(45deg, #10b981, #059669);
-  --error-gradient: linear-gradient(45deg, #ef4444, #dc2626);
-  --warning-gradient: linear-gradient(45deg, #f59e0b, #d97706);
-  --info-gradient: linear-gradient(45deg, #3b82f6, #2563eb);
-  --success-color: #10b981;
-  --error-color: #ef4444;
-  --warning-color: #f59e0b;
-  --info-color: #3b82f6;
-  --bg-primary: #ffffff;
-  --bg-secondary: #f8fafc;
-  --bg-accent: #f1f5f9;
-  --text-primary: #1e293b;
-  --text-secondary: #64748b;
-  --text-tertiary: #94a3b8;
-  --border-color: #e2e8f0;
-  --border-hover: #cbd5e1;
-  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
-  --radius-sm: 6px;
-  --radius-md: 12px;
-  --radius-lg: 16px;
-  --radius-xl: 20px;
-}
-
+/* Payment Container */
 .paymentContainer {
   min-height: 100vh;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 1rem;
-  font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
-  position: relative;
-  overflow: hidden;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 20px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans",
+    "Droid Sans", "Helvetica Neue", sans-serif;
 }
 
-/* Animated background elements */
-.paymentContainer::before {
-  content: "";
-  position: absolute;
-  top: -50%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
-  background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 1px, transparent 1px);
-  background-size: 20px 20px;
-  animation: backgroundMove 20s linear infinite;
-  z-index: 0;
-}
-
-@keyframes backgroundMove {
-  0% { transform: translate(0, 0); }
-  100% { transform: translate(50px, 50px); }
-}
-
+/* Payment Card */
 .paymentCard {
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(10px);
-  border-radius: var(--radius-xl);
-  padding: 3rem 2rem;
+  background: white;
+  border-radius: 20px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  padding: 40px;
   max-width: 600px;
   width: 100%;
-  box-shadow: 0 25px 50px rgba(0, 32, 96, 0.2);
   text-align: center;
-  transition: all 0.3s ease;
-  position: relative;
-  z-index: 1;
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  animation: slideUp 0.5s ease-out;
 }
 
-.paymentCard:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 30px 60px rgba(0, 32, 96, 0.25);
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
-.paymentStatus {
-  text-align: center;
-}
-
+/* Status Icon */
 .statusIcon {
-  width: 120px;
-  height: 120px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 0 auto 2rem;
-  font-size: 3.5rem;
-  color: white;
-  position: relative;
-  overflow: hidden;
+  font-size: 80px;
+  margin-bottom: 20px;
 }
 
-.statusIcon::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: inherit;
-  opacity: 0.2;
-  border-radius: 50%;
-  animation: pulse 2s infinite;
-}
-
-@keyframes pulse {
-  0% { transform: scale(1); opacity: 0.7; }
-  70% { transform: scale(1.1); opacity: 0.3; }
-  100% { transform: scale(1); opacity: 0.7; }
-}
-
-.success .statusIcon {
-  background: var(--success-gradient);
-}
-
-.error .statusIcon {
-  background: var(--error-gradient);
-}
-
-.cancelled .statusIcon {
-  background: var(--warning-gradient);
-}
-
-.verifying .statusIcon {
-  background: var(--info-gradient);
-}
-
-.statusTitle {
-  font-size: 2.2rem;
-  font-weight: 700;
-  color: var(--text-primary);
-  margin-bottom: 1rem;
-}
-
-.statusMessage {
-  color: var(--text-secondary);
-  font-size: 1.1rem;
-  margin-bottom: 2.5rem;
-  line-height: 1.6;
-}
-
-.errorNote {
-  font-size: 0.9rem;
-  color: var(--text-tertiary);
-  margin-top: 1.5rem;
-  padding: 1rem;
-  background: rgba(239, 68, 68, 0.05);
-  border-radius: var(--radius-md);
-  border-left: 3px solid var(--error-color);
-}
-
-.actionButtons {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  margin-top: 2.5rem;
-}
-
-.payBtn {
-  background: var(--primary-gradient);
-  color: white;
-  border: none;
-  padding: 1rem 2rem;
-  border-radius: var(--radius-md);
-  font-size: 1rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.8rem;
-  position: relative;
-  overflow: hidden;
-  box-shadow: 0 4px 15px rgba(0, 102, 255, 0.3);
-}
-
-.payBtn::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: rgba(255, 255, 255, 0.2);
-  transition: left 0.5s ease;
-}
-
-.payBtn:hover::before {
-  left: 100%;
-}
-
-.payBtn:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 6px 20px rgba(0, 102, 255, 0.4);
-}
-
-.payBtn:active {
-  transform: translateY(-1px);
-}
-
-.btn-content {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  position: relative;
-  z-index: 1;
-}
-
-.btn-text {
-  font-weight: 600;
-}
-
-.btn-arrow {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-/* Loading spinner */
-.spinner {
+.statusIcon i {
   display: inline-block;
-  width: 20px;
-  height: 20px;
-  border: 3px solid rgba(255, 255, 255, 0.3);
-  border-radius: 50%;
-  border-top-color: white;
-  animation: spin 1s ease-in-out infinite;
 }
 
-@keyframes spin {
-  to { transform: rotate(360deg); }
+/* Success State */
+.paymentCard.success .statusIcon i {
+  color: #10b981;
+  animation: scaleIn 0.6s ease-out;
 }
 
-/* Success animation */
-.successAnimation {
-  animation: successBounce 0.6s ease-out;
+.paymentCard.successAnimation .statusIcon i {
+  animation: successPulse 0.6s ease-out;
 }
 
-@keyframes successBounce {
-  0% { transform: scale(0.3); opacity: 0; }
-  50% { transform: scale(1.05); }
-  70% { transform: scale(0.9); }
-  100% { transform: scale(1); opacity: 1; }
+@keyframes successPulse {
+  0% {
+    transform: scale(0);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
 
-/* Error animation */
-.errorAnimation {
-  animation: errorShake 0.6s ease-out;
+/* Error State */
+.paymentCard.error .statusIcon i {
+  color: #ef4444;
+  animation: shake 0.5s ease-out;
+}
+
+.paymentCard.errorAnimation .statusIcon i {
+  animation: errorShake 0.5s ease-out;
 }
 
 @keyframes errorShake {
-  0%, 100% { transform: translateX(0); }
-  10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
-  20%, 40%, 60%, 80% { transform: translateX(5px); }
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-10px);
+  }
+  75% {
+    transform: translateX(10px);
+  }
+}
+
+/* Cancelled State */
+.paymentCard.cancelled .statusIcon i {
+  color: #f59e0b;
+}
+
+/* Verifying State */
+.paymentCard.verifying .statusIcon i {
+  color: #3b82f6;
+}
+
+.spinner {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Status Title */
+.statusTitle {
+  font-size: 32px;
+  font-weight: 700;
+  margin-bottom: 15px;
+  color: #1f2937;
+}
+
+/* Status Message */
+.statusMessage {
+  font-size: 18px;
+  color: #6b7280;
+  margin-bottom: 30px;
+  line-height: 1.6;
 }
 
 /* Subscription Details */
 .subscriptionDetails {
-  margin-top: 2rem;
+  background: #f9fafb;
+  border-radius: 12px;
+  padding: 25px;
+  margin: 30px 0;
   text-align: left;
-  background: rgba(0, 102, 255, 0.05);
-  border-radius: var(--radius-md);
-  padding: 1.5rem;
-  border: 1px solid rgba(0, 102, 255, 0.1);
 }
 
 .subscriptionDetails h3 {
-  margin-top: 0;
-  margin-bottom: 1rem;
-  color: var(--text-primary);
-  font-size: 1.2rem;
+  font-size: 20px;
+  font-weight: 600;
+  color: #1f2937;
+  margin-bottom: 20px;
   text-align: center;
 }
 
 .detailsGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 1rem;
+  gap: 15px;
 }
 
 .detailItem {
   display: flex;
-  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.detailItem:last-child {
+  border-bottom: none;
 }
 
 .detailLabel {
-  font-size: 0.85rem;
-  color: var(--text-tertiary);
-  margin-bottom: 0.3rem;
+  font-size: 16px;
+  color: #6b7280;
+  font-weight: 500;
 }
 
 .detailValue {
+  font-size: 16px;
+  color: #1f2937;
   font-weight: 600;
-  color: var(--text-primary);
+  text-align: right;
 }
 
-/* Support Button */
+/* Action Buttons */
+.actionButtons {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  margin-top: 30px;
+}
+
+.payBtn,
 .supportBtn {
-  background: var(--bg-secondary);
-  color: var(--text-primary);
-  border: 1px solid var(--border-color);
-  padding: 1rem 2rem;
-  border-radius: var(--radius-md);
-  font-size: 1rem;
+  width: 100%;
+  padding: 16px 24px;
+  border: none;
+  border-radius: 12px;
+  font-size: 18px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.8rem;
   position: relative;
   overflow: hidden;
 }
 
+.payBtn {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.payBtn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+}
+
+.supportBtn {
+  background: #f3f4f6;
+  color: #374151;
+}
+
 .supportBtn:hover {
-  background: var(--bg-accent);
-  border-color: var(--border-hover);
-  transform: translateY(-3px);
-  box-shadow: var(--shadow-md);
+  background: #e5e7eb;
+  transform: translateY(-2px);
+}
+
+.btnContent {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.btnText {
+  flex: 1;
+  text-align: center;
+}
+
+.btnArrow {
+  font-size: 16px;
 }
 
 /* Transaction Info */
 .transactionInfo {
-  margin-top: 2rem;
-  text-align: left;
-  font-size: 0.9rem;
-  color: var(--text-secondary);
-  padding: 1rem;
-  background: rgba(0, 0, 0, 0.03);
-  border-radius: var(--radius-md);
+  margin-top: 30px;
+  padding: 20px;
+  background: #fef3c7;
+  border-radius: 12px;
+  border-left: 4px solid #f59e0b;
+}
+
+.transactionInfo p {
+  font-size: 15px;
+  color: #92400e;
+  margin-bottom: 15px;
+  line-height: 1.5;
 }
 
 .transactionRef {
   display: flex;
   flex-direction: column;
-  margin-top: 0.5rem;
+  gap: 8px;
+  background: white;
+  padding: 15px;
+  border-radius: 8px;
 }
 
 .refLabel {
+  font-size: 13px;
+  color: #6b7280;
   font-weight: 600;
-  margin-bottom: 0.2rem;
-  color: var(--text-primary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .refValue {
-  font-family: monospace;
-  background: var(--bg-accent);
-  padding: 0.5rem;
-  border-radius: var(--radius-sm);
+  font-size: 15px;
+  color: #1f2937;
+  font-weight: 600;
   word-break: break-all;
-  color: var(--text-primary);
 }
 
-/* Responsive adjustments */
+/* Mobile Responsive Styles */
 @media (max-width: 768px) {
   .paymentContainer {
-    padding: 0.8rem;
+    padding: 15px;
   }
-  
+
   .paymentCard {
-    padding: 2rem 1.5rem;
-    max-width: 100%;
+    padding: 30px 20px;
+    border-radius: 16px;
   }
-  
+
   .statusIcon {
-    width: 100px;
-    height: 100px;
-    font-size: 3rem;
-    margin-bottom: 1.5rem;
+    font-size: 60px;
+    margin-bottom: 15px;
   }
-  
+
   .statusTitle {
-    font-size: 1.8rem;
-    margin-bottom: 0.8rem;
+    font-size: 24px;
+    margin-bottom: 12px;
   }
-  
+
   .statusMessage {
-    font-size: 1rem;
-    margin-bottom: 2rem;
-  }
-  
-  .payBtn, .supportBtn {
-    padding: 0.9rem 1.8rem;
-    font-size: 0.95rem;
-  }
-  
-  .actionButtons {
-    gap: 0.8rem;
-    margin-top: 2rem;
-  }
-  
-  .errorNote {
-    font-size: 0.85rem;
-    padding: 0.8rem;
-    margin-top: 1rem;
+    font-size: 15px;
+    margin-bottom: 25px;
   }
 
   .subscriptionDetails {
-    padding: 1.2rem;
-    margin-top: 1.5rem;
+    padding: 20px 15px;
+    margin: 25px 0;
+  }
+
+  .subscriptionDetails h3 {
+    font-size: 18px;
+    margin-bottom: 15px;
   }
 
   .detailsGrid {
-    grid-template-columns: 1fr;
-    gap: 0.8rem;
+    gap: 12px;
+  }
+
+  .detailItem {
+    padding: 10px 0;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 5px;
+  }
+
+  .detailLabel {
+    font-size: 14px;
+  }
+
+  .detailValue {
+    font-size: 15px;
+    text-align: left;
+  }
+
+  .actionButtons {
+    gap: 12px;
+    margin-top: 25px;
+  }
+
+  .payBtn,
+  .supportBtn {
+    padding: 14px 20px;
+    font-size: 16px;
+    border-radius: 10px;
+  }
+
+  .btnArrow {
+    font-size: 14px;
   }
 
   .transactionInfo {
-    padding: 0.8rem;
-    margin-top: 1.5rem;
+    margin-top: 25px;
+    padding: 15px;
+  }
+
+  .transactionInfo p {
+    font-size: 13px;
+    margin-bottom: 12px;
+  }
+
+  .transactionRef {
+    padding: 12px;
+  }
+
+  .refLabel {
+    font-size: 11px;
+  }
+
+  .refValue {
+    font-size: 13px;
   }
 }
 
 @media (max-width: 480px) {
-  .paymentContainer {
-    padding: 0.5rem;
-  }
-  
   .paymentCard {
-    padding: 1.5rem 1rem;
-  }
-  
-  .statusIcon {
-    width: 80px;
-    height: 80px;
-    font-size: 2.5rem;
-    margin-bottom: 1.2rem;
-  }
-  
-  .statusTitle {
-    font-size: 1.5rem;
-    margin-bottom: 0.6rem;
-  }
-  
-  .statusMessage {
-    font-size: 0.95rem;
-    margin-bottom: 1.5rem;
-  }
-  
-  .payBtn, .supportBtn {
-    padding: 0.8rem 1.5rem;
-    font-size: 0.9rem;
-  }
-  
-  .actionButtons {
-    gap: 0.6rem;
-    margin-top: 1.5rem;
-  }
-  
-  .errorNote {
-    font-size: 0.8rem;
-    padding: 0.7rem;
-    margin-top: 0.8rem;
+    padding: 25px 15px;
   }
 
-  .subscriptionDetails {
-    padding: 1rem;
-    margin-top: 1.2rem;
+  .statusIcon {
+    font-size: 50px;
+  }
+
+  .statusTitle {
+    font-size: 20px;
+  }
+
+  .statusMessage {
+    font-size: 14px;
   }
 
   .subscriptionDetails h3 {
-    font-size: 1.1rem;
+    font-size: 16px;
   }
 
-  .detailLabel {
-    font-size: 0.8rem;
-  }
-
+  .detailLabel,
   .detailValue {
-    font-size: 0.9rem;
+    font-size: 13px;
   }
 
-  .transactionInfo {
-    font-size: 0.85rem;
-    padding: 0.7rem;
-    margin-top: 1.2rem;
+  .payBtn,
+  .supportBtn {
+    padding: 12px 16px;
+    font-size: 15px;
+  }
+
+  .transactionInfo p {
+    font-size: 12px;
   }
 
   .refValue {
-    font-size: 0.8rem;
+    font-size: 12px;
   }
 }

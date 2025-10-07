@@ -4,6 +4,7 @@ import { Link } from "react-router-dom"
 import { useAuth } from "../../contexts/AuthContext"
 import styles from "../../styles/AdminDashboard.module.css"
 import api from "../../utils/api";
+
 const AdminDashboard = () => {
   const { user, logout } = useAuth()
   const [stats, setStats] = useState({
@@ -16,6 +17,11 @@ const AdminDashboard = () => {
   const [showUniversityForm, setShowUniversityForm] = useState(false)
   const [editingUniversity, setEditingUniversity] = useState(null)
   const [loading, setLoading] = useState(true)
+  
+  // New state for confirmation modal
+  const [showConfirmationModal, setShowConfirmationModal] = useState(false)
+  const [pendingUniversityData, setPendingUniversityData] = useState(null)
+  const [isPastDate, setIsPastDate] = useState(false)
 
   useEffect(() => {
     loadDashboardData()
@@ -41,10 +47,27 @@ const AdminDashboard = () => {
     }
   }
 
-  const handleSaveUniversity = async (universityData) => {
+  const handleSaveUniversity = async (universityData, confirmPastDate = false) => {
     try {
+      // Check if date is in the past and not confirmed
+      const newDate = new Date(universityData.globalSubscriptionEnd)
+      const now = new Date()
+      now.setHours(0, 0, 0, 0) // Set to beginning of day for comparison
+      
+      if (newDate < now && !confirmPastDate) {
+        // Show confirmation modal
+        setPendingUniversityData(universityData)
+        setIsPastDate(true)
+        setShowConfirmationModal(true)
+        return
+      }
+      
+      // If date is in the past and confirmed, or date is in the future
       if (editingUniversity) {
-        await api.put(`/api/universities/${editingUniversity._id}`, universityData)
+        await api.put(`/api/universities/${editingUniversity._id}`, {
+          ...universityData,
+          confirmPastDate: confirmPastDate
+        })
         showMessage("University updated successfully!", "success")
       } else {
         await api.post("/api/universities", universityData)
@@ -56,6 +79,21 @@ const AdminDashboard = () => {
     } catch (error) {
       showMessage("Failed to save university", "error")
     }
+  }
+
+  const handleConfirmSave = () => {
+    if (pendingUniversityData) {
+      handleSaveUniversity(pendingUniversityData, true)
+      setShowConfirmationModal(false)
+      setPendingUniversityData(null)
+      setIsPastDate(false)
+    }
+  }
+
+  const handleCancelSave = () => {
+    setShowConfirmationModal(false)
+    setPendingUniversityData(null)
+    setIsPastDate(false)
   }
 
   const handleFetchUniversities = async () => {
@@ -256,6 +294,40 @@ const AdminDashboard = () => {
           }}
         />
       )}
+      
+      {/* Confirmation Modal for Past Date */}
+      {showConfirmationModal && (
+        <div className={styles.modalOverlay}>
+          <div className={styles.modalContent}>
+            <div className={styles.modalHeader}>
+              <h2>⚠️ Confirm Past Date</h2>
+            </div>
+            <div className={styles.modalBody}>
+              <p>The date you selected has already passed. This action will:</p>
+              <ul>
+                <li>Mark all users of this university as unsubscribed</li>
+                <li>Set their subscription expiry to the selected past date</li>
+                <li>Require all users to resubscribe to regain access</li>
+              </ul>
+              <p>Are you sure you want to continue?</p>
+            </div>
+            <div className={styles.modalFooter}>
+              <button 
+                className={styles.cancelBtn}
+                onClick={handleCancelSave}
+              >
+                Cancel
+              </button>
+              <button 
+                className={styles.confirmBtn}
+                onClick={handleConfirmSave}
+              >
+                Confirm
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
@@ -284,6 +356,12 @@ const UniversityFormModal = ({ university, onSave, onClose }) => {
     e.preventDefault()
     onSave(formData)
   }
+  
+  // Check if the selected date is in the past
+  const selectedDate = new Date(formData.globalSubscriptionEnd)
+  const now = new Date()
+  now.setHours(0, 0, 0, 0) // Set to beginning of day for comparison
+  const isPastDate = selectedDate < now
   
   return (
     <div className={styles.modalOverlay}>
@@ -356,7 +434,14 @@ const UniversityFormModal = ({ university, onSave, onClose }) => {
               value={formData.globalSubscriptionEnd}
               onChange={handleChange}
               required
+              className={isPastDate ? styles.pastDateInput : ""}
             />
+            {isPastDate && (
+              <div className={styles.pastDateWarning}>
+                <i className="fas fa-exclamation-triangle"></i>
+                This date has already passed. All users will be marked as unsubscribed.
+              </div>
+            )}
             <small style={{ color: "var(--text-secondary)", marginTop: "0.5rem", display: "block" }}>
               All semester subscriptions for this university will expire on this date
             </small>
