@@ -96,6 +96,18 @@ router.put("/:id", adminAuth, async (req, res) => {
       globalSubscriptionEnd,
     } = req.body;
 
+    // Validate globalSubscriptionEnd
+    if (!globalSubscriptionEnd) {
+      await session.abortTransaction();
+      return res.status(400).json({ message: "globalSubscriptionEnd is required" });
+    }
+
+    const newGlobalEndDate = new Date(globalSubscriptionEnd);
+    if (isNaN(newGlobalEndDate.getTime())) {
+      await session.abortTransaction();
+      return res.status(400).json({ message: "Invalid date format for globalSubscriptionEnd" });
+    }
+
     // Find the existing university
     const existingUniversity = await University.findById(id).session(session);
     if (!existingUniversity) {
@@ -104,9 +116,9 @@ router.put("/:id", adminAuth, async (req, res) => {
     }
 
     const oldGlobalEndDate = existingUniversity.globalSubscriptionEnd;
-    const newGlobalEndDate = new Date(globalSubscriptionEnd);
+    const now = new Date();
 
-    // Update university
+    // Update university details
     const university = await University.findByIdAndUpdate(
       id,
       {
@@ -118,7 +130,6 @@ router.put("/:id", adminAuth, async (req, res) => {
       { new: true, session }
     );
 
-    // Update all users under this university
     // 1️⃣ Update universitySubscriptionEnd for all users
     await User.updateMany(
       { university: id },
@@ -126,15 +137,29 @@ router.put("/:id", adminAuth, async (req, res) => {
       { session }
     );
 
-    // 2️⃣ Update subscriptionExpiry only for users whose expiry matched old global end date
+    // 2️⃣ Update subscriptionExpiry only for users whose expiry matched the old global end date
     await User.updateMany(
       { university: id, subscriptionExpiry: oldGlobalEndDate },
       { subscriptionExpiry: newGlobalEndDate },
       { session }
     );
 
+    // 3️⃣ If the new global end date is in the past, expire all users immediately
+    if (newGlobalEndDate < now) {
+      await User.updateMany(
+        { university: id },
+        { isSubscribed: false },
+        { session }
+      );
+    }
+
     await session.commitTransaction();
-    res.json({ success: true, university });
+
+    res.json({
+      success: true,
+      message: "University and user subscriptions updated successfully",
+      university,
+    });
   } catch (error) {
     await session.abortTransaction();
     console.error("Error updating university:", error);
@@ -143,6 +168,7 @@ router.put("/:id", adminAuth, async (req, res) => {
     session.endSession();
   }
 });
+
 
 module.exports = router;
 
