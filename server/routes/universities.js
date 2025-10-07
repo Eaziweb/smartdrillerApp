@@ -83,6 +83,7 @@ router.post("/", adminAuth, async (req, res) => {
 });
 
 // Update university settings (admin only)
+// Update university settings (admin only)
 router.put("/:id", adminAuth, async (req, res) => {
   const session = await User.startSession();
   session.startTransaction();
@@ -118,7 +119,7 @@ router.put("/:id", adminAuth, async (req, res) => {
     const oldGlobalEndDate = existingUniversity.globalSubscriptionEnd;
     const now = new Date();
 
-    // Update university details
+    // ✅ 1️⃣ Update university details
     const university = await University.findByIdAndUpdate(
       id,
       {
@@ -130,21 +131,26 @@ router.put("/:id", adminAuth, async (req, res) => {
       { new: true, session }
     );
 
-    // 1️⃣ Update universitySubscriptionEnd for all users
+    // ✅ 2️⃣ Update universitySubscriptionEnd for ALL users
     await User.updateMany(
       { university: id },
       { universitySubscriptionEnd: newGlobalEndDate },
       { session }
     );
 
-    // 2️⃣ Update subscriptionExpiry only for users whose expiry matched the old global end date
+    // ✅ 3️⃣ Update subscriptionExpiry ONLY for semester-plan users
+    //     (and only if their expiry matched the old global end date)
     await User.updateMany(
-      { university: id, subscriptionExpiry: oldGlobalEndDate },
+      {
+        university: id,
+        subscriptionType: "semester",
+        subscriptionExpiry: oldGlobalEndDate,
+      },
       { subscriptionExpiry: newGlobalEndDate },
       { session }
     );
 
-    // 3️⃣ If the new global end date is in the past, expire all users immediately
+    // ✅ 4️⃣ If the new global date is already in the past, unsubscribe everyone
     if (newGlobalEndDate < now) {
       await User.updateMany(
         { university: id },
