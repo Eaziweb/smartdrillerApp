@@ -7,6 +7,219 @@ import AboutSmartDriller from "./AboutSmartDriller"
 import SubscriptionModal from "./SubscriptionModal"
 import api from "../../utils/api"
 
+// Feature Card Component
+const FeatureCard = React.memo(({ to, icon, title, description }) => (
+  <Link to={to} className={styles.featureCard}>
+    <div className={styles.featureIcon}>
+      <i className={icon}></i>
+    </div>
+    <div className={styles.featureText}>
+      <h3>{title}</h3>
+      <p>{description}</p>
+    </div>
+  </Link>
+))
+
+// Navbar Component
+const Navbar = React.memo(({ 
+  toggleSidebar, 
+  toggleContactPopup, 
+  toggleNotificationPanel, 
+  unreadCount 
+}) => (
+  <nav className={styles.navbar}>
+    <div className={styles.navLeft}>
+      <button className={styles.menuBtn} onClick={toggleSidebar}>
+        <i className="fas fa-bars"></i>
+      </button>
+      <h1 className={styles.appLogo}>SmartDriller</h1>
+    </div>
+    <div className={styles.navRight}>
+      <Link to="/AI-assistant">
+        <button className={`${styles.iconBtn} ${styles.aiIcon}`}>
+          <i className="fas fa-robot"></i>
+        </button>
+      </Link>
+      <button className={`${styles.iconBtn} ${styles.navContactIcon}`} onClick={toggleContactPopup}>
+        <i className="fas fa-question-circle"></i>
+      </button>
+      <button className={`${styles.iconBtn} ${styles.notificationBtn}`} onClick={toggleNotificationPanel}>
+        <i className="fas fa-bell"></i>
+        {unreadCount > 0 && (
+          <span className={`${styles.notificationBadge} ${styles.active}`}>
+            {unreadCount > 99 ? "99+" : unreadCount}
+          </span>
+        )}
+      </button>
+    </div>
+  </nav>
+))
+
+// Sidebar Component
+const Sidebar = React.memo(({ 
+  sidebarOpen, 
+  setSidebarOpen, 
+  handleActivate, 
+  openWhatsAppChannel, 
+  handleShare, 
+  toggleAboutModal, 
+  logout, 
+  user, 
+  handleProfileClick,
+  handleTouchStart,
+  handleTouchMove,
+  handleTouchEnd
+}) => (
+  <div 
+    className={`${styles.sidebar} ${sidebarOpen ? styles.active : ""}`}
+    onTouchStart={handleTouchStart}
+    onTouchMove={handleTouchMove}
+    onTouchEnd={handleTouchEnd}
+  >
+    <div className={styles.sidebarHeader}>
+      <div className={styles.userProfile}>
+        <Link to="/profile" style={{ textDecoration: "none", color: "white" }} onClick={handleProfileClick}>
+          <div className={styles.profileContainer}>
+            <i className={`fas fa-user-circle ${styles.profileIcon}`}></i>
+            <h2 className={styles.profileName}>{user?.fullName || "User"}</h2>
+            <i className={`fas fa-chevron-right ${styles.profileArrow}`}></i>
+          </div>
+        </Link>
+      </div>
+      <button className={styles.closeBtn} onClick={(e) => {
+        e.stopPropagation();
+        setSidebarOpen(false);
+      }}>
+        <i className="fas fa-times"></i>
+      </button>
+    </div>
+    <div className={styles.sidebarContent}>
+      <div className={styles.sidebarSection}>
+        <h3>Quick Access</h3>
+        <ul>
+          <li>
+            <button onClick={handleActivate} className={styles.sidebarItem}>
+              <i className="fas fa-plus-circle"></i> Activate
+            </button>
+          </li>
+          <li>
+            <Link to="/competition-history" className={styles.sidebarItem}>
+              <i className="fas fa-trophy"></i> Leaderboard
+            </Link>
+          </li>
+          <li>
+            <Link to="/bookmarks" className={styles.sidebarItem}>
+              <i className="fas fa-bookmark"></i> Bookmarks
+            </Link>
+          </li>
+        </ul>
+      </div>
+      
+      <div className={styles.sidebarSection}>
+        <h3>Community & Contact</h3>
+        <ul>
+          <li>
+            <button onClick={openWhatsAppChannel} className={styles.sidebarItem}>
+              <i className="fas fa-thumbs-up"></i> Follow us on WhatsApp
+            </button>
+          </li>
+          <li>
+            <button onClick={handleShare} className={styles.sidebarItem}>
+              <i className="fas fa-share-alt"></i> Share
+            </button>
+          </li>
+          <li>
+            <button onClick={toggleAboutModal} className={styles.sidebarItem}>
+              <i className="fas fa-info-circle"></i> About SmartDriller
+            </button>
+          </li>
+        </ul>
+      </div>
+      
+      <div className={styles.sidebarSection}>
+        <h3>Account</h3>
+        <ul>
+          <li>
+            <button onClick={logout} className={styles.sidebarItem}>
+              <i className="fas fa-sign-out-alt"></i> Logout
+            </button>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+))
+
+// Notification Panel Component
+const NotificationPanel = React.memo(({ 
+  notificationPanelOpen, 
+  setNotificationPanelOpen, 
+  notifications, 
+  getNotificationIcon, 
+  isNotificationNew 
+}) => (
+  <div className={`${styles.notificationPanel} ${notificationPanelOpen ? styles.active : ""}`}>
+    <div className={styles.header}>
+      <button className={styles.backBtn} onClick={() => setNotificationPanelOpen(false)}>
+        <i className="fas fa-arrow-left"></i>
+      </button>
+      <h2>Notifications</h2>
+      <button className={styles.deleteAllBtn}>Clear</button>
+    </div>
+    <div className={styles.notificationContent}>
+      {notifications.length === 0 ? (
+        <div className={styles.emptyNotification}>
+          <i className="fas fa-bell-slash"></i>
+          <p>No notifications yet</p>
+        </div>
+      ) : (
+        notifications.map((notification) => (
+          <div 
+            key={notification._id} 
+            className={`${styles.notificationItem} ${styles[`type${notification.type.charAt(0).toUpperCase() + notification.type.slice(1)}`]} ${isNotificationNew(notification) ? styles.newNotification : ''}`}
+          >
+            <div className={`${styles.notificationIcon} ${styles[`icon${notification.type.charAt(0).toUpperCase() + notification.type.slice(1)}`]}`}>
+              <i className={`fas ${getNotificationIcon(notification.type)}`}></i>
+            </div>
+            <div className={styles.notificationText}>
+              <h3>{notification.title}</h3>
+              <p>{notification.message}</p>
+              <div className={styles.notificationTime}>
+                {new Date(notification.createdAt).toLocaleDateString()}
+              </div>
+            </div>
+          </div>
+        ))
+      )}
+    </div>
+  </div>
+))
+
+// Contact Popup Component
+const ContactPopup = React.memo(({ contactPopupOpen }) => (
+  <div className={`${styles.contactPopUp} ${contactPopupOpen ? styles.showContact : ""}`}>
+    <div className={`${styles.contact} ${styles.contact1}`}>
+      <div className={styles.contactIcon}>WhatsApp</div>
+      <a href="tel:+2348103414050" className={styles.contactNo}>
+        +2348103414050
+      </a>
+    </div>
+    <div className={`${styles.contact} ${styles.contact2}`}>
+      <div className={styles.contactIcon}>Email</div>
+      <a href="mailto:smartdrillerhelp@gmail.com" className={styles.contactNo}>
+        smartdrillerhelp@gmail.com
+      </a>
+    </div>
+  </div>
+))
+
+// Loading Overlay Component
+const LoadingOverlay = React.memo(() => (
+  <div className={styles.loadingOverlay}>
+    <div className={styles.loadingSpinner}></div>
+  </div>
+))
+
 const Home = () => {
   const { user, logout, updateUser } = useAuth()
   const [sidebarOpen, setSidebarOpen] = useState(false)
@@ -19,6 +232,7 @@ const Home = () => {
   const [loading, setLoading] = useState(false)
   const [touchStartX, setTouchStartX] = useState(0)
   const [touchEndX, setTouchEndX] = useState(0)
+  
   const contactPopupRef = useRef(null)
   const sidebarRef = useRef(null)
   const initializedRef = useRef(false)
@@ -292,8 +506,8 @@ const Home = () => {
     }
   }, [touchStartX, touchEndX])
   
-const handleShare = useCallback(async () => {
-  const fullText = `🎓 Unlock Your Academic Potential with SmartDriller! 🚀
+  const handleShare = useCallback(async () => {
+    const fullText = `🎓 Unlock Your Academic Potential with SmartDriller! 🚀
 
 Join thousands of first-year university students mastering their courses with our premium learning platform.
 
@@ -310,49 +524,47 @@ Join thousands of first-year university students mastering their courses with ou
 
 Join now: https://smartdriller.vercel.app/`;
 
-  const shareData = {
-    title: 'SmartDriller - Your Ultimate Study Companion',
-    text: fullText,
-    url: 'https://smartdriller.vercel.app/'
-  };
+    const shareData = {
+      title: 'SmartDriller - Your Ultimate Study Companion',
+      text: fullText,
+      url: 'https://smartdriller.vercel.app/'
+    };
 
-  try {
-    if (navigator.share) {
-      try {
-        await navigator.share(shareData);
-        showMessage('Shared successfully!', 'success');
-      } catch (shareError) {
-        console.log('Web Share failed, falling back to clipboard:', shareError);
-        // If Web Share fails or is cancelled, copy to clipboard
+    try {
+      if (navigator.share) {
+        try {
+          await navigator.share(shareData);
+          showMessage('Shared successfully!', 'success');
+        } catch (shareError) {
+          console.log('Web Share failed, falling back to clipboard:', shareError);
+          // If Web Share fails or is cancelled, copy to clipboard
+          await navigator.clipboard.writeText(fullText);
+          showMessage('Full message copied to clipboard!', 'success');
+        }
+      } else {
+        // If Web Share API is not available, copy to clipboard
         await navigator.clipboard.writeText(fullText);
         showMessage('Full message copied to clipboard!', 'success');
       }
-    } else {
-      // If Web Share API is not available, copy to clipboard
-      await navigator.clipboard.writeText(fullText);
-      showMessage('Full message copied to clipboard!', 'success');
+    } catch (err) {
+      console.error('Error sharing:', err);
+      showMessage('Failed to share', 'error');
     }
-  } catch (err) {
-    console.error('Error sharing:', err);
-    showMessage('Failed to share', 'error');
-  }
-}, [showMessage]);
+  }, [showMessage])
   
-const openWhatsAppChannel = useCallback((event) => {
-  event.preventDefault();
+  const openWhatsAppChannel = useCallback((event) => {
+    event.preventDefault();
 
-  const channelId = "0029VbBLtIyKbYMQYmgnDh2o";
-  const webLink = `https://whatsapp.com/channel/${channelId}`;
-  const appLink = `https://wa.me/channel/${channelId}`;
+    const channelId = "0029VbBLtIyKbYMQYmgnDh2o";
+    const webLink = `https://whatsapp.com/channel/${channelId}`;
+    const appLink = `https://wa.me/channel/${channelId}`;
 
- 
-  window.location.href = appLink;
+    window.location.href = appLink;
 
-  setTimeout(() => {
-    window.open(webLink, "_blank");
-  }, 800);
-}, []);
-
+    setTimeout(() => {
+      window.open(webLink, "_blank");
+    }, 800);
+  }, [])
 
   const isNotificationNew = useCallback((notification) => {
     if (!user?.lastNotificationView) return true;
@@ -367,11 +579,7 @@ const openWhatsAppChannel = useCallback((event) => {
 
   return (
     <div className={styles.homePage}>
-      {loading && (
-        <div className={styles.loadingOverlay}>
-          <div className={styles.loadingSpinner}></div>
-        </div>
-      )}
+      {loading && <LoadingOverlay />}
       
       <div
         className={`${styles.overlay} ${sidebarOpen || notificationPanelOpen || aboutModalOpen ? styles.active : ""}`}
@@ -384,180 +592,48 @@ const openWhatsAppChannel = useCallback((event) => {
         }}
       ></div>
       
-      <nav className={styles.navbar}>
-        <div className={styles.navLeft}>
-          <button className={styles.menuBtn} onClick={toggleSidebar}>
-            <i className="fas fa-bars"></i>
-          </button>
-          <h1 className={styles.appLogo}>SmartDriller</h1>
-        </div>
-        <div className={styles.navRight}>
-          <Link to="/AI-assistant">
-            <button className={`${styles.iconBtn} ${styles.aiIcon}`}>
-              <i className="fas fa-robot"></i>
-            </button>
-          </Link>
-          <button className={`${styles.iconBtn} ${styles.navContactIcon}`} onClick={toggleContactPopup}>
-            <i className="fas fa-question-circle"></i>
-          </button>
-          <button className={`${styles.iconBtn} ${styles.notificationBtn}`} onClick={toggleNotificationPanel}>
-            <i className="fas fa-bell"></i>
-            {unreadCount > 0 && (
-              <span className={`${styles.notificationBadge} ${styles.active}`}>
-                {unreadCount > 99 ? "99+" : unreadCount}
-              </span>
-            )}
-          </button>
-        </div>
-      </nav>
+      <Navbar 
+        toggleSidebar={toggleSidebar}
+        toggleContactPopup={toggleContactPopup}
+        toggleNotificationPanel={toggleNotificationPanel}
+        unreadCount={unreadCount}
+      />
       
-      <div 
-        ref={sidebarRef}
-        className={`${styles.sidebar} ${sidebarOpen ? styles.active : ""}`}
-        onTouchStart={handleTouchStart}
-        onTouchMove={handleTouchMove}
-        onTouchEnd={handleTouchEnd}
-      >
-        <div className={styles.sidebarHeader}>
-          <div className={styles.userProfile}>
-            <Link to="/profile" style={{ textDecoration: "none", color: "white" }} onClick={handleProfileClick}>
-              <div className={styles.profileContainer}>
-                <i className={`fas fa-user-circle ${styles.profileIcon}`}></i>
-                <h2 className={styles.profileName}>{user?.fullName || "User"}</h2>
-                <i className={`fas fa-chevron-right ${styles.profileArrow}`}></i>
-              </div>
-            </Link>
-          </div>
-          <button className={styles.closeBtn} onClick={(e) => {
-            e.stopPropagation();
-            setSidebarOpen(false);
-          }}>
-            <i className="fas fa-times"></i>
-          </button>
-        </div>
-     <div className={styles.sidebarContent}>
-<div className={styles.sidebarSection}>
-  <h3>Quick Access</h3>
-  <ul>
-    <li>
-      <button onClick={handleActivate} className={styles.sidebarItem}>
-        <i className="fas fa-plus-circle"></i> Activate
-      </button>
-    </li>
-    <li>
-      <Link to="/competition-history" className={styles.sidebarItem}>
-        <i className="fas fa-trophy"></i> Leaderboard
-      </Link>
-    </li>
-    <li>
-      <Link to="/bookmarks" className={styles.sidebarItem}>
-        <i className="fas fa-bookmark"></i> Bookmarks
-      </Link>
-    </li>
-  </ul>
-</div>
-
-<div className={styles.sidebarSection}>
-  <h3>Community & Contact</h3>
-  <ul>
-    <li>
-      <button onClick={openWhatsAppChannel} className={styles.sidebarItem}>
-        <i className="fas fa-thumbs-up"></i> Follow us on WhatsApp
-      </button>
-    </li>
-    <li>
-      <button onClick={handleShare} className={styles.sidebarItem}>
-        <i className="fas fa-share-alt"></i> Share
-      </button>
-    </li>
-    <li>
-      <button onClick={toggleAboutModal} className={styles.sidebarItem}>
-        <i className="fas fa-info-circle"></i> About SmartDriller
-      </button>
-    </li>
-  </ul>
-</div>
-
-<div className={styles.sidebarSection}>
-  <h3>Account</h3>
-  <ul>
-    <li>
-      <button onClick={logout} className={styles.sidebarItem}>
-        <i className="fas fa-sign-out-alt"></i> Logout
-      </button>
-    </li>
-  </ul>
-</div>
-
-
-      </div>
+      <Sidebar 
+        sidebarOpen={sidebarOpen}
+        setSidebarOpen={setSidebarOpen}
+        handleActivate={handleActivate}
+        openWhatsAppChannel={openWhatsAppChannel}
+        handleShare={handleShare}
+        toggleAboutModal={toggleAboutModal}
+        logout={logout}
+        user={user}
+        handleProfileClick={handleProfileClick}
+        handleTouchStart={handleTouchStart}
+        handleTouchMove={handleTouchMove}
+        handleTouchEnd={handleTouchEnd}
+      />
       
-      <div className={`${styles.notificationPanel} ${notificationPanelOpen ? styles.active : ""}`}>
-        <div className={styles.header}>
-          <button className={styles.backBtn} onClick={toggleNotificationPanel}>
-            <i className="fas fa-arrow-left"></i>
-          </button>
-          <h2>Notifications</h2>
-          <button className={styles.deleteAllBtn}>Clear</button>
-        </div>
-        <div className={styles.notificationContent}>
-          {notifications.length === 0 ? (
-            <div className={styles.emptyNotification}>
-              <i className="fas fa-bell-slash"></i>
-              <p>No notifications yet</p>
-            </div>
-          ) : (
-            notifications.map((notification) => (
-              <div 
-                key={notification._id} 
-                className={`${styles.notificationItem} ${styles[`type${notification.type.charAt(0).toUpperCase() + notification.type.slice(1)}`]} ${isNotificationNew(notification) ? styles.newNotification : ''}`}
-              >
-                <div className={`${styles.notificationIcon} ${styles[`icon${notification.type.charAt(0).toUpperCase() + notification.type.slice(1)}`]}`}>
-                  <i className={`fas ${getNotificationIcon(notification.type)}`}></i>
-                </div>
-                <div className={styles.notificationText}>
-                  <h3>{notification.title}</h3>
-                  <p>{notification.message}</p>
-                  <div className={styles.notificationTime}>
-                    {new Date(notification.createdAt).toLocaleDateString()}
-                  </div>
-                </div>
-              </div>
-            ))
-          )}
-        </div>
-      </div>
+      <NotificationPanel 
+        notificationPanelOpen={notificationPanelOpen}
+        setNotificationPanelOpen={setNotificationPanelOpen}
+        notifications={notifications}
+        getNotificationIcon={getNotificationIcon}
+        isNotificationNew={isNotificationNew}
+      />
       
-      <div 
-        ref={contactPopupRef}
-        className={`${styles.contactPopUp} ${contactPopupOpen ? styles.showContact : ""}`}
-      >
-        <div className={`${styles.contact} ${styles.contact1}`}>
-          <div className={styles.contactIcon}>WhatsApp</div>
-          <a href="tel:+2348103414050" className={styles.contactNo}>
-            +2348103414050
-          </a>
-        </div>
-        <div className={`${styles.contact} ${styles.contact2}`}>
-          <div className={styles.contactIcon}>Email</div>
-          <a href="mailto:smartdrillerhelp@gmail.com" className={styles.contactNo}>
-            smartdrillerhelp@gmail.com
-          </a>
-        </div>
-      </div>
+      <ContactPopup contactPopupOpen={contactPopupOpen} />
       
       <main className={styles.main}>
         <div className={styles.featureGrid}>
           {featureCards.map((card, index) => (
-            <Link to={card.to} key={index} className={styles.featureCard}>
-              <div className={styles.featureIcon}>
-                <i className={card.icon}></i>
-              </div>
-              <div className={styles.featureText}>
-                <h3>{card.title}</h3>
-                <p>{card.description}</p>
-              </div>
-            </Link>
+            <FeatureCard 
+              key={index}
+              to={card.to}
+              icon={card.icon}
+              title={card.title}
+              description={card.description}
+            />
           ))}
         </div>
       </main>
