@@ -385,22 +385,25 @@ const UniversityFormModal = ({ university, onSave, onClose }) => {
       : new Date(Date.now() + 120 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
   })
   
-  const [isSemesterExpired, setIsSemesterExpired] = useState(false)
-  
-  useEffect(() => {
-    if (university && university.globalSubscriptionEnd) {
-      const endDate = new Date(university.globalSubscriptionEnd)
-      const now = new Date()
-      setIsSemesterExpired(endDate < now)
-    }
-  }, [university])
-  
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target
-    setFormData({
+    let newFormData = {
       ...formData,
       [name]: type === "checkbox" ? checked : value,
-    })
+    }
+    
+    // If the date is changed and it's in the past, automatically uncheck semesterActive
+    if (name === "globalSubscriptionEnd") {
+      const selectedDate = new Date(value)
+      const now = new Date()
+      now.setHours(0, 0, 0, 0) // Set to beginning of day for comparison
+      
+      if (selectedDate < now) {
+        newFormData.semesterActive = false
+      }
+    }
+    
+    setFormData(newFormData)
   }
   
   const handleSubmit = (e) => {
@@ -425,7 +428,7 @@ const UniversityFormModal = ({ university, onSave, onClose }) => {
           <h2>{university ? "Edit University" : "Add University"}</h2>
         </div>
         
-        {isSemesterExpired && (
+        {isPastDate && (
           <div className={styles.warningBox}>
             <i className="fas fa-exclamation-triangle"></i>
             <div>
@@ -481,13 +484,13 @@ const UniversityFormModal = ({ university, onSave, onClose }) => {
                 name="semesterActive"
                 checked={formData.semesterActive}
                 onChange={handleChange}
-                disabled={isSemesterExpired && !formData.semesterActive}
+                disabled={isPastDate}
               />
               <span>Activate Semester Plan</span>
             </label>
-            {isSemesterExpired && !formData.semesterActive && (
+            {isPastDate && (
               <div className={styles.helperText}>
-                Semester plan expired. Reactivate and set a new end date.
+                Semester plan expired. Set a future date to activate.
               </div>
             )}
           </div>
