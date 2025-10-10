@@ -1,4 +1,3 @@
-// models/University.js
 const mongoose = require("mongoose");
 
 const universitySchema = new mongoose.Schema(
@@ -32,5 +31,32 @@ const universitySchema = new mongoose.Schema(
     timestamps: true,
   }
 );
+
+// Method to check and update semester active status
+universitySchema.methods.checkAndUpdateSemesterStatus = async function() {
+  const now = new Date();
+  // If the end date has passed, deactivate the semester plan
+  if (this.globalSubscriptionEnd < now && this.semesterActive) {
+    this.semesterActive = false;
+    await this.save();
+    return true; // Indicates that status was updated
+  }
+  return false; // Indicates no update was needed
+};
+
+// Static method to check all universities
+universitySchema.statics.checkAllSemesterStatus = async function() {
+  const universities = await this.find({ semesterActive: true });
+  const updatedUniversities = [];
+  
+  for (const university of universities) {
+    const wasUpdated = await university.checkAndUpdateSemesterStatus();
+    if (wasUpdated) {
+      updatedUniversities.push(university);
+    }
+  }
+  
+  return updatedUniversities;
+};
 
 module.exports = mongoose.model("University", universitySchema);

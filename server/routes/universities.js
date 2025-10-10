@@ -186,4 +186,25 @@ router.put("/:id", adminAuth, async (req, res) => {
 })
 
 
+router.post("/check-subscriptions", adminAuth, async (req, res) => {
+  try {
+    const universities = await University.find({ semesterActive: true });
+    let updatedCount = 0;
+    
+    for (const university of universities) {
+      await university.checkAndUpdateSemesterStatus();
+      if (!university.semesterActive) {
+        updatedCount++;
+      }
+    }
+    
+    res.json({ 
+      success: true, 
+      message: `Checked ${universities.length} universities. Updated ${updatedCount}.` 
+    });
+  } catch (error) {
+    console.error("Error checking university subscriptions:", error);
+    res.status(500).json({ message: "Failed to check university subscriptions" });
+  }
+});
 module.exports = router;

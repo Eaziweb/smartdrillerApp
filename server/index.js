@@ -7,8 +7,9 @@ const cookieParser = require("cookie-parser");
 const bcrypt = require("bcryptjs");
 const User = require("./models/User");
 const CourseofStudy = require("./models/CourseofStudy");
-
-
+const cron = require("node-cron");
+const { checkAllSubscriptions } = require("./jobs/subscriptionChecker");
+const { checkUniversitySubscriptions } = require("./jobs/universitySubscriptionChecker");
 const app = express();
 
 // ----------------------
@@ -100,7 +101,10 @@ mongoose.connect(process.env.MONGODB_URI)
       await superAdminCourse.save();
       console.log("✅ SuperAdministration course created");
     }
-
+// Run subscription check every day at midnight
+cron.schedule("0 0 * * *", async () => {
+  await checkAllSubscriptions();
+});
     // Update maxDevices for existing users
     const updateResult = await User.updateMany(
       { maxDevices: { $lt: 8 } },
@@ -114,6 +118,9 @@ mongoose.connect(process.env.MONGODB_URI)
   .catch(err => console.error("❌ MongoDB connection error:", err));
 
 
+cron.schedule("0 0 * * *", async () => {
+  await checkUniversitySubscriptions();
+});
 // ----------------------
 // Routes
 // ----------------------

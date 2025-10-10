@@ -3,7 +3,7 @@ import { useState, useEffect } from "react"
 import { Link } from "react-router-dom"
 import { useAuth } from "../../contexts/AuthContext"
 import styles from "../../styles/AdminDashboard.module.css"
-import api from "../../utils/api";
+import api from "../../utils/api"
 
 const AdminDashboard = () => {
   const { user, logout } = useAuth()
@@ -17,6 +17,7 @@ const AdminDashboard = () => {
   const [showUniversityForm, setShowUniversityForm] = useState(false)
   const [editingUniversity, setEditingUniversity] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [checkingSubscriptions, setCheckingSubscriptions] = useState(false)
   
   // New state for confirmation modal
   const [showConfirmationModal, setShowConfirmationModal] = useState(false)
@@ -106,6 +107,24 @@ const AdminDashboard = () => {
     }
   }
 
+  const handleCheckSubscriptions = async () => {
+    setCheckingSubscriptions(true)
+    try {
+      const response = await api.post("/api/universities/check-subscriptions")
+      const { updatedCount } = response.data
+      if (updatedCount > 0) {
+        showMessage(`${updatedCount} university semester plans deactivated!`, "warning")
+      } else {
+        showMessage("All university semester plans are up to date!", "success")
+      }
+      loadUniversities()
+    } catch (error) {
+      showMessage("Failed to check subscriptions", "error")
+    } finally {
+      setCheckingSubscriptions(false)
+    }
+  }
+
   const showMessage = (message, type = "info") => {
     const messageEl = document.createElement("div")
     messageEl.className = `${styles.messageToast} ${styles[type]}`
@@ -118,6 +137,10 @@ const AdminDashboard = () => {
       messageEl.style.animation = "slideOutRight 0.3s ease forwards"
       setTimeout(() => messageEl.remove(), 300)
     }, 3000)
+  }
+
+  const isSubscriptionExpired = (endDate) => {
+    return new Date(endDate) < new Date()
   }
 
   if (loading) {
@@ -202,7 +225,6 @@ const AdminDashboard = () => {
           <Link to="/admin/users" className={styles.adminBtn}>
             User Management
           </Link>
-          {/* New Course of Study Management Button */}
           <Link to="/admin/courseofstudy" className={styles.adminBtn}>
             Course of Study Manag.
           </Link>
@@ -230,6 +252,14 @@ const AdminDashboard = () => {
                 <i className="fas fa-plus"></i>
                 <span>Add University</span>
               </button>
+              <button 
+                className={`${styles.submitBtn} ${checkingSubscriptions ? styles.loadingBtn : ""}`}
+                onClick={handleCheckSubscriptions}
+                disabled={checkingSubscriptions}
+              >
+                <i className={`fas ${checkingSubscriptions ? "fa-spinner fa-spin" : "fa-sync-alt"}`}></i>
+                <span>{checkingSubscriptions ? "Checking..." : "Check Subscriptions"}</span>
+              </button>
             </div>
           </div>
           
@@ -240,36 +270,47 @@ const AdminDashboard = () => {
                   <th>University Name</th>
                   <th>Monthly Price</th>
                   <th>Semester Price</th>
-                  <th>Semester Active</th>
+                  <th>Semester Status</th>
                   <th>Semester End Date</th>
                   <th>Actions</th>
                 </tr>
               </thead>
               <tbody>
-                {universities.map((university) => (
-                  <tr key={university._id}>
-                    <td>{university.name}</td>
-                    <td>₦{university.monthlyPrice}</td>
-                    <td>₦{university.semesterPrice}</td>
-                    <td>
-                      <span className={`${styles.statusBadge} ${university.semesterActive ? styles.subscribed : styles.expired}`}>
-                        {university.semesterActive ? "Active" : "Inactive"}
-                      </span>
-                    </td>
-                    <td>{new Date(university.globalSubscriptionEnd).toLocaleDateString()}</td>
-                    <td>
-                      <button 
-                        className={styles.editBtn}
-                        onClick={() => {
-                          setEditingUniversity(university)
-                          setShowUniversityForm(true)
-                        }}
-                      >
-                        <i className="fas fa-edit"></i>
-                      </button>
-                    </td>
-                  </tr>
-                ))}
+                {universities.map((university) => {
+                  const expired = isSubscriptionExpired(university.globalSubscriptionEnd)
+                  return (
+                    <tr key={university._id} className={expired ? styles.expiredRow : ""}>
+                      <td>{university.name}</td>
+                      <td>₦{university.monthlyPrice}</td>
+                      <td>₦{university.semesterPrice}</td>
+                      <td>
+                        <span className={`${styles.statusBadge} ${university.semesterActive ? styles.active : styles.inactive}`}>
+                          {university.semesterActive ? "Active" : "Inactive"}
+                        </span>
+                        {expired && university.semesterActive && (
+                          <span className={styles.expiredBadge}>Expired</span>
+                        )}
+                      </td>
+                      <td>
+                        {new Date(university.globalSubscriptionEnd).toLocaleDateString()}
+                        {expired && (
+                          <i className={`fas fa-exclamation-triangle ${styles.expiredIcon}`}></i>
+                        )}
+                      </td>
+                      <td>
+                        <button 
+                          className={styles.editBtn}
+                          onClick={() => {
+                            setEditingUniversity(university)
+                            setShowUniversityForm(true)
+                          }}
+                        >
+                          <i className="fas fa-edit"></i>
+                        </button>
+                      </td>
+                    </tr>
+                  )
+                })}
               </tbody>
             </table>
           </div>
@@ -344,6 +385,16 @@ const UniversityFormModal = ({ university, onSave, onClose }) => {
       : new Date(Date.now() + 120 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
   })
   
+  const [isSemesterExpired, setIsSemesterExpired] = useState(false)
+  
+  useEffect(() => {
+    if (university && university.globalSubscriptionEnd) {
+      const endDate = new Date(university.globalSubscriptionEnd)
+      const now = new Date()
+      setIsSemesterExpired(endDate < now)
+    }
+  }, [university])
+  
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target
     setFormData({
@@ -373,6 +424,16 @@ const UniversityFormModal = ({ university, onSave, onClose }) => {
         <div className={styles.modalHeader}>
           <h2>{university ? "Edit University" : "Add University"}</h2>
         </div>
+        
+        {isSemesterExpired && (
+          <div className={styles.warningBox}>
+            <i className="fas fa-exclamation-triangle"></i>
+            <div>
+              <h4>Semester Plan Expired</h4>
+              <p>This university's semester plan has expired. You need to reactivate it and set a new end date.</p>
+            </div>
+          </div>
+        )}
         
         <form onSubmit={handleSubmit} className={styles.adminForm}>
           <div className={styles.inputGroup}>
@@ -420,9 +481,15 @@ const UniversityFormModal = ({ university, onSave, onClose }) => {
                 name="semesterActive"
                 checked={formData.semesterActive}
                 onChange={handleChange}
+                disabled={isSemesterExpired && !formData.semesterActive}
               />
               <span>Activate Semester Plan</span>
             </label>
+            {isSemesterExpired && !formData.semesterActive && (
+              <div className={styles.helperText}>
+                Semester plan expired. Reactivate and set a new end date.
+              </div>
+            )}
           </div>
           
           <div className={styles.inputGroup}>

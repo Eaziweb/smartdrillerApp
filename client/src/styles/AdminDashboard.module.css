@@ -872,3 +872,70 @@
 .modalBody p {
   margin-bottom: 1rem;
 }
+/* Add these styles to your existing CSS file */
+
+.expiredRow {
+  background-color: rgba(220, 53, 69, 0.05);
+}
+
+.expiredBadge {
+  background-color: #dc3545;
+  color: white;
+  font-size: 0.7rem;
+  padding: 0.15rem 0.4rem;
+  border-radius: 12px;
+  margin-left: 0.5rem;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+.expiredIcon {
+  color: #dc3545;
+  margin-left: 0.5rem;
+}
+
+.warningBox {
+  background-color: rgba(255, 193, 7, 0.1);
+  border-left: 4px solid #ffc107;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  border-radius: 4px;
+  display: flex;
+  align-items: flex-start;
+}
+
+.warningBox i {
+  color: #ffc107;
+  margin-right: 0.75rem;
+  font-size: 1.25rem;
+  flex-shrink: 0;
+}
+
+.warningBox h4 {
+  margin: 0 0 0.5rem 0;
+  color: #856404;
+}
+
+.warningBox p {
+  margin: 0;
+  color: #856404;
+}
+
+.helperText {
+  font-size: 0.875rem;
+  color: #dc3545;
+  margin-top: 0.5rem;
+}
+
+.loadingBtn {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.active {
+  background-color: #28a745;
+}
+
+.inactive {
+  background-color: #6c757d;
+}
