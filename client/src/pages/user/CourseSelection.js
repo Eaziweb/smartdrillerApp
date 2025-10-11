@@ -208,6 +208,7 @@ const CourseSelection = () => {
     }
   }, [isSubscribed, showNotification])
 
+  // UPDATED: Always show subscription modal when user is not subscribed
   const handleCourseSelect = useCallback((courseCode, isSelected) => {
     if (!isSubscribed) {
       setShowSubscriptionModal(true)
@@ -356,6 +357,7 @@ const CourseSelection = () => {
     setShowTopicPopup(false)
   }, [selectedTopics, courseTopics, currentTopicDropdown])
   
+  // UPDATED: Always show subscription modal when user is not subscribed
   const handleStartExam = useCallback(async () => {
     if (!isSubscribed) {
       setShowSubscriptionModal(true)
@@ -430,17 +432,7 @@ const CourseSelection = () => {
     }
   }, [isSubscribed, selectedCourse, formData, courseTopics, examType, isMockMode, showNotification, navigate])
   
-  // Handle activate functionality - show subscription modal
-  const handleActivate = useCallback(async () => {
-    if (user?.isSubscribed) {
-      showNotification("You are already subscribed!", "info");
-      return;
-    }
-    
-    setShowSubscriptionModal(true);
-  }, [user, showNotification])
-  
-  // Initialize payment with new structure (subscriptionType and months)
+  // UPDATED: Initialize payment with new structure (subscriptionType and months)
   const initializePayment = useCallback(async (subscriptionType, months) => {
     setLoadingPayment(true);
     try {
@@ -583,7 +575,7 @@ const CourseSelection = () => {
             <p>Subscribe to access study materials and start practicing</p>
             <button 
               className={styles.subscribeBtn}
-              onClick={handleActivate}
+              onClick={() => setShowSubscriptionModal(true)}
             >
               Subscribe Now
             </button>
@@ -724,11 +716,11 @@ const CourseSelection = () => {
                               onClick={() => handleDropdownClick(course.courseCode, "time")}
                               ref={el => dropdownTriggerRefs.current[`${course.courseCode}-time`] = el}
                             >
-                              {formData[course.courseCode]?.timeLabel || "Select Time"}
-                              <i className="fas fa-chevron-down"></i>
-                            </div>
+                            {formData[course.courseCode]?.timeLabel || "Select Time"}
+                            <i className="fas fa-chevron-down"></i>
                           </div>
                         </div>
+                      </div>
                       )}
                       
                       {/* Topics Selection */}
@@ -859,11 +851,11 @@ const CourseSelection = () => {
                               onClick={() => handleDropdownClick(course.courseCode, "time")}
                               ref={el => dropdownTriggerRefs.current[`${course.courseCode}-time`] = el}
                             >
-                              {formData[course.courseCode]?.timeLabel || "Select Time"}
-                              <i className="fas fa-chevron-down"></i>
-                            </div>
+                            {formData[course.courseCode]?.timeLabel || "Select Time"}
+                            <i className="fas fa-chevron-down"></i>
                           </div>
                         </div>
+                      </div>
                       )}
                       
                       {/* Topics Selection */}

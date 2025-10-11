@@ -209,26 +209,15 @@ const Home = () => {
     }
   }, [user, updateUser]);
   
+  // UPDATED: Always show subscription modal when user clicks Activate
   const handleActivate = useCallback(async () => {
     if (user?.isSubscribed) {
       showMessage("You are already subscribed!", "info");
       return;
     }
     
-    try {
-      const response = await api.get("/api/payments/subscription-options");
-      const { semester } = response.data.options;
-      
-      if (semester) {
-        setShowSubscriptionModal(true);
-      } else {
-        // Default to 1 month if no semester option
-        initializePayment("monthly", 1);
-      }
-    } catch (error) {
-      console.error("Failed to check subscription options:", error);
-      showMessage("Failed to check subscription options", "error");
-    }
+    // Always show the subscription modal
+    setShowSubscriptionModal(true);
   }, [user])
   
   const initializePayment = useCallback(async (subscriptionType, months) => {
@@ -236,7 +225,7 @@ const Home = () => {
     try {
       const response = await api.post("/api/payments/initialize", {
         subscriptionType,
-        months
+        months,
       });
       
       if (response.data.status === "success") {
@@ -581,6 +570,8 @@ Join now: https://smartdriller.vercel.app/`;
         isOpen={showSubscriptionModal}
         onClose={() => setShowSubscriptionModal(false)}
         user={user}
+        onSubscribe={initializePayment}
+        loading={loading}
       />
     </div>
   )
