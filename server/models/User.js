@@ -1,4 +1,3 @@
-// models/User.js
 const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
 
@@ -89,35 +88,18 @@ const userSchema = new mongoose.Schema(
       enum: ["monthly", "semester"],
       default: "monthly",
     },
-    isRecurring: {
-      type: Boolean,
-      default: false,
-    },
-    recurringMonths: {
-      type: Number,
-      default: 1,
-    },
-    remainingMonths: {
-      type: Number,
-      default: 0,
-    },
-    nextPaymentDate: {
-      type: Date,
-      default: null,
-    },
-trustedDevices: [
-  {
-    deviceId: { 
-      type: String,
-      required: function () {
-        return this.role === "user";
+    trustedDevices: [
+      {
+        deviceId: { 
+          type: String,
+          required: function () {
+            return this.role === "user";
+          }
+        },
+        deviceName: { type: String, default: "Unknown Device" },
+        lastUsed: { type: Date, default: Date.now }
       }
-    },
-    deviceName: { type: String, default: "Unknown Device" },
-    lastUsed: { type: Date, default: Date.now }
-  }
-],
-
+    ],
     deviceOTP: { type: String, default: null },
     deviceOTPExpires: { type: Date, default: null },
     maxDevices: { type: Number, default: 8 }
@@ -169,4 +151,4 @@ userSchema.methods.overwriteUnverifiedUser = async function(newUserData) {
 const User = mongoose.model("User", userSchema);
 
 // Export the model
-module.exports = User;    
+module.exports = User;

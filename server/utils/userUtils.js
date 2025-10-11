@@ -5,11 +5,14 @@ const checkAndUpdateSubscription = async (user) => {
   // Check if university subscription has ended
   if (user.universitySubscriptionEnd && now > user.universitySubscriptionEnd) {
     user.isSubscribed = false;
+    user.subscriptionExpiry = null;
+    user.universitySubscriptionEnd = null;
     updated = true;
   } 
   // Check if individual subscription has expired
   else if (user.subscriptionExpiry && now > user.subscriptionExpiry) {
     user.isSubscribed = false;
+    user.subscriptionExpiry = null;
     updated = true;
   }
 
@@ -23,4 +26,4 @@ const checkAndUpdateSubscription = async (user) => {
 
 module.exports = {
   checkAndUpdateSubscription
-};  
+};

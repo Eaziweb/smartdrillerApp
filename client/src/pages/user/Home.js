@@ -222,7 +222,8 @@ const Home = () => {
       if (semester) {
         setShowSubscriptionModal(true);
       } else {
-        initializePayment("monthly", false, 1);
+        // Default to 1 month if no semester option
+        initializePayment("monthly", 1);
       }
     } catch (error) {
       console.error("Failed to check subscription options:", error);
@@ -230,13 +231,12 @@ const Home = () => {
     }
   }, [user])
   
-  const initializePayment = useCallback(async (subscriptionType, isRecurring, recurringMonths) => {
+  const initializePayment = useCallback(async (subscriptionType, months) => {
     setLoading(true);
     try {
       const response = await api.post("/api/payments/initialize", {
         subscriptionType,
-        isRecurring,
-        recurringMonths,
+        months
       });
       
       if (response.data.status === "success") {

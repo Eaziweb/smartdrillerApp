@@ -1,6 +1,6 @@
 "use client"
 import { useState, useEffect } from "react"
-import api from "../../utils/api";
+import api from "../../utils/api"
 import styles from "../../styles/subscriptionModal.module.css"
 
 const SubscriptionModal = ({ isOpen, onClose, user }) => {
@@ -9,8 +9,7 @@ const SubscriptionModal = ({ isOpen, onClose, user }) => {
     semester: null,
   })
   const [selectedPlan, setSelectedPlan] = useState("monthly")
-  const [isRecurring, setIsRecurring] = useState(false)
-  const [recurringMonths, setRecurringMonths] = useState(3)
+  const [selectedMonths, setSelectedMonths] = useState(1)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
 
@@ -42,13 +41,10 @@ const SubscriptionModal = ({ isOpen, onClose, user }) => {
     try {
       const subscriptionData = {
         subscriptionType: selectedPlan,
-        isRecurring: selectedPlan === "monthly" ? isRecurring : false,
-        recurringMonths: selectedPlan === "monthly" && isRecurring ? recurringMonths : 1,
+        months: selectedPlan === "monthly" ? selectedMonths : 1,
       }
       
-      
       const response = await api.post("/api/payments/initialize", subscriptionData)
-      
       
       if (response.data.status === "success") {
         // Redirect to Flutterwave payment link
@@ -125,42 +121,31 @@ const SubscriptionModal = ({ isOpen, onClose, user }) => {
           )}
         </div>
         
-        {/* Recurring Options - Only for Monthly */}
+        {/* Month Selection - Only for Monthly Plan */}
         {selectedPlan === "monthly" && (
-          <div className={styles.recurringOptions}>
-            <div className={styles.recurringToggle}>
-              <label className={styles.switch}>
-                <input 
-                  type="checkbox" 
-                  checked={isRecurring}
-                  onChange={(e) => setIsRecurring(e.target.checked)}
-                />
-                <span className={styles.slider}></span>
-              </label>
-              <span>Set up recurring payment</span>
-            </div>
-            
-            {isRecurring && (
-              <div className={styles.recurringMonths}>
-                <label>Number of months:</label>
-                <select 
-                  value={recurringMonths}
-                  onChange={(e) => setRecurringMonths(parseInt(e.target.value))}
+          <div className={styles.monthsSelection}>
+            <h3>Select Number of Months</h3>
+            <div className={styles.monthsOptions}>
+              {[1, 2, 3, 4, 5, 6].map((months) => (
+                <button
+                  key={months}
+                  className={`${styles.monthButton} ${selectedMonths === months ? styles.selected : ""}`}
+                  onClick={() => setSelectedMonths(months)}
                 >
-                        <option value={1}>1 months</option>
-                  <option value={2}>2 months</option>
-                  <option value={3}>3 months</option>
-                  <option value={4}>4 months</option>
-                </select>
-                <div className={styles.recurringInfo}>
-                  <p>You'll be charged ₦{subscriptionOptions.monthly?.price || 2000} monthly for {recurringMonths} months</p>
-                  <p>First payment now, then automatic renewal each month</p>
-                  <div className={styles.totalPrice}>
-                    Total: ₦{(subscriptionOptions.monthly?.price || 2000) * recurringMonths}
-                  </div>
-                </div>
-              </div>
-            )}
+                  {months} month{months > 1 ? 's' : ''}
+                </button>
+              ))}
+            </div>
+            <div className={styles.totalPrice}>
+              <p>
+                Total: <span className={styles.priceAmount}>
+                  ₦{(subscriptionOptions.monthly?.price || 2000) * selectedMonths}
+                </span>
+              </p>
+              <p className={styles.priceDescription}>
+                You'll have access for {selectedMonths} month{selectedMonths > 1 ? 's' : ''}
+              </p>
+            </div>
           </div>
         )}
         

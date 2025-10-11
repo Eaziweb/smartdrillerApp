@@ -257,7 +257,7 @@ const CourseSelection = () => {
       });
       setCourseTopics((prev) => {
         const newTopics = { ...prev };
-        delete newTopics[courseCode];
+        delete newTopics[selectedCourse];
         return newTopics;
       });
       setSelectedTopics(new Set());
@@ -440,14 +440,13 @@ const CourseSelection = () => {
     setShowSubscriptionModal(true);
   }, [user, showNotification])
   
-  // Initialize payment
-  const initializePayment = useCallback(async (subscriptionType, isRecurring, recurringMonths) => {
+  // Initialize payment with new structure (subscriptionType and months)
+  const initializePayment = useCallback(async (subscriptionType, months) => {
     setLoadingPayment(true);
     try {
       const response = await api.post("/api/payments/initialize", {
         subscriptionType,
-        isRecurring,
-        recurringMonths,
+        months,
       });
       
       if (response.data.status === "success") {

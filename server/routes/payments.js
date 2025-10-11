@@ -7,9 +7,10 @@ const { auth } = require("../middleware/auth")
 const router = express.Router()
 
 // Initialize payment
+// Initialize payment
 router.post("/initialize", auth, async (req, res) => {
   try {
-    const { subscriptionType, isRecurring, recurringMonths } = req.body
+    const { subscriptionType, months } = req.body // Changed from isRecurring and recurringMonths to months
 
     // Get user with university details
     const user = await User.findById(req.user._id).populate("university")
@@ -34,15 +35,15 @@ router.post("/initialize", auth, async (req, res) => {
       description = "SmartDriller Semester Subscription"
       paymentPlan = "one-time"
     } else {
-      // For monthly subscription, always charge for one month at a time
-      amount = user.university.monthlyPrice
-      description = "SmartDriller Monthly Subscription"
-      paymentPlan = isRecurring ? "recurring" : "one-time"
+      // For monthly subscription, calculate amount based on number of months
+      const numMonths = months || 1 // Default to 1 month if not specified
+      amount = user.university.monthlyPrice * numMonths
+      description = `SmartDriller Monthly Subscription (${numMonths} month${numMonths > 1 ? 's' : ''})`
+      paymentPlan = "one-time"
     }
 
     // Update user's subscription type preference
     user.subscriptionType = subscriptionType || "monthly"
-    user.recurringMonths = isRecurring ? recurringMonths : 1
     await user.save()
 
     // Create payment data for Flutterwave
@@ -63,22 +64,10 @@ router.post("/initialize", auth, async (req, res) => {
       },
       meta: {
         subscriptionType: subscriptionType || "monthly",
-        isRecurring: isRecurring || false,
-        recurringMonths: isRecurring ? recurringMonths : 1,
+        months: months || 1, // Store number of months for monthly plans
         paymentPlan: paymentPlan,
         userId: req.user._id.toString(),
       },
-    }
-
-    // For recurring payments, set up subscription plan
-    if (isRecurring && subscriptionType === "monthly") {
-      paymentData.subscription = {
-        id: `smartdriller_sub_${Date.now()}_${req.user._id}`,
-        name: "SmartDriller Monthly Subscription",
-        amount: amount,
-        interval: "monthly",
-        duration: recurringMonths,
-      }
     }
 
     // Make request to Flutterwave
@@ -97,8 +86,7 @@ router.post("/initialize", auth, async (req, res) => {
       subscriptionType: subscriptionType || "monthly",
       status: "pending",
       meta: {
-        isRecurring: isRecurring || false,
-        recurringMonths: isRecurring ? recurringMonths : 1,
+        months: months || 1, // Store number of months for monthly plans
         paymentPlan: paymentPlan,
       },
     })
@@ -150,9 +138,6 @@ router.post("/verify/:txRef", async (req, res) => {
           isSubscribed: user.isSubscribed,
           subscriptionExpiry: user.subscriptionExpiry,
           subscriptionType: user.subscriptionType,
-          isRecurring: user.isRecurring,
-          remainingMonths: user.remainingMonths,
-          nextPaymentDate: user.nextPaymentDate,
           universitySubscriptionEnd: user.universitySubscriptionEnd,
           university: user.university,
         },
@@ -192,16 +177,10 @@ router.post("/verify/:txRef", async (req, res) => {
         subscriptionExpiry = new Date(user.university.globalSubscriptionEnd)
         universitySubscriptionEnd = subscriptionExpiry
       } else {
-        // For monthly subscription, add 30 days for the first payment
+        // For monthly subscription, add 30 days for each month paid
+        const numMonths = payment.meta.months || 1
         subscriptionExpiry = new Date()
-        subscriptionExpiry.setDate(subscriptionExpiry.getDate() + 30)
-
-        // If recurring, set up the recurring information
-        if (payment.meta.isRecurring) {
-          user.isRecurring = true
-          user.recurringMonths = payment.meta.recurringMonths
-          user.nextPaymentDate = subscriptionExpiry
-        }
+        subscriptionExpiry.setDate(subscriptionExpiry.getDate() + (30 * numMonths))
       }
 
       // Update user subscription
@@ -212,9 +191,6 @@ router.post("/verify/:txRef", async (req, res) => {
           subscriptionExpiry,
           universitySubscriptionEnd,
           subscriptionType: payment.subscriptionType,
-          isRecurring: payment.meta.isRecurring,
-          recurringMonths: payment.meta.recurringMonths,
-          nextPaymentDate: user.isRecurring ? subscriptionExpiry : null,
         },
         { new: true },
       ).populate("university") // Populate university for the response
@@ -231,9 +207,6 @@ router.post("/verify/:txRef", async (req, res) => {
           isSubscribed: updatedUser.isSubscribed,
           subscriptionExpiry: updatedUser.subscriptionExpiry,
           subscriptionType: updatedUser.subscriptionType,
-          isRecurring: updatedUser.isRecurring,
-          remainingMonths: updatedUser.remainingMonths,
-          nextPaymentDate: updatedUser.nextPaymentDate,
           universitySubscriptionEnd: updatedUser.universitySubscriptionEnd,
           university: updatedUser.university,
         },
@@ -276,7 +249,7 @@ router.post("/verify/:txRef", async (req, res) => {
   }
 })
 
-// Handle Flutterwave webhook - THIS IS THE PRIMARY PAYMENT VERIFICATION
+// Handle Flutterwave webhook
 router.post("/webhook", async (req, res) => {
   try {
     const secretHash = process.env.FLUTTERWAVE_WEBHOOK_SECRET
@@ -338,42 +311,11 @@ router.post("/webhook", async (req, res) => {
         universitySubscriptionEnd = subscriptionExpiry
         console.log("[v0] Semester subscription - expiry set to:", subscriptionExpiry)
       } else {
-        // For monthly subscription
-        const isRecurringPayment = payment.meta?.recurringPayment === true
-
-        if (isRecurringPayment) {
-          // For recurring payments, extend from current expiry
-          subscriptionExpiry = new Date(user.subscriptionExpiry)
-          subscriptionExpiry.setDate(subscriptionExpiry.getDate() + 30)
-          console.log("[v0] Recurring monthly payment - extending expiry to:", subscriptionExpiry)
-        } else {
-          // For first-time monthly payment, add 30 days from now
-          subscriptionExpiry = new Date()
-          subscriptionExpiry.setDate(subscriptionExpiry.getDate() + 30)
-          console.log("[v0] First monthly payment - expiry set to:", subscriptionExpiry)
-        }
-
-        // Set up recurring information for first payment
-        if (payment.meta.isRecurring && !isRecurringPayment) {
-          user.isRecurring = true
-          user.recurringMonths = payment.meta.recurringMonths
-          user.remainingMonths = payment.meta.recurringMonths - 1
-          user.nextPaymentDate = subscriptionExpiry
-          console.log("[v0] Recurring subscription setup:", {
-            recurringMonths: user.recurringMonths,
-            remainingMonths: user.remainingMonths,
-          })
-        } else if (isRecurringPayment) {
-          // Update remaining months for recurring payments
-          user.remainingMonths = Math.max(0, (user.remainingMonths || 0) - 1)
-          user.nextPaymentDate = user.remainingMonths > 0 ? subscriptionExpiry : null
-
-          // If all payments completed, mark as non-recurring
-          if (user.remainingMonths <= 0) {
-            user.isRecurring = false
-            console.log("[v0] Recurring subscription completed")
-          }
-        }
+        // For monthly subscription, add 30 days for each month paid
+        const numMonths = payment.meta.months || 1
+        subscriptionExpiry = new Date()
+        subscriptionExpiry.setDate(subscriptionExpiry.getDate() + (30 * numMonths))
+        console.log("[v0] Monthly subscription - expiry set to:", subscriptionExpiry, `for ${numMonths} month(s)`)
       }
 
       // Update user subscription
@@ -418,73 +360,6 @@ router.post("/webhook", async (req, res) => {
   }
 })
 
-// Handle recurring payment webhook
-// router.post("/webhook", async (req, res) => {
-//   try {
-//     const secretHash = process.env.FLUTTERWAVE_WEBHOOK_SECRET;
-//     const signature = req.headers["verif-hash"];
-
-//     if (!signature || signature !== secretHash) {
-//       return res.status(401).json({ message: "Unauthorized" });
-//     }
-
-//     const payload = req.body;
-//     console.log("Webhook payload:", payload);
-
-//     // Handle subscription charge events
-//     if (payload.event === "charge.completed" && payload.data.meta?.paymentPlan === "recurring") {
-//       const userId = payload.data.meta.userId;
-//       const amount = payload.data.amount;
-
-//       // Update user subscription
-//       const user = await User.findById(userId);
-//       if (user) {
-//         // Extend subscription by one month
-//         const newExpiryDate = new Date(user.subscriptionExpiry);
-//         newExpiryDate.setDate(newExpiryDate.getDate() + 30);
-
-//         // Update next payment date
-//         const nextPaymentDate = new Date(user.nextPaymentDate);
-//         nextPaymentDate.setDate(nextPaymentDate.getDate() + 30);
-
-//         // Update user
-//         user.subscriptionExpiry = newExpiryDate;
-//         user.nextPaymentDate = nextPaymentDate;
-//         user.remainingMonths = user.remainingMonths ? user.remainingMonths - 1 : user.recurringMonths - 1;
-
-//         // If all payments completed, mark as non-recurring
-//         if (user.remainingMonths <= 0) {
-//           user.isRecurring = false;
-//           user.remainingMonths = 0;
-//         }
-
-//         await user.save();
-
-//         // Save payment record
-//         const payment = new Payment({
-//           user: userId,
-//           amount: amount,
-//           transactionId: payload.data.tx_ref,
-//           flutterwaveRef: payload.data.id,
-//           subscriptionType: user.subscriptionType,
-//           status: "successful",
-//           meta: {
-//             isRecurring: true,
-//             recurringPayment: true,
-//           }
-//         });
-//         await payment.save();
-
-//         console.log("Recurring payment processed for user:", userId);
-//       }
-//     }
-
-//     res.status(200).json({ status: "success" });
-//   } catch (error) {
-//     console.error("Webhook error:", error);
-//     res.status(500).json({ message: "Webhook processing failed" });
-//   }
-// });
 
 router.post("/retry/:paymentId", auth, async (req, res) => {
   try {
@@ -722,8 +597,9 @@ router.get("/subscription-options", auth, async (req, res) => {
     const options = {
       monthly: {
         price: user.university.monthlyPrice,
-        duration: "30 days",
-        description: "Monthly subscription that renews every 30 days",
+        duration: "30 days per month",
+        description: "Monthly subscription that you can purchase for multiple months in advance",
+        months: [1, 2, 3, 4, 5, 6] // Available month options
       },
     }
 
@@ -744,8 +620,6 @@ router.get("/subscription-options", auth, async (req, res) => {
         ? {
             type: user.subscriptionType,
             expiry: user.subscriptionExpiry,
-            isRecurring: user.isRecurring,
-            remainingMonths: user.remainingMonths,
           }
         : null,
     })
