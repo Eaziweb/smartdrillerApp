@@ -181,6 +181,31 @@ const Profile = () => {
     )
   }
 
+  // Calculate subscription duration text
+  const getSubscriptionDurationText = () => {
+    if (!user?.subscriptionExpiry) return "Not Subscribed"
+    
+    const expiryDate = new Date(user.subscriptionExpiry)
+    const now = new Date()
+    const diffTime = expiryDate - now
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+    
+    if (diffDays <= 0) return "Expired"
+    
+    if (user.subscriptionType === "monthly") {
+      // For monthly plans, calculate how many months were paid for
+      const startDate = new Date(user.subscriptionExpiry)
+      startDate.setDate(startDate.getDate() - (diffDays - 1)) // Approximate start date
+      
+      const monthsDiff = (expiryDate.getFullYear() - startDate.getFullYear()) * 12 + 
+                         (expiryDate.getMonth() - startDate.getMonth())
+      
+      return `${monthsDiff} month${monthsDiff > 1 ? 's' : ''} plan`
+    } else {
+      return "Semester plan"
+    }
+  }
+
   return (
     <div className={styles.profilePage}>
       <div className={styles.profileContainer}>
@@ -214,7 +239,7 @@ const Profile = () => {
           {user?.subscriptionType && (
             <p className={styles.subscriptionType}>
               <i className="fas fa-credit-card"></i>
-              Subscription Type: {user?.subscriptionType === "monthly" ? "Monthly" : "Semester"}
+              Plan: {getSubscriptionDurationText()}
             </p>
           )}
           
@@ -332,6 +357,9 @@ const Profile = () => {
                     <div className={styles.paymentDetails}>
                       <span className={styles.paymentType}>
                         {payment.subscriptionType === "monthly" ? "Monthly" : "Semester"} Plan
+                        {payment.meta?.months && payment.subscriptionType === "monthly" && (
+                          <span> ({payment.meta.months} month{payment.meta.months > 1 ? 's' : ''})</span>
+                        )}
                       </span>
                       <span className={styles.paymentAmount}>
                         ₦{payment.amount}

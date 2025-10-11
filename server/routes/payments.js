@@ -107,7 +107,6 @@ router.post("/initialize", auth, async (req, res) => {
   }
 })
 
-// Verify payment
 router.post("/verify/:txRef", async (req, res) => {
   try {
     const { txRef } = req.params
@@ -176,11 +175,23 @@ router.post("/verify/:txRef", async (req, res) => {
         // For semester subscription, use university's global end date
         subscriptionExpiry = new Date(user.university.globalSubscriptionEnd)
         universitySubscriptionEnd = subscriptionExpiry
+        console.log("[v0] Semester subscription - expiry set to:", subscriptionExpiry)
       } else {
         // For monthly subscription, add 30 days for each month paid
-        const numMonths = payment.meta.months || 1
+        const numMonths = payment.meta?.months || 1
         subscriptionExpiry = new Date()
         subscriptionExpiry.setDate(subscriptionExpiry.getDate() + (30 * numMonths))
+        console.log("[v0] Monthly subscription - expiry set to:", subscriptionExpiry, `for ${numMonths} month(s)`)
+      }
+
+      // Check if the subscription expiry is in the past
+      const now = new Date()
+      if (subscriptionExpiry < now) {
+        console.error("[v0] Subscription expiry is in the past:", subscriptionExpiry)
+        return res.status(400).json({
+          status: "failed",
+          message: "Subscription expiry date is in the past",
+        })
       }
 
       // Update user subscription
@@ -629,4 +640,23 @@ router.get("/subscription-options", auth, async (req, res) => {
   }
 })
 
+// Get payment history for a user
+router.get("/history", auth, async (req, res) => {
+  try {
+    const payments = await Payment.find({ user: req.user._id })
+      .sort({ createdAt: -1 }) // Sort by most recent first
+      .lean()
+    
+    res.json({
+      success: true,
+      payments
+    })
+  } catch (error) {
+    console.error("Error fetching payment history:", error)
+    res.status(500).json({ 
+      success: false,
+      message: "Failed to fetch payment history"
+    })
+  }
+})
 module.exports = router

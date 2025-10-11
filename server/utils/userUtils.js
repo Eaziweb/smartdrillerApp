@@ -7,12 +7,20 @@ const checkAndUpdateSubscription = async (user) => {
     user.isSubscribed = false;
     user.subscriptionExpiry = null;
     user.universitySubscriptionEnd = null;
+    // For semester plans, revert back to monthly plan
+    if (user.subscriptionType === "semester") {
+      user.subscriptionType = "monthly";
+    }
     updated = true;
   } 
   // Check if individual subscription has expired
   else if (user.subscriptionExpiry && now > user.subscriptionExpiry) {
     user.isSubscribed = false;
     user.subscriptionExpiry = null;
+    // For semester plans, revert back to monthly plan
+    if (user.subscriptionType === "semester") {
+      user.subscriptionType = "monthly";
+    }
     updated = true;
   }
 
