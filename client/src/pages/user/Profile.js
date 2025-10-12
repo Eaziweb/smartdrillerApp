@@ -19,10 +19,6 @@ const Profile = () => {
   const [universityName, setUniversityName] = useState("")
   const [courseName, setCourseName] = useState("")
   const [loadingCourse, setLoadingCourse] = useState(true)
-  const [paymentHistory, setPaymentHistory] = useState([])
-  const [loadingPayments, setLoadingPayments] = useState(false)
-  const [retryingPayment, setRetryingPayment] = useState(false)
-  const [retryMessage, setRetryMessage] = useState("")
 
   useEffect(() => {
     if (user) {
@@ -57,8 +53,6 @@ const Profile = () => {
         setCourseName("Course not set")
         setLoadingCourse(false)
       }
-
-      loadPaymentHistory()
     }
   }, [user])
 
@@ -71,18 +65,6 @@ const Profile = () => {
       setCourseName("Course not found")
     } finally {
       setLoadingCourse(false)
-    }
-  }
-
-  const loadPaymentHistory = async () => {
-    setLoadingPayments(true)
-    try {
-      const response = await api.get("/api/payments/history")
-      setPaymentHistory(response.data.payments || [])
-    } catch (error) {
-      console.error("Failed to load payment history:", error)
-    } finally {
-      setLoadingPayments(false)
     }
   }
 
@@ -106,28 +88,6 @@ const Profile = () => {
       setMessage(error.response?.data?.message || "Failed to update profile")
     }
     setLoading(false)
-  }
-
-  const handleRetryPayment = async (paymentId) => {
-    setRetryingPayment(true)
-    setRetryMessage("")
-
-    try {
-      const response = await api.post(`/api/payments/retry-verification/${paymentId}`)
-
-      if (response.data.success) {
-        updateUser(response.data.user)
-        setRetryMessage("Payment verification successful! Your subscription has been activated.")
-        loadPaymentHistory()
-      } else {
-        setRetryMessage(response.data.message || "Payment verification failed. Please try again.")
-      }
-    } catch (error) {
-      console.error("Payment retry error:", error)
-      setRetryMessage(error.response?.data?.message || "Failed to verify payment. Please try again.")
-    } finally {
-      setRetryingPayment(false)
-    }
   }
 
   const getInitials = (name) => {
@@ -190,22 +150,6 @@ const Profile = () => {
         expiry: expiryDate,
       }
     }
-  }
-
-  const hasRetryablePayment = () => {
-    if (!paymentHistory.length) return false
-
-    const retryablePayment = paymentHistory.find(
-      (payment) => payment.status === "pending" || (payment.status === "failed" && !payment.subscriptionExpiry),
-    )
-
-    return !!retryablePayment
-  }
-
-  const getRetryablePayment = () => {
-    return paymentHistory.find(
-      (payment) => payment.status === "pending" || (payment.status === "failed" && !payment.subscriptionExpiry),
-    )
   }
 
   const subscriptionInfo = getSubscriptionInfo()
@@ -330,90 +274,6 @@ const Profile = () => {
               Device Manager
             </button>
           </Link>
-        </div>
-
-        <div className={styles.paymentHistorySection}>
-          <h3>Payment History</h3>
-
-          {retryMessage && (
-            <div className={retryMessage.includes("successful") ? styles.successMessage : styles.errorMessage}>
-              <i className={`fas ${retryMessage.includes("successful") ? "fa-check-circle" : "fa-times-circle"}`}></i>
-              {retryMessage}
-            </div>
-          )}
-
-          {loadingPayments ? (
-            <div className={styles.loadingPayments}>
-              <div className={styles.spinnerSmall}></div>
-              <p>Loading payment history...</p>
-            </div>
-          ) : paymentHistory.length > 0 ? (
-            <div className={styles.paymentsList}>
-              {paymentHistory.map((payment) => (
-                <div key={payment._id} className={styles.paymentItem}>
-                  <div className={styles.paymentInfo}>
-                    <div className={styles.paymentDetails}>
-                      <span className={styles.paymentType}>
-                        {payment.subscriptionType === "monthly" ? "Monthly" : "Semester"} Plan
-                        {payment.meta?.months && payment.subscriptionType === "monthly" && (
-                          <span>
-                            {" "}
-                            ({payment.meta.months} month{payment.meta.months > 1 ? "s" : ""})
-                          </span>
-                        )}
-                      </span>
-                      <span className={styles.paymentAmount}>₦{payment.amount}</span>
-                      <span className={styles.paymentDate}>{formatDate(payment.createdAt)}</span>
-                    </div>
-                    <div className={styles.paymentStatus}>
-                      <span className={`${styles.statusBadge} ${styles[payment.status]}`}>
-                        {payment.status === "successful"
-                          ? "Successful"
-                          : payment.status === "pending"
-                            ? "Pending"
-                            : "Failed"}
-                      </span>
-                      {payment.subscriptionExpiry && (
-                        <span className={styles.paymentExpiry}>
-                          Expires: {formatDateTime(payment.subscriptionExpiry)}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-
-                  {(payment.status === "pending" || (payment.status === "failed" && !payment.subscriptionExpiry)) && (
-                    <button
-                      className={styles.retryBtn}
-                      onClick={() => handleRetryPayment(payment._id)}
-                      disabled={retryingPayment}
-                    >
-                      {retryingPayment ? "Retrying..." : "Retry Verification"}
-                    </button>
-                  )}
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className={styles.noPayments}>
-              <i className="fas fa-credit-card"></i>
-              <p>No payment history found</p>
-            </div>
-          )}
-
-          {hasRetryablePayment() && (
-            <div className={styles.retrySection}>
-              <h4>Having trouble with your payment?</h4>
-              <p>If you made a payment but it's not showing as active, you can retry the verification process.</p>
-              <button
-                className={styles.globalRetryBtn}
-                onClick={() => handleRetryPayment(getRetryablePayment()._id)}
-                disabled={retryingPayment}
-              >
-                <i className="fas fa-sync-alt"></i>
-                {retryingPayment ? "Retrying Verification..." : "Retry Payment Verification"}
-              </button>
-            </div>
-          )}
         </div>
       </div>
     </div>
