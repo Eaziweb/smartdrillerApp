@@ -614,7 +614,196 @@
   animation: spin 1s linear infinite;
   margin-right: 0.5rem;
 }
+.subscriptionInfo {
+  margin-top: 0.5rem;
+  padding: 0.75rem;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  border-left: 4px solid #4a90e2;
+}
 
+.subscriptionInfo p {
+  margin: 0;
+  color: #333;
+  font-weight: 500;
+}
+
+.subscriptionInfo .fa {
+  color: #4a90e2;
+  margin-right: 0.5rem;
+}
+/* Add these new styles to your existing profile.module.css */
+
+.startDate {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 5px;
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.subscriptionDuration {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 5px;
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.paymentDetails {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.paymentType {
+  font-weight: 600;
+  color: #333;
+}
+
+.paymentAmount {
+  color: #2e7d32;
+  font-weight: 500;
+}
+
+.paymentDate {
+  color: #666;
+  font-size: 0.85rem;
+}
+
+.paymentStatus {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+}
+
+.statusBadge {
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.statusBadge.successful {
+  background-color: #e8f5e9;
+  color: #2e7d32;
+}
+
+.statusBadge.pending {
+  background-color: #fff8e1;
+  color: #f57f17;
+}
+
+.statusBadge.failed {
+  background-color: #ffebee;
+  color: #c62828;
+}
+
+.paymentExpiry {
+  font-size: 0.8rem;
+  color: #666;
+}
+
+.retryBtn {
+  padding: 6px 12px;
+  background-color: #1976d2;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: background-color 0.2s;
+}
+
+.retryBtn:hover {
+  background-color: #1565c0;
+}
+
+.retryBtn:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+.retrySection {
+  margin-top: 20px;
+  padding: 15px;
+  background-color: #f5f5f5;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.retrySection h4 {
+  margin-top: 0;
+  color: #333;
+}
+
+.retrySection p {
+  margin-bottom: 15px;
+  color: #666;
+}
+
+.globalRetryBtn {
+  padding: 10px 20px;
+  background-color: #1976d2;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin: 0 auto;
+  transition: background-color 0.2s;
+}
+
+.globalRetryBtn:hover {
+  background-color: #1565c0;
+}
+
+.globalRetryBtn:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+.loadingPayments {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+}
+
+.spinnerSmall {
+  width: 24px;
+  height: 24px;
+  border: 3px solid rgba(0, 0, 0, 0.1);
+  border-radius: 50%;
+  border-top-color: #1976d2;
+  animation: spin 1s ease-in-out infinite;
+  margin-bottom: 10px;
+}
+
+.noPayments {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 30px;
+  color: #666;
+}
+
+.noPayments i {
+  font-size: 2rem;
+  margin-bottom: 10px;
+  color: #ccc;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
 @keyframes spin {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }

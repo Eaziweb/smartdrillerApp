@@ -23,7 +23,6 @@ const userSchema = new mongoose.Schema(
     university: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "University",
-      // Make university optional for admin/superadmin
       required: function() {
         return this.role === "user";
       },
@@ -31,7 +30,6 @@ const userSchema = new mongoose.Schema(
     course: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "CourseofStudy", 
-    
       required: function() {
         return this.role === "user";
       },
@@ -60,13 +58,17 @@ const userSchema = new mongoose.Schema(
       type: Date,
       default: null,
     },
+    subscriptionStartDate: {
+      type: Date,
+      default: null,
+    },
     universitySubscriptionEnd: {
       type: Date,
       default: null,
     },
     isEmailVerified: {
       type: Boolean,
-      default: true, //**** */
+      default: true,
     },
     emailVerificationCode: {
       type: String,
@@ -127,18 +129,15 @@ userSchema.methods.comparePassword = async function (candidatePassword) {
 };
 
 userSchema.methods.overwriteUnverifiedUser = async function(newUserData) {
-  // Only allow overwrite if user is unverified
   if (this.isEmailVerified) {
     throw new Error("Cannot overwrite a verified user");
   }
   
-  // Update user data
   this.fullName = newUserData.fullName;
-  this.password = newUserData.password; // Will be hashed by pre-save hook
-  this.course = newUserData.course; // Now storing ObjectId
+  this.password = newUserData.password;
+  this.course = newUserData.course;
   this.university = newUserData.university;
   
-  // Generate new verification code
   const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
   this.emailVerificationCode = verificationCode;
   this.emailVerificationExpires = Date.now() + 3600000; // 1 hour
@@ -147,8 +146,5 @@ userSchema.methods.overwriteUnverifiedUser = async function(newUserData) {
   return verificationCode;
 };
 
-// Create the model
 const User = mongoose.model("User", userSchema);
-
-// Export the model
 module.exports = User;

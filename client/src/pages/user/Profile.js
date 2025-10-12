@@ -23,7 +23,6 @@ const Profile = () => {
   const [retryingPayment, setRetryingPayment] = useState(false)
   const [retryMessage, setRetryMessage] = useState("")
 
-  // Initialize form data when user is available
   useEffect(() => {
     if (user) {
       setFormData({
@@ -33,7 +32,6 @@ const Profile = () => {
         bankName: user.bankName || "",
       })
       
-      // Set university name
       if (user.university) {
         if (typeof user.university === 'object' && user.university.name) {
           setUniversityName(user.university.name)
@@ -44,7 +42,6 @@ const Profile = () => {
         setUniversityName("University not set")
       }
       
-      // Set course name
       if (user.course) {
         if (typeof user.course === 'object' && user.course.name) {
           setCourseName(user.course.name)
@@ -53,7 +50,6 @@ const Profile = () => {
           setCourseName(user.course)
           setLoadingCourse(false)
         } else {
-          // If course is an ObjectId, fetch the course name
           fetchCourseName(user.course)
         }
       } else {
@@ -61,12 +57,10 @@ const Profile = () => {
         setLoadingCourse(false)
       }
       
-      // Load payment history
       loadPaymentHistory()
     }
   }, [user])
 
-  // Fetch course name by ID
   const fetchCourseName = async (courseId) => {
     try {
       const response = await api.get(`/api/courseofstudy/id/${courseId}`)
@@ -79,7 +73,6 @@ const Profile = () => {
     }
   }
 
-  // Load user's payment history
   const loadPaymentHistory = async () => {
     setLoadingPayments(true)
     try {
@@ -114,7 +107,6 @@ const Profile = () => {
     setLoading(false)
   }
 
-  // Retry payment verification
   const handleRetryPayment = async (paymentId) => {
     setRetryingPayment(true)
     setRetryMessage("")
@@ -123,11 +115,8 @@ const Profile = () => {
       const response = await api.post(`/api/payments/retry-verification/${paymentId}`)
       
       if (response.data.success) {
-        // Update user context with the latest user data
         updateUser(response.data.user)
         setRetryMessage("Payment verification successful! Your subscription has been activated.")
-        
-        // Reload payment history to show updated status
         loadPaymentHistory()
       } else {
         setRetryMessage(response.data.message || "Payment verification failed. Please try again.")
@@ -160,11 +149,69 @@ const Profile = () => {
     })
   }
 
-  // Check if there's a payment that can be retried
+  const formatDateTime = (date) => {
+    if (!date) return ""
+    return new Date(date).toLocaleString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    })
+  }
+
+  const getSubscriptionInfo = () => {
+    if (!user?.subscriptionExpiry) {
+      return { 
+        duration: "Not Subscribed", 
+        expiry: null,
+        startDate: null,
+        totalDays: 0,
+        months: 0
+      }
+    }
+    
+    const expiryDate = new Date(user.subscriptionExpiry)
+    const now = new Date()
+    const diffTime = expiryDate - now
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+    
+    if (diffDays <= 0) {
+      return { 
+        duration: "Expired", 
+        expiry: expiryDate,
+        startDate: user.subscriptionStartDate,
+        totalDays: 0,
+        months: 0
+      }
+    }
+    
+    if (user.subscriptionType === "monthly") {
+      const startDate = new Date(user.subscriptionStartDate || user.createdAt)
+      const totalDays = Math.ceil((expiryDate - startDate) / (1000 * 60 * 60 * 24))
+      const months = Math.round(totalDays / 30)
+      
+      return {
+        duration: `${months} month${months > 1 ? 's' : ''} plan`,
+        expiry: expiryDate,
+        startDate: startDate,
+        totalDays,
+        months
+      }
+    } else {
+      return {
+        duration: "Semester plan",
+        expiry: expiryDate,
+        startDate: user.subscriptionStartDate,
+        totalDays: diffDays,
+        months: 0
+      }
+    }
+  }
+
   const hasRetryablePayment = () => {
     if (!paymentHistory.length) return false
     
-    // Find the most recent payment that is pending or failed
     const retryablePayment = paymentHistory.find(payment => 
       payment.status === "pending" || 
       (payment.status === "failed" && !payment.subscriptionExpiry)
@@ -173,7 +220,6 @@ const Profile = () => {
     return !!retryablePayment
   }
 
-  // Get the most recent retryable payment
   const getRetryablePayment = () => {
     return paymentHistory.find(payment => 
       payment.status === "pending" || 
@@ -181,30 +227,7 @@ const Profile = () => {
     )
   }
 
-  // Calculate subscription duration text
-  const getSubscriptionDurationText = () => {
-    if (!user?.subscriptionExpiry) return "Not Subscribed"
-    
-    const expiryDate = new Date(user.subscriptionExpiry)
-    const now = new Date()
-    const diffTime = expiryDate - now
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
-    
-    if (diffDays <= 0) return "Expired"
-    
-    if (user.subscriptionType === "monthly") {
-      // For monthly plans, calculate how many months were paid for
-      const startDate = new Date(user.subscriptionExpiry)
-      startDate.setDate(startDate.getDate() - (diffDays - 1)) // Approximate start date
-      
-      const monthsDiff = (expiryDate.getFullYear() - startDate.getFullYear()) * 12 + 
-                         (expiryDate.getMonth() - startDate.getMonth())
-      
-      return `${monthsDiff} month${monthsDiff > 1 ? 's' : ''} plan`
-    } else {
-      return "Semester plan"
-    }
-  }
+  const subscriptionInfo = getSubscriptionInfo()
 
   return (
     <div className={styles.profilePage}>
@@ -236,19 +259,34 @@ const Profile = () => {
             {user?.isSubscribed ? "Subscribed" : "Not Subscribed"}
           </div>
           
-          {user?.subscriptionType && (
+          <div className={styles.subscriptionInfo}>
             <p className={styles.subscriptionType}>
               <i className="fas fa-credit-card"></i>
-              Plan: {getSubscriptionDurationText()}
+              Plan: {subscriptionInfo.duration}
             </p>
-          )}
-          
-          {user?.subscriptionExpiry && (
-            <p className={styles.expiryDate}>
-              <i className="fas fa-hourglass-half"></i>
-              Expires: {formatDate(user.subscriptionExpiry)}
-            </p>
-          )}
+            
+            {user?.subscriptionStartDate && (
+              <p className={styles.startDate}>
+                <i className="fas fa-calendar-plus"></i>
+                Started: {formatDateTime(user.subscriptionStartDate)}
+              </p>
+            )}
+            
+            {user?.subscriptionExpiry && (
+              <p className={styles.expiryDate}>
+                <i className="fas fa-hourglass-half"></i>
+                Expires: {formatDateTime(user.subscriptionExpiry)}
+              </p>
+            )}
+            
+            {user?.subscriptionType === "monthly" && subscriptionInfo.totalDays > 0 && (
+              <p className={styles.subscriptionDuration}>
+                <i className="fas fa-calendar-alt"></i>
+                Duration: {subscriptionInfo.totalDays} days
+                ({subscriptionInfo.months} month{subscriptionInfo.months > 1 ? 's' : ''})
+              </p>
+            )}
+          </div>
         </div>
         
         <div className={styles.profileForm}>
@@ -333,7 +371,6 @@ const Profile = () => {
           </Link>
         </div>
         
-        {/* Payment History Section */}
         <div className={styles.paymentHistorySection}>
           <h3>Payment History</h3>
           
@@ -358,7 +395,7 @@ const Profile = () => {
                       <span className={styles.paymentType}>
                         {payment.subscriptionType === "monthly" ? "Monthly" : "Semester"} Plan
                         {payment.meta?.months && payment.subscriptionType === "monthly" && (
-                          <span> ({payment.meta.months} month{payment.meta.months > 1 ? 's' : ''})</span>
+                          <span> ({payment.meta.months} month{payment.meta.months > 1 ? 's' : ''} - {payment.meta.months * 30} days)</span>
                         )}
                       </span>
                       <span className={styles.paymentAmount}>
@@ -375,13 +412,12 @@ const Profile = () => {
                       </span>
                       {payment.subscriptionExpiry && (
                         <span className={styles.paymentExpiry}>
-                          Expires: {formatDate(payment.subscriptionExpiry)}
+                          Expires: {formatDateTime(payment.subscriptionExpiry)}
                         </span>
                       )}
                     </div>
                   </div>
                   
-                  {/* Show retry button for pending or failed payments that haven't expired */}
                   {(payment.status === "pending" || 
                     (payment.status === "failed" && !payment.subscriptionExpiry)) && (
                     <button
@@ -402,7 +438,6 @@ const Profile = () => {
             </div>
           )}
           
-          {/* Global Retry Button for the most recent retryable payment */}
           {hasRetryablePayment() && (
             <div className={styles.retrySection}>
               <h4>Having trouble with your payment?</h4>
