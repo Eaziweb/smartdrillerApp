@@ -1,4 +1,5 @@
 "use client"
+
 import { useState, useEffect } from "react"
 import { Link } from "react-router-dom"
 import { useAuth } from "../../contexts/AuthContext"
@@ -31,22 +32,22 @@ const Profile = () => {
         accountNumber: user.accountNumber || "",
         bankName: user.bankName || "",
       })
-      
+
       if (user.university) {
-        if (typeof user.university === 'object' && user.university.name) {
+        if (typeof user.university === "object" && user.university.name) {
           setUniversityName(user.university.name)
-        } else if (typeof user.university === 'string') {
+        } else if (typeof user.university === "string") {
           setUniversityName(user.university)
         }
       } else {
         setUniversityName("University not set")
       }
-      
+
       if (user.course) {
-        if (typeof user.course === 'object' && user.course.name) {
+        if (typeof user.course === "object" && user.course.name) {
           setCourseName(user.course.name)
           setLoadingCourse(false)
-        } else if (typeof user.course === 'string') {
+        } else if (typeof user.course === "string") {
           setCourseName(user.course)
           setLoadingCourse(false)
         } else {
@@ -56,7 +57,7 @@ const Profile = () => {
         setCourseName("Course not set")
         setLoadingCourse(false)
       }
-      
+
       loadPaymentHistory()
     }
   }, [user])
@@ -96,7 +97,7 @@ const Profile = () => {
     e.preventDefault()
     setLoading(true)
     setMessage("")
-    
+
     try {
       const response = await api.put("/api/users/profile", formData)
       updateUser(response.data.user)
@@ -110,10 +111,10 @@ const Profile = () => {
   const handleRetryPayment = async (paymentId) => {
     setRetryingPayment(true)
     setRetryMessage("")
-    
+
     try {
       const response = await api.post(`/api/payments/retry-verification/${paymentId}`)
-      
+
       if (response.data.success) {
         updateUser(response.data.user)
         setRetryMessage("Payment verification successful! Your subscription has been activated.")
@@ -142,88 +143,68 @@ const Profile = () => {
 
   const formatDate = (date) => {
     if (!date) return ""
-    return new Date(date).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
+    return new Date(date).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
     })
   }
 
   const formatDateTime = (date) => {
     if (!date) return ""
-    return new Date(date).toLocaleString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
+    return new Date(date).toLocaleString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
     })
   }
 
   const getSubscriptionInfo = () => {
     if (!user?.subscriptionExpiry) {
-      return { 
-        duration: "Not Subscribed", 
-        expiry: null,
-        startDate: null,
-        totalDays: 0,
-        months: 0
-      }
+      return { duration: "Not Subscribed", expiry: null }
     }
-    
+
     const expiryDate = new Date(user.subscriptionExpiry)
     const now = new Date()
     const diffTime = expiryDate - now
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
-    
+
     if (diffDays <= 0) {
-      return { 
-        duration: "Expired", 
-        expiry: expiryDate,
-        startDate: user.subscriptionStartDate,
-        totalDays: 0,
-        months: 0
-      }
+      return { duration: "Expired", expiry: expiryDate }
     }
-    
+
     if (user.subscriptionType === "monthly") {
-      const startDate = new Date(user.subscriptionStartDate || user.createdAt)
+      const startDate = user.subscriptionStartDate ? new Date(user.subscriptionStartDate) : now
       const totalDays = Math.ceil((expiryDate - startDate) / (1000 * 60 * 60 * 24))
-      const months = Math.round(totalDays / 30)
-      
+      const monthsPurchased = Math.ceil(totalDays / 30)
+
       return {
-        duration: `${months} month${months > 1 ? 's' : ''} plan`,
+        duration: `${monthsPurchased} month${monthsPurchased > 1 ? "s" : ""} plan`,
         expiry: expiryDate,
-        startDate: startDate,
-        totalDays,
-        months
       }
     } else {
       return {
         duration: "Semester plan",
         expiry: expiryDate,
-        startDate: user.subscriptionStartDate,
-        totalDays: diffDays,
-        months: 0
       }
     }
   }
 
   const hasRetryablePayment = () => {
     if (!paymentHistory.length) return false
-    
-    const retryablePayment = paymentHistory.find(payment => 
-      payment.status === "pending" || 
-      (payment.status === "failed" && !payment.subscriptionExpiry)
+
+    const retryablePayment = paymentHistory.find(
+      (payment) => payment.status === "pending" || (payment.status === "failed" && !payment.subscriptionExpiry),
     )
-    
+
     return !!retryablePayment
   }
 
   const getRetryablePayment = () => {
-    return paymentHistory.find(payment => 
-      payment.status === "pending" || 
-      (payment.status === "failed" && !payment.subscriptionExpiry)
+    return paymentHistory.find(
+      (payment) => payment.status === "pending" || (payment.status === "failed" && !payment.subscriptionExpiry),
     )
   }
 
@@ -238,7 +219,7 @@ const Profile = () => {
           </Link>
           <h1 className={styles.appLogo}>SmartDriller</h1>
         </div>
-        
+
         <div className={styles.profileHeader}>
           <div className={styles.profileAvatar}>{getInitials(user?.fullName)}</div>
           <h2>{user?.fullName}</h2>
@@ -255,50 +236,34 @@ const Profile = () => {
             {universityName}
           </p>
           <div className={user?.isSubscribed ? styles.subscribedBadge : styles.notSubscribedBadge}>
-            <i className={`fas ${user?.isSubscribed ? 'fa-check-circle' : 'fa-times-circle'}`}></i>
+            <i className={`fas ${user?.isSubscribed ? "fa-check-circle" : "fa-times-circle"}`}></i>
             {user?.isSubscribed ? "Subscribed" : "Not Subscribed"}
           </div>
-          
+
           <div className={styles.subscriptionInfo}>
             <p className={styles.subscriptionType}>
               <i className="fas fa-credit-card"></i>
               Plan: {subscriptionInfo.duration}
             </p>
-            
-            {user?.subscriptionStartDate && (
-              <p className={styles.startDate}>
-                <i className="fas fa-calendar-plus"></i>
-                Started: {formatDateTime(user.subscriptionStartDate)}
-              </p>
-            )}
-            
             {user?.subscriptionExpiry && (
               <p className={styles.expiryDate}>
                 <i className="fas fa-hourglass-half"></i>
                 Expires: {formatDateTime(user.subscriptionExpiry)}
               </p>
             )}
-            
-            {user?.subscriptionType === "monthly" && subscriptionInfo.totalDays > 0 && (
-              <p className={styles.subscriptionDuration}>
-                <i className="fas fa-calendar-alt"></i>
-                Duration: {subscriptionInfo.totalDays} days
-                ({subscriptionInfo.months} month{subscriptionInfo.months > 1 ? 's' : ''})
-              </p>
-            )}
           </div>
         </div>
-        
+
         <div className={styles.profileForm}>
           <h3>Update Profile Information</h3>
-          
+
           {message && (
             <div className={message.includes("successfully") ? styles.successMessage : styles.errorMessage}>
-              <i className={`fas ${message.includes("successfully") ? 'fa-check-circle' : 'fa-times-circle'}`}></i>
+              <i className={`fas ${message.includes("successfully") ? "fa-check-circle" : "fa-times-circle"}`}></i>
               {message}
             </div>
           )}
-          
+
           <form onSubmit={handleSubmit}>
             <div className={styles.inputGroup}>
               <label htmlFor="fullName">Full Name</label>
@@ -311,7 +276,7 @@ const Profile = () => {
                 placeholder="Enter your full name"
               />
             </div>
-            
+
             <div className={styles.inputGroup}>
               <label htmlFor="phoneNumber">Phone Number</label>
               <input
@@ -323,7 +288,7 @@ const Profile = () => {
                 placeholder="Enter your phone number"
               />
             </div>
-            
+
             <div className={styles.inputGroup}>
               <label htmlFor="accountNumber">Account Number</label>
               <input
@@ -335,9 +300,9 @@ const Profile = () => {
                 placeholder="Enter your account number"
               />
             </div>
-            
+
             <div className={styles.inputGroup}>
-              <label htmlFor="bankName">Bank Name</label> 
+              <label htmlFor="bankName">Bank Name</label>
               <input
                 type="text"
                 id="bankName"
@@ -347,12 +312,8 @@ const Profile = () => {
                 placeholder="Enter your bank name"
               />
             </div>
-            
-            <button 
-              type="submit" 
-              className={`${styles.submitBtn} ${loading ? styles.loading : ""}`} 
-              disabled={loading}
-            >
+
+            <button type="submit" className={`${styles.submitBtn} ${loading ? styles.loading : ""}`} disabled={loading}>
               <div className={styles.btnContent}>
                 <span className={styles.btnText}>Update Profile</span>
                 <div className={styles.btnLoader}>
@@ -362,7 +323,7 @@ const Profile = () => {
               <i className="fas fa-save"></i>
             </button>
           </form>
-          
+
           <Link to="/device-manager" className={styles.deviceManagerLink}>
             <button className={styles.deviceManagerBtn}>
               <i className="fas fa-mobile-alt"></i>
@@ -370,17 +331,17 @@ const Profile = () => {
             </button>
           </Link>
         </div>
-        
+
         <div className={styles.paymentHistorySection}>
           <h3>Payment History</h3>
-          
+
           {retryMessage && (
             <div className={retryMessage.includes("successful") ? styles.successMessage : styles.errorMessage}>
-              <i className={`fas ${retryMessage.includes("successful") ? 'fa-check-circle' : 'fa-times-circle'}`}></i>
+              <i className={`fas ${retryMessage.includes("successful") ? "fa-check-circle" : "fa-times-circle"}`}></i>
               {retryMessage}
             </div>
           )}
-          
+
           {loadingPayments ? (
             <div className={styles.loadingPayments}>
               <div className={styles.spinnerSmall}></div>
@@ -395,20 +356,22 @@ const Profile = () => {
                       <span className={styles.paymentType}>
                         {payment.subscriptionType === "monthly" ? "Monthly" : "Semester"} Plan
                         {payment.meta?.months && payment.subscriptionType === "monthly" && (
-                          <span> ({payment.meta.months} month{payment.meta.months > 1 ? 's' : ''} - {payment.meta.months * 30} days)</span>
+                          <span>
+                            {" "}
+                            ({payment.meta.months} month{payment.meta.months > 1 ? "s" : ""})
+                          </span>
                         )}
                       </span>
-                      <span className={styles.paymentAmount}>
-                        ₦{payment.amount}
-                      </span>
-                      <span className={styles.paymentDate}>
-                        {formatDate(payment.createdAt)}
-                      </span>
+                      <span className={styles.paymentAmount}>₦{payment.amount}</span>
+                      <span className={styles.paymentDate}>{formatDate(payment.createdAt)}</span>
                     </div>
                     <div className={styles.paymentStatus}>
                       <span className={`${styles.statusBadge} ${styles[payment.status]}`}>
-                        {payment.status === "successful" ? "Successful" : 
-                         payment.status === "pending" ? "Pending" : "Failed"}
+                        {payment.status === "successful"
+                          ? "Successful"
+                          : payment.status === "pending"
+                            ? "Pending"
+                            : "Failed"}
                       </span>
                       {payment.subscriptionExpiry && (
                         <span className={styles.paymentExpiry}>
@@ -417,9 +380,8 @@ const Profile = () => {
                       )}
                     </div>
                   </div>
-                  
-                  {(payment.status === "pending" || 
-                    (payment.status === "failed" && !payment.subscriptionExpiry)) && (
+
+                  {(payment.status === "pending" || (payment.status === "failed" && !payment.subscriptionExpiry)) && (
                     <button
                       className={styles.retryBtn}
                       onClick={() => handleRetryPayment(payment._id)}
@@ -437,7 +399,7 @@ const Profile = () => {
               <p>No payment history found</p>
             </div>
           )}
-          
+
           {hasRetryablePayment() && (
             <div className={styles.retrySection}>
               <h4>Having trouble with your payment?</h4>

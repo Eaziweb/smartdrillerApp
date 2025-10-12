@@ -1,5 +1,5 @@
-const mongoose = require("mongoose");
-const bcrypt = require("bcryptjs");
+const mongoose = require("mongoose")
+const bcrypt = require("bcryptjs")
 
 const userSchema = new mongoose.Schema(
   {
@@ -23,15 +23,15 @@ const userSchema = new mongoose.Schema(
     university: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "University",
-      required: function() {
-        return this.role === "user";
+      required: function () {
+        return this.role === "user"
       },
     },
     course: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "CourseofStudy", 
-      required: function() {
-        return this.role === "user";
+      ref: "CourseofStudy",
+      required: function () {
+        return this.role === "user"
       },
     },
     phoneNumber: {
@@ -82,7 +82,7 @@ const userSchema = new mongoose.Schema(
     resetPasswordExpires: Date,
     role: {
       type: String,
-      enum: ["user", "admin", "superadmin"], 
+      enum: ["user", "admin", "superadmin"],
       default: "user",
     },
     subscriptionType: {
@@ -92,59 +92,57 @@ const userSchema = new mongoose.Schema(
     },
     trustedDevices: [
       {
-        deviceId: { 
+        deviceId: {
           type: String,
           required: function () {
-            return this.role === "user";
-          }
+            return this.role === "user"
+          },
         },
         deviceName: { type: String, default: "Unknown Device" },
-        lastUsed: { type: Date, default: Date.now }
-      }
+        lastUsed: { type: Date, default: Date.now },
+      },
     ],
     deviceOTP: { type: String, default: null },
     deviceOTPExpires: { type: Date, default: null },
-    maxDevices: { type: Number, default: 8 }
+    maxDevices: { type: Number, default: 8 },
   },
   {
     timestamps: true,
-  }
-);
+  },
+)
 
-// Hash password before saving
 userSchema.pre("save", async function (next) {
-  if (!this.isModified("password")) return next();
+  if (!this.isModified("password")) return next()
   try {
-    const salt = await bcrypt.genSalt(10);
-    this.password = await bcrypt.hash(this.password, salt);
-    next();
+    const salt = await bcrypt.genSalt(10)
+    this.password = await bcrypt.hash(this.password, salt)
+    next()
   } catch (error) {
-    next(error);
+    next(error)
   }
-});
+})
 
-// Compare password method
 userSchema.methods.comparePassword = async function (candidatePassword) {
-  return bcrypt.compare(candidatePassword, this.password);
-};
+  return bcrypt.compare(candidatePassword, this.password)
+}
 
-userSchema.methods.overwriteUnverifiedUser = async function(newUserData) {
+userSchema.methods.overwriteUnverifiedUser = async function (newUserData) {
   if (this.isEmailVerified) {
-    throw new Error("Cannot overwrite a verified user");
+    throw new Error("Cannot overwrite a verified user")
   }
-  
-  this.fullName = newUserData.fullName;
-  this.password = newUserData.password;
-  this.course = newUserData.course;
-  this.university = newUserData.university;
-  
-  const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
-  this.emailVerificationCode = verificationCode;
-  this.emailVerificationExpires = Date.now() + 3600000; // 1 hour
-  
-  await this.save();
-  return verificationCode;
-};
 
-const User = mongoose.model("User", userSchema);
-module.exports = User;
+  this.fullName = newUserData.fullName
+  this.password = newUserData.password
+  this.course = newUserData.course
+  this.university = newUserData.university
+
+  const verificationCode = Math.floor(100000 + Math.random() * 900000).toString()
+  this.emailVerificationCode = verificationCode
+  this.emailVerificationExpires = Date.now() + 3600000
+
+  await this.save()
+  return verificationCode
+}
+
+const User = mongoose.model("User", userSchema)
+module.exports = User

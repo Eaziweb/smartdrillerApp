@@ -1,5 +1,3 @@
-// models/Payment.js
-
 const mongoose = require("mongoose")
 
 const paymentSchema = new mongoose.Schema(
@@ -34,22 +32,14 @@ const paymentSchema = new mongoose.Schema(
       required: true,
     },
     meta: {
-      isRecurring: {
-        type: Boolean,
-        default: false,
-      },
-      recurringMonths: {
+      months: {
         type: Number,
         default: 1,
       },
       paymentPlan: {
         type: String,
-        enum: ["one-time", "recurring"],
+        enum: ["one-time"],
         default: "one-time",
-      },
-      recurringPayment: {
-        type: Boolean,
-        default: false,
       },
     },
     paidAt: Date,

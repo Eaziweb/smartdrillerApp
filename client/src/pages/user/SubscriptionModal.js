@@ -1,4 +1,5 @@
 "use client"
+
 import { useState, useEffect } from "react"
 import api from "../../utils/api"
 import styles from "../../styles/subscriptionModal.module.css"
@@ -37,17 +38,16 @@ const SubscriptionModal = ({ isOpen, onClose, user }) => {
 
     setLoading(true)
     setError("")
-    
+
     try {
       const subscriptionData = {
         subscriptionType: selectedPlan,
         months: selectedPlan === "monthly" ? selectedMonths : 1,
       }
-      
+
       const response = await api.post("/api/payments/initialize", subscriptionData)
-      
+
       if (response.data.status === "success") {
-        // Redirect to Flutterwave payment link
         window.location.href = response.data.data.link
       } else {
         setError("Failed to initialize payment. Please try again.")
@@ -69,21 +69,16 @@ const SubscriptionModal = ({ isOpen, onClose, user }) => {
         <button className={styles.closeButton} onClick={onClose}>
           <i className="fas fa-times"></i>
         </button>
-        
+
         <div className={styles.modalHeader}>
           <h2>Choose Your Subscription Plan</h2>
           <p>Select the plan that works best for you</p>
         </div>
-        
-        {error && (
-          <div className={styles.errorMessage}>
-            {error}
-          </div>
-        )}
-        
+
+        {error && <div className={styles.errorMessage}>{error}</div>}
+
         <div className={styles.plansContainer}>
-          {/* Monthly Plan */}
-          <div 
+          <div
             className={`${styles.planCard} ${selectedPlan === "monthly" ? styles.selected : ""}`}
             onClick={() => setSelectedPlan("monthly")}
           >
@@ -99,10 +94,9 @@ const SubscriptionModal = ({ isOpen, onClose, user }) => {
               <p>Cancel anytime</p>
             </div>
           </div>
-          
-          {/* Semester Plan - Only show if available */}
+
           {subscriptionOptions.semester && (
-            <div 
+            <div
               className={`${styles.planCard} ${selectedPlan === "semester" ? styles.selected : ""}`}
               onClick={() => setSelectedPlan("semester")}
             >
@@ -120,8 +114,7 @@ const SubscriptionModal = ({ isOpen, onClose, user }) => {
             </div>
           )}
         </div>
-        
-        {/* Month Selection - Only for Monthly Plan */}
+
         {selectedPlan === "monthly" && (
           <div className={styles.monthsSelection}>
             <h3>Select Number of Months</h3>
@@ -132,28 +125,25 @@ const SubscriptionModal = ({ isOpen, onClose, user }) => {
                   className={`${styles.monthButton} ${selectedMonths === months ? styles.selected : ""}`}
                   onClick={() => setSelectedMonths(months)}
                 >
-                  {months} month{months > 1 ? 's' : ''}
+                  {months} month{months > 1 ? "s" : ""}
                 </button>
               ))}
             </div>
             <div className={styles.totalPrice}>
               <p>
-                Total: <span className={styles.priceAmount}>
+                Total:{" "}
+                <span className={styles.priceAmount}>
                   ₦{(subscriptionOptions.monthly?.price || 2000) * selectedMonths}
                 </span>
               </p>
               <p className={styles.priceDescription}>
-                You'll have access for {selectedMonths} month{selectedMonths > 1 ? 's' : ''}
+                You'll have access for {selectedMonths} month{selectedMonths > 1 ? "s" : ""}
               </p>
             </div>
           </div>
         )}
-        
-        <button 
-          className={styles.subscribeButton}
-          onClick={handleSubscribe}
-          disabled={loading}
-        >
+
+        <button className={styles.subscribeButton} onClick={handleSubscribe} disabled={loading}>
           {loading ? "Processing..." : `Subscribe to ${selectedPlan} Plan`}
         </button>
       </div>

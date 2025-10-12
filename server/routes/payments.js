@@ -6,7 +6,6 @@ const Payment = require("../models/Payment")
 const { auth } = require("../middleware/auth")
 const router = express.Router()
 
-// Initialize payment
 router.post("/initialize", auth, async (req, res) => {
   try {
     const { subscriptionType, months } = req.body
@@ -33,7 +32,7 @@ router.post("/initialize", auth, async (req, res) => {
     } else {
       const numMonths = months || 1
       amount = user.university.monthlyPrice * numMonths
-      description = `SmartDriller Monthly Subscription (${numMonths} month${numMonths > 1 ? 's' : ''})`
+      description = `SmartDriller Monthly Subscription (${numMonths} month${numMonths > 1 ? "s" : ""})`
       paymentPlan = "one-time"
     }
 
@@ -96,7 +95,6 @@ router.post("/initialize", auth, async (req, res) => {
   }
 })
 
-// Verify payment
 router.post("/verify/:txRef", async (req, res) => {
   try {
     const { txRef } = req.params
@@ -147,7 +145,7 @@ router.post("/verify/:txRef", async (req, res) => {
 
       const user = await User.findById(payment.user).populate("university")
       const now = new Date()
-      
+
       let subscriptionExpiry
       let universitySubscriptionEnd = null
 
@@ -155,9 +153,10 @@ router.post("/verify/:txRef", async (req, res) => {
         subscriptionExpiry = new Date(user.university.globalSubscriptionEnd)
         universitySubscriptionEnd = subscriptionExpiry
       } else {
+        // For monthly subscriptions, multiply 30 days by number of months
         const numMonths = payment.meta?.months || 1
         subscriptionExpiry = new Date()
-        subscriptionExpiry.setDate(subscriptionExpiry.getDate() + (30 * numMonths))
+        subscriptionExpiry.setDate(subscriptionExpiry.getDate() + 30 * numMonths)
       }
 
       if (subscriptionExpiry < now) {
@@ -225,7 +224,6 @@ router.post("/verify/:txRef", async (req, res) => {
   }
 })
 
-// Handle Flutterwave webhook
 router.post("/webhook", async (req, res) => {
   try {
     const secretHash = process.env.FLUTTERWAVE_WEBHOOK_SECRET
@@ -257,7 +255,7 @@ router.post("/webhook", async (req, res) => {
       payment.flutterwaveRef = flutterwaveId
       payment.paidAt = new Date()
       await payment.save()
-    
+
       const user = await User.findById(payment.user).populate("university")
 
       if (!user) {
@@ -274,7 +272,7 @@ router.post("/webhook", async (req, res) => {
       } else {
         const numMonths = payment.meta.months || 1
         subscriptionExpiry = new Date()
-        subscriptionExpiry.setDate(subscriptionExpiry.getDate() + (30 * numMonths))
+        subscriptionExpiry.setDate(subscriptionExpiry.getDate() + 30 * numMonths)
       }
 
       user.isSubscribed = true
@@ -284,7 +282,7 @@ router.post("/webhook", async (req, res) => {
       user.subscriptionType = payment.subscriptionType
 
       await user.save()
-  
+
       return res.status(200).json({
         status: "success",
         message: "Payment processed successfully",
@@ -309,19 +307,18 @@ router.post("/webhook", async (req, res) => {
   }
 })
 
-// Retry payment verification endpoint
 router.post("/retry-verification/:paymentId", auth, async (req, res) => {
   try {
     const { paymentId } = req.params
-    
+
     const payment = await Payment.findById(paymentId)
     if (!payment) {
       return res.status(404).json({
         success: false,
-        message: "Payment not found"
+        message: "Payment not found",
       })
     }
-    
+
     if (payment.status === "successful") {
       const user = await User.findById(payment.user).populate("university")
       return res.json({
@@ -340,18 +337,18 @@ router.post("/retry-verification/:paymentId", auth, async (req, res) => {
         },
       })
     }
-    
+
     const paymentDate = new Date(payment.createdAt)
     const now = new Date()
     const daysDiff = (now - paymentDate) / (1000 * 60 * 60 * 24)
-    
+
     if (daysDiff > 30) {
       return res.status(400).json({
         success: false,
-        message: "Payment is too old to be verified (over 30 days)"
+        message: "Payment is too old to be verified (over 30 days)",
       })
     }
-    
+
     const response = await axios.get(
       `https://api.flutterwave.com/v3/transactions/verify_by_reference?tx_ref=${payment.transactionId}`,
       {
@@ -371,7 +368,7 @@ router.post("/retry-verification/:paymentId", auth, async (req, res) => {
 
       const user = await User.findById(payment.user).populate("university")
       const now = new Date()
-      
+
       let subscriptionExpiry
       let universitySubscriptionEnd = null
 
@@ -381,13 +378,13 @@ router.post("/retry-verification/:paymentId", auth, async (req, res) => {
       } else {
         const numMonths = payment.meta?.months || 1
         subscriptionExpiry = new Date()
-        subscriptionExpiry.setDate(subscriptionExpiry.getDate() + (30 * numMonths))
+        subscriptionExpiry.setDate(subscriptionExpiry.getDate() + 30 * numMonths)
       }
 
       if (subscriptionExpiry < now) {
         return res.status(400).json({
           success: false,
-          message: "Subscription expiry date is in the past"
+          message: "Subscription expiry date is in the past",
         })
       }
 
@@ -427,7 +424,7 @@ router.post("/retry-verification/:paymentId", auth, async (req, res) => {
       return res.status(400).json({
         success: false,
         message: "Payment verification failed",
-        reason: data.processor_response || "Unknown error"
+        reason: data.processor_response || "Unknown error",
       })
     }
   } catch (error) {
@@ -444,12 +441,11 @@ router.post("/retry-verification/:paymentId", auth, async (req, res) => {
     res.status(500).json({
       success: false,
       message: "Payment verification failed",
-      error: error.message
+      error: error.message,
     })
   }
 })
 
-// Get payment status
 router.get("/status/:txRef", auth, async (req, res) => {
   try {
     const { txRef } = req.params
@@ -483,7 +479,7 @@ router.get("/status/:txRef", auth, async (req, res) => {
 
           const user = await User.findById(payment.user)
           const now = new Date()
-          
+
           let subscriptionExpiry
 
           if (payment.subscriptionType === "semester") {
@@ -491,7 +487,7 @@ router.get("/status/:txRef", auth, async (req, res) => {
           } else {
             const numMonths = payment.meta?.months || 1
             subscriptionExpiry = new Date()
-            subscriptionExpiry.setDate(subscriptionExpiry.getDate() + (30 * numMonths))
+            subscriptionExpiry.setDate(subscriptionExpiry.getDate() + 30 * numMonths)
           }
 
           await User.findByIdAndUpdate(payment.user, {
@@ -499,9 +495,6 @@ router.get("/status/:txRef", auth, async (req, res) => {
             subscriptionExpiry,
             subscriptionStartDate: now,
             subscriptionType: payment.subscriptionType,
-            isRecurring: payment.meta.isRecurring,
-            recurringMonths: payment.meta.recurringMonths,
-            nextPaymentDate: payment.meta.isRecurring ? subscriptionExpiry : null,
           })
         } else {
           payment.status = "failed"
@@ -536,9 +529,6 @@ router.get("/status/:txRef", auth, async (req, res) => {
         subscriptionExpiry: user.subscriptionExpiry,
         subscriptionStartDate: user.subscriptionStartDate,
         subscriptionType: user.subscriptionType,
-        isRecurring: user.isRecurring,
-        remainingMonths: user.remainingMonths,
-        nextPaymentDate: user.nextPaymentDate,
         universitySubscriptionEnd: user.universitySubscriptionEnd,
         university: user.university,
       },
@@ -551,7 +541,6 @@ router.get("/status/:txRef", auth, async (req, res) => {
   }
 })
 
-// Get subscription options for user
 router.get("/subscription-options", auth, async (req, res) => {
   try {
     const user = await User.findById(req.user._id).populate("university")
@@ -565,7 +554,7 @@ router.get("/subscription-options", auth, async (req, res) => {
         price: user.university.monthlyPrice,
         duration: "30 days per month",
         description: "Monthly subscription that you can purchase for multiple months in advance",
-        months: [1, 2, 3, 4, 5, 6]
+        months: [1, 2, 3, 4, 5, 6],
       },
     }
 
@@ -594,21 +583,18 @@ router.get("/subscription-options", auth, async (req, res) => {
   }
 })
 
-// Get payment history for a user
 router.get("/history", auth, async (req, res) => {
   try {
-    const payments = await Payment.find({ user: req.user._id })
-      .sort({ createdAt: -1 })
-      .lean()
-    
+    const payments = await Payment.find({ user: req.user._id }).sort({ createdAt: -1 }).lean()
+
     res.json({
       success: true,
-      payments
+      payments,
     })
   } catch (error) {
-    res.status(500).json({ 
+    res.status(500).json({
       success: false,
-      message: "Failed to fetch payment history"
+      message: "Failed to fetch payment history",
     })
   }
 })
