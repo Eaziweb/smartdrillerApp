@@ -1,477 +1,959 @@
+:root {
+  --primary-dark: #002060;
+  --primary-light: #0066ff;
+  --primary-gradient: linear-gradient(45deg, #0099ff, #002060 70%);
+  --success-color: #10b981;
+  --error-color: #ef4444;
+  --warning-color: #f59e0b;
+  --info-color: #3b82f6;
+  --bg-primary: #ffffff;
+  --bg-secondary: #f8fafc;
+  --bg-accent: #f1f5f9;
+  background: linear-gradient(135deg, #002060, #0066ff);
+  --text-primary: #1e293b;
+  --text-secondary: #64748b;
+  --text-tertiary: #94a3b8;
+  --border-color: #e2e8f0;
+  --border-hover: #cbd5e1;
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+}
+
 .profilePage {
   min-height: 100vh;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  padding: 20px;
+  background: var(--bg-gradient);
+  padding: 1rem;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+  color: var(--text-primary);
 }
 
 .profileContainer {
-  max-width: 800px;
+  width: 100%;
+  max-width: 600px;
   margin: 0 auto;
-  background: white;
-  border-radius: 20px;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
-  overflow: hidden;
 }
 
 .authHeader {
   display: flex;
   align-items: center;
-  padding: 20px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .backBtn {
-  background: rgba(255, 255, 255, 0.2);
-  border: none;
-  color: white;
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  cursor: pointer;
-  transition: all 0.3s ease;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.15);
+  color: white;
   text-decoration: none;
+  margin-right: 1rem;
+  transition: all 0.3s ease;
+  box-shadow: var(--shadow-md);
 }
 
 .backBtn:hover {
-  background: rgba(255, 255, 255, 0.3);
-  transform: translateX(-5px);
+  background: rgba(255, 255, 255, 0.25);
+  transform: translateX(-3px);
+  box-shadow: var(--shadow-lg);
 }
 
 .appLogo {
-  flex: 1;
-  text-align: center;
-  font-size: 24px;
-  font-weight: bold;
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: white;
   margin: 0;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 .profileHeader {
   text-align: center;
-  padding: 40px 20px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
+  margin-bottom: 2rem;
+  padding: 2.5rem;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-xl);
+  border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .profileAvatar {
   width: 100px;
   height: 100px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.3);
+  background: var(--primary-gradient);
+  color: white;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 36px;
+  font-size: 2rem;
   font-weight: bold;
-  margin: 0 auto 20px;
+  margin: 0 auto 1.5rem;
+  box-shadow: var(--shadow-lg);
   border: 4px solid white;
 }
 
 .profileHeader h2 {
-  margin: 0 0 10px;
-  font-size: 28px;
+  font-size: 1.8rem;
+  margin: 0 0 0.5rem 0;
+  color: var(--text-primary);
+  font-weight: 700;
 }
 
-.profileEmail,
-.profileCourse,
-.profileUniversity {
-  margin: 8px 0;
-  opacity: 0.9;
+.profileEmail {
+  color: var(--text-secondary);
+  margin: 0 0 0.5rem 0;
+  font-size: 1.1rem;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: 0.5rem;
 }
 
-.subscribedBadge,
-.notSubscribedBadge {
-  display: inline-flex;
+.profileEmail i {
+  color: var(--primary-light);
+}
+
+.profileCourse {
+  color: var(--text-secondary);
+  margin: 0 0 0.5rem 0;
+  font-size: 1.1rem;
+  display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 8px 16px;
-  border-radius: 20px;
-  margin-top: 15px;
-  font-weight: 600;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.profileCourse i {
+  color: var(--info-color);
+}
+
+.profileUniversity {
+  color: var(--text-secondary);
+  font-size: 1.1rem;
+  margin: 0.5rem 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.profileUniversity i {
+  color: var(--warning-color);
 }
 
 .subscribedBadge {
-  background: rgba(76, 175, 80, 0.2);
-  color: #4caf50;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 1.5rem;
+  padding: 0.7rem 1.2rem;
+  border-radius: 30px;
+  background: rgba(16, 185, 129, 0.15);
+  color: var(--success-color);
+  font-weight: 600;
+  font-size: 1rem;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
+}
+
+.subscribedBadge i {
+  color: var(--success-color);
 }
 
 .notSubscribedBadge {
-  background: rgba(244, 67, 54, 0.2);
-  color: #f44336;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 1.5rem;
+  padding: 0.7rem 1.2rem;
+  border-radius: 30px;
+  background: rgba(239, 68, 68, 0.15);
+  color: var(--error-color);
+  font-weight: 600;
+  font-size: 1rem;
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);
 }
 
-.subscriptionInfo {
-  margin-top: 20px;
-  padding: 15px;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 10px;
+.notSubscribedBadge i {
+  color: var(--error-color);
 }
 
-.subscriptionType,
-.expiryDate {
-  margin: 8px 0;
+.subscriptionType {
+  color: var(--primary-light);
+  font-weight: 600;
+  margin: 0.8rem 0 0.3rem 0;
+  font-size: 1rem;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  font-size: 14px;
+  gap: 0.5rem;
+}
+
+.subscriptionType i {
+  color: var(--primary-light);
+}
+
+.recurringInfo {
+  color: var(--info-color);
+  font-size: 0.95rem;
+  margin: 0.3rem 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.recurringInfo i {
+  color: var(--info-color);
+}
+
+.nextPaymentDate {
+  color: var(--warning-color);
+  font-size: 0.95rem;
+  margin: 0.3rem 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.nextPaymentDate i {
+  color: var(--warning-color);
+}
+
+.expiryDate {
+  color: var(--text-tertiary);
+  font-size: 0.95rem;
+  margin-top: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.expiryDate i {
+  color: var(--text-tertiary);
 }
 
 .profileForm {
-  padding: 40px;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-radius: var(--radius-xl);
+  padding: 2rem;
+  box-shadow: var(--shadow-xl);
+  margin-bottom: 2rem;
+  border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .profileForm h3 {
-  margin: 0 0 20px;
-  color: #333;
-  font-size: 20px;
-}
-
-.successMessage,
-.errorMessage {
-  padding: 12px;
-  border-radius: 8px;
-  margin-bottom: 20px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.successMessage {
-  background: #e8f5e9;
-  color: #2e7d32;
-  border: 1px solid #4caf50;
-}
-
-.errorMessage {
-  background: #ffebee;
-  color: #c62828;
-  border: 1px solid #f44336;
+  margin-bottom: 2rem;
+  color: var(--text-primary);
+  text-align: center;
+  font-weight: 700;
+  font-size: 1.5rem;
 }
 
 .inputGroup {
-  margin-bottom: 20px;
+  margin-bottom: 1.8rem;
 }
 
 .inputGroup label {
   display: block;
-  margin-bottom: 8px;
-  color: #555;
-  font-weight: 500;
+  margin-bottom: 0.7rem;
+  color: var(--text-primary);
+  font-weight: 600;
+  font-size: 1rem;
 }
 
 .inputGroup input {
   width: 100%;
-  padding: 12px;
-  border: 2px solid #e0e0e0;
-  border-radius: 8px;
-  font-size: 16px;
+  padding: 0.85rem 1.2rem;
+  border: 2px solid var(--border-color);
+  border-radius: var(--radius-md);
+  font-size: 1rem;
   transition: all 0.3s ease;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  box-shadow: var(--shadow-sm);
 }
 
 .inputGroup input:focus {
   outline: none;
-  border-color: #667eea;
+  border-color: var(--primary-light);
+  box-shadow: 0 0 0 4px rgba(0, 102, 255, 0.1);
+  background: white;
 }
 
 .submitBtn {
   width: 100%;
-  padding: 14px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 0.9rem 1.2rem;
+  background: var(--primary-gradient);
   color: white;
   border: none;
-  border-radius: 8px;
-  font-size: 16px;
-  font-weight: 600;
+  border-radius: var(--radius-md);
+  font-size: 1.1rem;
+  font-weight: 700;
   cursor: pointer;
-  transition: all 0.3s ease;
   display: flex;
+  justify-content: space-between;
   align-items: center;
-  justify-content: center;
-  gap: 10px;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  box-shadow: var(--shadow-md);
+  margin-top: 1rem;
 }
 
-.submitBtn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+.submitBtn:hover:not(:disabled) {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-lg);
 }
 
 .submitBtn:disabled {
-  opacity: 0.7;
   cursor: not-allowed;
+  opacity: 0.8;
 }
 
 .btnContent {
   display: flex;
   align-items: center;
-  gap: 10px;
+  justify-content: center;
+  width: 100%;
 }
 
 .btnLoader {
   display: none;
 }
 
+.spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid transparent;
+  border-top: 2px solid white;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
 .loading .btnText {
-  display: none;
+  visibility: hidden;
 }
 
 .loading .btnLoader {
   display: block;
-}
-
-.spinner {
-  width: 20px;
-  height: 20px;
-  border: 3px solid rgba(255, 255, 255, 0.3);
-  border-top-color: white;
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
-}
-
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
 }
 
 .deviceManagerLink {
   text-decoration: none;
   display: block;
-  margin-top: 20px;
+  margin-top: 1.5rem;
 }
 
 .deviceManagerBtn {
   width: 100%;
-  padding: 14px;
-  background: white;
-  color: #667eea;
-  border: 2px solid #667eea;
-  border-radius: 8px;
-  font-size: 16px;
-  font-weight: 600;
+  padding: 0.9rem 1.2rem;
+  background: rgba(255, 255, 255, 0.9);
+  color: var(--primary-dark);
+  border: 2px solid var(--primary-light);
+  border-radius: var(--radius-md);
+  font-size: 1.1rem;
+  font-weight: 700;
   cursor: pointer;
   transition: all 0.3s ease;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
+  gap: 0.7rem;
+  box-shadow: var(--shadow-md);
 }
 
 .deviceManagerBtn:hover {
-  background: #667eea;
-  color: white;
+  background: white;
+  border-color: var(--primary-dark);
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-lg);
 }
 
+.successMessage {
+  background: rgba(16, 185, 129, 0.15);
+  color: var(--success-color);
+  padding: 1.2rem;
+  border-radius: var(--radius-md);
+  margin-bottom: 1.5rem;
+  text-align: center;
+  border-left: 5px solid var(--success-color);
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.7rem;
+  box-shadow: var(--shadow-md);
+}
+
+.successMessage i {
+  color: var(--success-color);
+  font-size: 1.2rem;
+}
+
+.errorMessage {
+  background: rgba(239, 68, 68, 0.15);
+  color: var(--error-color);
+  padding: 1.2rem;
+  border-radius: var(--radius-md);
+  margin-bottom: 1.5rem;
+  text-align: center;
+  border-left: 5px solid var(--error-color);
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.7rem;
+  box-shadow: var(--shadow-md);
+}
+
+.errorMessage i {
+  color: var(--error-color);
+  font-size: 1.2rem;
+}
 .paymentHistorySection {
-  padding: 40px;
-  background: #f5f5f5;
+  margin-top: 2rem;
+  padding: 1.5rem;
+  background-color: #f8f9fa;
+  border-radius: 8px;
 }
 
 .paymentHistorySection h3 {
-  margin: 0 0 20px;
+  margin-bottom: 1rem;
   color: #333;
-  font-size: 20px;
-}
-
-.loadingPayments {
-  text-align: center;
-  padding: 40px;
-}
-
-.spinnerSmall {
-  width: 40px;
-  height: 40px;
-  border: 4px solid #e0e0e0;
-  border-top-color: #667eea;
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
-  margin: 0 auto 15px;
 }
 
 .paymentsList {
   display: flex;
   flex-direction: column;
-  gap: 15px;
+  gap: 1rem;
 }
 
 .paymentItem {
-  background: white;
-  padding: 20px;
-  border-radius: 10px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-.paymentInfo {
+  background-color: white;
+  border-radius: 8px;
+  padding: 1rem;
+  border: 1px solid #e0e0e0;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  flex-wrap: wrap;
-  gap: 15px;
+}
+
+.paymentInfo {
+  flex: 1;
 }
 
 .paymentDetails {
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  gap: 0.5rem;
 }
 
 .paymentType {
   font-weight: 600;
   color: #333;
-  font-size: 16px;
 }
 
 .paymentAmount {
-  color: #667eea;
-  font-weight: 700;
-  font-size: 18px;
+  color: #4a90e2;
+  font-weight: 500;
 }
 
 .paymentDate {
-  color: #888;
-  font-size: 14px;
+  color: #666;
+  font-size: 0.9rem;
 }
 
 .paymentStatus {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
-  gap: 5px;
+  gap: 0.5rem;
 }
 
 .statusBadge {
-  padding: 6px 12px;
-  border-radius: 15px;
-  font-size: 12px;
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.8rem;
   font-weight: 600;
   text-transform: uppercase;
 }
 
 .statusBadge.successful {
-  background: #e8f5e9;
-  color: #2e7d32;
+  background-color: #d4edda;
+  color: #155724;
 }
 
 .statusBadge.pending {
-  background: #fff3e0;
-  color: #e65100;
+  background-color: #fff3cd;
+  color: #856404;
 }
 
 .statusBadge.failed {
-  background: #ffebee;
-  color: #c62828;
+  background-color: #f8d7da;
+  color: #721c24;
 }
 
 .paymentExpiry {
-  color: #888;
-  font-size: 12px;
+  color: #666;
+  font-size: 0.8rem;
 }
 
 .retryBtn {
-  margin-top: 10px;
-  padding: 8px 16px;
-  background: #667eea;
+  padding: 0.5rem 1rem;
+  background-color: #4a90e2;
   color: white;
   border: none;
   border-radius: 6px;
-  font-size: 14px;
-  font-weight: 600;
   cursor: pointer;
-  transition: all 0.3s ease;
+  font-weight: 500;
+  transition: background-color 0.3s;
 }
 
 .retryBtn:hover {
-  background: #5568d3;
+  background-color: #3a7bc8;
 }
 
 .retryBtn:disabled {
-  opacity: 0.6;
+  background-color: #a0c4e4;
   cursor: not-allowed;
 }
 
 .noPayments {
   text-align: center;
-  padding: 40px;
-  color: #888;
+  padding: 2rem;
+  color: #666;
 }
 
 .noPayments i {
-  font-size: 48px;
-  margin-bottom: 15px;
-  opacity: 0.5;
+  font-size: 2rem;
+  margin-bottom: 1rem;
+  color: #ccc;
 }
 
 .retrySection {
-  margin-top: 30px;
-  padding: 20px;
-  background: white;
-  border-radius: 10px;
-  text-align: center;
+  margin-top: 1.5rem;
+  padding: 1.5rem;
+  background-color: #e8f4ff;
+  border-radius: 8px;
+  border-left: 4px solid #4a90e2;
 }
 
 .retrySection h4 {
-  margin: 0 0 10px;
+  margin-top: 0;
+  margin-bottom: 0.5rem;
   color: #333;
 }
 
 .retrySection p {
-  margin: 0 0 20px;
-  color: #666;
-  font-size: 14px;
+  margin-bottom: 1rem;
+  color: #555;
 }
 
 .globalRetryBtn {
-  padding: 12px 24px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  background-color: #4a90e2;
   color: white;
   border: none;
-  border-radius: 8px;
-  font-size: 16px;
-  font-weight: 600;
+  border-radius: 6px;
   cursor: pointer;
-  transition: all 0.3s ease;
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
+  font-weight: 600;
+  transition: background-color 0.3s;
 }
 
 .globalRetryBtn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+  background-color: #3a7bc8;
 }
 
 .globalRetryBtn:disabled {
-  opacity: 0.7;
+  background-color: #a0c4e4;
   cursor: not-allowed;
 }
 
+.loadingPayments {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  color: #666;
+}
+
+.spinnerSmall {
+  width: 20px;
+  height: 20px;
+  border: 2px solid #f3f3f3;
+  border-top: 2px solid #4a90e2;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-right: 0.5rem;
+}
+.subscriptionInfo {
+  margin-top: 0.5rem;
+  padding: 0.75rem;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  border-left: 4px solid #4a90e2;
+}
+
+.subscriptionInfo p {
+  margin: 0;
+  color: #333;
+  font-weight: 500;
+}
+
+.subscriptionInfo .fa {
+  color: #4a90e2;
+  margin-right: 0.5rem;
+}
+/* Add these new styles to your existing profile.module.css */
+
+.startDate {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 5px;
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.subscriptionDuration {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 5px;
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.paymentDetails {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.paymentType {
+  font-weight: 600;
+  color: #333;
+}
+
+.paymentAmount {
+  color: #2e7d32;
+  font-weight: 500;
+}
+
+.paymentDate {
+  color: #666;
+  font-size: 0.85rem;
+}
+
+.paymentStatus {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+}
+
+.statusBadge {
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.statusBadge.successful {
+  background-color: #e8f5e9;
+  color: #2e7d32;
+}
+
+.statusBadge.pending {
+  background-color: #fff8e1;
+  color: #f57f17;
+}
+
+.statusBadge.failed {
+  background-color: #ffebee;
+  color: #c62828;
+}
+
+.paymentExpiry {
+  font-size: 0.8rem;
+  color: #666;
+}
+
+.retryBtn {
+  padding: 6px 12px;
+  background-color: #1976d2;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: background-color 0.2s;
+}
+
+.retryBtn:hover {
+  background-color: #1565c0;
+}
+
+.retryBtn:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+.retrySection {
+  margin-top: 20px;
+  padding: 15px;
+  background-color: #f5f5f5;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.retrySection h4 {
+  margin-top: 0;
+  color: #333;
+}
+
+.retrySection p {
+  margin-bottom: 15px;
+  color: #666;
+}
+
+.globalRetryBtn {
+  padding: 10px 20px;
+  background-color: #1976d2;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin: 0 auto;
+  transition: background-color 0.2s;
+}
+
+.globalRetryBtn:hover {
+  background-color: #1565c0;
+}
+
+.globalRetryBtn:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+.loadingPayments {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+}
+
+.spinnerSmall {
+  width: 24px;
+  height: 24px;
+  border: 3px solid rgba(0, 0, 0, 0.1);
+  border-radius: 50%;
+  border-top-color: #1976d2;
+  animation: spin 1s ease-in-out infinite;
+  margin-bottom: 10px;
+}
+
+.noPayments {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 30px;
+  color: #666;
+}
+
+.noPayments i {
+  font-size: 2rem;
+  margin-bottom: 10px;
+  color: #ccc;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+/* Responsive adjustments */
 @media (max-width: 768px) {
   .profilePage {
-    padding: 10px;
+    padding: 0.8rem;
   }
-
+  
   .profileContainer {
-    border-radius: 15px;
+    padding: 0.5rem;
   }
-
-  .profileForm,
-  .paymentHistorySection {
-    padding: 20px;
+  
+  .profileForm {
+    padding: 1.5rem;
   }
-
-  .paymentInfo {
-    flex-direction: column;
-    align-items: flex-start;
+  
+  .authHeader {
+    margin-bottom: 1.5rem;
   }
+  
+  .appLogo {
+    font-size: 1.5rem;
+  }
+  
+  .profileHeader {
+    padding: 2rem;
+  }
+  
+  .profileHeader h2 {
+    font-size: 1.5rem;
+  }
+  
+  .profileAvatar {
+    width: 80px;
+    height: 80px;
+    font-size: 1.8rem;
+  }
+  
+  .profileEmail,
+  .profileCourse,
+  .profileUniversity {
+    font-size: 1rem;
+  }
+  
+  .inputGroup input {
+    padding: 0.75rem 1rem;
+    font-size: 0.95rem;
+  }
+  
+  .submitBtn,
+  .deviceManagerBtn {
+    padding: 0.8rem 1rem;
+    font-size: 1rem;
+  }
+  
+  .subscribedBadge,
+  .notSubscribedBadge {
+    padding: 0.6rem 1rem;
+    font-size: 0.9rem;
+  }
+  
+  .subscriptionType,
+  .recurringInfo,
+  .nextPaymentDate,
+  .expiryDate {
+    font-size: 0.9rem;
+  }
+}
 
-  .paymentStatus {
-    align-items: flex-start;
+@media (max-width: 480px) {
+  .profilePage {
+    padding: 0.5rem;
+  }
+  
+  .profileContainer {
+    padding: 0.25rem;
+  }
+  
+  .authHeader {
+    margin-bottom: 1rem;
+  }
+  
+  .appLogo {
+    font-size: 1.3rem;
+  }
+  
+  .backBtn {
+    width: 40px;
+    height: 40px;
+  }
+  
+  .profileHeader {
+    padding: 1.5rem;
+  }
+  
+  .profileHeader h2 {
+    font-size: 1.3rem;
+  }
+  
+  .profileAvatar {
+    width: 70px;
+    height: 70px;
+    font-size: 1.5rem;
+  }
+  
+  .profileForm {
+    padding: 1.2rem;
+  }
+  
+  .profileForm h3 {
+    font-size: 1.3rem;
+  }
+  
+  .inputGroup {
+    margin-bottom: 1.2rem;
+  }
+  
+  .inputGroup label {
+    font-size: 0.9rem;
+  }
+  
+  .inputGroup input {
+    padding: 0.7rem 0.9rem;
+    font-size: 0.9rem;
+  }
+  
+  .submitBtn,
+  .deviceManagerBtn {
+    padding: 0.7rem 0.9rem;
+    font-size: 0.9rem;
+  }
+  
+  .subscribedBadge,
+  .notSubscribedBadge {
+    padding: 0.5rem 0.8rem;
+    font-size: 0.85rem;
+  }
+  
+  .successMessage,
+  .errorMessage {
+    padding: 1rem;
+    font-size: 0.9rem;
+  }
+  
+  .subscriptionType,
+  .recurringInfo,
+  .nextPaymentDate,
+  .expiryDate {
+    font-size: 0.85rem;
   }
 }
