@@ -121,14 +121,25 @@ const Videos = () => {
   if (error) {
     return (
       <div className={styles.videosPage}>
-        <div className={styles.errorContainer}>
-          <i className="fas fa-exclamation-triangle"></i>
+        <div className={styles.emptyState}>
+          <div className={styles.emptyStateIcon}>
+            <i className="fas fa-exclamation-triangle"></i>
+          </div>
           <h2>Error Loading Videos</h2>
           <p>{error}</p>
-          <button className={`${styles.btn} ${styles.btnPrimary}`} onClick={loadCourses}>
-            <i className="fas fa-redo"></i>
-            Try Again
-          </button>
+          <div className={styles.emptyStateActions}>
+            <button 
+              className={`${styles.emptyStateBtn} ${styles.emptyStatePrimary}`} 
+              onClick={loadCourses}
+            >
+              <i className="fas fa-redo"></i>
+              Try Again
+            </button>
+            <Link to="/home" className={`${styles.emptyStateBtn} ${styles.emptyStateSecondary}`}>
+              <i className="fas fa-home"></i>
+              Back to Home
+            </Link>
+          </div>
         </div>
       </div>
     )
@@ -136,6 +147,7 @@ const Videos = () => {
 
   return (
     <div className={styles.videosPage}>
+      {/* Header */}
       <header className={styles.videosHeader}>
         <div className={styles.headerContent}>
           <Link to="/home" className={styles.backBtn}>
@@ -161,6 +173,7 @@ const Videos = () => {
         </div>
       </header>
       
+      {/* Search Section */}
       <div className={styles.searchSection}>
         <div className={styles.searchBar}>
           <i className="fas fa-search"></i>
@@ -178,19 +191,57 @@ const Videos = () => {
         </div>
       </div>
       
-      <div className={`${styles.coursesContainer} ${viewStyle}`}>
+      {/* Main Content */}
+      <div className={styles.coursesContainer}>
         {courses.length === 0 ? (
+          // No courses available
           <div className={styles.emptyState}>
-            <i className="fas fa-video"></i>
-            <h2>No courses available</h2>
-            <p>There are no video courses available at the moment.</p>
+            <div className={styles.emptyStateIcon}>
+              <i className="fas fa-video-slash"></i>
+            </div>
+            <h2>No Courses Available</h2>
+            <p>There are no video courses available at the moment. Check back later for new content.</p>
+            <div className={styles.emptyStateActions}>
+              <button 
+                className={`${styles.emptyStateBtn} ${styles.emptyStatePrimary}`} 
+                onClick={loadCourses}
+              >
+                <i className="fas fa-sync-alt"></i>
+                Refresh
+              </button>
+              <Link to="/home" className={`${styles.emptyStateBtn} ${styles.emptyStateSecondary}`}>
+                <i className="fas fa-home"></i>
+                Back to Home
+              </Link>
+            </div>
           </div>
         ) : filteredCourses.length === 0 ? (
-          <div className={styles.noResults}>
-            <i className="fas fa-search"></i>
-            <p>No videos found matching your search</p>
+          // No search results
+          <div className={`${styles.emptyState} ${styles.searchEmptyState}`}>
+            <div className={styles.emptyStateIcon}>
+              <i className="fas fa-search"></i>
+            </div>
+            <h2>No Videos Found</h2>
+            <p>We couldn't find any videos matching "{searchTerm}". Try a different search term.</p>
+            <div className={styles.emptyStateActions}>
+              <button 
+                className={`${styles.emptyStateBtn} ${styles.emptyStatePrimary}`} 
+                onClick={() => setSearchTerm("")}
+              >
+                <i className="fas fa-times-circle"></i>
+                Clear Search
+              </button>
+              <button 
+                className={`${styles.emptyStateBtn} ${styles.emptyStateSecondary}`} 
+                onClick={loadCourses}
+              >
+                <i className="fas fa-sync-alt"></i>
+                Refresh Courses
+              </button>
+            </div>
           </div>
         ) : (
+          // Courses and videos list
           filteredCourses.map((course) => (
             <div key={course._id} className={styles.courseItem}>
               <div className={styles.courseHeader} onClick={() => toggleCourse(course._id)}>
@@ -272,6 +323,7 @@ const Videos = () => {
         )}
       </div>
       
+      {/* Video Player Modal */}
       {selectedVideo && (
         <div className={styles.videoModal}>
           <div className={styles.modalBackdrop} onClick={closeVideoPlayer}></div>
