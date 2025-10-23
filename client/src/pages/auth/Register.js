@@ -41,61 +41,97 @@ const Register = () => {
   const formRef = useRef(null)
   const courseSearchRef = useRef(null)
   
-  // Fetch universities and courses when component mounts
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        // Fetch universities
-        const uniResponse = await api.get("/api/universities")
-        if (uniResponse.data && Array.isArray(uniResponse.data.universities)) {
-          setUniversities(uniResponse.data.universities)
-        } else {
-          console.error("Invalid universities data format")
-          setUniversities([])
-        }
-      } catch (error) {
-        console.error("Failed to fetch universities:", error)
-        setUniversities([])
-      } finally {
-        setLoadingUniversities(false)
-      }
-      
-      try {
-        // Fetch courses
-        const courseResponse = await api.get("/api/courseofstudy")
-        if (courseResponse.data && Array.isArray(courseResponse.data.courses)) {
-          // Filter out courses from the "Administration" category
-          const nonAdminCourses = courseResponse.data.courses.filter(
-            course => course.category.toLowerCase() !== "administration"
-          )
-          setCourses(nonAdminCourses)
-          setFilteredCourses(nonAdminCourses)
-        } else {
-          console.error("Invalid courses data format")
-          setCourses([])
-          setFilteredCourses([])
-        }
-      } catch (error) {
-        console.error("Failed to fetch courses:", error)
-        setCourses([])
-        setFilteredCourses([])
-      } finally {
-        setLoadingCourses(false)
-      }
-    }
+  // Refs for retry timeouts
+  const universityRetryRef = useRef(null)
+  const courseRetryRef = useRef(null)
+  
+  // Fetch universities with automatic retry
+  const fetchUniversities = (retryCount = 0) => {
+    setLoadingUniversities(true);
     
-    fetchData()
-  }, [])
+    api.get("/api/universities")
+      .then(response => {
+        if (response.data && Array.isArray(response.data.universities)) {
+          setUniversities(response.data.universities);
+          setLoadingUniversities(false);
+        } else {
+          throw new Error("Invalid universities data format");
+        }
+      })
+      .catch(error => {
+        console.error(`Failed to fetch universities (attempt ${retryCount + 1}):`, error);
+        
+        // Retry with exponential backoff
+        if (retryCount < 5) {
+          const delay = Math.pow(2, retryCount) * 1000; // 1s, 2s, 4s, 8s, 16s
+          universityRetryRef.current = setTimeout(() => {
+            fetchUniversities(retryCount + 1);
+          }, delay);
+        } else {
+          // After max retries, try one more time with a longer delay
+          universityRetryRef.current = setTimeout(() => {
+            fetchUniversities(0); // Reset retry count
+          }, 30000); // 30 seconds
+        }
+      });
+  }
+  
+  // Fetch courses with automatic retry
+  const fetchCourses = (retryCount = 0) => {
+    setLoadingCourses(true);
+    
+    api.get("/api/courseofstudy")
+      .then(response => {
+        if (response.data && Array.isArray(response.data.courses)) {
+          // Filter out courses from the "Administration" category
+          const nonAdminCourses = response.data.courses.filter(
+            course => course.category.toLowerCase() !== "administration"
+          );
+          setCourses(nonAdminCourses);
+          setFilteredCourses(nonAdminCourses);
+          setLoadingCourses(false);
+        } else {
+          throw new Error("Invalid courses data format");
+        }
+      })
+      .catch(error => {
+        console.error(`Failed to fetch courses (attempt ${retryCount + 1}):`, error);
+        
+        // Retry with exponential backoff
+        if (retryCount < 5) {
+          const delay = Math.pow(2, retryCount) * 1000; // 1s, 2s, 4s, 8s, 16s
+          courseRetryRef.current = setTimeout(() => {
+            fetchCourses(retryCount + 1);
+          }, delay);
+        } else {
+          // After max retries, try one more time with a longer delay
+          courseRetryRef.current = setTimeout(() => {
+            fetchCourses(0); // Reset retry count
+          }, 30000); // 30 seconds
+        }
+      });
+  }
+  
+  // Initial fetch and cleanup
+  useEffect(() => {
+    fetchUniversities();
+    fetchCourses();
+    
+    return () => {
+      if (universityRetryRef.current) clearTimeout(universityRetryRef.current);
+      if (courseRetryRef.current) clearTimeout(courseRetryRef.current);
+    };
+  }, []);
   
   // Filter courses based on search term
   useEffect(() => {
     if (courseSearchTerm.trim() === "") {
-      setFilteredCourses(courses)
+      setFilteredCourses(courses);
     } else {
       const filtered = courses.filter(course => 
         course.name.toLowerCase().includes(courseSearchTerm.toLowerCase())
-      )
-      setFilteredCourses(filtered)
+      );
+      setFilteredCourses(filtered);
     }
   }, [courseSearchTerm, courses])
   
@@ -103,13 +139,13 @@ const Register = () => {
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (courseSearchRef.current && !courseSearchRef.current.contains(event.target)) {
-        setShowCourseDropdown(false)
+        setShowCourseDropdown(false);
       }
     }
     
-    document.addEventListener("mousedown", handleClickOutside)
+    document.addEventListener("mousedown", handleClickOutside);
     return () => {
-      document.removeEventListener("mousedown", handleClickOutside)
+      document.removeEventListener("mousedown", handleClickOutside);
     }
   }, [])
   
@@ -117,16 +153,16 @@ const Register = () => {
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (e.key === "ArrowLeft") {
-        handlePrev()
+        handlePrev();
       } else if (e.key === "ArrowRight") {
         if (currentSection < 2) {
-          handleNext()
+          handleNext();
         }
       }
     }
-    window.addEventListener("keydown", handleKeyDown)
+    window.addEventListener("keydown", handleKeyDown);
     return () => {
-      window.removeEventListener("keydown", handleKeyDown)
+      window.removeEventListener("keydown", handleKeyDown);
     }
   }, [currentSection])
   
@@ -138,169 +174,125 @@ const Register = () => {
       specialChar: /[!@#$%^&*(),.?":{}|<>]/.test(password),
     }
     
-    setPasswordCriteria(criteria)
+    setPasswordCriteria(criteria);
     
-    let strength = 0
-    if (criteria.length) strength += 33
-    if (criteria.number) strength += 33
-    if (criteria.specialChar) strength += 34
+    let strength = 0;
+    if (criteria.length) strength += 33;
+    if (criteria.number) strength += 33;
+    if (criteria.specialChar) strength += 34;
     
-    setPasswordStrength(strength)
+    setPasswordStrength(strength);
   }
   
   const handleChange = (e) => {
-    const { name, value } = e.target
+    const { name, value } = e.target;
     setFormData({
       ...formData,
       [name]: value,
-    })
+    });
     if (name === "password") {
-      calculatePasswordStrength(value)
+      calculatePasswordStrength(value);
     }
   }
   
   const handleCourseSearch = (e) => {
-    setCourseSearchTerm(e.target.value)
-    setShowCourseDropdown(true)
+    setCourseSearchTerm(e.target.value);
+    setShowCourseDropdown(true);
   }
   
   const handleCourseSelect = (course) => {
     setFormData({
       ...formData,
       course: course._id || course.id,
-    })
-    setCourseSearchTerm(course.name)
-    setShowCourseDropdown(false)
+    });
+    setCourseSearchTerm(course.name);
+    setShowCourseDropdown(false);
   }
   
   const handleNext = () => {
     // Validate current section before moving to next
     if (currentSection === 0) {
       if (!formData.fullName.trim()) {
-        setError("Please enter your full name")
-        return
+        setError("Please enter your full name");
+        return;
       }
       if (!formData.email.trim()) {
-        setError("Please enter your email address")
-        return
+        setError("Please enter your email address");
+        return;
       }
       if (!isValidEmail(formData.email)) {
-        setError("Please enter a valid email address")
-        return
+        setError("Please enter a valid email address");
+        return;
       }
     }
     
     if (currentSection === 1) {
       if (!formData.password) {
-        setError("Please enter a password")
-        return
+        setError("Please enter a password");
+        return;
       }
       if (formData.password.length < 6) {
-        setError("Password must be at least 6 characters")
-        return
+        setError("Password must be at least 6 characters");
+        return;
       }
       if (formData.password !== formData.confirmPassword) {
-        setError("Passwords do not match")
-        return
+        setError("Passwords do not match");
+        return;
       }
     }
     
-    setError("")
+    setError("");
     if (currentSection < 2) {
-      setCurrentSection(currentSection + 1)
+      setCurrentSection(currentSection + 1);
     }
   }
   
   const handlePrev = () => {
     if (currentSection > 0) {
-      setCurrentSection(currentSection - 1)
+      setCurrentSection(currentSection - 1);
     }
   }
   
-  // const handleSubmit = async (e) => {
-  //   e.preventDefault()
+  const handleSubmit = async (e) => {
+    e.preventDefault();
     
-  //   // Validate final section
-  //   if (!formData.university) {
-  //     setError("Please select your university")
-  //     return
-  //   }
-  //   if (!formData.course) {
-  //     setError("Please select your course")
-  //     return
-  //   }
+    // Validate final section
+    if (!formData.university) {
+      setError("Please select your university");
+      return;
+    }
+    if (!formData.course) {
+      setError("Please select your course");
+      return;
+    }
     
-  //   setLoading(true)
-  //   setError("")
+    setLoading(true);
+    setError("");
     
-  //   try {
-  //     const result = await register({
-  //       fullName: formData.fullName,
-  //       email: formData.email,
-  //       password: formData.password,
-  //       university: formData.university,
-  //       course: formData.course,
-  //     })
+    try {
+      const result = await register({
+        fullName: formData.fullName,
+        email: formData.email,
+        password: formData.password,
+        university: formData.university,
+        course: formData.course,
+      });
       
-  //     if (result.success) {
-  //       setSuccess(result.message || "Registration successful! Please check your email for verification.")
-  //       // Redirect to verification page after a short delay
-  //       setTimeout(() => {
-  //         navigate("/verify-email", { 
-  //           state: { email: formData.email } 
-  //         })
-  //       }, 2000)
-  //     } else {
-  //       setError(result.message)
-  //     }
-  //   } catch (error) {
-  //     setError(error.response?.data?.message || "Registration failed. Please try again.")
-  //   } finally {
-  //     setLoading(false)
-  //   }
-  // }
-  // In Register.js, modify the handleSubmit function
-const handleSubmit = async (e) => {
-  e.preventDefault()
-  
-  // Validate final section
-  if (!formData.university) {
-    setError("Please select your university")
-    return
-  }
-  if (!formData.course) {
-    setError("Please select your course")
-    return
-  }
-  
-  setLoading(true)
-  setError("")
-  
-  try {
-    const result = await register({
-      fullName: formData.fullName,
-      email: formData.email,
-      password: formData.password,
-      university: formData.university,
-      course: formData.course,
-    })
-    
-    if (result.success) {
-      // Redirect to congratulations page instead of showing success message
-      navigate("/congratulations")
-    } else {
-      setError(result.message)
+      if (result.success) {
+        navigate("/congratulations");
+      } else {
+        setError(result.message);
+      }
+    } catch (error) {
+      setError(error.response?.data?.message || "Registration failed. Please try again.");
+    } finally {
+      setLoading(false);
     }
-  } catch (error) {
-    setError(error.response?.data?.message || "Registration failed. Please try again.")
-  } finally {
-    setLoading(false)
   }
-}
   
   const isValidEmail = (email) => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-    return emailRegex.test(email)
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
   }
   
   const getProgressPercentage = () => {
@@ -308,9 +300,9 @@ const handleSubmit = async (e) => {
   }
   
   const getPasswordStrengthColor = () => {
-    if (passwordStrength <= 33) return "#ff6b6b" // Red
-    if (passwordStrength <= 66) return "#ffd43b" // Yellow
-    return "#51cf66" // Green
+    if (passwordStrength <= 33) return "#ff6b6b"; // Red
+    if (passwordStrength <= 66) return "#ffd43b"; // Yellow
+    return "#51cf66"; // Green
   }
   
   return (
@@ -542,10 +534,12 @@ const handleSubmit = async (e) => {
                       </option>
                     )}
                   </select>
+                  
                   {loadingUniversities && (
-                    <small className={styles.inputHint}>
-                      Fetching list of Nigerian universities...
-                    </small>
+                    <div className={styles.loadingIndicator}>
+                      <div className={styles.spinner}></div>
+                      <span>Fetching universities...</span>
+                    </div>
                   )}
                 </div>
                 
@@ -577,6 +571,7 @@ const handleSubmit = async (e) => {
                       <div className={styles.courseDropdown}>
                         {loadingCourses ? (
                           <div className={styles.courseDropdownLoading}>
+                            <div className={styles.spinner}></div>
                             Loading courses...
                           </div>
                         ) : filteredCourses.length > 0 ? (
@@ -599,6 +594,13 @@ const handleSubmit = async (e) => {
                       </div>
                     )}
                   </div>
+                  
+                  {loadingCourses && (
+                    <div className={styles.loadingIndicator}>
+                      <div className={styles.spinner}></div>
+                      <span>Fetching courses...</span>
+                    </div>
+                  )}
                 </div>
                 
                 <div className={styles.termsNotice}>
@@ -622,7 +624,7 @@ const handleSubmit = async (e) => {
                   <button
                     type="submit"
                     className={`${styles.submitBtn} ${loading ? styles.loading : ""}`}
-                    disabled={loading}
+                    disabled={loading || loadingUniversities || loadingCourses}
                     style={{ flex: 1 }}
                   >
                     <div className={styles.btnContent}>
