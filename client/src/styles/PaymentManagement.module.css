@@ -500,7 +500,27 @@
   font-size: 2rem;
   color: var(--primary-light);
 }
+/* In PaymentManagement.module.css */
+.noFlutterwaveRef {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.5rem;
+  background-color: rgba(239, 68, 68, 0.1);
+  color: var(--error-color);
+  border-radius: var(--radius-sm);
+  font-size: 0.75rem;
+  font-weight: 500;
+}
 
+.retryDisabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.retryDisabled:hover {
+  background: none;
+  transform: none;
+}
 /* Responsive Design */
 @media (max-width: 1024px) {
   .filterSection {

@@ -25,7 +25,10 @@ const paymentSchema = new mongoose.Schema(
       required: true,
       unique: true,
     },
-    flutterwaveRef: String,
+    flutterwaveRef: {
+      type: String,
+      required: false,
+    },
     subscriptionType: {
       type: String,
       enum: ["monthly", "semester"],
