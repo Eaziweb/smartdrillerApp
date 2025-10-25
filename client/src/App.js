@@ -61,6 +61,7 @@ import ReportsManagement from "./pages/admin/ReportsManagement"
 import AdminQuizManagement from "./pages/admin/AdminQuizManagement"
 import VideoManagement from "./pages/admin/VideoManagement"
 import NoteManagement from "./pages/admin/NoteManagement"
+import PaymentManagement from "./pages/admin/PaymentManagement"
 import MaterialManagement from "./pages/admin/MaterialManagement"
 import CompetitionManagement from "./pages/admin/CompetitionManagement"
 import AdminCompetitionDetails from "./pages/admin/CompetitionDetails"
@@ -80,6 +81,7 @@ import Correction from "./pages/user/Correction"
 import AOS from 'aos';
 import 'aos/dist/aos.css';
 import './index.css';
+import PaymentManagement from "./pages/admin/PaymentManagement";
 
 
 
@@ -177,6 +179,14 @@ useEffect(() => {
               element={
                 <AdminRoute>
                   <CompetitionManagement />
+                </AdminRoute>
+              }
+            />
+                        <Route
+              path="/admin/payments"
+              element={
+                <AdminRoute>
+                  <PaymentManagement />
                 </AdminRoute>
               }
             />

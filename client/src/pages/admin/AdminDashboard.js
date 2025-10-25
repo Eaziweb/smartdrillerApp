@@ -228,6 +228,9 @@ const AdminDashboard = () => {
           <Link to="/admin/courseofstudy" className={styles.adminBtn}>
             Course of Study Manag.
           </Link>
+<Link to="/admin/payments" className={styles.adminBtn}>
+  Payment Management
+</Link>
         </div>
         
         {/* University Management Section */}

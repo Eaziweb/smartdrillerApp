@@ -628,5 +628,29 @@ router.get("/history", auth, async (req, res) => {
     });
   }
 });
+// Get all payments (admin only)
+router.get("/all", auth, async (req, res) => {
+  try {
+    // Check if user is admin
+    if (req.user.role !== "admin") {
+      return res.status(403).json({ message: "Access denied. Admin privileges required." });
+    }
 
+    const payments = await Payment.find({})
+      .populate("user", "fullName email")
+      .sort({ createdAt: -1 });
+
+    res.json({
+      success: true,
+      payments,
+    });
+  } catch (error) {
+    console.error("Error fetching payments:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch payments",
+      error: error.message,
+    });
+  }
+});
 module.exports = router;
