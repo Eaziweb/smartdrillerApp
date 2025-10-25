@@ -18,6 +18,7 @@ const PaymentManagement = () => {
   const [showPaymentDetails, setShowPaymentDetails] = useState(false)
   const [retrySuccess, setRetrySuccess] = useState(false)
   const [retryError, setRetryError] = useState("")
+  const [retryModalVisible, setRetryModalVisible] = useState(false)
 
   useEffect(() => {
     loadPayments()
@@ -33,6 +34,7 @@ const PaymentManagement = () => {
       setPayments(response.data.payments)
     } catch (error) {
       console.error("Failed to load payments:", error)
+      showMessage("Failed to load payments. Please try again.", "error")
     }
     setLoading(false)
   }
@@ -59,6 +61,18 @@ const PaymentManagement = () => {
   }
 
   const handleRetryPayment = async (paymentId) => {
+    // First, check if the payment is still pending
+    const payment = payments.find(p => p._id === paymentId)
+    if (!payment) {
+      showMessage("Payment not found", "error")
+      return
+    }
+    
+    if (payment.status !== "pending") {
+      showMessage(`Payment is already ${payment.status}, cannot retry`, "warning")
+      return
+    }
+    
     setRetryingPayment(paymentId)
     setRetrySuccess(false)
     setRetryError("")
@@ -67,6 +81,8 @@ const PaymentManagement = () => {
       const response = await api.post(`/api/payments/retry-verification/${paymentId}`)
       if (response.data.success) {
         setRetrySuccess(true)
+        setRetryModalVisible(true)
+        
         // Update the payment in the list
         const updatedPayments = payments.map(p => 
           p._id === paymentId ? { ...p, status: "successful" } : p
@@ -77,11 +93,31 @@ const PaymentManagement = () => {
         showMessage("Payment verification successful! User subscription activated.", "success")
       } else {
         setRetryError(response.data.message || "Failed to verify payment")
-        showMessage(response.data.message || "Failed to verify payment", "error")
+        setRetryModalVisible(true)
       }
     } catch (error) {
-      setRetryError(error.response?.data?.message || error.message)
-      showMessage(error.response?.data?.message || error.message, "error")
+      // Handle different error types
+      let errorMessage = "Failed to verify payment";
+      
+      if (error.response) {
+        // The request was made and the server responded with a status code
+        // that falls out of the range of 2xx
+        if (error.response.status === 400) {
+          errorMessage = error.response.data?.message || "Invalid request for payment verification";
+        } else if (error.response.status === 404) {
+          errorMessage = "Payment not found";
+        } else if (error.response.status === 403) {
+          errorMessage = "Access denied";
+        } else if (error.response.status === 500) {
+          errorMessage = "Server error. Please try again later.";
+        }
+      } else if (error.request) {
+        // The request was made but no response was received
+        errorMessage = "Network error. Please check your connection.";
+      }
+      
+      setRetryError(errorMessage)
+      setRetryModalVisible(true)
     } finally {
       setRetryingPayment(null)
     }
@@ -96,7 +132,7 @@ const PaymentManagement = () => {
     const messageEl = document.createElement("div")
     messageEl.className = `${styles.messageToast} ${styles[type]}`
     messageEl.innerHTML = `
-      <i class="fas ${type === "success" ? "fa-check-circle" : type === "error" ? "fa-exclamation-triangle" : "fa-info-circle"}"></i>
+      <i class="fas ${type === "success" ? "fa-check-circle" : type === "error" ? "fa-exclamation-triangle" : type === "warning" ? "fa-exclamation-circle" : "fa-info-circle"}"></i>
       <span>${message}</span>
     `
     document.body.appendChild(messageEl)
@@ -125,6 +161,12 @@ const PaymentManagement = () => {
       default:
         return <span className={styles.statusBadge}>{status}</span>
     }
+  }
+
+  const closeRetryModal = () => {
+    setRetryModalVisible(false)
+    setRetrySuccess(false)
+    setRetryError("")
   }
 
   return (
@@ -362,7 +404,7 @@ const PaymentManagement = () => {
       )}
       
       {/* Retry Status Modal */}
-      {(retrySuccess || retryError) && (
+      {retryModalVisible && (
         <div className={styles.modalOverlay}>
           <div className={styles.modalContent}>
             <div className={styles.modalHeader}>
@@ -384,10 +426,7 @@ const PaymentManagement = () => {
             <div className={styles.modalFooter}>
               <button 
                 className={styles.submitBtn}
-                onClick={() => {
-                  setRetrySuccess(false)
-                  setRetryError("")
-                }}
+                onClick={closeRetryModal}
               >
                 OK
               </button>
