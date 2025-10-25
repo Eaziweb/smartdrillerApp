@@ -81,7 +81,7 @@ import Correction from "./pages/user/Correction"
 import AOS from 'aos';
 import 'aos/dist/aos.css';
 import './index.css';
-import PaymentManagement from "./pages/admin/PaymentManagement";
+
 
 
 
