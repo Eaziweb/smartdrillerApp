@@ -440,5 +440,3 @@ const PaymentManagement = () => {
 
 export default PaymentManagement
 
-
-pages/admin/PaymentManagement.js
