@@ -244,10 +244,92 @@ router.post("/verify/:txRef", async (req, res) => {
 });
 
 // Webhook handler
-router.post("/webhook", async (req, res) => {
+// router.post("/webhook", async (req, res) => {
+//   try {
+//     const secretHash = process.env.FLUTTERWAVE_WEBHOOK_SECRET;
+//     const signature = req.headers["verif-hash"];
+
+//     if (!signature || signature !== secretHash) {
+//       return res.status(401).json({ message: "Unauthorized" });
+//     }
+
+//     const payload = req.body;
+
+//     if (payload.event === "charge.completed" && payload.data.status === "successful") {
+//       const txRef = payload.data.tx_ref;
+//       const flutterwaveId = payload.data.id;
+
+//       const payment = await Payment.findOne({ transactionId: txRef });
+
+//       if (!payment) {
+//         return res.status(404).json({ message: "Payment record not found" });
+//       }
+
+//       if (payment.status === "successful") {
+//         return res.status(200).json({ status: "success", message: "Payment already processed" });
+//       }
+
+//       payment.status = "successful";
+//       payment.flutterwaveRef = flutterwaveId;
+//       payment.paidAt = new Date();
+//       await payment.save();
+
+//       const user = await User.findById(payment.user).populate("university");
+
+//       if (!user) {
+//         return res.status(404).json({ message: "User not found" });
+//       }
+
+//       const now = new Date();
+//       let subscriptionExpiry;
+//       let universitySubscriptionEnd = null;
+
+//       if (payment.subscriptionType === "semester") {
+//         subscriptionExpiry = new Date(user.university.globalSubscriptionEnd);
+//         universitySubscriptionEnd = subscriptionExpiry;
+//       } else {
+//         const numMonths = payment.meta.months || 1;
+//         subscriptionExpiry = new Date();
+//         subscriptionExpiry.setDate(subscriptionExpiry.getDate() + 30 * numMonths);
+//       }
+
+//       user.isSubscribed = true;
+//       user.subscriptionExpiry = subscriptionExpiry;
+//       user.subscriptionStartDate = now;
+//       user.universitySubscriptionEnd = universitySubscriptionEnd;
+//       user.subscriptionType = payment.subscriptionType;
+
+//       await user.save();
+
+//       return res.status(200).json({
+//         status: "success",
+//         message: "Payment processed successfully",
+//       });
+//     }
+
+//     if (payload.event === "charge.completed" && payload.data.status === "failed") {
+//       const txRef = payload.data.tx_ref;
+
+//       const payment = await Payment.findOne({ transactionId: txRef });
+//       if (payment && payment.status === "pending") {
+//         payment.status = "failed";
+//         payment.failedAt = new Date();
+//         payment.failureReason = payload.data.processor_response || "Payment failed";
+//         await payment.save();
+//       }
+//     }
+
+//     res.status(200).json({ status: "success" });
+//   } catch (error) {
+//     console.error("Webhook processing error:", error);
+//     res.status(500).json({ message: "Webhook processing failed" });
+//   }
+// });
+
+router.post("/webhook", express.json({ type: "application/json" }), async (req, res) => {
   try {
-    const secretHash = process.env.FLUTTERWAVE_WEBHOOK_SECRET;
     const signature = req.headers["verif-hash"];
+    const secretHash = process.env.FLUTTERWAVE_WEBHOOK_SECRET;
 
     if (!signature || signature !== secretHash) {
       return res.status(401).json({ message: "Unauthorized" });
@@ -255,18 +337,19 @@ router.post("/webhook", async (req, res) => {
 
     const payload = req.body;
 
+    // Handle successful payment
     if (payload.event === "charge.completed" && payload.data.status === "successful") {
       const txRef = payload.data.tx_ref;
       const flutterwaveId = payload.data.id;
+      const email = payload.data.customer?.email;
 
       const payment = await Payment.findOne({ transactionId: txRef });
-
       if (!payment) {
         return res.status(404).json({ message: "Payment record not found" });
       }
 
       if (payment.status === "successful") {
-        return res.status(200).json({ status: "success", message: "Payment already processed" });
+        return res.status(200).json({ message: "Payment already processed" });
       }
 
       payment.status = "successful";
@@ -275,7 +358,6 @@ router.post("/webhook", async (req, res) => {
       await payment.save();
 
       const user = await User.findById(payment.user).populate("university");
-
       if (!user) {
         return res.status(404).json({ message: "User not found" });
       }
@@ -288,7 +370,7 @@ router.post("/webhook", async (req, res) => {
         subscriptionExpiry = new Date(user.university.globalSubscriptionEnd);
         universitySubscriptionEnd = subscriptionExpiry;
       } else {
-        const numMonths = payment.meta.months || 1;
+        const numMonths = payment.meta?.months || 1;
         subscriptionExpiry = new Date();
         subscriptionExpiry.setDate(subscriptionExpiry.getDate() + 30 * numMonths);
       }
@@ -298,19 +380,16 @@ router.post("/webhook", async (req, res) => {
       user.subscriptionStartDate = now;
       user.universitySubscriptionEnd = universitySubscriptionEnd;
       user.subscriptionType = payment.subscriptionType;
-
       await user.save();
 
-      return res.status(200).json({
-        status: "success",
-        message: "Payment processed successfully",
-      });
+      return res.status(200).json({ status: "success" });
     }
 
+    // Handle failed payments
     if (payload.event === "charge.completed" && payload.data.status === "failed") {
       const txRef = payload.data.tx_ref;
-
       const payment = await Payment.findOne({ transactionId: txRef });
+
       if (payment && payment.status === "pending") {
         payment.status = "failed";
         payment.failedAt = new Date();
@@ -319,9 +398,8 @@ router.post("/webhook", async (req, res) => {
       }
     }
 
-    res.status(200).json({ status: "success" });
+    res.status(200).json({ status: "ignored" });
   } catch (error) {
-    console.error("Webhook processing error:", error);
     res.status(500).json({ message: "Webhook processing failed" });
   }
 });
