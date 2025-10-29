@@ -939,3 +939,73 @@
 .inactive {
   background-color: #6c757d;
 }
+/* Add these styles to your AdminDashboard.module.css file */
+
+/* University Selection Styles */
+.universitySelection {
+  margin-top: 1.5rem;
+  padding: 1rem;
+  background: var(--bg-accent);
+  border-radius: var(--radius-md);
+}
+
+.universitySelection h3 {
+  margin-top: 0;
+  margin-bottom: 1rem;
+  color: var(--text-primary);
+}
+
+.selectAllContainer {
+  margin-bottom: 1rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.universityCheckboxes {
+  max-height: 300px;
+  overflow-y: auto;
+  padding-right: 0.5rem;
+}
+
+.universityCheckboxItem {
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.universityCheckboxItem:last-child {
+  border-bottom: none;
+}
+
+/* Custom scrollbar for university list */
+.universityCheckboxes::-webkit-scrollbar {
+  width: 6px;
+}
+
+.universityCheckboxes::-webkit-scrollbar-track {
+  background: var(--bg-secondary);
+  border-radius: 3px;
+}
+
+.universityCheckboxes::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 3px;
+}
+
+.universityCheckboxes::-webkit-scrollbar-thumb:hover {
+  background: var(--border-hover);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .universityCheckboxes {
+    max-height: 200px;
+  }
+  
+  .universitySelection {
+    padding: 0.75rem;
+  }
+  
+  .universitySelection h3 {
+    font-size: 1.1rem;
+  }
+}

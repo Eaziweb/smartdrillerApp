@@ -300,18 +300,26 @@ const QuestionSearch = () => {
 
   return (
     <div className={styles.questionSearch} ref={contentRef}>
-      <div className={styles.searchHeader}>
-        <div className={styles.headerContent}>
-          <button onClick={() => navigate("/home")} className={styles.backBtn}>
-            <i className="fas fa-arrow-left"></i>
-          </button>
-          <div>
-            <h1>Question Search</h1>
-            <p>Search through questions by course and topic</p>
-          </div>
-        </div>
+<div className={styles.searchHeader}>
+  <div className={styles.headerContent}>
+    <button onClick={() => navigate("/home")} className={styles.backBtn}>
+      <i className="fas fa-arrow-left"></i>
+    </button>
+    <div className={styles.titleSection}>
+      <h1>Question Search</h1>
+      <p>Search through questions by course and topic</p>
+    </div>
+    <div className={styles.searchStats}>
+      <div className={styles.statsIcon}>
+        <i className="fas fa-search"></i>
       </div>
-      
+      <div className={styles.statsText}>
+        <span className={styles.statsNumber}>{pagination.total || 0}</span>
+        <span className={styles.statsLabel}>Results</span>
+      </div>
+    </div>
+  </div>
+</div>
       <div className={styles.searchForm}>
         <div className={styles.formRow}>
           <div className={styles.formGroup}>

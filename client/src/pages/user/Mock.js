@@ -67,9 +67,7 @@ const Mock = () => {
           }
           break;
         case 'Enter':
-          if (currentQuestionIndex === examData.questions.length - 1) {
-            submitMock();
-          }
+          submitMock();
           break;
         default:
           break;
@@ -544,11 +542,10 @@ const Mock = () => {
           <button className={styles.backBtn} onClick={handleBack}>
             <i className="fa fa-arrow-left"></i>
           </button>
-      
-<div className={styles.subjectInfo}>
-  <h2 title={examData.course}>{examData.course.toUpperCase()}</h2>
-  <span>Question {currentQuestionIndex + 1} of {examData.questions.length}</span>
-</div>
+          <div className={styles.subjectInfo}>
+            <h2 title={examData.course}>{examData.course.toUpperCase()}</h2>
+            <span>Question {currentQuestionIndex + 1} of {examData.questions.length}</span>
+          </div>
         </div>
         <div className={styles.headerRight}>
           <div className={styles.timer}>
@@ -563,16 +560,6 @@ const Mock = () => {
             >
               <i className={`fas ${isReading ? 'fa-volume-up' : 'fa-volume-mute'}`}></i>
               {isReading && <span className={styles.readingIndicator}></span>}
-            </button>
-          )}
-          {isLastQuestion && (
-            <button 
-              className={`${styles.iconBtn} ${styles.submitBtn}`}
-              onClick={submitMock}
-              disabled={submitting}
-              title="Submit Test (Enter)"
-            >
-              <i className="fas fa-paper-plane"></i>
             </button>
           )}
           <button className={styles.iconBtn} onClick={() => setShowReportModal(true)}>
@@ -648,14 +635,6 @@ const Mock = () => {
         })}
       </div>
       
-      {isLastQuestion && (
-        <div className={styles.actionButtons}>
-          <button className={`${styles.btn} ${styles.btnPrimary}`} onClick={submitMock} disabled={submitting}>
-            {submitting ? "Submitting..." : "Submit Test"}
-          </button>
-        </div>
-      )}
-      
       <div className={styles.navigationContainer}>
         <button
           className={styles.navBtn}
@@ -665,6 +644,16 @@ const Mock = () => {
         >
           <i className="fas fa-chevron-left"></i>
         </button>
+        
+        <button
+          className={`${styles.navBtn} ${styles.submitNavBtn}`}
+          onClick={submitMock}
+          disabled={submitting}
+          title="Submit Test (Enter)"
+        >
+          <i className="fas fa-paper-plane"></i>
+        </button>
+        
         <button
           className={styles.navBtn}
           onClick={() => navigateToQuestion(currentQuestionIndex + 1)}

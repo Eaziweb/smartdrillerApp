@@ -392,7 +392,54 @@
 .messageToast.warning {
   border-left-color: var(--warning-color);
 }
+.headerActions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
 
+/* Share Button */
+.shareBtn {
+  background: rgba(0, 102, 255, 0.1);
+  border: none;
+  color: var(--primary-light);
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 0.9rem;
+}
+
+.shareBtn:hover {
+  background: rgba(0, 102, 255, 0.2);
+  transform: scale(1.1);
+  color: var(--primary-dark);
+}
+
+.shareBtn:active {
+  transform: scale(0.95);
+}
+
+/* Responsive adjustments for share button */
+@media (max-width: 768px) {
+  .shareBtn {
+    width: 28px;
+    height: 28px;
+    font-size: 0.8rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .shareBtn {
+    width: 26px;
+    height: 26px;
+    font-size: 0.75rem;
+  }
+}
 @keyframes slideInRight {
   from {
     transform: translateX(100%);

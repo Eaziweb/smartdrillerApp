@@ -3,7 +3,7 @@ import { useState, useEffect } from "react"
 import { Link, useNavigate } from "react-router-dom"
 import { useAuth } from "../../contexts/AuthContext"
 import styles from "../../styles/Competitions.module.css"
-import api from "../../utils/api";
+import api from "../../utils/api"
 
 const Competitions = () => {
   const { user } = useAuth()
@@ -56,6 +56,15 @@ const Competitions = () => {
     return new Date(dateString).toLocaleString()
   }
 
+  const getFormattedDate = (dateString) => {
+    // Format date for sharing (without time)
+    return new Date(dateString).toLocaleDateString(undefined, {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    })
+  }
+
   const getTimeRemaining = (endDate) => {
     const now = new Date()
     const end = new Date(endDate)
@@ -76,6 +85,41 @@ const Competitions = () => {
       navigate(`/competitions/${competition._id}/leaderboard`)
     } else {
       navigate(`/competitions/${competition._id}`)
+    }
+  }
+
+  const handleShareCompetition = (competition, e) => {
+    e.stopPropagation()
+    
+    // Generate beautiful share text
+    const statusText = competition.status.charAt(0).toUpperCase() + competition.status.slice(1)
+    const startDate = getFormattedDate(competition.startDate)
+    const endDate = getFormattedDate(competition.endDate)
+    
+    const shareText = `🏆 *${competition.name}*\n\n${competition.description}\n\n📅 *Dates:* ${startDate} - ${endDate}\n📊 *Status:* ${statusText}\n\nJoin this exciting academic competition and test your knowledge!`
+    
+    // Add platform-specific link
+    const competitionUrl = `https://smartdriller.vercel.app`
+    const fullShareText = `${shareText}\n\n${competitionUrl}`
+    
+    // Try to use Web Share API if available
+    if (navigator.share) {
+      navigator.share({
+        title: competition.name,
+        text: shareText,
+        url: competitionUrl
+      })
+      .catch(err => console.log('Error sharing:', err))
+    } else {
+      // Fallback: copy to clipboard
+      navigator.clipboard.writeText(fullShareText)
+        .then(() => {
+          showMessage("Competition details copied to clipboard!", "success")
+        })
+        .catch(err => {
+          console.error('Failed to copy: ', err)
+          showMessage("Failed to copy competition details", "error")
+        })
     }
   }
 
@@ -153,7 +197,16 @@ const Competitions = () => {
           >
             <div className={styles.competitionHeader}>
               <h3>{competition.name}</h3>
-              {getStatusBadge(competition.status)}
+              <div className={styles.headerActions}>
+                {getStatusBadge(competition.status)}
+                <button 
+                  className={styles.shareBtn}
+                  onClick={(e) => handleShareCompetition(competition, e)}
+                  title="Share Competition"
+                >
+                  <i className="fas fa-share-alt"></i>
+                </button>
+              </div>
             </div>
             <p className={styles.competitionDescription}>{competition.description}</p>
             <div className={styles.competitionMeta}>

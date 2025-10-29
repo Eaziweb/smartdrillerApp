@@ -23,6 +23,15 @@ const AdminDashboard = () => {
   const [showConfirmationModal, setShowConfirmationModal] = useState(false)
   const [pendingUniversityData, setPendingUniversityData] = useState(null)
   const [isPastDate, setIsPastDate] = useState(false)
+  
+  // New state for generic semester modal
+  const [showGenericModal, setShowGenericModal] = useState(false)
+  const [genericData, setGenericData] = useState({
+    semesterEnd: new Date(Date.now() + 120 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+    semesterPrice: 6000,
+    monthlyPrice: 2000,
+    selectedUniversities: []
+  })
 
   useEffect(() => {
     loadDashboardData()
@@ -142,6 +151,56 @@ const AdminDashboard = () => {
   const isSubscriptionExpired = (endDate) => {
     return new Date(endDate) < new Date()
   }
+  
+  // Generic semester handlers
+  const handleOpenGenericModal = () => {
+    // Initialize with all universities selected
+    setGenericData({
+      semesterEnd: new Date(Date.now() + 120 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+      semesterPrice: 6000,
+      monthlyPrice: 2000,
+      selectedUniversities: universities.map(u => u._id)
+    })
+    setShowGenericModal(true)
+  }
+  
+  const handleGenericDataChange = (e) => {
+    const { name, value, type, checked } = e.target
+    if (type === 'checkbox') {
+      // Handle university selection
+      const universityId = name
+      setGenericData(prev => {
+        const selected = prev.selectedUniversities
+        if (checked) {
+          return { ...prev, selectedUniversities: [...selected, universityId] }
+        } else {
+          return { ...prev, selectedUniversities: selected.filter(id => id !== universityId) }
+        }
+      })
+    } else {
+      // Handle form field changes
+      setGenericData(prev => ({ ...prev, [name]: value }))
+    }
+  }
+  
+  const handleSelectAll = (e) => {
+    const { checked } = e.target
+    setGenericData(prev => ({
+      ...prev,
+      selectedUniversities: checked ? universities.map(u => u._id) : []
+    }))
+  }
+  
+  const handleSaveGenericSemester = async () => {
+    try {
+      await api.post("/api/universities/generic-semester", genericData)
+      showMessage("Generic semester details updated successfully!", "success")
+      loadUniversities()
+      setShowGenericModal(false)
+    } catch (error) {
+      showMessage("Failed to update generic semester details", "error")
+    }
+  }
 
   if (loading) {
     return (
@@ -228,9 +287,9 @@ const AdminDashboard = () => {
           <Link to="/admin/courseofstudy" className={styles.adminBtn}>
             Course of Study Manag.
           </Link>
-<Link to="/admin/payments" className={styles.adminBtn}>
-  Payment Management
-</Link>
+          <Link to="/admin/payments" className={styles.adminBtn}>
+            Payment Management
+          </Link>
         </div>
         
         {/* University Management Section */}
@@ -254,6 +313,13 @@ const AdminDashboard = () => {
               >
                 <i className="fas fa-plus"></i>
                 <span>Add University</span>
+              </button>
+              <button 
+                className={styles.submitBtn}
+                onClick={handleOpenGenericModal}
+              >
+                <i className="fas fa-calendar-alt"></i>
+                <span>Set Generic Semester Details</span>
               </button>
               <button 
                 className={`${styles.submitBtn} ${checkingSubscriptions ? styles.loadingBtn : ""}`}
@@ -369,6 +435,99 @@ const AdminDashboard = () => {
                 Confirm
               </button>
             </div>
+          </div>
+        </div>
+      )}
+      
+      {/* Generic Semester Modal */}
+      {showGenericModal && (
+        <div className={styles.modalOverlay}>
+          <div className={styles.modalContent}>
+            <button className={styles.closeButton} onClick={() => setShowGenericModal(false)}>
+              <i className="fas fa-times"></i>
+            </button>
+            
+            <div className={styles.modalHeader}>
+              <h2>Set Generic Semester Details</h2>
+            </div>
+            
+            <form onSubmit={(e) => {
+              e.preventDefault()
+              handleSaveGenericSemester()
+            }} className={styles.adminForm}>
+              <div className={styles.inputGroup}>
+                <label htmlFor="semesterEnd">Semester End Date</label>
+                <input
+                  type="date"
+                  id="semesterEnd"
+                  name="semesterEnd"
+                  value={genericData.semesterEnd}
+                  onChange={handleGenericDataChange}
+                  required
+                />
+              </div>
+              
+              <div className={styles.inputRow}>
+                <div className={styles.inputGroup}>
+                  <label htmlFor="semesterPrice">Semester Price (₦)</label>
+                  <input
+                    type="number"
+                    id="semesterPrice"
+                    name="semesterPrice"
+                    value={genericData.semesterPrice}
+                    onChange={handleGenericDataChange}
+                    required
+                  />
+                </div>
+                
+                <div className={styles.inputGroup}>
+                  <label htmlFor="monthlyPrice">Monthly Price (₦)</label>
+                  <input
+                    type="number"
+                    id="monthlyPrice"
+                    name="monthlyPrice"
+                    value={genericData.monthlyPrice}
+                    onChange={handleGenericDataChange}
+                    required
+                  />
+                </div>
+              </div>
+              
+              <div className={styles.universitySelection}>
+                <h3>Select Universities to Apply Changes</h3>
+                <div className={styles.selectAllContainer}>
+                  <label className={styles.checkboxLabel}>
+                    <input
+                      type="checkbox"
+                      checked={genericData.selectedUniversities.length === universities.length}
+                      onChange={handleSelectAll}
+                    />
+                    <span>Select All Universities</span>
+                  </label>
+                </div>
+                
+                <div className={styles.universityCheckboxes}>
+                  {universities.map(university => (
+                    <div key={university._id} className={styles.universityCheckboxItem}>
+                      <label className={styles.checkboxLabel}>
+                        <input
+                          type="checkbox"
+                          name={university._id}
+                          checked={genericData.selectedUniversities.includes(university._id)}
+                          onChange={handleGenericDataChange}
+                        />
+                        <span>{university.name}</span>
+                      </label>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              
+              <button type="submit" className={styles.submitBtn}>
+                <span>Apply to Selected Universities</span>
+                <i className="fas fa-save"></i>
+              </button>
+            </form>
           </div>
         </div>
       )}

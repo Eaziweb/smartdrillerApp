@@ -502,13 +502,18 @@ Join now: https://smartdriller.vercel.app/`;
                 <div className={`${styles.notificationIcon} ${styles[`icon${notification.type.charAt(0).toUpperCase() + notification.type.slice(1)}`]}`}>
                   <i className={`fas ${getNotificationIcon(notification.type)}`}></i>
                 </div>
-                <div className={styles.notificationText}>
-                  <h3>{notification.title}</h3>
-                  <p>{notification.message}</p>
-                  <div className={styles.notificationTime}>
-                    {new Date(notification.createdAt).toLocaleDateString()}
-                  </div>
-                </div>
+<div className={styles.notificationText}>
+  <h3>{notification.title}</h3>
+  <p dangerouslySetInnerHTML={{ 
+    __html: notification.message.replace(
+      /(https?:\/\/[^\s]+)/g, 
+      '<a href="$1" target="_blank" rel="noopener noreferrer" class="wrap-link">$1</a>'
+    ) 
+  }} />
+  <div className={styles.notificationTime}>
+    {new Date(notification.createdAt).toLocaleDateString()}
+  </div>
+</div>
               </div>
             ))
           )}

@@ -257,14 +257,22 @@ const Bookmarks = () => {
     <div className={styles.bookmarksPage} ref={contentRef}>
       {/* Header */}
       <div className={styles.bookmarksHeader}>
-        <button className={styles.backBtn} onClick={() => navigate("/home")}>
-          <i className="fa fa-arrow-left"></i>
-        </button>
-        <h1>My Bookmarks</h1>
-        <div className={styles.bookmarkStats}>
-          <span>{totalBookmarks} Questions</span>
-        </div>
-      </div>
+  <button className={styles.backBtn} onClick={() => navigate("/home")}>
+    <i className="fa fa-arrow-left"></i>
+  </button>
+  <div className={styles.headerContent}>
+    <h1>My Bookmarks</h1>
+  </div>
+  <div className={styles.bookmarkStats}>
+    <div className={styles.statsIcon}>
+      <i className="fas fa-bookmark"></i>
+    </div>
+    <div className={styles.statsText}>
+      <span className={styles.statsNumber}>{totalBookmarks}</span>
+      <span className={styles.statsLabel}>Questions</span>
+    </div>
+  </div>
+</div>
       
       <div className={styles.bookmarksContainer}>
         {!selectedCourse ? (
