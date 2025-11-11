@@ -1,4 +1,5 @@
 "use client"
+
 import { useState, useEffect, useRef } from "react"
 import { useAuth } from "../../contexts/AuthContext"
 import styles from "../../styles/AIAssistant.module.css"

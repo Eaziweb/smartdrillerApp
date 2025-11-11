@@ -39,7 +39,7 @@
   --primary-gradient-2: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   --primary-color: #002060;
   --accent-color: #0099ff;
-  --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #fb5268 100%);
   --success-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
   --warning-gradient: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
   --dark-gradient: linear-gradient(135deg, #ff7e5f 0%, #feb47b 100%);
@@ -643,10 +643,10 @@
   background: var(--secondary-gradient);
 }
 .featureGrid > :nth-child(9) .featureIcon {
-  background: var(--info-gradient);
+  background: linear-gradient(135deg, #f093fb 0%, #fb5268 100%)
 }
 .featureGrid > :nth-child(10) .featureIcon {
-  background: var(--fire-gradient);
+  background: linear-gradient(135deg, #43cea2 0%, #185a9d 100%);
 }
 .featureText h3 {
   font-size: 1.5rem;
@@ -673,7 +673,7 @@
   z-index: 5;
 }
 .activateBtn {
-  background: var(--primary-gradient);
+  background: linear-gradient(45deg, #0099ff, #002060 70%);
   color: white;
   border: none;
   padding: 1rem 3rem;
