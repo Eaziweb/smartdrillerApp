@@ -13,6 +13,7 @@ const AIAssistant = () => {
   const messagesEndRef = useRef(null)
 
   // Get user's first name or full name if only one name exists
+  
   const getUserName = () => {
     if (!user?.fullName) return "there"
     const nameParts = user.fullName.trim().split(/\s+/)
