@@ -12,16 +12,15 @@ const AIAssistant = () => {
   const [isLoading, setIsLoading] = useState(false)
   const messagesEndRef = useRef(null)
 
-  // Get user's first name or full name if only one name exists
-  
+  // Get user's first name
   const getUserName = () => {
     if (!user?.fullName) return "there"
     const nameParts = user.fullName.trim().split(/\s+/)
-    return nameParts[0] // Always use the first name
+    return nameParts[0]
   }
 
   useEffect(() => {
-    // Initial greeting when component mounts
+    // Initial greeting
     const userName = getUserName()
     const greeting = {
       id: Date.now(),
@@ -31,10 +30,8 @@ const AIAssistant = () => {
     }
     setMessages([greeting])
     
-    // Clear history when component unmounts (user leaves)
-    return () => {
-      setMessages([])
-    }
+    // Cleanup on unmount
+    return () => setMessages([])
   }, [user])
 
   useEffect(() => {
@@ -64,7 +61,6 @@ const AIAssistant = () => {
         "/api/ai/chat",
         {
           message: inputMessage,
-          // Only send userName for the first message to establish context
           userName: messages.length <= 1 ? getUserName() : undefined,
         },
         {
@@ -130,7 +126,7 @@ const AIAssistant = () => {
         </button>
         <div className={styles.aiTitle}>
           <h1>AI Assistant</h1>
-          <p>Powered by Gemini 2.0</p>
+          <p>Powered by Gemini 2.0 Flash Experimental</p>
         </div>
         <button className={styles.clearBtn} onClick={clearChat}>
           <i className="fas fa-trash"></i>
