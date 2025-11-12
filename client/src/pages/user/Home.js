@@ -95,6 +95,12 @@ const Home = () => {
       icon: "fa-solid fa-trophy",
       title: "Competition",
       description: "Compete with peers and climb leaderboards in real time."
+    },
+    {
+      to: "/cgpa-calc",
+      icon: "fa-solid fa-calculator",
+      title: "CGPA",
+      description: "Calculate your CGPA with ease."
     }
   ], [])
   

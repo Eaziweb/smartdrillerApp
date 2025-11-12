@@ -44,6 +44,7 @@ import Materials from "./pages/user/Materials"
 import ResultsHistory from "./pages/user/ResultsHistory"
 import QuestionSearch from "./pages/user/QuestionSearch"
 import Bookmarks from "./pages/user/Bookmarks"
+import CGPACalculator from "./pages/user/CGPACalculator"
 
 // Admin Pages
 import AdminLogin from "./pages/admin/AdminLogin"
@@ -377,7 +378,16 @@ useEffect(() => {
                 </ProtectedRoute>
               }
             />
-
+           <Route
+              path="/cgpa-calc"
+              element={
+                <ProtectedRoute>
+                  <SubscriptionProtectedRoute>
+                    <CGPACalculator />
+                  </SubscriptionProtectedRoute>
+                </ProtectedRoute>
+              }
+            />
             <Route
               path="/bookmarks"
               element={

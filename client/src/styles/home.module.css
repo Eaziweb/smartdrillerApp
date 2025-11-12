@@ -648,6 +648,9 @@
 .featureGrid > :nth-child(10) .featureIcon {
   background: linear-gradient(135deg, #43cea2 0%, #185a9d 100%);
 }
+.featureGrid > :nth-child(11) .featureIcon {
+  background: linear-gradient(135deg, #43cea2 0%, #185a9d 100%);
+}
 .featureText h3 {
   font-size: 1.5rem;
   color: var(--text-primary);
