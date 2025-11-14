@@ -622,7 +622,7 @@
   background: var(--primary-gradient-2);
 }
 .featureGrid > :nth-child(2) .featureIcon {
-  background: var(--secondary-gradient);
+  background: linear-gradient(135deg, #f093fb 0%, #fb5268 100%);
 }
 .featureGrid > :nth-child(3) .featureIcon {
   background: var(--success-gradient);
