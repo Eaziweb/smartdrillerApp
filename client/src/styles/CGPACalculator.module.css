@@ -1,0 +1,463 @@
+/* CGPA Calculator Styles */
+:root {
+  --primary-dark: #002060;
+  --primary-light: #0066ff;
+  --primary-gradient: linear-gradient(45deg, #0099ff, #002060 70%);
+  --success-color: #10b981;
+  --error-color: #ef4444;
+  --warning-color: #f59e0b;
+  --info-color: #3b82f6;
+  --bg-primary: #ffffff;
+  --bg-secondary: #f8fafc;
+  --bg-accent: #f1f5f9;
+  --text-primary: #1e293b;
+  --text-secondary: #64748b;
+  --border-color: #e2e8f0;
+  --border-hover: #cbd5e1;
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+}
+
+.cgpaPage {
+  min-height: 100vh;
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+.cgpaHeader {
+  background: var(--primary-gradient);
+  box-shadow: var(--shadow-lg);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  padding: 1rem 0;
+}
+
+.headerContent {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0 1.5rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.backBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-md);
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+
+.backBtn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateX(-3px);
+}
+
+.cgpaHeader h1 {
+  font-size: 1.5rem;
+  color: white;
+  margin: 0;
+  font-weight: 600;
+}
+
+.progressSection {
+  padding: 1.5rem;
+  background: var(--bg-primary);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.progressCard {
+  max-width: 1200px;
+  margin: 0 auto;
+  background: var(--primary-gradient);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+  color: white;
+  box-shadow: 0 4px 15px rgba(0, 102, 255, 0.2);
+}
+
+.progressInfo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.progressStats {
+  display: flex;
+  align-items: baseline;
+  gap: 0.25rem;
+}
+
+.statNumber {
+  font-size: 2.5rem;
+  font-weight: 700;
+}
+
+.statTotal {
+  font-size: 1.5rem;
+  opacity: 0.9;
+}
+
+.progressLabel {
+  font-size: 1.1rem;
+  opacity: 0.9;
+  font-weight: 500;
+}
+
+.progressBar {
+  height: 10px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+
+.progressFill {
+  height: 100%;
+  background: white;
+  border-radius: var(--radius-sm);
+  transition: width 0.5s ease;
+}
+
+.cgpaContainer {
+  padding: 1.5rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.cgpaSection {
+  background: var(--bg-primary);
+  border-radius: var(--radius-lg);
+  margin-bottom: 1.5rem;
+  box-shadow: var(--shadow-md);
+  overflow: hidden;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.cgpaSection:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-lg);
+}
+
+.sectionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.5rem;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.sectionHeader:hover {
+  background: var(--bg-accent);
+}
+
+.sectionInfo h3 {
+  margin: 0 0 0.25rem 0;
+  color: var(--text-primary);
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.sectionContent {
+  border-top: 1px solid var(--border-color);
+}
+
+.inputCard {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.5rem;
+  text-decoration: none;
+  color: inherit;
+  border-bottom: 1px solid var(--bg-accent);
+  transition: background 0.3s ease;
+}
+
+.inputCard:hover {
+  background: var(--bg-accent);
+}
+
+.inputCard:last-child {
+  border-bottom: none;
+}
+
+.inputContent {
+  flex: 1;
+}
+
+.inputContent h4 {
+  margin: 0 0 0.5rem 0;
+  color: var(--text-primary);
+  font-size: 1.1rem;
+  font-weight: 500;
+}
+
+.messageInput {
+  width: 100%;
+  padding: 0.75rem;
+  border: 2px solid var(--border-color);
+  border-radius: var(--radius-md);
+  font-size: 1rem;
+  outline: none;
+  transition: all 0.3s ease;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+}
+
+.messageInput:focus {
+  border-color: var(--primary-light);
+  box-shadow: 0 0 0 3px rgba(0, 102, 255, 0.1);
+}
+
+.courseRow {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr auto;
+  gap: 1rem;
+  align-items: center;
+}
+
+.sendBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background: var(--primary-gradient);
+  color: white;
+  border: none;
+  border-radius: var(--radius-md);
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.sendBtn:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.clearBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-md);
+  background: rgba(239, 68, 68, 0.1);
+  color: var(--error-color);
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.clearBtn:hover {
+  background: rgba(239, 68, 68, 0.2);
+  transform: scale(1.05);
+}
+
+.clearBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.resultsGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.resultItem {
+  padding: 1rem;
+  background: var(--bg-accent);
+  border-radius: var(--radius-md);
+  transition: all 0.3s ease;
+}
+
+.resultItem:hover {
+  background: var(--bg-secondary);
+  transform: translateY(-2px);
+}
+
+.resultItem h4 {
+  margin: 0 0 0.5rem 0;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.resultValue {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--primary-light);
+}
+
+/* Responsive styles */
+@media (max-width: 768px) {
+  .headerContent {
+    padding: 0 1rem;
+  }
+  
+  .cgpaHeader h1 {
+    font-size: 1.2rem;
+  }
+  
+  .backBtn {
+    width: 36px;
+    height: 36px;
+  }
+  
+  .progressSection {
+    padding: 1rem;
+  }
+  
+  .progressCard {
+    padding: 1.2rem;
+  }
+  
+  .statNumber {
+    font-size: 2rem;
+  }
+  
+  .statTotal {
+    font-size: 1.2rem;
+  }
+  
+  .progressLabel {
+    font-size: 1rem;
+  }
+  
+  .cgpaContainer {
+    padding: 1rem;
+  }
+  
+  .cgpaSection {
+    margin-bottom: 1rem;
+  }
+  
+  .sectionHeader {
+    padding: 1.2rem;
+  }
+  
+  .sectionInfo h3 {
+    font-size: 1.1rem;
+  }
+  
+  .inputCard {
+    padding: 0.8rem 1.2rem;
+  }
+  
+  .inputContent h4 {
+    font-size: 1rem;
+  }
+  
+  .messageInput {
+    padding: 0.6rem;
+    font-size: 0.9rem;
+  }
+  
+  .sendBtn {
+    padding: 0.6rem 1.2rem;
+    font-size: 0.9rem;
+  }
+  
+  .clearBtn {
+    width: 32px;
+    height: 32px;
+  }
+  
+  .resultsGrid {
+    grid-template-columns: 1fr;
+  }
+  
+  .progressInfo {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .headerContent {
+    padding: 0 0.75rem;
+  }
+  
+  .backBtn {
+    width: 32px;
+    height: 32px;
+  }
+  
+  .cgpaHeader h1 {
+    font-size: 1.1rem;
+  }
+  
+  .progressCard {
+    padding: 1rem;
+  }
+  
+  .statNumber {
+    font-size: 1.8rem;
+  }
+  
+  .statTotal {
+    font-size: 1.1rem;
+  }
+  
+  .progressLabel {
+    font-size: 0.9rem;
+  }
+  
+  .sectionHeader {
+    padding: 1rem;
+  }
+  
+  .sectionInfo h3 {
+    font-size: 1rem;
+  }
+  
+  .inputCard {
+    padding: 0.7rem 1rem;
+  }
+  
+  .inputContent h4 {
+    font-size: 0.95rem;
+  }
+  
+  .messageInput {
+    padding: 0.5rem;
+    font-size: 0.85rem;
+  }
+  
+  .sendBtn {
+    padding: 0.5rem 1rem;
+    font-size: 0.85rem;
+  }
+  
+  .clearBtn {
+    width: 28px;
+    height: 28px;
+  }
+  
+  .courseRow {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+  
+  .resultValue {
+    font-size: 1.3rem;
+  }
+}

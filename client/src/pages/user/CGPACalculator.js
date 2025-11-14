@@ -1,7 +1,7 @@
 "use client"
 import { useState, useEffect } from "react"
 import { Link } from "react-router-dom"
-import styles from "../../styles/Notes.module.css"
+import styles from "../../styles/CGPACalculator.module.css"
 
 const CGPACalculator = () => {
   // State for current CGPA and credits
