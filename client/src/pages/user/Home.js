@@ -100,10 +100,12 @@ const Home = () => {
       to: "/cgpa-calc",
       icon: "fa-solid fa-calculator",
       title: "CGPA",
-      description: "Calculate your CGPA with ease."
+      description: "Easily calculate your CGPA in just a few simple steps."
     }
   ], [])
-  
+
+
+
   // Initialize component - fetch user data and notifications
   useEffect(() => {
     if (initializedRef.current) return;
