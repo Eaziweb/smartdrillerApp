@@ -22,6 +22,8 @@ const Mock = () => {
   const [submitting, setSubmitting] = useState(false)
   const [progressLoaded, setProgressLoaded] = useState(false)
   const [katexLoaded, setKatexLoaded] = useState(false)
+  const [submitError, setSubmitError] = useState("")
+  const [submitSuccess, setSubmitSuccess] = useState(false)
   
   // Voice reader states
   const [voiceReaderOn, setVoiceReaderOn] = useState(false)
@@ -153,7 +155,7 @@ const Mock = () => {
     if (!content) return null
     
     // Simple regex to find LaTeX patterns
-    const latexPattern = /(\\\(.*?\\\)|\\\[.*?\\\]|\$\$.*?\$\$|\$.*?\$)/g
+    const latexPattern = /(\\$$.*?\\$$|\\\[.*?\\\]|\$\$.*?\$\$|\$.*?\$)/g
     
     // Split content by LaTeX patterns
     const parts = content.split(latexPattern)
@@ -244,7 +246,7 @@ const Mock = () => {
     // Clean LaTeX expressions from text
     const cleanText = (text) => {
       return text
-        .replace(/\\\(.*?\\\)/g, '') // Remove inline math
+        .replace(/\\$$.*?\\$$/g, '') // Remove inline math
         .replace(/\\\[.*?\\\]/g, '') // Remove display math
         .replace(/\$\$.*?\$\$/g, '') // Remove display math with $$         
         .replace(/\$.*?\$/g, '')     // Remove inline math with $         
@@ -429,6 +431,9 @@ const Mock = () => {
   const submitMock = async () => {
     if (submitting) return
     setSubmitting(true)
+    setSubmitError("")
+    setSubmitSuccess(false)
+    
     try {
       const questions = examData.questions.map((question) => {
         const selectedOption = userAnswers[question._id] || 0
@@ -440,7 +445,6 @@ const Mock = () => {
         }
       })
       
-      // Calculate time used in minutes
       const timeUsed = examData.timeAllowed - Math.floor(timeRemaining / 60)
       
       const resultData = {
@@ -452,16 +456,40 @@ const Mock = () => {
         timeUsed: Math.max(timeUsed, 0),
         questions,
       }
-      
+
       const response = await api.post("/api/results/submit", resultData)
+      
+      if (!response.data) {
+        throw new Error("No response from server")
+      }
+      
       if (response.data.result) {
+        setSubmitSuccess(true)
         localStorage.setItem("latestResult", JSON.stringify(response.data.result))
         const progressKey = `mock_progress_${examData.course}_${examData.year}`
         localStorage.removeItem(progressKey)
-        navigate("/results")
+        
+        setTimeout(() => {
+          navigate("/results")
+        }, 1000)
+      } else if (response.data.error) {
+        setSubmitError(response.data.error)
+      } else {
+        setSubmitError("Failed to submit. Please try again.")
       }
     } catch (error) {
       console.error("Submit error:", error)
+      if (error.response?.status === 401) {
+        setSubmitError("Session expired. Please login again.")
+      } else if (error.response?.status === 400) {
+        setSubmitError(error.response.data?.message || "Invalid test data. Please try again.")
+      } else if (error.response?.status === 500) {
+        setSubmitError("Server error. Please try again later.")
+      } else if (error.message === "Network Error") {
+        setSubmitError("Network connection error. Check your internet.")
+      } else {
+        setSubmitError("Failed to submit. Please try again.")
+      }
     } finally {
       setSubmitting(false)
     }
@@ -645,14 +673,56 @@ const Mock = () => {
           <i className="fas fa-chevron-left"></i>
         </button>
         
-        <button
-          className={`${styles.navBtn} ${styles.submitNavBtn}`}
-          onClick={submitMock}
-          disabled={submitting}
-          title="Submit Test (Enter)"
-        >
-          <i className="fas fa-paper-plane"></i>
-        </button>
+        <div style={{ flex: 1, display: "flex", justifyContent: "center" }}>
+          <button
+            className={`${styles.submitBtn} ${submitting ? styles.submitting : ""}`}
+            onClick={submitMock}
+            disabled={submitting}
+            title="Submit Test (Enter)"
+            style={{
+              minWidth: "160px",
+              padding: "12px 24px",
+              fontSize: "16px",
+              fontWeight: "600",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: "8px",
+              background: submitSuccess ? "#10b981" : submitting ? "#94a3b8" : "linear-gradient(135deg, #0066ff 0%, #002060 100%)",
+              color: "white",
+              border: "none",
+              borderRadius: "8px",
+              cursor: submitting ? "not-allowed" : "pointer",
+              transition: "all 0.3s ease",
+              boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)"
+            }}
+          >
+            {submitting ? (
+              <>
+                <span style={{
+                  display: "inline-block",
+                  width: "16px",
+                  height: "16px",
+                  border: "2px solid rgba(255, 255, 255, 0.3)",
+                  borderTop: "2px solid white",
+                  borderRadius: "50%",
+                  animation: "spin 0.8s linear infinite"
+                }}></span>
+                Submitting...
+              </>
+            ) : submitSuccess ? (
+              <>
+                <i className="fas fa-check"></i>
+                Submitted!
+              </>
+            ) : (
+              <>
+                <i className="fas fa-paper-plane"></i>
+                Submit Test
+              </>
+            )}
+          </button>
+        </div>
         
         <button
           className={styles.navBtn}
@@ -663,6 +733,38 @@ const Mock = () => {
           <i className="fas fa-chevron-right"></i>
         </button>
       </div>
+      
+      {submitError && (
+        <div style={{
+          position: "fixed",
+          bottom: "100px",
+          left: "20px",
+          right: "20px",
+          background: "#fee2e2",
+          border: "2px solid #ef4444",
+          borderRadius: "8px",
+          padding: "16px",
+          color: "#991b1b",
+          fontSize: "14px",
+          zIndex: "1000",
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)"
+        }}>
+          <div>
+            <strong>Submission Error:</strong> {submitError}
+          </div>
+          <button onClick={() => setSubmitError("")} style={{
+            background: "none",
+            border: "none",
+            color: "#991b1b",
+            fontSize: "20px",
+            cursor: "pointer",
+            padding: "0"
+          }}>×</button>
+        </div>
+      )}
       
       {showQuitModal && (
         <div className={styles.modalOverlay}>
@@ -727,6 +829,13 @@ const Mock = () => {
           </div>
         </div>
       )}
+
+      <style>{`
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+      `}</style>
     </div>
   )
 }
