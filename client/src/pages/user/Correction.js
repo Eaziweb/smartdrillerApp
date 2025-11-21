@@ -4,10 +4,9 @@ import { useNavigate } from "react-router-dom"
 import { useAuth } from "../../contexts/AuthContext"
 import api from "../../utils/api"
 import styles from "../../styles/correction.module.css"
-import { convertMalformedLatex } from "../../utils/latex-converter"
 
 // Import KaTeX CSS
-import "katex/dist/katex.min.css"
+import 'katex/dist/katex.min.css'
 
 const Correction = () => {
   const { user } = useAuth()
@@ -24,28 +23,28 @@ const Correction = () => {
       navigate("/home")
       return
     }
-
+    
     loadCorrectionData()
-
+    
     // Load KaTeX dynamically
     const loadKaTeX = async () => {
       try {
         // Import KaTeX components
-        const katexModule = await import("katex")
+        const katexModule = await import('katex')
         const { render, renderToString } = katexModule
-
+        
         // Store KaTeX functions globally for easy access
         window.katex = {
           render,
-          renderToString,
+          renderToString
         }
-
+        
         setKatexLoaded(true)
       } catch (error) {
         console.error("Failed to load KaTeX:", error)
       }
     }
-
+    
     loadKaTeX()
   }, [user, navigate])
 
@@ -58,18 +57,18 @@ const Correction = () => {
 
   const processMathContent = () => {
     if (!window.katex) return
-
+    
     // Find all elements with math content
-    const mathElements = contentRef.current.querySelectorAll(".math-content")
-
-    mathElements.forEach((element) => {
-      const content = element.getAttribute("data-math")
+    const mathElements = contentRef.current.querySelectorAll('.math-content')
+    
+    mathElements.forEach(element => {
+      const content = element.getAttribute('data-math')
       if (content) {
         try {
           // Render the math content
           const renderedMath = window.katex.renderToString(content, {
             throwOnError: false,
-            displayMode: element.classList.contains("display-math"),
+            displayMode: element.classList.contains('display-math')
           })
           element.innerHTML = renderedMath
         } catch (e) {
@@ -83,32 +82,29 @@ const Correction = () => {
   // Helper function to render content with math
   const renderContentWithMath = (content, isDisplayMode = false) => {
     if (!content) return null
-
-    const convertedContent = convertMalformedLatex(content)
-
+    
     // Simple regex to find LaTeX patterns
-    const latexPattern = /(\\$$.*?\\$$|\\\[.*?\\\]|\$\$.*?\$\$|\$.*?\$)/g
-
+    const latexPattern = /(\\\(.*?\\\)|\\\[.*?\\\]|\$\$.*?\$\$|\$.*?\$)/g
+    
     // Split content by LaTeX patterns
-    const parts = convertedContent.split(latexPattern)
-
+    const parts = content.split(latexPattern)
+    
     return parts.map((part, index) => {
-      if (index % 2 === 1) {
-        // This is a LaTeX expression
+      if (index % 2 === 1) { // This is a LaTeX expression
         // Determine if it's display mode
-        const isDisplay = part.startsWith("\\[") || part.startsWith("$$")
-
+        const isDisplay = part.startsWith('\\[') || part.startsWith('$$')
+        
         // Extract the actual LaTeX content
         let latexContent = part
-        if (part.startsWith("\\(")) latexContent = part.slice(2, -2)
-        if (part.startsWith("\\[")) latexContent = part.slice(2, -2)
-        if (part.startsWith("$") && !part.startsWith("$$")) latexContent = part.slice(1, -1)
-        if (part.startsWith("$$")) latexContent = part.slice(2, -2)
-
+        if (part.startsWith('\\(')) latexContent = part.slice(2, -2)
+        if (part.startsWith('\\[')) latexContent = part.slice(2, -2)
+        if (part.startsWith('$') && !part.startsWith('$$')) latexContent = part.slice(1, -1)
+        if (part.startsWith('$$')) latexContent = part.slice(2, -2)
+        
         return (
-          <span
-            key={index}
-            className={`math-content ${isDisplay ? "display-math" : "inline-math"}`}
+          <span 
+            key={index} 
+            className={`math-content ${isDisplay ? 'display-math' : 'inline-math'}`}
             data-math={latexContent}
           />
         )
@@ -138,7 +134,7 @@ const Correction = () => {
   }
 
   const handleBack = () => {
-    navigate("/results")
+      navigate("/results")
   }
 
   const navigateToQuestion = (index) => {
@@ -148,39 +144,38 @@ const Correction = () => {
   // Get image URL with proper fallback for Cloudinary and local images
   const getImageUrl = (imagePath) => {
     if (!imagePath) return null
-
+    
     // If it's a full URL (Cloudinary), return as is
-    if (imagePath.startsWith("http")) {
+    if (imagePath.startsWith('http')) {
       return imagePath
     }
-
+    
     // If it's a local path starting with /uploads, return as is
-    if (imagePath.startsWith("/uploads")) {
+    if (imagePath.startsWith('/uploads')) {
       return imagePath
     }
-
+    
     // Otherwise, prepend /uploads
     return `/uploads${imagePath}`
   }
-
+  
   // Handle image error with better fallback
   const handleImageError = (e) => {
     // Prevent infinite loop by removing the error handler
     e.target.onerror = null
-
+    
     // Hide the broken image
-    e.target.style.display = "none"
-
+    e.target.style.display = 'none'
+    
     // If there's a container, show a placeholder
     const container = e.target.parentElement
     if (container && container.classList.contains(styles.questionImage)) {
       // Create a fallback element if it doesn't exist
-      if (!container.querySelector(".image-fallback")) {
-        const fallback = document.createElement("div")
-        fallback.className = "image-fallback"
+      if (!container.querySelector('.image-fallback')) {
+        const fallback = document.createElement('div')
+        fallback.className = 'image-fallback'
         fallback.innerHTML = '<i class="fas fa-image"></i><span>Image not available</span>'
-        fallback.style.cssText =
-          "display: flex; flex-direction: column; align-items: center; justify-content: center; height: 200px; color: #666;"
+        fallback.style.cssText = 'display: flex; flex-direction: column; align-items: center; justify-content: center; height: 200px; color: #666;'
         container.appendChild(fallback)
       }
     }
@@ -199,7 +194,7 @@ const Correction = () => {
   const currentQuestion = currentQuestionData.questionId
   const userAnswer = currentQuestionData.selectedOption
   const isCorrect = currentQuestionData.isCorrect
-
+  
   return (
     <div className={styles.correctionPage} ref={contentRef}>
       {/* Header */}
@@ -221,22 +216,24 @@ const Correction = () => {
           </div>
         </div>
       </div>
-
+      
       {/* Question Content */}
       <div className={styles.questionContainer}>
         {/* Display image if available */}
         {(currentQuestion.cloudinaryUrl || currentQuestion.image) && (
           <div className={styles.questionImage}>
-            <img
-              src={getImageUrl(currentQuestion.cloudinaryUrl || currentQuestion.image)}
-              alt="Question illustration"
+            <img 
+              src={getImageUrl(currentQuestion.cloudinaryUrl || currentQuestion.image)} 
+              alt="Question illustration" 
               onError={handleImageError}
             />
           </div>
         )}
-
-        <div className={styles.questionText}>{renderContentWithMath(currentQuestion.question)}</div>
-
+        
+        <div className={styles.questionText}>
+          {renderContentWithMath(currentQuestion.question)}
+        </div>
+        
         <div className={styles.optionsContainer}>
           {currentQuestion.options.map((option, index) => {
             const optionNumber = index + 1
@@ -244,34 +241,36 @@ const Correction = () => {
             const isCorrectOption = currentQuestion.correctOption === optionNumber
             const showCorrect = isCorrectOption
             const showWrong = isSelected && !isCorrectOption
-
+            
             return (
               <div
                 key={index}
                 className={`${styles.option} ${isSelected ? styles.selected : ""} ${showCorrect ? styles.correct : ""} ${showWrong ? styles.wrong : ""}`}
               >
                 <div className={styles.optionLetter}>{String.fromCharCode(65 + index)}</div>
-                <div className={styles.optionText}>{renderContentWithMath(option)}</div>
+                <div className={styles.optionText}>
+                  {renderContentWithMath(option)}
+                </div>
                 {showCorrect && <i className={`fas fa-check ${styles.optionIcon} ${styles.correctIcon}`}></i>}
                 {showWrong && <i className={`fas fa-times ${styles.optionIcon} ${styles.wrongIcon}`}></i>}
               </div>
             )
           })}
         </div>
-
+        
         {/* Explanation - Always shown */}
         <div className={styles.explanationContainer}>
           <div className={styles.explanationHeader}>
             <i className="fas fa-lightbulb"></i>
             <span>Explanation</span>
           </div>
-          <div className={styles.explanationText}>{renderContentWithMath(currentQuestion.explanation)}</div>
+          <div className={styles.explanationText}>
+            {renderContentWithMath(currentQuestion.explanation)}
+          </div>
         </div>
-
+        
         {/* Answer Status */}
-        <div
-          className={`${styles.answerStatus} ${isCorrect ? styles.correct : userAnswer === 0 ? styles.unanswered : styles.wrong}`}
-        >
+        <div className={`${styles.answerStatus} ${isCorrect ? styles.correct : userAnswer === 0 ? styles.unanswered : styles.wrong}`}>
           {userAnswer === 0 ? (
             <>
               <i className="fas fa-question-circle"></i>
@@ -292,14 +291,14 @@ const Correction = () => {
           )}
         </div>
       </div>
-
+      
       {/* Question Grid */}
       <div className={styles.questionGrid}>
         {correctionData.questions.map((questionData, index) => {
           const isCurrentQuestion = index === currentQuestionIndex
           const questionIsCorrect = questionData.isCorrect
           const questionIsUnanswered = questionData.selectedOption === 0
-
+          
           return (
             <button
               key={index}
@@ -313,7 +312,7 @@ const Correction = () => {
           )
         })}
       </div>
-
+      
       {/* Navigation */}
       <div className={styles.navigationContainer}>
         <button
