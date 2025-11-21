@@ -48,8 +48,9 @@ router.post("/fetch", auth, subscriptionCheck, async (req, res) => {
     };
     
     // Add topic filter if specific topics are selected
+    let topicArray = [];
     if (topics && topics !== "all" && topics.length > 0) {
-      const topicArray = Array.isArray(topics) ? topics : topics.split(",");
+      topicArray = Array.isArray(topics) ? topics : topics.split(",");
       query.topic = { $in: topicArray };
     }
     
@@ -62,6 +63,23 @@ router.post("/fetch", auth, subscriptionCheck, async (req, res) => {
     } else {
       // For study mode, sort by creation date at database level
       questions = await Question.find(query).select("-createdBy").sort({ createdAt: 1 });
+    }
+    
+    // Check if we found any questions
+    if (questions.length === 0) {
+      // If specific topics were selected but no questions found
+      if (topicArray.length > 0) {
+        return res.status(404).json({ 
+          success: false, 
+          message: "No questions found for the selected topics. Please try different topics.",
+          noQuestionsForTopics: true 
+        });
+      } else {
+        return res.status(404).json({ 
+          success: false, 
+          message: "No questions found for the selected criteria. Please try different options." 
+        });
+      }
     }
     
     // Only limit to requested count if it's not "all"

@@ -512,108 +512,92 @@ router.post("/admin-login", async (req, res) => {
   }
 });
 
-// Forgot Password
-// router.post("/forgot-password", async (req, res) => {
-//   try {
-//     const { email } = req.body;
-//     const user = await User.findOne({ email });
+// Forgot Password - Modified to return token instead of sending email
+router.post("/forgot-password", async (req, res) => {
+  try {
+    const { email } = req.body;
+    const user = await User.findOne({ email });
 
-//     if (!user) {
-//       return res.status(404).json({ message: "User not found" });
-//     }
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
 
-//     // Generate reset token
-//     const resetToken = crypto.randomBytes(32).toString("hex");
-//     user.resetPasswordToken = resetToken;
-//     user.resetPasswordExpires = Date.now() + 3600000; // 1 hour
-//     await user.save();
+    // Generate reset token
+    const resetToken = crypto.randomBytes(32).toString("hex");
+    user.resetPasswordToken = resetToken;
+    user.resetPasswordExpires = Date.now() + 3600000; // 1 hour
+    await user.save();
 
-//     // Create reset URL
-//     const resetUrl = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/reset-password/${resetToken}`;
+    // Return the token directly instead of sending email
+    res.json({ 
+      message: "Password reset token generated", 
+      resetToken: resetToken 
+    });
 
-//     await emailService.sendEmail({
-//       to: email,
-//       subject: "Password Reset - SmartDriller",
-//       html: `
-//         <h2>Password Reset Request</h2>
-//         <p>Click the link below to reset your password:</p>
-//         <a href="${resetUrl}" style="display: inline-block; padding: 10px 20px; background-color: #4CAF50; color: white; text-decoration: none; border-radius: 4px;">Reset Password</a>
-//         <p>This link expires in 1 hour.</p>
-//         <p>If you didn't request this, please ignore this email.</p>
-//       `,
-//     });
+  } catch (error) {
+    console.error("Forgot password error:", error);
+    res.status(500).json({ message: "Failed to generate reset token" });
+  }
+});
 
-//     res.json({ message: "Password reset email sent" });
-//   } catch (error) {
-//     console.error("Forgot password error:", error);
-//     if (error.message.includes('email account has reached its daily sending limit')) {
-//       res.status(503).json({ 
-//         message: "Email service temporarily unavailable. Please try again later." 
-//       });
-//     } else {
-//       res.status(500).json({ message: "Failed to send reset email" });
-//     }
-//   }
-// });
+// Reset Password
+router.post("/reset-password/:token", async (req, res) => {
+  try {
+    const { password } = req.body;
+    const { token } = req.params;
 
-// // Reset Password
-// router.post("/reset-password/:token", async (req, res) => {
-//   try {
-//     const { password } = req.body;
-//     const { token } = req.params;
+    // Validate token format
+    if (!token || token.length !== 64) {
+      return res.status(400).json({ message: "Invalid reset token format" });
+    }
 
-//     // Validate token format
-//     if (!token || token.length !== 64) {
-//       return res.status(400).json({ message: "Invalid reset token format" });
-//     }
+    // Find user by token and check expiration
+    const user = await User.findOne({
+      resetPasswordToken: token,
+      resetPasswordExpires: { $gt: Date.now() },
+    });
 
-//     // Find user by token and check expiration
-//     const user = await User.findOne({
-//       resetPasswordToken: token,
-//       resetPasswordExpires: { $gt: Date.now() },
-//     });
+    if (!user) {
+      return res.status(400).json({ message: "Invalid or expired reset token" });
+    }
 
-//     if (!user) {
-//       return res.status(400).json({ message: "Invalid or expired reset token" });
-//     }
+    // Update password
+    user.password = password;
+    user.resetPasswordToken = undefined;
+    user.resetPasswordExpires = undefined;
+    await user.save();
 
-//     // Update password
-//     user.password = password;
-//     user.resetPasswordToken = undefined;
-//     user.resetPasswordExpires = undefined;
-//     await user.save();
+    res.json({ message: "Password reset successfully" });
+  } catch (error) {
+    console.error("Reset password error:", error);
+    res.status(500).json({ message: "Failed to reset password" });
+  }
+});
 
-//     res.json({ message: "Password reset successfully" });
-//   } catch (error) {
-//     console.error("Reset password error:", error);
-//     res.status(500).json({ message: "Failed to reset password" });
-//   }
-// });
+// Verify Reset Token
+router.get("/verify-reset-token/:token", async (req, res) => {
+  try {
+    const { token } = req.params;
 
-// // Verify Reset Token
-// router.get("/verify-reset-token/:token", async (req, res) => {
-//   try {
-//     const { token } = req.params;
+    if (!token || token.length !== 64) {
+      return res.status(400).json({ valid: false, message: "Invalid reset token format" });
+    }
 
-//     if (!token || token.length !== 64) {
-//       return res.status(400).json({ valid: false, message: "Invalid reset token format" });
-//     }
+    const user = await User.findOne({
+      resetPasswordToken: token,
+      resetPasswordExpires: { $gt: Date.now() },
+    });
 
-//     const user = await User.findOne({
-//       resetPasswordToken: token,
-//       resetPasswordExpires: { $gt: Date.now() },
-//     });
+    if (!user) {
+      return res.status(400).json({ valid: false, message: "Invalid or expired reset token" });
+    }
 
-//     if (!user) {
-//       return res.status(400).json({ valid: false, message: "Invalid or expired reset token" });
-//     }
-
-//     res.json({ valid: true, message: "Token is valid" });
-//   } catch (error) {
-//     console.error("Token verification error:", error);
-//     res.status(500).json({ valid: false, message: "Failed to verify token" });
-//   }
-// });
+    res.json({ valid: true, message: "Token is valid" });
+  } catch (error) {
+    console.error("Token verification error:", error);
+    res.status(500).json({ valid: false, message: "Failed to verify token" });
+  }
+});
 
 router.get("/superadmin/me", auth, async (req, res) => {
   try {

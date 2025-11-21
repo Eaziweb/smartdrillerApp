@@ -358,79 +358,94 @@ const CourseSelection = () => {
   }, [selectedTopics, courseTopics, currentTopicDropdown])
   
   // UPDATED: Always show subscription modal when user is not subscribed
-  const handleStartExam = useCallback(async () => {
-    if (!isSubscribed) {
-      setShowSubscriptionModal(true)
-      return
+const handleStartExam = useCallback(async () => {
+  if (!isSubscribed) {
+    setShowSubscriptionModal(true)
+    return
+  }
+  
+  if (!selectedCourse) {
+    showNotification("Please select a course", "error")
+    return
+  }
+  
+  const courseDataObj = formData[selectedCourse]
+  if (!courseDataObj?.year) {
+    showNotification("Please select a year", "error")
+    return
+  }
+  if (!courseDataObj?.questions) {
+    showNotification("Please select number of questions", "error")
+    return
+  }
+  if (isMockMode && !courseDataObj?.time) {
+    showNotification("Please select time limit", "error")
+    return
+  }
+  
+  setFetchingQuestions(true)
+  try {
+    let topicsToSend = "all"
+    if (courseDataObj.selectedTopics && courseDataObj.selectedTopics.length < (courseTopics[selectedCourse]?.length || 0)) {
+      topicsToSend = courseDataObj.selectedTopics
+    }
+    const requestData = {
+      course: selectedCourse,
+      year: courseDataObj.year,
+      topics: topicsToSend,
+      questionCount: Number.parseInt(courseDataObj.questions),
+      examType: examType,
+      ...(isMockMode && { timeAllowed: Number.parseInt(courseDataObj.time) }),
     }
     
-    if (!selectedCourse) {
-      showNotification("Please select a course", "error")
-      return
-    }
+    const token = localStorage.getItem("token")
+    const response = await api.post("/api/questions/fetch", requestData, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    })
     
-    const courseDataObj = formData[selectedCourse]
-    if (!courseDataObj?.year) {
-      showNotification("Please select a year", "error")
-      return
-    }
-    if (!courseDataObj?.questions) {
-      showNotification("Please select number of questions", "error")
-      return
-    }
-    if (isMockMode && !courseDataObj?.time) {
-      showNotification("Please select time limit", "error")
-      return
-    }
-    
-    setFetchingQuestions(true)
-    try {
-      let topicsToSend = "all"
-      if (courseDataObj.selectedTopics && courseDataObj.selectedTopics.length < (courseTopics[selectedCourse]?.length || 0)) {
-        topicsToSend = courseDataObj.selectedTopics
+    if (!response.data.success) {
+      // Handle the case when no questions are found for selected topics
+      if (response.data.noQuestionsForTopics) {
+        showNotification(response.data.message, "warning");
+        // Reset the topics selection to "all"
+        setFormData(prev => ({
+          ...prev,
+          [selectedCourse]: {
+            ...prev[selectedCourse],
+            topics: "all",
+            selectedTopics: courseTopics[selectedCourse] || []
+          }
+        }));
+        setSelectedTopics(new Set(courseTopics[selectedCourse] || []));
+        return;
       }
-      const requestData = {
-        course: selectedCourse,
-        year: courseDataObj.year,
-        topics: topicsToSend,
-        questionCount: Number.parseInt(courseDataObj.questions),
+      throw new Error(response.data.message || "Failed to fetch questions")
+    }
+    
+    if (!response.data.questions || response.data.questions.length === 0) {
+      throw new Error("No questions found for the selected criteria. Please try different options.")
+    }
+    
+    localStorage.setItem(
+      "currentExam",
+      JSON.stringify({
+        ...requestData,
+        questions: response.data.questions,
         examType: examType,
-        ...(isMockMode && { timeAllowed: Number.parseInt(courseDataObj.time) }),
-      }
-      
-      const token = localStorage.getItem("token")
-      const response = await api.post("/api/questions/fetch", requestData, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      })
-      
-      if (!response.data.success) {
-        throw new Error(response.data.message || "Failed to fetch questions")
-      }
-      
-      if (!response.data.questions || response.data.questions.length === 0) {
-        throw new Error("No questions found for the selected criteria. Please try different options.")
-      }
-      
-      localStorage.setItem(
-        "currentExam",
-        JSON.stringify({
-          ...requestData,
-          questions: response.data.questions,
-          examType: examType,
-        }),
-      )
-      
-      navigate(isMockMode ? "/mock" : "/study")
-    } catch (error) {
-      console.error("Failed to start exam:", error)
-      showNotification(error.response?.data?.message || error.message || "Failed to start exam", "error")
-    } finally {
-      setFetchingQuestions(false)
-    }
-  }, [isSubscribed, selectedCourse, formData, courseTopics, examType, isMockMode, showNotification, navigate])
+      }),
+    )
+    
+    navigate(isMockMode ? "/mock" : "/study")
+  } catch (error) {
+    console.error("Failed to start exam:", error)
+    showNotification(error.response?.data?.message || error.message || "Failed to start exam", "error")
+  } finally {
+    setFetchingQuestions(false)
+  }
+}, [isSubscribed, selectedCourse, formData, courseTopics, examType, isMockMode, showNotification, navigate])
   
   // UPDATED: Initialize payment with new structure (subscriptionType and months)
   const initializePayment = useCallback(async (subscriptionType, months) => {

@@ -9,6 +9,9 @@
   position: relative;
   overflow: hidden;
 }
+.fullWidth {
+  width: 100%;
+}
 
 .authPage::before {
   content: "";
