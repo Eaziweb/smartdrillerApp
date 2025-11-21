@@ -512,7 +512,8 @@ router.post("/admin-login", async (req, res) => {
   }
 });
 
-// Forgot Password - Modified to return token instead of sending email
+// Forgot Password
+// Forgot Password - Modified to return token directly
 router.post("/forgot-password", async (req, res) => {
   try {
     const { email } = req.body;
@@ -530,10 +531,9 @@ router.post("/forgot-password", async (req, res) => {
 
     // Return the token directly instead of sending email
     res.json({ 
-      message: "Password reset token generated", 
-      resetToken: resetToken 
+      message: "Password reset token generated. Use this token to reset your password.",
+      resetToken 
     });
-
   } catch (error) {
     console.error("Forgot password error:", error);
     res.status(500).json({ message: "Failed to generate reset token" });

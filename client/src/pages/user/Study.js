@@ -4,7 +4,8 @@ import { useNavigate } from "react-router-dom"
 import { useAuth } from "../../contexts/AuthContext"
 import api from "../../utils/api"
 import styles from "../../styles/study.module.css"
-import 'katex/dist/katex.min.css'
+import "katex/dist/katex.min.css"
+import { convertMalformedLatex } from "../../utils/latex-converter"
 
 const Study = () => {
   const { user } = useAuth()
@@ -21,7 +22,7 @@ const Study = () => {
   const [submittingReport, setSubmittingReport] = useState(false)
   const [progressLoaded, setProgressLoaded] = useState(false)
   const [katexLoaded, setKatexLoaded] = useState(false)
-  
+
   // Voice reader states
   const [voiceReaderOn, setVoiceReaderOn] = useState(false)
   const [speechSupported, setSpeechSupported] = useState(false)
@@ -37,7 +38,7 @@ const Study = () => {
 
   // Check if speech synthesis is supported
   useEffect(() => {
-    setSpeechSupported('speechSynthesis' in window)
+    setSpeechSupported("speechSynthesis" in window)
   }, [])
 
   // Initialize speech synthesis
@@ -52,16 +53,16 @@ const Study = () => {
     if (voiceReaderOnRef.current && speechSupported && examData) {
       const currentQuestion = examData.questions[currentQuestionIndex]
       const isStudied = studiedQuestions.has(currentQuestion._id)
-      
+
       stopSpeech()
-      
+
       if (isStudied) {
         readQuestionContent(currentQuestion, true)
       } else {
         readQuestionAndOptions(currentQuestion)
       }
     }
-    
+
     return () => {
       stopSpeech()
     }
@@ -71,19 +72,19 @@ const Study = () => {
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (!examData) return
-      
-      switch(e.key) {
-        case 'ArrowLeft':
+
+      switch (e.key) {
+        case "ArrowLeft":
           if (currentQuestionIndex > 0) {
             navigateToQuestion(currentQuestionIndex - 1)
           }
           break
-        case 'ArrowRight':
+        case "ArrowRight":
           if (currentQuestionIndex < examData.questions.length - 1) {
             navigateToQuestion(currentQuestionIndex + 1)
           }
           break
-        case 'Enter':
+        case "Enter":
           if (!studiedQuestions.has(examData.questions[currentQuestionIndex]._id)) {
             handleStudy(examData.questions[currentQuestionIndex]._id)
           }
@@ -93,9 +94,9 @@ const Study = () => {
       }
     }
 
-    window.addEventListener('keydown', handleKeyDown)
+    window.addEventListener("keydown", handleKeyDown)
     return () => {
-      window.removeEventListener('keydown', handleKeyDown)
+      window.removeEventListener("keydown", handleKeyDown)
     }
   }, [currentQuestionIndex, examData, studiedQuestions])
 
@@ -111,29 +112,29 @@ const Study = () => {
   // Read question and options only
   const readQuestionAndOptions = (question) => {
     if (!speechRef.current) return
-    
+
     const cleanText = (text) => {
       return text
-        .replace(/\\\(.*?\\\)/g, '')
-        .replace(/\\\[.*?\\\]/g, '')
-        .replace(/\$\$.*?\$\$/g, '')
-        .replace(/\$.*?\$/g, '')
-        .replace(/\\[a-zA-Z]+/g, '')
-        .replace(/[{}]/g, '')
+        .replace(/\\$$.*?\\$$/g, "")
+        .replace(/\\\[.*?\\\]/g, "")
+        .replace(/\$\$.*?\$\$/g, "")
+        .replace(/\$.*?\$/g, "")
+        .replace(/\\[a-zA-Z]+/g, "")
+        .replace(/[{}]/g, "")
         .trim()
     }
-    
+
     let textToRead = `Question: ${cleanText(question.question)}. Options: `
-    
+
     question.options.forEach((option, index) => {
       textToRead += `${String.fromCharCode(65 + index)}. ${cleanText(option)}. `
     })
-    
+
     const utterance = new SpeechSynthesisUtterance(textToRead)
     utterance.rate = 0.9
     utterance.pitch = 1
     utterance.volume = 1
-    
+
     utterance.onstart = () => setIsReading(true)
     utterance.onend = () => {
       setIsReading(false)
@@ -143,43 +144,43 @@ const Study = () => {
       setIsReading(false)
       setVoiceReaderOn(false)
     }
-    
+
     speechRef.current.speak(utterance)
   }
 
   // Read question content (for studied questions)
   const readQuestionContent = (question, isStudied) => {
     if (!speechRef.current || !isStudied) return
-    
+
     const cleanText = (text) => {
       return text
-        .replace(/\\\(.*?\\\)/g, '')
-        .replace(/\\\[.*?\\\]/g, '')
-        .replace(/\$\$.*?\$\$/g, '')
-        .replace(/\$.*?\$/g, '')
-        .replace(/\\[a-zA-Z]+/g, '')
-        .replace(/[{}]/g, '')
+        .replace(/\\$$.*?\\$$/g, "")
+        .replace(/\\\[.*?\\\]/g, "")
+        .replace(/\$\$.*?\$\$/g, "")
+        .replace(/\$.*?\$/g, "")
+        .replace(/\\[a-zA-Z]+/g, "")
+        .replace(/[{}]/g, "")
         .trim()
     }
-    
+
     let textToRead = `Question: ${cleanText(question.question)}. `
-    
+
     const correctOptionIndex = question.correctOption - 1
     textToRead += `The correct answer is: ${String.fromCharCode(65 + correctOptionIndex)}. ${cleanText(question.options[correctOptionIndex])}. `
-    
+
     const userAnswer = userAnswers[question._id]
     if (userAnswer !== undefined && userAnswer !== question.correctOption) {
       const wrongOptionIndex = userAnswer - 1
       textToRead += `Your answer was: ${String.fromCharCode(65 + wrongOptionIndex)}. ${cleanText(question.options[wrongOptionIndex])}. `
     }
-    
+
     textToRead += `Explanation: ${cleanText(question.explanation)}`
-    
+
     const utterance = new SpeechSynthesisUtterance(textToRead)
     utterance.rate = 0.9
     utterance.pitch = 1
     utterance.volume = 1
-    
+
     utterance.onstart = () => setIsReading(true)
     utterance.onend = () => {
       setIsReading(false)
@@ -189,7 +190,7 @@ const Study = () => {
       setIsReading(false)
       setVoiceReaderOn(false)
     }
-    
+
     speechRef.current.speak(utterance)
   }
 
@@ -199,18 +200,18 @@ const Study = () => {
       stopSpeech()
       return
     }
-    
+
     const newState = !voiceReaderOn
     setVoiceReaderOn(newState)
-    
+
     if (newState && speechSupported && examData) {
       const currentQuestion = examData.questions[currentQuestionIndex]
       const isStudied = studiedQuestions.has(currentQuestion._id)
-      
+
       if (speechRef.current) {
         speechRef.current.cancel()
       }
-      
+
       if (isStudied) {
         readQuestionContent(currentQuestion, true)
       } else {
@@ -259,29 +260,29 @@ const Study = () => {
       navigate("/home")
       return
     }
-    
+
     loadExamData()
     loadBookmarks()
-    
+
     const loadKaTeX = async () => {
       try {
-        const katexModule = await import('katex')
+        const katexModule = await import("katex")
         const { render, renderToString } = katexModule
-        
+
         window.katex = {
           render,
-          renderToString
+          renderToString,
         }
-        
+
         setKatexLoaded(true)
       } catch (error) {
         console.error("Failed to load KaTeX:", error)
       }
     }
-    
+
     loadKaTeX()
   }, [user, navigate])
-  
+
   // Load progress when exam data is available
   useEffect(() => {
     if (examData && !progressLoaded) {
@@ -289,7 +290,7 @@ const Study = () => {
       setProgressLoaded(true)
     }
   }, [examData, progressLoaded])
-  
+
   // Load exam data
   const loadExamData = () => {
     try {
@@ -310,7 +311,7 @@ const Study = () => {
       navigate("/course-selection?type=study")
     }
   }
-  
+
   // Load bookmarks
   const loadBookmarks = async () => {
     try {
@@ -326,7 +327,7 @@ const Study = () => {
       console.error("Failed to load bookmarks:", error)
     }
   }
-  
+
   // Load progress
   const loadProgress = () => {
     if (!examData) return
@@ -344,7 +345,7 @@ const Study = () => {
       console.error("Failed to load progress:", error)
     }
   }
-  
+
   // Save progress
   const saveProgress = () => {
     if (!examData) return
@@ -362,14 +363,14 @@ const Study = () => {
       console.error("Failed to save progress:", error)
     }
   }
-  
+
   // Save progress when relevant data changes
   useEffect(() => {
     if (progressLoaded) {
       saveProgress()
     }
   }, [userAnswers, studiedQuestions, showExplanation, currentQuestionIndex, progressLoaded])
-  
+
   // Handle answer selection
   const handleAnswerSelect = (questionId, optionIndex) => {
     if (studiedQuestions.has(questionId)) return
@@ -378,7 +379,7 @@ const Study = () => {
       [questionId]: optionIndex,
     }))
   }
-  
+
   // Handle bookmark
   const handleBookmark = async (questionId) => {
     try {
@@ -397,7 +398,7 @@ const Study = () => {
       console.error("Bookmark error:", error)
     }
   }
-  
+
   // Handle report submission
   const handleReport = async () => {
     if (!reportDescription.trim()) return
@@ -416,7 +417,7 @@ const Study = () => {
       setSubmittingReport(false)
     }
   }
-  
+
   // Render content with math
   const renderContentWithMath = (content) => {
     if (!content) return null
@@ -425,8 +426,10 @@ const Study = () => {
       return <span>{content}</span>
     }
 
-    const latexPattern = /(\\\(.*?\\\)|\\\[.*?\\\]|\$\$.*?\$\$|\$.*?\$)/g
-    const parts = content.split(latexPattern)
+    const convertedContent = convertMalformedLatex(content)
+
+    const latexPattern = /(\\$$.*?\\$$|\\\[.*?\\\]|\$\$.*?\$\$|\$.*?\$)/g
+    const parts = convertedContent.split(latexPattern)
 
     return parts.map((part, index) => {
       if (latexPattern.test(part)) {
@@ -436,18 +439,6 @@ const Study = () => {
         if (part.startsWith("\\[")) latexContent = part.slice(2, -2)
         if (part.startsWith("$$")) latexContent = part.slice(2, -2)
         if (part.startsWith("$") && !part.startsWith("$$")) latexContent = part.slice(1, -1)
-
-        latexContent = latexContent
-          .replace(/frac\s*([^\s]+)\s*([^\s]+)/g, "\\frac{$1}{$2}")
-          .replace(/sqrt\s*([^\s]+)/g, "\\sqrt{$1}")
-          .replace(/([a-zA-Z]+)(\d+)/g, "$1^{$2}")
-          .replace(/le/g, "\\leq")
-          .replace(/ge/g, "\\geq")
-          .replace(/neq/g, "\\neq")
-          .replace(/cap/g, "\\cap")
-          .replace(/cup/g, "\\cup")
-          .replace(/phi/g, "\\phi")
-          .replace(/alpha/g, "\\alpha")
 
         try {
           return (
@@ -470,37 +461,38 @@ const Study = () => {
       }
     })
   }
-  
+
   // Get image URL with proper fallback
   const getImageUrl = (imagePath) => {
     if (!imagePath) return null
-    
-    if (imagePath.startsWith('http')) {
+
+    if (imagePath.startsWith("http")) {
       return imagePath
     }
-    if (imagePath.startsWith('/uploads')) {
+    if (imagePath.startsWith("/uploads")) {
       return imagePath
     }
     return `/uploads${imagePath}`
   }
-  
+
   // Handle image error
   const handleImageError = (e) => {
     e.target.onerror = null
-    e.target.style.display = 'none'
-    
+    e.target.style.display = "none"
+
     const container = e.target.parentElement
     if (container && container.classList.contains(styles.questionImage)) {
-      if (!container.querySelector('.image-fallback')) {
-        const fallback = document.createElement('div')
-        fallback.className = 'image-fallback'
+      if (!container.querySelector(".image-fallback")) {
+        const fallback = document.createElement("div")
+        fallback.className = "image-fallback"
         fallback.innerHTML = '<i class="fas fa-image"></i><span>Image not available</span>'
-        fallback.style.cssText = 'display: flex; flex-direction: column; align-items: center; justify-content: center; height: 200px; color: #666;'
+        fallback.style.cssText =
+          "display: flex; flex-direction: column; align-items: center; justify-content: center; height: 200px; color: #666;"
         container.appendChild(fallback)
       }
     }
   }
-  
+
   // Loading state
   if (loading || !examData) {
     return (
@@ -510,12 +502,12 @@ const Study = () => {
       </div>
     )
   }
-  
+
   const currentQuestion = examData.questions[currentQuestionIndex]
   const isStudied = studiedQuestions.has(currentQuestion._id)
   const userAnswer = userAnswers[currentQuestion._id]
   const showExp = showExplanation[currentQuestion._id]
-  
+
   return (
     <div className={styles.studyPage} ref={contentRef}>
       <div className={styles.quizHeader}>
@@ -525,17 +517,19 @@ const Study = () => {
           </button>
           <div className={styles.subjectInfo}>
             <h2>{examData.course.toUpperCase()}</h2>
-            <span>Question {currentQuestionIndex + 1} of {examData.questions.length}</span>
+            <span>
+              Question {currentQuestionIndex + 1} of {examData.questions.length}
+            </span>
           </div>
         </div>
         <div className={styles.headerRight}>
           {speechSupported && (
-            <button 
-              className={`${styles.iconBtn} ${isReading ? styles.active : ''}`}
+            <button
+              className={`${styles.iconBtn} ${isReading ? styles.active : ""}`}
               onClick={toggleVoiceReader}
               title={isReading ? "Stop reading" : "Start voice reader"}
             >
-              <i className={`fas ${isReading ? 'fa-volume-up' : 'fa-volume-mute'}`}></i>
+              <i className={`fas ${isReading ? "fa-volume-up" : "fa-volume-mute"}`}></i>
               {isReading && <span className={styles.readingIndicator}></span>}
             </button>
           )}
@@ -550,7 +544,7 @@ const Study = () => {
           </button>
         </div>
       </div>
-      
+
       <div className={styles.progressContainer}>
         <div className={styles.progressBar}>
           <div
@@ -561,20 +555,18 @@ const Study = () => {
           ></div>
         </div>
       </div>
-      
+
       <div className={styles.questionContainer}>
         {(currentQuestion.cloudinaryUrl || currentQuestion.image) && (
           <div className={styles.questionImage}>
-            <img 
-              src={getImageUrl(currentQuestion.cloudinaryUrl || currentQuestion.image)} 
-              alt="Question illustration" 
+            <img
+              src={getImageUrl(currentQuestion.cloudinaryUrl || currentQuestion.image)}
+              alt="Question illustration"
               onError={handleImageError}
             />
           </div>
         )}
-        <div className={styles.questionText}>
-          {katexLoaded && renderContentWithMath(currentQuestion.question)}
-        </div>
+        <div className={styles.questionText}>{katexLoaded && renderContentWithMath(currentQuestion.question)}</div>
         <div className={styles.optionsContainer}>
           {currentQuestion.options.map((option, index) => {
             const optionNumber = index + 1
@@ -582,7 +574,7 @@ const Study = () => {
             const isCorrect = currentQuestion.correctOption === optionNumber
             const showCorrect = isStudied && isCorrect
             const showWrong = isStudied && isSelected && !isCorrect
-            
+
             return (
               <div
                 key={index}
@@ -590,9 +582,7 @@ const Study = () => {
                 onClick={() => handleAnswerSelect(currentQuestion._id, optionNumber)}
               >
                 <div className={styles.optionLetter}>{String.fromCharCode(65 + index)}</div>
-                <div className={styles.optionText}>
-                  {katexLoaded && renderContentWithMath(option)}
-                </div>
+                <div className={styles.optionText}>{katexLoaded && renderContentWithMath(option)}</div>
                 {showCorrect && <i className={`fas fa-check ${styles.optionIcon} ${styles.correctIcon}`}></i>}
                 {showWrong && <i className={`fas fa-times ${styles.optionIcon} ${styles.wrongIcon}`}></i>}
               </div>
@@ -611,7 +601,7 @@ const Study = () => {
           </div>
         )}
       </div>
-      
+
       <div className={styles.questionGrid}>
         {examData.questions.map((_, index) => {
           const questionId = examData.questions[index]._id
@@ -628,7 +618,7 @@ const Study = () => {
           )
         })}
       </div>
-      
+
       <div className={styles.navigationContainer}>
         <button
           className={styles.navBtn}
@@ -638,16 +628,16 @@ const Study = () => {
         >
           <i className="fas fa-chevron-left"></i>
         </button>
-        
-        <button 
-          className={`${styles.studyBtn} ${isStudied ? styles.studiedBtn : ''}`}
+
+        <button
+          className={`${styles.studyBtn} ${isStudied ? styles.studiedBtn : ""}`}
           onClick={() => handleStudy(currentQuestion._id)}
           disabled={isStudied}
           title="Study Question (Enter)"
         >
           {isStudied ? "Studied" : "Study"}
         </button>
-        
+
         <button
           className={styles.navBtn}
           onClick={() => navigateToQuestion(currentQuestionIndex + 1)}
@@ -657,7 +647,7 @@ const Study = () => {
           <i className="fas fa-chevron-right"></i>
         </button>
       </div>
-      
+
       {showReportModal && (
         <div className={styles.reportModalOverlay}>
           <div className={styles.reportModal}>
@@ -679,7 +669,11 @@ const Study = () => {
               <button className={`${styles.btn} ${styles.btnSecondary}`} onClick={() => setShowReportModal(false)}>
                 Cancel
               </button>
-              <button className={`${styles.btn} ${styles.btnPrimary}`} onClick={handleReport} disabled={submittingReport}>
+              <button
+                className={`${styles.btn} ${styles.btnPrimary}`}
+                onClick={handleReport}
+                disabled={submittingReport}
+              >
                 {submittingReport ? "Submitting..." : "Submit Report"}
               </button>
             </div>
