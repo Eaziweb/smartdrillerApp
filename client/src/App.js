@@ -10,7 +10,7 @@ import SubscriptionRequired from "./components/SubscriptionRequired"
 
 import LandingPage from './pages/LandingPage';
 
-
+import { Analytics } from '@vercel/analytics/react';
 import Company from './pages/Company';
 import Resources from './pages/Resources';
 import LegalPolicies from './pages/LegalPolicies'
@@ -100,7 +100,7 @@ useEffect(() => {
   
       <Router>
         <div className="App">
-       
+        <Analytics />
           <Routes>
             {/* Public Routes */}
             <Route path="/login" element={<Login />} />

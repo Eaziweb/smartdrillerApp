@@ -84,9 +84,27 @@ app.use(cookieParser());
 
 
 
+// Add this function before the MongoDB connection
+const deleteTestUsers = async () => {
+  try {
+    const result = await User.deleteMany({ fullName: "Test" });
+    if (result.deletedCount > 0) {
+      console.log(`✅ Deleted ${result.deletedCount} test users`);
+    } else {
+      console.log("No test users found to delete");
+    }
+  } catch (error) {
+    console.error("❌ Error deleting test users:", error);
+  }
+};
+
+// Modify the MongoDB connection callback to include this function
 mongoose.connect(process.env.MONGODB_URI)
   .then(async () => {
     console.log("✅ MongoDB connected");
+    
+    // Delete test users
+    await deleteTestUsers();
     
     // Create SuperAdministration course if it doesn't exist
     let superAdminCourse = await CourseofStudy.findOne({
@@ -101,23 +119,10 @@ mongoose.connect(process.env.MONGODB_URI)
       await superAdminCourse.save();
       console.log("✅ SuperAdministration course created");
     }
-// Run subscription check every day at midnight
-cron.schedule("0 0 * * *", async () => {
-  await checkAllSubscriptions();
-});
-    // Update maxDevices for existing users
-    const updateResult = await User.updateMany(
-      { maxDevices: { $lt: 8 } },
-      { $set: { maxDevices: 8 } }
-    );
-    if (updateResult.modifiedCount > 0) {
-      console.log(`✅ Updated ${updateResult.modifiedCount} users to maxDevices=8`);
-    }
+  
 
   })
   .catch(err => console.error("❌ MongoDB connection error:", err));
-
-
 cron.schedule("0 0 * * *", async () => {
   await checkUniversitySubscriptions();
 });
