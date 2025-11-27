@@ -87,7 +87,7 @@ app.use(cookieParser());
 // Add this function before the MongoDB connection
 const deleteTestUsers = async () => {
   try {
-    const result = await User.deleteMany({ fullName: "Test" });
+    const result = await User.deleteMany({ fullName: "test" });
     if (result.deletedCount > 0) {
       console.log(`✅ Deleted ${result.deletedCount} test users`);
     } else {
