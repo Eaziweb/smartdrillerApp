@@ -12,53 +12,6 @@ const { checkAllSubscriptions } = require("./jobs/subscriptionChecker");
 const { checkUniversitySubscriptions } = require("./jobs/universitySubscriptionChecker");
 const app = express();
 
-// ----------------------
-// Fix duplicate courses
-// ----------------------
-const fixDuplicates = async () => {
-  try {
-    const duplicates = await CourseofStudy.aggregate([
-      {
-        $group: {
-          _id: "$name",
-          count: { $sum: 1 },
-          categories: { $push: "$category" }
-        }
-      },
-      {
-        $match: { count: { $gt: 1 } }
-      }
-    ]);
-
-    console.log(`Found ${duplicates.length} duplicate course names`);
-
-    for (const duplicate of duplicates) {
-      const courses = await CourseofStudy.find({ name: duplicate._id });
-      console.log(`Processing duplicate: ${duplicate._id} (${courses.length} entries)`);
-
-      const categoryMap = new Map();
-      for (const course of courses) {
-        const key = `${course.name}-${course.category}`;
-        if (categoryMap.has(key)) {
-          console.log(`  Deleting duplicate: ${course.name} in ${course.category}`);
-          await CourseofStudy.deleteOne({ _id: course._id });
-        } else {
-          categoryMap.set(key, true);
-        }
-      }
-    }
-
-    console.log("✅ Duplicate cleanup completed");
-
-    await CourseofStudy.collection.createIndex(
-      { name: 1, category: 1 },
-      { unique: true }
-    );
-    console.log("✅ Compound index created");
-  } catch (error) {
-    console.error("❌ Error fixing duplicates:", error);
-  }
-};
 
 // ----------------------
 // CORS Setup
