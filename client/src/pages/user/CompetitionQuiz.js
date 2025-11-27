@@ -19,12 +19,11 @@ const CompetitionQuiz = () => {
   const [showReportModal, setShowReportModal] = useState(false)
   const [reportDescription, setReportDescription] = useState("")
   const [submittingReport, setSubmittingReport] = useState(false)
-  const [showQuitModal, setShowQuitModal] = useState(false)
+  const [showSubmitModal, setShowSubmitModal] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [courseQuestions, setCourseQuestions] = useState({})
   const [courseTabs, setCourseTabs] = useState([])
   const [katexLoaded, setKatexLoaded] = useState(false)
-  const [showBackModal, setShowBackModal] = useState(false)
   const [isSubmitted, setIsSubmitted] = useState(false)
   
   const timerRef = useRef(null)
@@ -107,7 +106,7 @@ const CompetitionQuiz = () => {
     const handlePopState = (e) => {
       e.preventDefault()
       if (!isSubmitted) {
-        setShowBackModal(true)
+        setShowSubmitModal(true)
         window.history.pushState({ noBack: true }, '')
       }
     }
@@ -119,7 +118,7 @@ const CompetitionQuiz = () => {
     const handleBeforeUnload = (e) => {
       if (isSubmitted) return
       e.preventDefault()
-      e.returnValue = 'Your quiz progress will be lost. Are you sure you want to leave?'
+      e.returnValue = 'Your competition progress will be submitted. Are you sure you want to leave?'
     }
     
     window.addEventListener('beforeunload', handleBeforeUnload)
@@ -321,13 +320,11 @@ const CompetitionQuiz = () => {
   }
 
   const handleBack = () => {
-    setShowQuitModal(true)
+    setShowSubmitModal(true)
   }
 
-  const handleQuit = () => {
-    const progressKey = `competition_progress_${competitionData?.competitionId}`
-    localStorage.removeItem(progressKey)
-    navigate("/competitions")
+  const handleSubmit = () => {
+    submitCompetition()
   }
 
   const handleAutoSubmit = () => {
@@ -619,47 +616,23 @@ const CompetitionQuiz = () => {
         </button>
       </div>
       
-      {/* Quit Modal */}
-      {showQuitModal && (
+      {/* Submit Modal */}
+      {showSubmitModal && (
         <div className={styles.modalOverlay}>
           <div className={styles.modal}>
             <div className={styles.modalHeader}>
-              <h3>Quit Competition</h3>
+              <h3>Submit Competition</h3>
             </div>
             <div className={styles.modalBody}>
               <p>
-                Are you sure you want to quit? Your progress will be lost and the competition will not be submitted.
+                Are you sure you want to submit your competition? Once submitted, you cannot make any changes.
               </p>
             </div>
             <div className={styles.modalFooter}>
-              <button className={`${styles.btn} ${styles.btnSecondary}`} onClick={() => setShowQuitModal(false)}>
+              <button className={`${styles.btn} ${styles.btnSecondary}`} onClick={() => setShowSubmitModal(false)}>
                 Cancel
               </button>
-              <button className={`${styles.btn} ${styles.btnDanger}`} onClick={handleQuit}>
-                Yes, Quit
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-      
-      {/* Back Navigation Modal */}
-      {showBackModal && (
-        <div className={styles.modalOverlay} key="backModal">
-          <div className={styles.modal}>
-            <div className={styles.modalHeader}>
-              <h3>Leave Quiz</h3>
-            </div>
-            <div className={styles.modalBody}>
-              <p>
-                If you go back, your test will be submitted.
-              </p>
-            </div>
-            <div className={styles.modalFooter}>
-              <button className={`${styles.btn} ${styles.btnSecondary}`} onClick={() => setShowBackModal(false)}>
-                Cancel
-              </button>
-              <button className={`${styles.btn} ${styles.btnPrimary}`} onClick={submitCompetition}>
+              <button className={`${styles.btn} ${styles.btnPrimary}`} onClick={handleSubmit}>
                 Yes, Submit
               </button>
             </div>

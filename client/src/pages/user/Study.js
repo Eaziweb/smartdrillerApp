@@ -99,6 +99,37 @@ const Study = () => {
     }
   }, [currentQuestionIndex, examData, studiedQuestions])
 
+  // Process content with KaTeX when it changes
+  useEffect(() => {
+    if (katexLoaded && examData && contentRef.current) {
+      processMathContent()
+    }
+  }, [katexLoaded, currentQuestionIndex, examData, showExplanation])
+
+  const processMathContent = () => {
+    if (!window.katex) return
+    
+    // Find all elements with math content
+    const mathElements = contentRef.current.querySelectorAll('.math-content')
+    
+    mathElements.forEach(element => {
+      const content = element.getAttribute('data-math')
+      if (content) {
+        try {
+          // Render the math content
+          const renderedMath = window.katex.renderToString(content, {
+            throwOnError: false,
+            displayMode: element.classList.contains('display-math')
+          })
+          element.innerHTML = renderedMath
+        } catch (e) {
+          console.error("KaTeX rendering error:", e)
+          element.innerHTML = content // Fallback to raw content
+        }
+      }
+    })
+  }
+
   // Stop speech function
   const stopSpeech = () => {
     if (speechRef.current) {
@@ -417,90 +448,38 @@ const Study = () => {
     }
   }
   
-  // Render content with math - FIXED VERSION
-  const renderContentWithMath = (content) => {
+  // Render content with math - UPDATED to match Correction page
+  const renderContentWithMath = (content, isDisplayMode = false) => {
     if (!content) return null
-
-    if (!katexLoaded) {
-      return <span>{content}</span>
-    }
-
-    // Improved regex to capture LaTeX expressions
-    const latexPattern = /(\\\(.*?\\\)|\\\[.*?\\\]|\$\$.*?\$\$|\$.*?\$|\\[a-zA-Z]+\{.*?\}|\\[a-zA-Z]+)/g
+    
+    // Simple regex to find LaTeX patterns
+    const latexPattern = /(\\\(.*?\\\)|\\\[.*?\\\]|\$\$.*?\$\$|\$.*?\$)/g
+    
+    // Split content by LaTeX patterns
     const parts = content.split(latexPattern)
-
+    
     return parts.map((part, index) => {
-      if (latexPattern.test(part)) {
+      if (index % 2 === 1) { // This is a LaTeX expression
+        // Determine if it's display mode
+        const isDisplay = part.startsWith('\\[') || part.startsWith('$$')
+        
+        // Extract the actual LaTeX content
         let latexContent = part
-        let displayMode = false
-
-        // Handle different LaTeX delimiters
-        if (part.startsWith('\\(') && part.endsWith('\\)')) {
-          latexContent = part.slice(2, -2)
-          displayMode = false
-        } else if (part.startsWith('\\[') && part.endsWith('\\]')) {
-          latexContent = part.slice(2, -2)
-          displayMode = true
-        } else if (part.startsWith('$$') && part.endsWith('$$')) {
-          latexContent = part.slice(2, -2)
-          displayMode = true
-        } else if (part.startsWith('$') && part.endsWith('$') && part.length > 1) {
-          latexContent = part.slice(1, -1)
-          displayMode = false
-        }
-
-        // Fix common LaTeX formatting issues
-        latexContent = latexContent
-          .replace(/frac\s*([^\s]+)\s*([^\s]+)/g, '\\frac{$1}{$2}')
-          .replace(/sqrt\s*([^\s]+)/g, '\\sqrt{$1}')
-          .replace(/([a-zA-Z]+)(\d+)/g, '$1^{$2}')
-          .replace(/leq?/g, '\\leq')
-          .replace(/geq?/g, '\\geq')
-          .replace(/neq/g, '\\neq')
-          .replace(/cap/g, '\\cap')
-          .replace(/cup/g, '\\cup')
-          .replace(/phi/g, '\\phi')
-          .replace(/alpha/g, '\\alpha')
-          .replace(/beta/g, '\\beta')
-          .replace(/gamma/g, '\\gamma')
-          .replace(/delta/g, '\\delta')
-          .replace(/theta/g, '\\theta')
-          .replace(/pi/g, '\\pi')
-          .replace(/sigma/g, '\\sigma')
-          .replace(/sum/g, '\\sum')
-          .replace(/int/g, '\\int')
-          .replace(/infty/g, '\\infty')
-          .replace(/pm/g, '\\pm')
-          .replace(/times/g, '\\times')
-          .replace(/div/g, '\\div')
-          .replace(/cdot/g, '\\cdot')
-          .replace(/ldots/g, '\\ldots')
-          .replace(/cdots/g, '\\cdots')
-          .replace(/vdots/g, '\\vdots')
-          .replace(/ddots/g, '\\ddots')
-          .replace(/forall/g, '\\forall')
-          .replace(/exists/g, '\\exists')
-          .replace(/partial/g, '\\partial')
-          .replace(/nabla/g, '\\nabla')
-
-        try {
-          return (
-            <span
-              key={index}
-              dangerouslySetInnerHTML={{
-                __html: window.katex.renderToString(latexContent, {
-                  throwOnError: false,
-                  displayMode: displayMode,
-                }),
-              }}
-            />
-          )
-        } catch (e) {
-          console.error("KaTeX render error:", e, "with content:", latexContent)
-          return <span key={index}>{part}</span>
-        }
+        if (part.startsWith('\\(')) latexContent = part.slice(2, -2)
+        if (part.startsWith('\\[')) latexContent = part.slice(2, -2)
+        if (part.startsWith('$') && !part.startsWith('$$')) latexContent = part.slice(1, -1)
+        if (part.startsWith('$$')) latexContent = part.slice(2, -2)
+        
+        return (
+          <span 
+            key={index} 
+            className={`math-content ${isDisplay ? 'display-math' : 'inline-math'}`}
+            data-math={latexContent}
+          />
+        )
       } else {
-        return <span key={index}>{part}</span>
+        // Regular HTML content
+        return <span key={index} dangerouslySetInnerHTML={{ __html: part }} />
       }
     })
   }
@@ -607,7 +586,7 @@ const Study = () => {
           </div>
         )}
         <div className={styles.questionText}>
-          {katexLoaded && renderContentWithMath(currentQuestion.question)}
+          {renderContentWithMath(currentQuestion.question)}
         </div>
         <div className={styles.optionsContainer}>
           {currentQuestion.options.map((option, index) => {
@@ -625,7 +604,7 @@ const Study = () => {
               >
                 <div className={styles.optionLetter}>{String.fromCharCode(65 + index)}</div>
                 <div className={styles.optionText}>
-                  {katexLoaded && renderContentWithMath(option)}
+                  {renderContentWithMath(option)}
                 </div>
                 {showCorrect && <i className={`fas fa-check ${styles.optionIcon} ${styles.correctIcon}`}></i>}
                 {showWrong && <i className={`fas fa-times ${styles.optionIcon} ${styles.wrongIcon}`}></i>}
@@ -640,7 +619,7 @@ const Study = () => {
               <span>Explanation</span>
             </div>
             <div className={styles.explanationText}>
-              {katexLoaded && renderContentWithMath(currentQuestion.explanation)}
+              {renderContentWithMath(currentQuestion.explanation)}
             </div>
           </div>
         )}

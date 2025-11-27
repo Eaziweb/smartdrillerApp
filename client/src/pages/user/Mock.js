@@ -150,12 +150,12 @@ const Mock = () => {
     })
   }
   
-  // Helper function to render content with math
+  // Helper function to render content with math - FIXED VERSION
   const renderContentWithMath = (content, isDisplayMode = false) => {
     if (!content) return null
     
-    // Simple regex to find LaTeX patterns
-    const latexPattern = /(\\$$.*?\\$$|\\\[.*?\\\]|\$\$.*?\$\$|\$.*?\$)/g
+    // Simple regex to find LaTeX patterns - FIXED
+    const latexPattern = /(\\\(.*?\\\)|\\\[.*?\\\]|\$\$.*?\$\$|\$.*?\$)/g
     
     // Split content by LaTeX patterns
     const parts = content.split(latexPattern)
@@ -246,7 +246,7 @@ const Mock = () => {
     // Clean LaTeX expressions from text
     const cleanText = (text) => {
       return text
-        .replace(/\\$$.*?\\$$/g, '') // Remove inline math
+        .replace(/\\\(.*?\\\)/g, '') // Remove inline math
         .replace(/\\\[.*?\\\]/g, '') // Remove display math
         .replace(/\$\$.*?\$\$/g, '') // Remove display math with $$         
         .replace(/\$.*?\$/g, '')     // Remove inline math with $         
