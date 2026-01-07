@@ -91,6 +91,42 @@ const UsersPage = () => {
     }
   }
 
+  // --- NEW FEATURE: Download Emails ---
+  const downloadEmails = () => {
+    if (filteredUsers.length === 0) {
+      showMessage("No users to download", "error")
+      return
+    }
+
+    // Create CSV content
+    const csvRows = []
+    // Header row
+    csvRows.push(["Name", "Email"])
+
+    // Data rows
+    filteredUsers.forEach(user => {
+      // Escape quotes in names to prevent CSV breaking
+      const safeName = user.fullName.replace(/"/g, '""') 
+      csvRows.push([safeName, user.email])
+    })
+
+    // Convert array of arrays to CSV string
+    const csvString = csvRows.map(row => row.join(",")).join("\n")
+
+    // Create a blob and download link
+    const blob = new Blob([csvString], { type: "text/csv;charset=utf-8;" })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement("a")
+    link.setAttribute("href", url)
+    link.setAttribute("download", "user_emails.csv")
+    link.style.visibility = "hidden"
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+
+    showMessage("Email list downloaded successfully", "success")
+  }
+
   // Filter users based on search term and filters
   const filteredUsers = useMemo(() => {
     return users.filter(user => {
@@ -299,8 +335,29 @@ const UsersPage = () => {
         {/* Users Table */}
         <div className={styles.section}>
           <div className={styles.sectionHeader}>
-            <h2>Registered Users</h2>
-            <p>{filteredUsers.length} of {users.length} users</p>
+            <div style={{ display: 'flex', flexDirection: 'column' }}>
+              <h2>Registered Users</h2>
+              <p>{filteredUsers.length} of {users.length} users</p>
+            </div>
+            {/* Download Button Added Here */}
+            <button 
+              onClick={downloadEmails}
+              className={`${styles.primaryBtn} ${styles.downloadBtn}`} 
+              style={{ 
+                padding: '8px 16px', 
+                backgroundColor: '#28a745', 
+                color: 'white', 
+                border: 'none', 
+                borderRadius: '4px', 
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                fontSize: '0.9rem'
+              }}
+            >
+              <i className="fas fa-download"></i> Download Emails
+            </button>
           </div>
           
           {filteredUsers.length === 0 ? (
