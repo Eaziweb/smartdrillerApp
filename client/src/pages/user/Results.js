@@ -38,29 +38,61 @@ const Results = () => {
   const getGradeColor = (grade) => {
     switch (grade) {
       case "A":
-        return "#10b981"
+        return "#10b981" // Green
       case "B":
-        return "#3b82f6"
+        return "#3b82f6" // Blue
       case "C":
-        return "#f59e0b"
+        return "#f59e0b" // Yellow/Orange
       case "D":
-        return "#ef4444"
+        return "#f97316" // Orange
       case "E":
-        return "#8b5cf6"
+        return "#ef4444" // Red
       case "F":
-        return "#6b7280"
+        return "#6b7280" // Grey
       default:
         return "#6b7280"
     }
   }
 
-  const getGradeMessage = (grade, percentage) => {
-    if (percentage >= 90) return "Outstanding Performance!"
-    if (percentage >= 80) return "Excellent Work!"
-    if (percentage >= 70) return "Good Job!"
-    if (percentage >= 60) return "Well Done!"
-    if (percentage >= 50) return "Keep Practicing!"
-    return "Need More Practice"
+  // Updated Logic for Grading Scale and Points
+  const getGradeData = (percentage) => {
+    if (percentage >= 70) {
+      return { 
+        grade: "A", 
+        points: 5, 
+        message: "Outstanding Performance!" 
+      }
+    } else if (percentage >= 60) {
+      return { 
+        grade: "B", 
+        points: 4, 
+        message: "Excellent Work!" 
+      }
+    } else if (percentage >= 50) {
+      return { 
+        grade: "C", 
+        points: 3, 
+        message: "Good Job!" 
+      }
+    } else if (percentage >= 45) {
+      return { 
+        grade: "D", 
+        points: 2, 
+        message: "Fair Performance!" 
+      }
+    } else if (percentage >= 40) {
+      return { 
+        grade: "E", 
+        points: 1, 
+        message: "Needs Improvement!" 
+      }
+    } else {
+      return { 
+        grade: "F", 
+        points: 0, 
+        message: "Keep Practicing!" 
+      }
+    }
   }
 
   const handleViewCorrection = () => {
@@ -82,6 +114,10 @@ const Results = () => {
     )
   }
 
+  // Calculate data based on the new rules
+  const gradeData = getGradeData(result.percentage)
+  const gradeColor = getGradeColor(gradeData.grade)
+
   return (
     <div className={styles.resultsPage}>
       {/* Header */}
@@ -96,13 +132,16 @@ const Results = () => {
       <div className={styles.resultsContainer}>
         {/* Score Circle */}
         <div className={styles.scoreSection}>
-          <div className={styles.scoreCircle} style={{ borderColor: getGradeColor(result.grade) }}>
+          <div className={styles.scoreCircle} style={{ borderColor: gradeColor }}>
             <div className={styles.scorePercentage}>{result.percentage}%</div>
-            <div className={styles.scoreGrade} style={{ color: getGradeColor(result.grade) }}>
-              Grade {result.grade}
+            <div className={styles.scoreGrade} style={{ color: gradeColor }}>
+              Grade {gradeData.grade}
+            </div>
+            <div className={styles.scorePoints}>
+              {gradeData.points} Points
             </div>
           </div>
-          <div className={styles.scoreMessage}>{getGradeMessage(result.grade, result.percentage)}</div>
+          <div className={styles.scoreMessage}>{gradeData.message}</div>
         </div>
         
         {/* Stats Grid */}
