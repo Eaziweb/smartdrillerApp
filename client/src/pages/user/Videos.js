@@ -17,29 +17,29 @@ const Videos = () => {
   const [error, setError] = useState(null)
   const [topicVideos, setTopicVideos] = useState({}) // Cache for topic videos
 
-  // useEffect(() => {
-  //   loadCourses()
-  // }, [])
+  useEffect(() => {
+    loadCourses()
+  }, [])
 
   useEffect(() => {
     localStorage.setItem("videoViewStyle", viewStyle)
   }, [viewStyle])
 
-  // const loadCourses = useCallback(async () => {
-  //   setLoading(true)
-  //   setError(null)
-  //   try {
-  //     const response = await api.get("/api/videos/courses", {
-  //       headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-  //     })
-  //     setCourses(response.data)
-  //   } catch (error) {
-  //     console.error("Failed to load courses:", error)
-  //     setError("Failed to load courses. Please try again later.")
-  //   } finally {
-  //     setLoading(false)
-  //   }
-  // }, [])
+  const loadCourses = useCallback(async () => {
+    setLoading(true)
+    setError(null)
+    try {
+      const response = await api.get("/api/videos/courses", {
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+      })
+      setCourses(response.data)
+    } catch (error) {
+      console.error("Failed to load courses:", error)
+      setError("Failed to load courses. Please try again later.")
+    } finally {
+      setLoading(false)
+    }
+  }, [])
 
   const toggleCourse = useCallback((courseId) => {
     setOpenCourse(openCourse === courseId ? null : courseId)
