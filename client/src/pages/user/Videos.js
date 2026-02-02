@@ -21,6 +21,7 @@ const Videos = () => {
     loadCourses()
   }, [])
 
+  
   useEffect(() => {
     localStorage.setItem("videoViewStyle", viewStyle)
   }, [viewStyle])
