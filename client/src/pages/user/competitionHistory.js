@@ -6,28 +6,28 @@ import styles from "../../styles/EndedCompetitions.module.css"
 import api from "../../utils/api";
 
 const EndedCompetitions = () => {
-  const { user } = useAuth()
+  // const { user } = useAuth()
   const navigate = useNavigate()
   const [competitions, setCompetitions] = useState([])
   const [loading, setLoading] = useState(true)
 
-  useEffect(() => {
-    fetchCompetitions()
-  }, [])
+  // useEffect(() => {
+  //   fetchCompetitions()
+  // }, [])
 
-  const fetchCompetitions = async () => {
-    try {
-      const response = await api.get("/api/competitions")
-      // Filter competitions to only include ended ones
-      const endedCompetitions = response.data.filter(comp => comp.status === "ended")
-      setCompetitions(endedCompetitions)
-    } catch (error) {
-      console.error("Error fetching competitions:", error)
-      showMessage("Failed to fetch competitions", "error")
-    } finally {
-      setLoading(false)
-    }
-  }
+  // const fetchCompetitions = async () => {
+  //   try {
+  //     const response = await api.get("/api/competitions")
+  //     // Filter competitions to only include ended ones
+  //     const endedCompetitions = response.data.filter(comp => comp.status === "ended")
+  //     setCompetitions(endedCompetitions)
+  //   } catch (error) {
+  //     console.error("Error fetching competitions:", error)
+  //     showMessage("Failed to fetch competitions", "error")
+  //   } finally {
+  //     setLoading(false)
+  //   }
+  // }
 
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleString()
