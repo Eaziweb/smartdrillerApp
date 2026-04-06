@@ -68,7 +68,7 @@ const userSchema = new mongoose.Schema(
     },
     isEmailVerified: {
       type: Boolean,
-      default: false, // Users must verify their email before accessing the app
+      default: true,
     },
     emailVerificationCode: {
       type: String,
@@ -90,18 +90,6 @@ const userSchema = new mongoose.Schema(
       enum: ["monthly", "semester"],
       default: "monthly",
     },
-    isRecurring: {
-      type: Boolean,
-      default: false,
-    },
-    remainingMonths: {
-      type: Number,
-      default: 0,
-    },
-    nextPaymentDate: {
-      type: Date,
-      default: null,
-    },
     trustedDevices: [
       {
         deviceId: {
@@ -120,10 +108,9 @@ const userSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
-  }
+  },
 )
 
-// Hash password before saving
 userSchema.pre("save", async function (next) {
   if (!this.isModified("password")) return next()
   try {
@@ -135,12 +122,10 @@ userSchema.pre("save", async function (next) {
   }
 })
 
-// Compare password
 userSchema.methods.comparePassword = async function (candidatePassword) {
   return bcrypt.compare(candidatePassword, this.password)
 }
 
-// Overwrite an unverified user's data and issue a new verification code
 userSchema.methods.overwriteUnverifiedUser = async function (newUserData) {
   if (this.isEmailVerified) {
     throw new Error("Cannot overwrite a verified user")
@@ -153,7 +138,7 @@ userSchema.methods.overwriteUnverifiedUser = async function (newUserData) {
 
   const verificationCode = Math.floor(100000 + Math.random() * 900000).toString()
   this.emailVerificationCode = verificationCode
-  this.emailVerificationExpires = Date.now() + 3600000 // 1 hour
+  this.emailVerificationExpires = Date.now() + 3600000
 
   await this.save()
   return verificationCode
