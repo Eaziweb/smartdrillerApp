@@ -931,7 +931,13 @@
   justify-content: flex-end;
   gap: 12px;
 }
+/* Add this to your CSS file */
 
+.yearCardActions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+} 
 /* Responsive Design */
 @media (max-width: 768px) {
   .adminDashboard {

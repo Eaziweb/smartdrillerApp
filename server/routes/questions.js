@@ -839,6 +839,60 @@ router.get("/admin/search", adminAuth, async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 });
+  // routes/questions.js
+
+// ... existing imports and routes ...
+
+// Admin: Bulk delete all questions for a specific course and year
+router.delete("/admin/bulk-delete-course-year", adminAuth, async (req, res) => {
+  try {
+    const { course, year } = req.body;
+
+    if (!course || !year) {
+      return res.status(400).json({ message: "Course and year are required" });
+    }
+
+    // Find all questions matching the criteria
+    const questions = await Question.find({
+      course: course.toLowerCase(),
+      year: year.trim(),
+      isActive: true, // Only target active questions, or remove this line to delete soft-deleted too
+    });
+
+    if (questions.length === 0) {
+      return res.status(404).json({ message: "No questions found for this course and year" });
+    }
+
+    // Delete associated images from Cloudinary
+    let imageDeletionErrors = 0;
+    for (const question of questions) {
+      if (question.cloudinaryPublicId) {
+        try {
+          await cloudinary.uploader.destroy(question.cloudinaryPublicId);
+        } catch (err) {
+          console.error(`Failed to delete image ${question.cloudinaryPublicId}:`, err);
+          imageDeletionErrors++;
+        }
+      }
+    }
+
+    // Delete questions from the database
+    const result = await Question.deleteMany({
+      course: course.toLowerCase(),
+      year: year.trim(),
+      isActive: true,
+    });
+
+    res.json({
+      message: `Successfully deleted ${result.deletedCount} questions.`,
+      deletedCount: result.deletedCount,
+      imageErrors: imageDeletionErrors > 0 ? `${imageDeletionErrors} images failed to delete from Cloudinary.` : null,
+    });
+  } catch (error) {
+    console.error("Bulk delete course-year error:", error);
+    res.status(500).json({ message: "Server error: " + error.message });
+  }
+});
 
 // // Admin: Delete question
 // router.delete("/admin/:id", adminAuth, async (req, res) => {

@@ -543,6 +543,31 @@ const AdminQuizManagement = () => {
     }
   }
   
+  // NEW: Handler for Bulk Deleting Questions in a Course Year
+  const handleDeleteAllQuestionsInYear = (course, year) => {
+    setConfirmDialog({
+      isOpen: true,
+      message: `Are you sure you want to delete ALL questions for ${course.toUpperCase()} - ${year}? This action cannot be undone and will delete images associated with these questions.`,
+      onConfirm: async () => {
+        try {
+          const token = localStorage.getItem("token")
+          await api.delete("/api/questions/admin/bulk-delete-course-year", {
+            headers: { Authorization: `Bearer ${token}` },
+            data: { course, year }
+          })
+          
+          showToast(`All questions for ${course.toUpperCase()} - ${year} deleted`)
+          fetchQuestions()
+          fetchStatistics()
+        } catch (error) {
+          console.error("Error bulk deleting questions:", error)
+          showToast(error.response?.data?.message || "Failed to delete questions", "error")
+        }
+        closeConfirmDialog()
+      },
+    })
+  }
+  
   const toggleCourseStatus = async (courseId, currentStatus) => {
     try {
       const token = localStorage.getItem("token")
@@ -1119,12 +1144,22 @@ const AdminQuizManagement = () => {
                     {data.years.map((yearData) => (
                       <div key={yearData._id} className={styles.yearCard}>
                         <span className={styles.yearText}>{yearData.year}</span>
-                        <button 
-                          onClick={() => handleDeleteCourseYear(yearData._id)} 
-                          className={`${styles.btn} ${styles.btnDeleteSmall}`}
-                        >
-                          ×
-                        </button>
+                        <div className={styles.yearCardActions}>
+                          <button 
+                            onClick={() => handleDeleteAllQuestionsInYear(course, yearData.year)} 
+                            className={`${styles.btn} ${styles.btnWarning} ${styles.btnSmall}`}
+                            title="Delete all questions in this year"
+                          >
+                            <i className="fas fa-trash-alt"></i>
+                          </button>
+                          <button 
+                            onClick={() => handleDeleteCourseYear(yearData._id)} 
+                            className={`${styles.btn} ${styles.btnDeleteSmall}`}
+                            title="Remove year definition"
+                          >
+                            ×
+                          </button>
+                        </div>
                       </div>
                     ))}
                   </div>
