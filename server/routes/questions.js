@@ -844,69 +844,62 @@ router.get("/admin/search", adminAuth, async (req, res) => {
 // ... existing imports and routes ...
 
 // Admin: Bulk delete all questions for a specific course and year
-router.delete("/admin/bulk-delete-course-year", adminAuth, async (req, res) => {
+router.post("/admin/bulk-delete-course-year", adminAuth, async (req, res) => {
   try {
     const { course, year } = req.body;
-
+ 
     if (!course || !year) {
       return res.status(400).json({ message: "Course and year are required" });
     }
-
-    // Find all questions matching the criteria
+ 
+    const normalizedCourse = course.toLowerCase().trim();
+    const normalizedYear = year.trim();
+ 
+    // Find all questions matching the criteria (both active and soft-deleted)
     const questions = await Question.find({
-      course: course.toLowerCase(),
-      year: year.trim(),
-      isActive: true, // Only target active questions, or remove this line to delete soft-deleted too
+      course: normalizedCourse,
+      year: normalizedYear,
     });
-
+ 
     if (questions.length === 0) {
-      return res.status(404).json({ message: "No questions found for this course and year" });
+      return res.status(404).json({
+        message: `No questions found for ${course.toUpperCase()} - ${year}`,
+      });
     }
-
+ 
     // Delete associated images from Cloudinary
     let imageDeletionErrors = 0;
-    for (const question of questions) {
-      if (question.cloudinaryPublicId) {
-        try {
-          await cloudinary.uploader.destroy(question.cloudinaryPublicId);
-        } catch (err) {
-          console.error(`Failed to delete image ${question.cloudinaryPublicId}:`, err);
-          imageDeletionErrors++;
-        }
-      }
-    }
-
-    // Delete questions from the database
+    const cloudinaryDeletions = questions
+      .filter((q) => q.cloudinaryPublicId)
+      .map((q) =>
+        cloudinary.uploader
+          .destroy(q.cloudinaryPublicId)
+          .catch((err) => {
+            console.error(`Failed to delete image ${q.cloudinaryPublicId}:`, err);
+            imageDeletionErrors++;
+          })
+      );
+ 
+    await Promise.all(cloudinaryDeletions);
+ 
+    // Hard delete questions from the database
     const result = await Question.deleteMany({
-      course: course.toLowerCase(),
-      year: year.trim(),
-      isActive: true,
+      course: normalizedCourse,
+      year: normalizedYear,
     });
-
+ 
     res.json({
-      message: `Successfully deleted ${result.deletedCount} questions.`,
+      message: `Successfully deleted ${result.deletedCount} questions for ${course.toUpperCase()} - ${year}.`,
       deletedCount: result.deletedCount,
-      imageErrors: imageDeletionErrors > 0 ? `${imageDeletionErrors} images failed to delete from Cloudinary.` : null,
+      imageErrors:
+        imageDeletionErrors > 0
+          ? `${imageDeletionErrors} image(s) failed to delete from Cloudinary.`
+          : null,
     });
   } catch (error) {
     console.error("Bulk delete course-year error:", error);
     res.status(500).json({ message: "Server error: " + error.message });
   }
 });
-
-// // Admin: Delete question
-// router.delete("/admin/:id", adminAuth, async (req, res) => {
-//   try {
-//     const { id } = req.params;
-//     const question = await Question.findByIdAndUpdate(id, { isActive: false }, { new: true });
-//     if (!question) {
-//       return res.status(404).json({ message: "Question not found" });
-//     }
-//     res.json({ message: "Question deleted successfully" });
-//   } catch (error) {
-//     console.error(error);
-//     res.status(500).json({ message: "Server error" });
-//   }
-// });
-
+ 
 module.exports = router;

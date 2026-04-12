@@ -543,30 +543,40 @@ const AdminQuizManagement = () => {
     }
   }
   
-  // NEW: Handler for Bulk Deleting Questions in a Course Year
-  const handleDeleteAllQuestionsInYear = (course, year) => {
-    setConfirmDialog({
-      isOpen: true,
-      message: `Are you sure you want to delete ALL questions for ${course.toUpperCase()} - ${year}? This action cannot be undone and will delete images associated with these questions.`,
-      onConfirm: async () => {
-        try {
-          const token = localStorage.getItem("token")
-          await api.delete("/api/questions/admin/bulk-delete-course-year", {
-            headers: { Authorization: `Bearer ${token}` },
-            data: { course, year }
-          })
-          
-          showToast(`All questions for ${course.toUpperCase()} - ${year} deleted`)
-          fetchQuestions()
-          fetchStatistics()
-        } catch (error) {
-          console.error("Error bulk deleting questions:", error)
-          showToast(error.response?.data?.message || "Failed to delete questions", "error")
-        }
-        closeConfirmDialog()
-      },
-    })
-  }
+const handleDeleteAllQuestionsInYear = (course, year) => {
+  setConfirmDialog({
+    isOpen: true,
+    message: `Are you sure you want to delete ALL questions for ${course.toUpperCase()} - ${year}? This action cannot be undone and will also delete any images associated with these questions.`,
+    onConfirm: async () => {
+      try {
+        const token = localStorage.getItem("token")
+ 
+        // Changed: api.delete → api.post
+        // Changed: { data: { course, year } } → { course, year } in body directly
+        const response = await api.post(
+          "/api/questions/admin/bulk-delete-course-year",
+          { course, year },                          // ← body (always works)
+          { headers: { Authorization: `Bearer ${token}` } }
+        )
+ 
+        showToast(
+          response.data.message ||
+            `All questions for ${course.toUpperCase()} - ${year} deleted`
+        )
+        fetchQuestions()
+        fetchStatistics()
+      } catch (error) {
+        console.error("Error bulk deleting questions:", error)
+        showToast(
+          error.response?.data?.message || "Failed to delete questions",
+          "error"
+        )
+      }
+      closeConfirmDialog()
+    },
+  })
+}
+ 
   
   const toggleCourseStatus = async (courseId, currentStatus) => {
     try {
