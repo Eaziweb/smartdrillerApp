@@ -7,6 +7,7 @@ import AdminRoute from "./components/AdminRoute"
 import SuperAdminRoute from "./components/SuperAdminRoute"
 import SubscriptionProtectedRoute from "./components/SubscriptionProtectedRoute"
 import SubscriptionRequired from "./components/SubscriptionRequired"
+import GuestRoute from "./components/GuestRoute" // <-- Added GuestRoute import
 
 import LandingPage from './pages/LandingPage';
 
@@ -15,7 +16,8 @@ import Company from './pages/Company';
 import Resources from './pages/Resources';
 import LegalPolicies from './pages/LegalPolicies'
 import Features from './components/Features';
-   import NotFound from './pages/NotFound';
+import NotFound from './pages/NotFound';
+
 // Auth Pages
 import Login from "./pages/auth/Login"
 import Register from "./pages/auth/Register"
@@ -25,7 +27,6 @@ import VerifyEmail from "./pages/auth/VerifyEmail"
 import DeviceManagement from "./pages/auth/DeviceMangement"
 import Congratulations from "./pages/auth/Congratulations"
 
-// Add this route
 // User Pages
 import Home from "./pages/user/Home"
 import Profile from "./pages/user/Profile"
@@ -50,14 +51,6 @@ import CGPACalculator from "./pages/user/CGPACalculator"
 import AdminLogin from "./pages/admin/AdminLogin"
 import AdminDashboard from "./pages/admin/AdminDashboard"
 import CourseOfStudyManagement from './pages/admin/CourseOfStudyManagement';
-
-// Add this route to your router configuration
-//SuperAdmin
-import SuperAdminLogin from './pages/superadmin/SuperAdminLogin';
-import SuperAdminDashboard from './pages/superadmin/SuperAdminDashboard';
-
-
-
 import ReportsManagement from "./pages/admin/ReportsManagement"
 import AdminQuizManagement from "./pages/admin/AdminQuizManagement"
 import VideoManagement from "./pages/admin/VideoManagement"
@@ -69,6 +62,10 @@ import AdminCompetitionDetails from "./pages/admin/CompetitionDetails"
 import AdminCompetitionLeaderboard from "./pages/admin/AdminCompetitionLeaderboard"
 import UsersPage from "./pages/admin/UsersPage"
 import NotificationsPage from "./pages/admin/NotificationsPage"
+
+// SuperAdmin
+import SuperAdminLogin from './pages/superadmin/SuperAdminLogin';
+import SuperAdminDashboard from './pages/superadmin/SuperAdminDashboard';
 
 // Payment Pages
 import PaymentCallback from "./pages/payment/PaymentCallback"
@@ -83,400 +80,404 @@ import AOS from 'aos';
 import 'aos/dist/aos.css';
 import './index.css';
 
-
-
-
 function App() {
-useEffect(() => {
-  AOS.init({
-    duration: 800,
-    once: true
-  });
-}, []);
+  useEffect(() => {
+    AOS.init({
+      duration: 800,
+      once: true
+    });
+  }, []);
 
   return (
     <AuthProvider>
-            <NotificationProvider>
-  
-      <Router>
-        <div className="App">
-        {/* <Analytics /> */}
-          <Routes>
-            {/* Public Routes */}
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-            <Route path="/forgot-password" element={<ForgotPassword />} />
-            <Route path="/reset-password/:token" element={<ResetPassword />} />
-            {/* <Route path="/verify-email" element={<VerifyEmail />} /> */}
-<Route path="/congratulations" element={<Congratulations />} />
+      <NotificationProvider>
+        <Router>
+          <div className="App">
+            {/* <Analytics /> */}
+            <Routes>
+              {/* --- Public Routes (Wrapped in GuestRoute) --- */}
+              <Route 
+                path="/" 
+                element={
+                  <GuestRoute>
+                    <LandingPage />
+                  </GuestRoute>
+                } 
+              />
+              <Route 
+                path="/login" 
+                element={
+                  <GuestRoute>
+                    <Login />
+                  </GuestRoute>
+                } 
+              />
+              <Route 
+                path="/register" 
+                element={
+                  <GuestRoute>
+                    <Register />
+                  </GuestRoute>
+                } 
+              />
+              
+              {/* Other Unprotected/Informational Routes */}
+              <Route path="/forgot-password" element={<ForgotPassword />} />
+              <Route path="/reset-password/:token" element={<ResetPassword />} />
+              {/* <Route path="/verify-email" element={<VerifyEmail />} /> */}
+              <Route path="/congratulations" element={<Congratulations />} />
+              <Route path="/company" element={<Company />} />
+              <Route path="/resources" element={<Resources />} />
+              <Route path="/legal" element={<LegalPolicies />} />
 
-            {/* Admin Routes */}
-            <Route path="/private/admin/login" element={<AdminLogin />} />
-            <Route
-              path="/admin/dashboard"
-              element={
-                <AdminRoute>
-                  <AdminDashboard />
-                </AdminRoute>
-              }
-            />
-
-<Route path="/private/superadmin/login" element={<SuperAdminLogin />} />
-<Route path="/superadmin/dashboard" element={
-  <SuperAdminRoute>
-                <SuperAdminDashboard />
-              </SuperAdminRoute>
-            } />
-
-            <Route
-              path="/admin/quiz"
-              element={
-                <AdminRoute>
-                  <AdminQuizManagement />
-                </AdminRoute>
-              }
-            />
-            
-
-            <Route
-              path="/admin/reports"
-              element={
-                <AdminRoute>
-                  <ReportsManagement />
-                </AdminRoute>
-              }
-            />
-
-<Route path="/admin/courseofstudy" element={ <AdminRoute>
-                  <CourseOfStudyManagement/>
-                </AdminRoute>} />
-
-            <Route
-              path="/admin/videos"
-              element={
-                <AdminRoute>
-                  <VideoManagement />
-                </AdminRoute>
-              }
-            />
-            <Route
-              path="/admin/notes"
-              element={
-                <AdminRoute>
-                  <NoteManagement />
-                </AdminRoute>
-              }
-            />
-            <Route
-              path="/admin/materials"
-              element={
-                <AdminRoute>
-                  <MaterialManagement />
-                </AdminRoute>
-              }
-            />
-            <Route
-              path="/admin/competitions"
-              element={
-                <AdminRoute>
-                  <CompetitionManagement />
-                </AdminRoute>
-              }
-            />
-                        <Route
-              path="/admin/payments"
-              element={
-                <AdminRoute>
-                  <PaymentManagement />
-                </AdminRoute>
-              }
-            />
-            <Route
-              path="/admin/competitions/:id"
-              element={
-                <AdminRoute>
-                  <AdminCompetitionDetails />
-                </AdminRoute>
-              }
-            />
-            <Route
-              path="/admin/competitions/:id/leaderboard"
-              element={
-                <AdminRoute>
-                  <AdminCompetitionLeaderboard />
-                </AdminRoute>
-              }
-            />
-             <Route
-              path="/admin/users"
-              element={
-                <AdminRoute>
-                  <UsersPage />
-                </AdminRoute>
-              }
-            />
-             <Route
-              path="/admin/notifications"
-              element={
-                <AdminRoute>
-                  <NotificationsPage />
-                </AdminRoute>
-              }
-            />
-
-            {/* Protected User Routes */}
-            <Route
-              path="/home"
-              element={
-                <ProtectedRoute>
-                  <Home />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/profile"
-              element={
-                <ProtectedRoute>
-                  <Profile />
-                </ProtectedRoute>
-              }
-            />
-                 <Route
-              path="/subscription-required"
-              element={
-                <ProtectedRoute>
-                  <subscriptionRequired />
-                </ProtectedRoute>
-              }
-            />
-               {/* <Route
-              path="/device-manager"
-              element={
-                <ProtectedRoute>
-                  <DeviceManagement />
-                </ProtectedRoute>
-              }
-            /> */}
-            <Route
-              path="/competitions"
-              element={
-                <ProtectedRoute>
-                  <Competitions />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/competitions/:id"
-              element={
-                <ProtectedRoute>
-                  <CompetitionDetails />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/competitions/:id/leaderboard"
-              element={
-                <ProtectedRoute>
-                  <CompetitionLeaderboard />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/competition-quiz"
-              element={
-                <ProtectedRoute>
-                  <SubscriptionProtectedRoute>
-                    <CompetitionQuiz />
-                  </SubscriptionProtectedRoute>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/competition-completion"
-              element={
-                <ProtectedRoute>
-                  <CompetitionCompletion />
-                </ProtectedRoute>
-              }
-            />
+              {/* --- Admin Routes --- */}
+              <Route path="/private/admin/login" element={<AdminLogin />} />
               <Route
-              path="/competition-history"
-              element={
-                <ProtectedRoute>
-                  <CompetitionHistory />
-                </ProtectedRoute>
-              }
-            />
+                path="/admin/dashboard"
+                element={
+                  <AdminRoute>
+                    <AdminDashboard />
+                  </AdminRoute>
+                }
+              />
+              <Route
+                path="/admin/quiz"
+                element={
+                  <AdminRoute>
+                    <AdminQuizManagement />
+                  </AdminRoute>
+                }
+              />
+              <Route
+                path="/admin/reports"
+                element={
+                  <AdminRoute>
+                    <ReportsManagement />
+                  </AdminRoute>
+                }
+              />
+              <Route 
+                path="/admin/courseofstudy" 
+                element={ 
+                  <AdminRoute>
+                    <CourseOfStudyManagement/>
+                  </AdminRoute>
+                } 
+              />
+              <Route
+                path="/admin/videos"
+                element={
+                  <AdminRoute>
+                    <VideoManagement />
+                  </AdminRoute>
+                }
+              />
+              <Route
+                path="/admin/notes"
+                element={
+                  <AdminRoute>
+                    <NoteManagement />
+                  </AdminRoute>
+                }
+              />
+              <Route
+                path="/admin/materials"
+                element={
+                  <AdminRoute>
+                    <MaterialManagement />
+                  </AdminRoute>
+                }
+              />
+              <Route
+                path="/admin/competitions"
+                element={
+                  <AdminRoute>
+                    <CompetitionManagement />
+                  </AdminRoute>
+                }
+              />
+              <Route
+                path="/admin/payments"
+                element={
+                  <AdminRoute>
+                    <PaymentManagement />
+                  </AdminRoute>
+                }
+              />
+              <Route
+                path="/admin/competitions/:id"
+                element={
+                  <AdminRoute>
+                    <AdminCompetitionDetails />
+                  </AdminRoute>
+                }
+              />
+              <Route
+                path="/admin/competitions/:id/leaderboard"
+                element={
+                  <AdminRoute>
+                    <AdminCompetitionLeaderboard />
+                  </AdminRoute>
+                }
+              />
+              <Route
+                path="/admin/users"
+                element={
+                  <AdminRoute>
+                    <UsersPage />
+                  </AdminRoute>
+                }
+              />
+              <Route
+                path="/admin/notifications"
+                element={
+                  <AdminRoute>
+                    <NotificationsPage />
+                  </AdminRoute>
+                }
+              />
 
+              {/* --- SuperAdmin Routes --- */}
+              <Route path="/private/superadmin/login" element={<SuperAdminLogin />} />
+              <Route 
+                path="/superadmin/dashboard" 
+                element={
+                  <SuperAdminRoute>
+                    <SuperAdminDashboard />
+                  </SuperAdminRoute>
+                } 
+              />
 
-<Route
-  path="/course-selection"
-  element={
-    <ProtectedRoute>
-      <CourseSelection />
-    </ProtectedRoute>
-  }
-/>
-            <Route
-              path="/study"
-              element={
-                <ProtectedRoute>
-                  <SubscriptionProtectedRoute>
-                    <Study />
-                  </SubscriptionProtectedRoute>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/mock"
-              element={
-                <ProtectedRoute>
-                  <SubscriptionProtectedRoute>
-                    <Mock />
-                  </SubscriptionProtectedRoute>
-                </ProtectedRoute>
-              }
-            />
+              {/* --- Protected User Routes --- */}
+              <Route
+                path="/home"
+                element={
+                  <ProtectedRoute>
+                    <Home />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/profile"
+                element={
+                  <ProtectedRoute>
+                    <Profile />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/subscription-required"
+                element={
+                  <ProtectedRoute>
+                    <SubscriptionRequired />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/competitions"
+                element={
+                  <ProtectedRoute>
+                    <Competitions />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/competitions/:id"
+                element={
+                  <ProtectedRoute>
+                    <CompetitionDetails />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/competitions/:id/leaderboard"
+                element={
+                  <ProtectedRoute>
+                    <CompetitionLeaderboard />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/competition-quiz"
+                element={
+                  <ProtectedRoute>
+                    <SubscriptionProtectedRoute>
+                      <CompetitionQuiz />
+                    </SubscriptionProtectedRoute>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/competition-completion"
+                element={
+                  <ProtectedRoute>
+                    <CompetitionCompletion />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/competition-history"
+                element={
+                  <ProtectedRoute>
+                    <CompetitionHistory />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/course-selection"
+                element={
+                  <ProtectedRoute>
+                    <CourseSelection />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/study"
+                element={
+                  <ProtectedRoute>
+                    <SubscriptionProtectedRoute>
+                      <Study />
+                    </SubscriptionProtectedRoute>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/mock"
+                element={
+                  <ProtectedRoute>
+                    <SubscriptionProtectedRoute>
+                      <Mock />
+                    </SubscriptionProtectedRoute>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/results"
+                element={
+                  <ProtectedRoute>
+                    <SubscriptionProtectedRoute>
+                      <Results />
+                    </SubscriptionProtectedRoute>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/correction"
+                element={
+                  <ProtectedRoute>
+                    <SubscriptionProtectedRoute>
+                      <Correction />
+                    </SubscriptionProtectedRoute>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/results-history"
+                element={
+                  <ProtectedRoute>
+                    <SubscriptionProtectedRoute>
+                      <ResultsHistory />
+                    </SubscriptionProtectedRoute>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/question-search"
+                element={
+                  <ProtectedRoute>
+                    <SubscriptionProtectedRoute>
+                      <QuestionSearch />
+                    </SubscriptionProtectedRoute>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/cgpa-calc"
+                element={
+                  <ProtectedRoute>
+                    <SubscriptionProtectedRoute>
+                      <CGPACalculator />
+                    </SubscriptionProtectedRoute>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/bookmarks"
+                element={
+                  <ProtectedRoute>
+                    <SubscriptionProtectedRoute>
+                      <Bookmarks />
+                    </SubscriptionProtectedRoute>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/videos"
+                element={
+                  <ProtectedRoute>
+                    <SubscriptionProtectedRoute>
+                      <Videos />
+                    </SubscriptionProtectedRoute>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/notes"
+                element={
+                  <ProtectedRoute>
+                    <SubscriptionProtectedRoute>
+                      <Notes />
+                    </SubscriptionProtectedRoute>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/note-reader/:noteId"
+                element={
+                  <ProtectedRoute>
+                    <SubscriptionProtectedRoute>
+                      <NoteReader />
+                    </SubscriptionProtectedRoute>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/AI-assistant"
+                element={
+                  <ProtectedRoute>
+                    <SubscriptionProtectedRoute>
+                      <AIAssistant />
+                    </SubscriptionProtectedRoute>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/materials"
+                element={
+                  <ProtectedRoute>
+                    <SubscriptionProtectedRoute>
+                      <Materials />
+                    </SubscriptionProtectedRoute>
+                  </ProtectedRoute>
+                }
+              />
 
-            <Route
-              path="/results"
-              element={
-                <ProtectedRoute>
-                  <SubscriptionProtectedRoute>
-                    <Results />
-                  </SubscriptionProtectedRoute>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/correction"
-              element={
-                <ProtectedRoute>
-                  <SubscriptionProtectedRoute>
-                    <Correction />
-                  </SubscriptionProtectedRoute>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/results-history"
-              element={
-                <ProtectedRoute>
-                  <SubscriptionProtectedRoute>
-                    <ResultsHistory />
-                  </SubscriptionProtectedRoute>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/question-search"
-              element={
-                <ProtectedRoute>
-                  <SubscriptionProtectedRoute>
-                    <QuestionSearch />
-                  </SubscriptionProtectedRoute>
-                </ProtectedRoute>
-              }
-            />
-           <Route
-              path="/cgpa-calc"
-              element={
-                <ProtectedRoute>
-                  <SubscriptionProtectedRoute>
-                    <CGPACalculator />
-                  </SubscriptionProtectedRoute>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/bookmarks"
-              element={
-                <ProtectedRoute>
-                  <SubscriptionProtectedRoute>
-                    <Bookmarks />
-                  </SubscriptionProtectedRoute>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/videos"
-              element={
-                <ProtectedRoute>
-                  <SubscriptionProtectedRoute>
-             
-                    <Videos />
-                               </SubscriptionProtectedRoute>
+              {/* Payment Routes */}
+              <Route
+                path="/payment/callback"
+                element={
+                  <ProtectedRoute>
+                    <PaymentCallback />
+                  </ProtectedRoute>
+                }
+              />
 
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/notes"
-              element={
-                <ProtectedRoute>
-                  <SubscriptionProtectedRoute>
-          
-                    <Notes />
-                  </SubscriptionProtectedRoute>
-       
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/note-reader/:noteId"
-              element={
-                <ProtectedRoute>
-                  <SubscriptionProtectedRoute>
-                    <NoteReader />
-                  </SubscriptionProtectedRoute>
-                </ProtectedRoute>
-              }
-            />
-
-            <Route
-              path="/AI-assistant"
-              element={
-                <ProtectedRoute>
-                  <SubscriptionProtectedRoute>
-                    <AIAssistant />
-                  </SubscriptionProtectedRoute>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/materials"
-              element={
-                <ProtectedRoute>
-                  <SubscriptionProtectedRoute>
-                    <Materials />
-                  </SubscriptionProtectedRoute>
-                </ProtectedRoute>
-              }
-            />
-            {/* Payment Routes */}
-            <Route
-              path="/payment/callback"
-              element={
-                <ProtectedRoute>
-                  <PaymentCallback />
-                </ProtectedRoute>
-              }
-            />
-
-               
-
-
-             <Route path="/" element={<LandingPage />} />
-        <Route path="/company" element={<Company />} />
-        <Route path="/resources" element={<Resources />} />
-        <Route path="/legal" element={<LegalPolicies />} />
-      
+              {/* 404 Route */}
               <Route path="*" element={<NotFound />} />
-          </Routes>
-        </div>
-      </Router>
-    </NotificationProvider>
-
+            </Routes>
+          </div>
+        </Router>
+      </NotificationProvider>
     </AuthProvider>
   )
 }
