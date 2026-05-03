@@ -1,17 +1,13 @@
 require("dotenv").config();
 const express = require("express");
-const mongoose = require("mongoose");
 const cors = require("cors");
 const path = require("path");
 const cookieParser = require("cookie-parser");
-const bcrypt = require("bcryptjs");
-const User = require("./models/User");
-const CourseofStudy = require("./models/CourseofStudy");
 const cron = require("node-cron");
-const { checkAllSubscriptions } = require("./jobs/subscriptionChecker");
+const connectDB = require("./db"); // Import our new DB logic
 const { checkUniversitySubscriptions } = require("./jobs/universitySubscriptionChecker");
-const app = express();
 
+const app = express();
 
 // ----------------------
 // CORS Setup
@@ -35,50 +31,28 @@ app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
-
-
-// Add this function before the MongoDB connection
-const deleteTestUsers = async () => {
+// ----------------------
+// Database Middleware (CRITICAL FOR VERCEL)
+// ----------------------
+// This ensures the DB is connected before any route is hit, preventing timeouts.
+app.use(async (req, res, next) => {
   try {
-    const result = await User.deleteMany({ fullName: "test" });
-    if (result.deletedCount > 0) {
-      console.log(`✅ Deleted ${result.deletedCount} test users`);
-    } else {
-      console.log("No test users found to delete");
-    }
+    await connectDB();
+    next();
   } catch (error) {
-    console.error("❌ Error deleting test users:", error);
+    return res.status(500).json({ message: "Database connection failed", error: error.message });
   }
-};
+});
 
-// Modify the MongoDB connection callback to include this function
-mongoose.connect(process.env.MONGODB_URI)
-  .then(async () => {
-    console.log("✅ MongoDB connected");
-    
-    // Delete test users
-    await deleteTestUsers();
-    
-    // Create SuperAdministration course if it doesn't exist
-    let superAdminCourse = await CourseofStudy.findOne({
-      name: "SuperAdministration",
-      category: "Administration"
-    });
-    if (!superAdminCourse) {
-      superAdminCourse = new CourseofStudy({
-        name: "SuperAdministration",
-        category: "Administration"
-      });
-      await superAdminCourse.save();
-      console.log("✅ SuperAdministration course created");
-    }
-  
-
-  })
-  .catch(err => console.error("❌ MongoDB connection error:", err));
+// ----------------------
+// Cron Jobs
+// ----------------------
 cron.schedule("0 0 * * *", async () => {
+  // Ensure DB is connected before cron runs
+  await connectDB();
   await checkUniversitySubscriptions();
 });
+
 // ----------------------
 // Routes
 // ----------------------
@@ -106,17 +80,12 @@ app.use("/api/courses", require("./routes/courses"));
 app.use("/api/courseofstudy", require("./routes/courseofstudy"));
 app.use("/api/universities", require("./routes/universities"));
 app.use("/api/test", require("./routes/test"));
-app.use("/api/payments/webhook", require("./middleware/webhookLogger"))
-
+app.use("/api/payments/webhook", require("./middleware/webhookLogger"));
 
 // ----------------------
-// Static Files
+// Static Files & Utilities
 // ----------------------
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
-
-// ----------------------
-// Utility jobs
-// ---------------------- 
 require("./utils/updateVideoMetadata");
 
 // ----------------------
@@ -134,7 +103,16 @@ app.get("/", (req, res) => {
   res.json({ status: "Backend running 🚀", time: new Date() });
 });
 
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
-});
+// ----------------------
+// Export & Listen
+// ----------------------
+// Exporting the app is required for Vercel serverless functions
+module.exports = app;
+
+// Keep listen for local development
+if (process.env.NODE_ENV !== 'production') {
+  const PORT = process.env.PORT || 5000;
+  app.listen(PORT, () => {
+    console.log(`🚀 Local server running on port ${PORT}`);
+  });
+}
