@@ -4,7 +4,7 @@ const cors = require("cors");
 const path = require("path");
 const cookieParser = require("cookie-parser");
 const cron = require("node-cron");
-const connectDB = require("./db"); // Import our new DB logic
+const connectDB = require("./db"); 
 const { checkUniversitySubscriptions } = require("./jobs/universitySubscriptionChecker");
 
 const app = express();
