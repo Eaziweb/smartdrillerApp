@@ -2,6 +2,7 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from "react"
 import { Link } from "react-router-dom"
 import { useAuth } from "../../contexts/AuthContext"
+import usePWAInstall from "../../hooks/usePWAInstall"
 import styles from "../../styles/home.module.css"
 import AboutSmartDriller from "./AboutSmartDriller"
 import SubscriptionModal from "./SubscriptionModal"
@@ -9,286 +10,307 @@ import api from "../../utils/api"
 
 const Home = () => {
   const { user, logout, updateUser } = useAuth()
+
+  // ── PWA Install hook ──────────────────────────────────────────────
+  const { isInstallable, isInstalled, handleInstall } = usePWAInstall()
+
+  // ── UI state ──────────────────────────────────────────────────────
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [notificationPanelOpen, setNotificationPanelOpen] = useState(false)
   const [contactPopupOpen, setContactPopupOpen] = useState(false)
   const [aboutModalOpen, setAboutModalOpen] = useState(false)
   const [showSubscriptionModal, setShowSubscriptionModal] = useState(false)
+
+  // ── Data state ────────────────────────────────────────────────────
   const [notifications, setNotifications] = useState([])
   const [unreadCount, setUnreadCount] = useState(0)
   const [loading, setLoading] = useState(false)
+
+  // ── Touch state (sidebar swipe-to-close) ─────────────────────────
   const [touchStartX, setTouchStartX] = useState(0)
   const [touchEndX, setTouchEndX] = useState(0)
+
+  // ── Refs ──────────────────────────────────────────────────────────
   const contactPopupRef = useRef(null)
   const sidebarRef = useRef(null)
   const initializedRef = useRef(false)
-  
-  // Memoize notification icon mapping
+
+  // ── Notification icon map ─────────────────────────────────────────
   const getNotificationIcon = useCallback((type) => {
     const iconMap = {
       success: "fa-check-circle",
       error: "fa-exclamation-circle",
       warning: "fa-exclamation-triangle",
-      default: "fa-info-circle"
+      default: "fa-info-circle",
     }
     return iconMap[type] || iconMap.default
   }, [])
-  
-  // Memoize feature cards
-  const featureCards = useMemo(() => [
-    {
-      to: "/course-selection?type=study",
-      icon: "fa-solid fa-book-open-reader",
-      title: "Study",
-      description: "Master concepts with thousands of expertly explained questions."
-    },
-    {
-      to: "/course-selection?type=mock",
-      icon: "fa-solid fa-stopwatch",
-      title: "Mock Test",
-      description: "Simulate real exams and instantly identify your weaknesses."
-    },
-    {
-      to: "/bookmarks",
-      icon: "fa-solid fa-bookmark",
-      title: "Bookmarks",
-      description: "Save important questions for faster, smarter exam revisions."
-    },
-    {
-      to: "/videos",
-      icon: "fa-solid fa-video",
-      title: "Videos",
-      description: "Watch engaging video lessons that simplify difficult concepts."
-    },
-    {
-      to: "/notes",
-      icon: "fa-solid fa-sticky-note",
-      title: "Notes",
-      description: "Access clear, concise notes tailored for effective studying."
-    },
-    {
-      to: "/materials",
-      icon: "fa-solid fa-file-lines",
-      title: "Materials",
-      description: "Download study materials for deeper insights and preparation."
-    },
-    {
-      to: "/results-history",
-      icon: "fa-solid fa-chart-line",
-      title: "Results History",
-      description: "Track progress with detailed reports on past performances."
-    },
-    {
-      to: "/AI-assistant",
-      icon: "fa-solid fa-robot",
-      title: "AI Assistant",
-      description: "Chat with AI for instant answers and study support."
-    },
-    {
-      to: "/question-search",
-      icon: "fa-solid fa-magnifying-glass",
-      title: "Question Search",
-      description: "Quickly find questions by topic, keyword, or subject."
-    },
-    {
-      to: "/competitions",
-      icon: "fa-solid fa-trophy",
-      title: "Competition",
-      description: "Compete with peers and climb leaderboards in real time."
-    },
-    {
-      to: "/cgpa-calc",
-      icon: "fa-solid fa-calculator",
-      title: "CGPA",
-      description: "Easily calculate your CGPA in just a few simple steps."
-    }
-  ], [])
 
+  // ── Feature cards ─────────────────────────────────────────────────
+  const featureCards = useMemo(
+    () => [
+      {
+        to: "/course-selection?type=study",
+        icon: "fa-solid fa-book-open-reader",
+        title: "Study",
+        description: "Master concepts with thousands of expertly explained questions.",
+      },
+      {
+        to: "/course-selection?type=mock",
+        icon: "fa-solid fa-stopwatch",
+        title: "Mock Test",
+        description: "Simulate real exams and instantly identify your weaknesses.",
+      },
+      {
+        to: "/bookmarks",
+        icon: "fa-solid fa-bookmark",
+        title: "Bookmarks",
+        description: "Save important questions for faster, smarter exam revisions.",
+      },
+      {
+        to: "/videos",
+        icon: "fa-solid fa-video",
+        title: "Videos",
+        description: "Watch engaging video lessons that simplify difficult concepts.",
+      },
+      {
+        to: "/notes",
+        icon: "fa-solid fa-sticky-note",
+        title: "Notes",
+        description: "Access clear, concise notes tailored for effective studying.",
+      },
+      {
+        to: "/materials",
+        icon: "fa-solid fa-file-lines",
+        title: "Materials",
+        description: "Download study materials for deeper insights and preparation.",
+      },
+      {
+        to: "/results-history",
+        icon: "fa-solid fa-chart-line",
+        title: "Results History",
+        description: "Track progress with detailed reports on past performances.",
+      },
+      {
+        to: "/AI-assistant",
+        icon: "fa-solid fa-robot",
+        title: "AI Assistant",
+        description: "Chat with AI for instant answers and study support.",
+      },
+      {
+        to: "/question-search",
+        icon: "fa-solid fa-magnifying-glass",
+        title: "Question Search",
+        description: "Quickly find questions by topic, keyword, or subject.",
+      },
+      {
+        to: "/competitions",
+        icon: "fa-solid fa-trophy",
+        title: "Competition",
+        description: "Compete with peers and climb leaderboards in real time.",
+      },
+      {
+        to: "/cgpa-calc",
+        icon: "fa-solid fa-calculator",
+        title: "CGPA",
+        description: "Easily calculate your CGPA in just a few simple steps.",
+      },
+    ],
+    []
+  )
 
-
-  // Initialize component - fetch user data and notifications
+  // ── Initialization: fetch user + notifications ────────────────────
   useEffect(() => {
-    if (initializedRef.current) return;
-    
+    if (initializedRef.current) return
+
     const initializeData = async () => {
       try {
-        // Fetch latest user data to get current lastNotificationView
-        const userResponse = await api.get("/api/users/profile");
-        const updatedUser = userResponse.data.user;
-        updateUser(updatedUser);
-        
-        // Load notifications with the latest user data
-        await loadNotifications(updatedUser);
+        const userResponse = await api.get("/api/users/profile")
+        const updatedUser = userResponse.data.user
+        updateUser(updatedUser)
+        await loadNotifications(updatedUser)
       } catch (error) {
-        console.error("Initialization error:", error);
-        // Fallback to current user data if available
-        if (user) {
-          await loadNotifications(user);
-        }
+        console.error("Initialization error:", error)
+        if (user) await loadNotifications(user)
       }
-    };
-    
-    initializeData();
-    initializedRef.current = true;
-    
-    // Set up event listeners
-    const handleClickOutside = (event) => {
-      if (contactPopupOpen && contactPopupRef.current && !contactPopupRef.current.contains(event.target)) {
-        setContactPopupOpen(false);
-        return;
-      }
-      
-      if (sidebarOpen && sidebarRef.current && !sidebarRef.current.contains(event.target)) {
-        setSidebarOpen(false);
-        return;
-      }
-    };
-    
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [contactPopupOpen, sidebarOpen, updateUser, user]);
-  
-  // Update notifications when user data changes
-  useEffect(() => {
-    if (user && initializedRef.current) {
-      loadNotifications(user);
     }
-  }, [user]);
-  
+
+    initializeData()
+    initializedRef.current = true
+
+    // Click-outside handler
+    const handleClickOutside = (event) => {
+      if (
+        contactPopupOpen &&
+        contactPopupRef.current &&
+        !contactPopupRef.current.contains(event.target)
+      ) {
+        setContactPopupOpen(false)
+        return
+      }
+      if (
+        sidebarOpen &&
+        sidebarRef.current &&
+        !sidebarRef.current.contains(event.target)
+      ) {
+        setSidebarOpen(false)
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside)
+    return () => document.removeEventListener("mousedown", handleClickOutside)
+  }, [contactPopupOpen, sidebarOpen, updateUser, user])
+
+  // Re-load notifications when user changes
+  useEffect(() => {
+    if (user && initializedRef.current) loadNotifications(user)
+  }, [user])
+
+  // Sync lastNotificationView from localStorage
+  useEffect(() => {
+    const storedLastView = localStorage.getItem("lastNotificationView")
+    if (storedLastView && user) {
+      if (
+        !user.lastNotificationView ||
+        new Date(user.lastNotificationView) < new Date(storedLastView)
+      ) {
+        updateUser({ ...user, lastNotificationView: storedLastView })
+      }
+    }
+  }, [user, updateUser])
+
+  // ── Data helpers ──────────────────────────────────────────────────
   const loadNotifications = useCallback(async (userData) => {
     try {
-      const response = await api.get("/api/notifications");
-      setNotifications(response.data);
-      
-      // Calculate unread count based on user's lastNotificationView
+      const response = await api.get("/api/notifications")
+      setNotifications(response.data)
+
       if (userData?.lastNotificationView) {
-        const lastView = new Date(userData.lastNotificationView);
+        const lastView = new Date(userData.lastNotificationView)
         const unread = response.data.filter(
-          notif => new Date(notif.createdAt) > lastView
-        ).length;
-        setUnreadCount(unread);
+          (n) => new Date(n.createdAt) > lastView
+        ).length
+        setUnreadCount(unread)
       } else {
-        setUnreadCount(response.data.length);
+        setUnreadCount(response.data.length)
       }
     } catch (error) {
-      console.error("Failed to load notifications:", error);
+      console.error("Failed to load notifications:", error)
     }
   }, [])
-  
+
   const markNotificationsAsRead = useCallback(async () => {
     try {
-      // Update lastNotificationView on server
-      const response = await api.put("/api/users/last-notification-view");
-      const updatedUser = response.data.user;
-      
-      // Update user context with new timestamp
-      updateUser(updatedUser);
-      
-      // Reset unread count
-      setUnreadCount(0);
-      
-      // Store in localStorage as backup
-      localStorage.setItem('lastNotificationView', new Date().toISOString());
+      const response = await api.put("/api/users/last-notification-view")
+      updateUser(response.data.user)
+      setUnreadCount(0)
+      localStorage.setItem("lastNotificationView", new Date().toISOString())
     } catch (error) {
-      console.error("Failed to mark notifications as read:", error);
+      console.error("Failed to mark notifications as read:", error)
     }
   }, [updateUser])
-  
+
+  const isNotificationNew = useCallback(
+    (notification) => {
+      if (!user?.lastNotificationView) return true
+      return new Date(notification.createdAt) > new Date(user.lastNotificationView)
+    },
+    [user]
+  )
+
+  // ── Action handlers ───────────────────────────────────────────────
   const toggleNotificationPanel = useCallback(async () => {
-    const isOpening = !notificationPanelOpen;
-    setNotificationPanelOpen(isOpening);
-    
-    if (isOpening) {
-      await markNotificationsAsRead();
-    }
+    const isOpening = !notificationPanelOpen
+    setNotificationPanelOpen(isOpening)
+    if (isOpening) await markNotificationsAsRead()
   }, [notificationPanelOpen, markNotificationsAsRead])
-  
-  // Check for stored lastNotificationView on component mount
-  useEffect(() => {
-    const storedLastView = localStorage.getItem('lastNotificationView');
-    if (storedLastView && user) {
-      // If we have a stored timestamp but user doesn't, update user
-      if (!user.lastNotificationView || new Date(user.lastNotificationView) < new Date(storedLastView)) {
-        updateUser({
-          ...user,
-          lastNotificationView: storedLastView
-        });
-      }
-    }
-  }, [user, updateUser]);
-  
-  // UPDATED: Always show subscription modal when user clicks Activate
+
   const handleActivate = useCallback(async () => {
     if (user?.isSubscribed) {
-      showMessage("You are already subscribed!", "info");
-      return;
+      showMessage("You are already subscribed!", "info")
+      return
     }
-    
-    // Always show the subscription modal
-    setShowSubscriptionModal(true);
+    setShowSubscriptionModal(true)
   }, [user])
-  
+
   const initializePayment = useCallback(async (subscriptionType, months) => {
-    setLoading(true);
+    setLoading(true)
     try {
       const response = await api.post("/api/payments/initialize", {
         subscriptionType,
         months,
-      });
-      
+      })
       if (response.data.status === "success") {
-        window.location.href = response.data.data.link;
+        window.location.href = response.data.data.link
       } else {
-        showMessage("Failed to initialize payment", "error");
+        showMessage("Failed to initialize payment", "error")
       }
     } catch (error) {
-      console.error("Payment initialization failed:", error);
-      showMessage(error.response?.data?.message || "Failed to initialize payment", "error");
+      console.error("Payment initialization failed:", error)
+      showMessage(
+        error.response?.data?.message || "Failed to initialize payment",
+        "error"
+      )
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
   }, [])
-  
+
   const showMessage = useCallback((message, type = "info") => {
-    const messageEl = document.createElement("div");
-    messageEl.className = `${styles.messageToast} ${styles[type]}`;
+    const messageEl = document.createElement("div")
+    messageEl.className = `${styles.messageToast} ${styles[type]}`
     messageEl.innerHTML = `
-      <i className="fas ${type === "success" ? "fa-check-circle" : type === "error" ? "fa-exclamation-triangle" : "fa-info-circle"}"></i>
+      <i class="fas ${
+        type === "success"
+          ? "fa-check-circle"
+          : type === "error"
+          ? "fa-exclamation-triangle"
+          : "fa-info-circle"
+      }"></i>
       <span>${message}</span>
-    `;
-    document.body.appendChild(messageEl);
+    `
+    document.body.appendChild(messageEl)
     setTimeout(() => {
-      messageEl.style.animation = "slideOutRight 0.3s ease forwards";
-      setTimeout(() => messageEl.remove(), 300);
-    }, 3000);
+      messageEl.style.animation = "slideOutRight 0.3s ease forwards"
+      setTimeout(() => messageEl.remove(), 300)
+    }, 3000)
   }, [])
-  
-  const toggleSidebar = useCallback(() => {
-    setSidebarOpen(prev => !prev);
-  }, [])
-  
-  const toggleContactPopup = useCallback(() => {
-    setContactPopupOpen(prev => !prev);
-  }, [])
-  
-  const toggleAboutModal = useCallback(() => {
-    setAboutModalOpen(prev => !prev);
-  }, [])
-  
-  const handleTouchStart = useCallback((e) => {
-    setTouchStartX(e.touches[0].clientX);
-  }, [])
-  
-  const handleTouchMove = useCallback((e) => {
-    setTouchEndX(e.touches[0].clientX);
-  }, [])
-  
-  const handleTouchEnd = useCallback(() => {
-    if (touchStartX - touchEndX > 75) {
-      setSidebarOpen(false);
+
+  // ── PWA install button handler ────────────────────────────────────
+  const handleInstallClick = useCallback(async () => {
+    const outcome = await handleInstall()
+    if (outcome === "accepted") {
+      showMessage("SmartDriller installed! 🎉", "success")
     }
+    setSidebarOpen(false)
+  }, [handleInstall, showMessage])
+
+  // ── Sidebar / misc ────────────────────────────────────────────────
+  const toggleSidebar = useCallback(() => setSidebarOpen((prev) => !prev), [])
+  const toggleContactPopup = useCallback(
+    () => setContactPopupOpen((prev) => !prev),
+    []
+  )
+  const toggleAboutModal = useCallback(
+    () => setAboutModalOpen((prev) => !prev),
+    []
+  )
+  const handleProfileClick = useCallback((e) => e.stopPropagation(), [])
+
+  // Touch swipe to close sidebar
+  const handleTouchStart = useCallback(
+    (e) => setTouchStartX(e.touches[0].clientX),
+    []
+  )
+  const handleTouchMove = useCallback(
+    (e) => setTouchEndX(e.touches[0].clientX),
+    []
+  )
+  const handleTouchEnd = useCallback(() => {
+    if (touchStartX - touchEndX > 75) setSidebarOpen(false)
   }, [touchStartX, touchEndX])
-  
+
+  // Share
   const handleShare = useCallback(async () => {
     const fullText = `🎓 Unlock Your Academic Potential with SmartDriller! 🚀
 
@@ -305,80 +327,69 @@ Join thousands of first-year university students mastering their courses with ou
 
 🌟 Transform your learning experience and ace your exams with SmartDriller!
 
-Join now: https://smartdriller.vercel.app/`;
+Join now: https://smartdriller.vercel.app/`
 
     const shareData = {
-      title: 'SmartDriller - Your Ultimate Study Companion',
+      title: "SmartDriller - Your Ultimate Study Companion",
       text: fullText,
-      url: 'https://smartdriller.vercel.app/'
-    };
+      url: "https://smartdriller.vercel.app/",
+    }
 
     try {
       if (navigator.share) {
-        try {
-          await navigator.share(shareData);
-          showMessage('Shared successfully!', 'success');
-        } catch (shareError) {
-          console.log('Web Share failed, falling back to clipboard:', shareError);
-          // If Web Share fails or is cancelled, copy to clipboard
-          await navigator.clipboard.writeText(fullText);
-          showMessage('Full message copied to clipboard!', 'success');
-        }
+        await navigator.share(shareData)
+        showMessage("Shared successfully!", "success")
       } else {
-        // If Web Share API is not available, copy to clipboard
-        await navigator.clipboard.writeText(fullText);
-        showMessage('Full message copied to clipboard!', 'success');
+        await navigator.clipboard.writeText(fullText)
+        showMessage("Copied to clipboard!", "success")
       }
-    } catch (err) {
-      console.error('Error sharing:', err);
-      showMessage('Failed to share', 'error');
+    } catch {
+      try {
+        await navigator.clipboard.writeText(fullText)
+        showMessage("Copied to clipboard!", "success")
+      } catch {
+        showMessage("Failed to share", "error")
+      }
     }
-  }, [showMessage]);
-  
+  }, [showMessage])
+
+  // WhatsApp channel
   const openWhatsAppChannel = useCallback((event) => {
-    event.preventDefault();
-
-    const channelId = "0029VbBLtIyKbYMQYmgnDh2o";
-    const webLink = `https://whatsapp.com/channel/${channelId}`;
-    const appLink = `https://wa.me/channel/${channelId}`;
-
-    window.location.href = appLink;
-
+    event.preventDefault()
+    const channelId = "0029VbBLtIyKbYMQYmgnDh2o"
+    window.location.href = `https://wa.me/channel/${channelId}`
     setTimeout(() => {
-      window.open(webLink, "_blank");
-    }, 800);
-  }, []);
-
-  const isNotificationNew = useCallback((notification) => {
-    if (!user?.lastNotificationView) return true;
-    return new Date(notification.createdAt) > new Date(user.lastNotificationView);
-  }, [user])
-  
-  // Handle profile click properly
-  const handleProfileClick = useCallback((e) => {
-    e.stopPropagation();
-    // Let the Link handle navigation
+      window.open(`https://whatsapp.com/channel/${channelId}`, "_blank")
+    }, 800)
   }, [])
 
+  // ── Render ────────────────────────────────────────────────────────
   return (
     <div className={styles.homePage}>
+      {/* Loading overlay */}
       {loading && (
         <div className={styles.loadingOverlay}>
           <div className={styles.loadingSpinner}></div>
         </div>
       )}
-      
+
+      {/* Dim overlay behind sidebar / panels */}
       <div
-        className={`${styles.overlay} ${sidebarOpen || notificationPanelOpen || aboutModalOpen ? styles.active : ""}`}
+        className={`${styles.overlay} ${
+          sidebarOpen || notificationPanelOpen || aboutModalOpen
+            ? styles.active
+            : ""
+        }`}
         onClick={(e) => {
           if (!contactPopupRef.current?.contains(e.target)) {
-            setSidebarOpen(false);
-            setNotificationPanelOpen(false);
-            setAboutModalOpen(false);
+            setSidebarOpen(false)
+            setNotificationPanelOpen(false)
+            setAboutModalOpen(false)
           }
         }}
-      ></div>
-      
+      />
+
+      {/* ── Navbar ── */}
       <nav className={styles.navbar}>
         <div className={styles.navLeft}>
           <button className={styles.menuBtn} onClick={toggleSidebar}>
@@ -392,10 +403,16 @@ Join now: https://smartdriller.vercel.app/`;
               <i className="fas fa-robot"></i>
             </button>
           </Link>
-          <button className={`${styles.iconBtn} ${styles.navContactIcon}`} onClick={toggleContactPopup}>
+          <button
+            className={`${styles.iconBtn} ${styles.navContactIcon}`}
+            onClick={toggleContactPopup}
+          >
             <i className="fas fa-question-circle"></i>
           </button>
-          <button className={`${styles.iconBtn} ${styles.notificationBtn}`} onClick={toggleNotificationPanel}>
+          <button
+            className={`${styles.iconBtn} ${styles.notificationBtn}`}
+            onClick={toggleNotificationPanel}
+          >
             <i className="fas fa-bell"></i>
             {unreadCount > 0 && (
               <span className={`${styles.notificationBadge} ${styles.active}`}>
@@ -405,8 +422,9 @@ Join now: https://smartdriller.vercel.app/`;
           </button>
         </div>
       </nav>
-      
-      <div 
+
+      {/* ── Sidebar ── */}
+      <div
         ref={sidebarRef}
         className={`${styles.sidebar} ${sidebarOpen ? styles.active : ""}`}
         onTouchStart={handleTouchStart}
@@ -415,7 +433,11 @@ Join now: https://smartdriller.vercel.app/`;
       >
         <div className={styles.sidebarHeader}>
           <div className={styles.userProfile}>
-            <Link to="/profile" style={{ textDecoration: "none", color: "white" }} onClick={handleProfileClick}>
+            <Link
+              to="/profile"
+              style={{ textDecoration: "none", color: "white" }}
+              onClick={handleProfileClick}
+            >
               <div className={styles.profileContainer}>
                 <i className={`fas fa-user-circle ${styles.profileIcon}`}></i>
                 <h2 className={styles.profileName}>{user?.fullName || "User"}</h2>
@@ -423,18 +445,35 @@ Join now: https://smartdriller.vercel.app/`;
               </div>
             </Link>
           </div>
-          <button className={styles.closeBtn} onClick={(e) => {
-            e.stopPropagation();
-            setSidebarOpen(false);
-          }}>
+          <button
+            className={styles.closeBtn}
+            onClick={(e) => {
+              e.stopPropagation()
+              setSidebarOpen(false)
+            }}
+          >
             <i className="fas fa-times"></i>
           </button>
         </div>
-        
+
         <div className={styles.sidebarContent}>
+          {/* Quick Access */}
           <div className={styles.sidebarSection}>
             <h3>Quick Access</h3>
             <ul>
+              {/* PWA Install button — only visible when browser supports it
+                  and app is not yet installed */}
+              {isInstallable && !isInstalled && (
+                <li>
+                  <button
+                    onClick={handleInstallClick}
+                    className={styles.sidebarItem}
+                  >
+                    <i className="fas fa-download"></i> Install App
+                  </button>
+                </li>
+              )}
+
               <li>
                 <button onClick={handleActivate} className={styles.sidebarItem}>
                   <i className="fas fa-plus-circle"></i> Activate
@@ -453,11 +492,15 @@ Join now: https://smartdriller.vercel.app/`;
             </ul>
           </div>
 
+          {/* Community & Contact */}
           <div className={styles.sidebarSection}>
-            <h3>Community & Contact</h3>
+            <h3>Community &amp; Contact</h3>
             <ul>
               <li>
-                <button onClick={openWhatsAppChannel} className={styles.sidebarItem}>
+                <button
+                  onClick={openWhatsAppChannel}
+                  className={styles.sidebarItem}
+                >
                   <i className="fas fa-thumbs-up"></i> Follow us on WhatsApp
                 </button>
               </li>
@@ -467,13 +510,17 @@ Join now: https://smartdriller.vercel.app/`;
                 </button>
               </li>
               <li>
-                <button onClick={toggleAboutModal} className={styles.sidebarItem}>
+                <button
+                  onClick={toggleAboutModal}
+                  className={styles.sidebarItem}
+                >
                   <i className="fas fa-info-circle"></i> About SmartDriller
                 </button>
               </li>
             </ul>
           </div>
 
+          {/* Account */}
           <div className={styles.sidebarSection}>
             <h3>Account</h3>
             <ul>
@@ -486,8 +533,13 @@ Join now: https://smartdriller.vercel.app/`;
           </div>
         </div>
       </div>
-      
-      <div className={`${styles.notificationPanel} ${notificationPanelOpen ? styles.active : ""}`}>
+
+      {/* ── Notification Panel ── */}
+      <div
+        className={`${styles.notificationPanel} ${
+          notificationPanelOpen ? styles.active : ""
+        }`}
+      >
         <div className={styles.header}>
           <button className={styles.backBtn} onClick={toggleNotificationPanel}>
             <i className="fas fa-arrow-left"></i>
@@ -503,34 +555,59 @@ Join now: https://smartdriller.vercel.app/`;
             </div>
           ) : (
             notifications.map((notification) => (
-              <div 
-                key={notification._id} 
-                className={`${styles.notificationItem} ${styles[`type${notification.type.charAt(0).toUpperCase() + notification.type.slice(1)}`]} ${isNotificationNew(notification) ? styles.newNotification : ''}`}
+              <div
+                key={notification._id}
+                className={`${styles.notificationItem} ${
+                  styles[
+                    `type${
+                      notification.type.charAt(0).toUpperCase() +
+                      notification.type.slice(1)
+                    }`
+                  ]
+                } ${
+                  isNotificationNew(notification) ? styles.newNotification : ""
+                }`}
               >
-                <div className={`${styles.notificationIcon} ${styles[`icon${notification.type.charAt(0).toUpperCase() + notification.type.slice(1)}`]}`}>
-                  <i className={`fas ${getNotificationIcon(notification.type)}`}></i>
+                <div
+                  className={`${styles.notificationIcon} ${
+                    styles[
+                      `icon${
+                        notification.type.charAt(0).toUpperCase() +
+                        notification.type.slice(1)
+                      }`
+                    ]
+                  }`}
+                >
+                  <i
+                    className={`fas ${getNotificationIcon(notification.type)}`}
+                  ></i>
                 </div>
-<div className={styles.notificationText}>
-  <h3>{notification.title}</h3>
-  <p dangerouslySetInnerHTML={{ 
-    __html: notification.message.replace(
-      /(https?:\/\/[^\s]+)/g, 
-      '<a href="$1" target="_blank" rel="noopener noreferrer" class="wrap-link">$1</a>'
-    ) 
-  }} />
-  <div className={styles.notificationTime}>
-    {new Date(notification.createdAt).toLocaleDateString()}
-  </div>
-</div>
+                <div className={styles.notificationText}>
+                  <h3>{notification.title}</h3>
+                  <p
+                    dangerouslySetInnerHTML={{
+                      __html: notification.message.replace(
+                        /(https?:\/\/[^\s]+)/g,
+                        '<a href="$1" target="_blank" rel="noopener noreferrer" class="wrap-link">$1</a>'
+                      ),
+                    }}
+                  />
+                  <div className={styles.notificationTime}>
+                    {new Date(notification.createdAt).toLocaleDateString()}
+                  </div>
+                </div>
               </div>
             ))
           )}
         </div>
       </div>
-      
-      <div 
+
+      {/* ── Contact popup ── */}
+      <div
         ref={contactPopupRef}
-        className={`${styles.contactPopUp} ${contactPopupOpen ? styles.showContact : ""}`}
+        className={`${styles.contactPopUp} ${
+          contactPopupOpen ? styles.showContact : ""
+        }`}
       >
         <div className={`${styles.contact} ${styles.contact1}`}>
           <div className={styles.contactIcon}>WhatsApp</div>
@@ -545,7 +622,8 @@ Join now: https://smartdriller.vercel.app/`;
           </a>
         </div>
       </div>
-      
+
+      {/* ── Main feature grid ── */}
       <main className={styles.main}>
         <div className={styles.featureGrid}>
           {featureCards.map((card, index) => (
@@ -561,24 +639,29 @@ Join now: https://smartdriller.vercel.app/`;
           ))}
         </div>
       </main>
-      
+
+      {/* ── Bottom Activate button ── */}
       <div className={styles.bottom}>
         <button
-          className={`${styles.activateBtn} ${user?.isSubscribed ? styles.subscribed : ""}`}
+          className={`${styles.activateBtn} ${
+            user?.isSubscribed ? styles.subscribed : ""
+          }`}
           onClick={handleActivate}
           disabled={loading}
         >
           <span className={styles.btnText}>
-            {loading ? "Processing..." : user?.isSubscribed ? "SUBSCRIBED" : "ACTIVATE"}
+            {loading
+              ? "Processing..."
+              : user?.isSubscribed
+              ? "SUBSCRIBED"
+              : "ACTIVATE"}
           </span>
         </button>
       </div>
-      
-      <AboutSmartDriller 
-        isOpen={aboutModalOpen} 
-        onClose={toggleAboutModal} 
-      />
-      
+
+      {/* ── Modals ── */}
+      <AboutSmartDriller isOpen={aboutModalOpen} onClose={toggleAboutModal} />
+
       <SubscriptionModal
         isOpen={showSubscriptionModal}
         onClose={() => setShowSubscriptionModal(false)}
