@@ -1,0 +1,27 @@
+{
+  "short_name": "SmartDriller",
+  "name": "SmartDriller - Educational Platform",
+  "description": "Educational Platform for 100-Level Nigerian Students.",
+  "icons": [
+    {
+      "src": "smartdriller.jpg",
+      "sizes": "192x192",
+      "type": "image/jpeg",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "smartdriller.jpg",
+      "sizes": "512x512",
+      "type": "image/jpeg",
+      "purpose": "any maskable"
+    }
+  ],
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "theme_color": "#0d1b2a",
+  "background_color": "#0d1b2a",
+  "categories": ["education"],
+  "lang": "en-NG"
+}
