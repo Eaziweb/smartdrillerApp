@@ -461,18 +461,20 @@ Join now: https://smartdriller.vercel.app/`
           <div className={styles.sidebarSection}>
             <h3>Quick Access</h3>
             <ul>
-              {/* PWA Install button — only visible when browser supports it
-                  and app is not yet installed */}
-              {isInstallable && !isInstalled && (
-                <li>
-                  <button
-                    onClick={handleInstallClick}
-                    className={styles.sidebarItem}
-                  >
-                    <i className="fas fa-download"></i> Install App
-                  </button>
-                </li>
-              )}
+              {/* PWA Install button — always visible:
+                  - "Install App"   → browser is ready to install
+                  - "App Installed" → already running as PWA (disabled) */}
+              <li>
+                <button
+                  onClick={isInstalled ? undefined : handleInstallClick}
+                  className={styles.sidebarItem}
+                  disabled={isInstalled}
+                  style={isInstalled ? { opacity: 0.5, cursor: "default" } : {}}
+                >
+                  <i className={`fas ${isInstalled ? "fa-check-circle" : "fa-download"}`}></i>
+                  {isInstalled ? " App Installed ✓" : " Install App"}
+                </button>
+              </li>
 
               <li>
                 <button onClick={handleActivate} className={styles.sidebarItem}>
@@ -664,6 +666,16 @@ Join now: https://smartdriller.vercel.app/`
 
       <SubscriptionModal
         isOpen={showSubscriptionModal}
+        onClose={() => setShowSubscriptionModal(false)}
+        user={user}
+        onSubscribe={initializePayment}
+        loading={loading}
+      />
+    </div>
+  )
+}
+
+export default Home
         onClose={() => setShowSubscriptionModal(false)}
         user={user}
         onSubscribe={initializePayment}
