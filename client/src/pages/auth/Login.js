@@ -15,9 +15,9 @@ const Login = () => {
   const { login } = useAuth();
   const navigate = useNavigate();
 
-  // Ping server on page load to wake it up
+  // Ping server on page load to wake it up (Render free tier cold start)
   useEffect(() => {
-    fetch(`${import.meta.env.VITE_API_URL}/health`).catch(() => {});
+    fetch(`${process.env.REACT_APP_API_URL}/health`).catch(() => {});
   }, []);
 
   const handleChange = (e) => {
@@ -82,9 +82,7 @@ const Login = () => {
 
           <form onSubmit={handleLoginSubmit}>
             {error && (
-              <div className={styles.errorMessage}>
-                {error}
-              </div>
+              <div className={styles.errorMessage}>{error}</div>
             )}
 
             <div className={styles.inputGroup}>
