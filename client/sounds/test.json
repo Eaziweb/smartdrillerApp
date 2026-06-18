@@ -1,0 +1,14 @@
+{
+  "levelId": 1,
+  "title": "First Steps",
+  "rows": 5,
+  "cols": 5,
+  "words": [
+    { "number": 1, "direction": "across", "row": 0, "col": 0, "answer": "HIS", "clue": "Masculine possessive pronoun" },
+    { "number": 3, "direction": "across", "row": 0, "col": 4, "answer": "A", "clue": "Indefinite article" },
+    { "number": 1, "direction": "down", "row": 0, "col": 0, "answer": "HOW", "clue": "In what way?" },
+    { "number": 2, "direction": "down", "row": 0, "col": 2, "answer": "SAD", "clue": "Unhappy" },
+    { "number": 4, "direction": "across", "row": 2, "col": 0, "answer": "WAR", "clue": "Active struggle" },
+    { "number": 5, "direction": "across", "row": 4, "col": 0, "answer": "WIN", "clue": "Be victorious" }
+  ]
+}
