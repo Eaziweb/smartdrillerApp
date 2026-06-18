@@ -24,10 +24,10 @@ const CrosswordPlay = () => {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
   
-  const [filled, setFilled] = useState({}) // "r-c" -> letter
-  const [lockedCells, setLockedCells] = useState(new Set()) // Cells belonging to fully solved words
+  const [filled, setFilled] = useState({})
+  const [lockedCells, setLockedCells] = useState(new Set())
   
-  const [selected, setSelected] = useState(null) // { row, col }
+  const [selected, setSelected] = useState(null)
   const [direction, setDirection] = useState("across")
   const [activeWordIndex, setActiveWordIndex] = useState(0)
   
@@ -38,21 +38,19 @@ const CrosswordPlay = () => {
 
   const timerRef = useRef(null)
 
-  // Sound Effects
-  const playSound = (type) => {
+  // ONLY play sound when a word is fully correct
+  const playCorrectSound = () => {
     try {
-      const audio = new Audio(`/sounds/${type}.mp3`);
-      audio.volume = 1.0; // Respects device volume
-      audio.play().catch(() => {}); // Catch safely if browser blocks autoplay
+      const audio = new Audio(`/sounds/correct.mp3`);
+      audio.volume = 1.0;
+      audio.play().catch(() => {});
     } catch (e) {
       console.warn("Audio play failed", e);
     }
   }
 
   useEffect(() => {
-    fetchLevelsIndex()
-      .then((data) => setTotalLevels(data.totalLevels))
-      .catch(() => {})
+    fetchLevelsIndex().then((data) => setTotalLevels(data.totalLevels)).catch(() => {})
   }, [])
 
   useEffect(() => {
@@ -73,7 +71,7 @@ const CrosswordPlay = () => {
         setLoading(false)
       })
       .catch(() => {
-        setError("Couldn't load this puzzle. Check your connection and try again.")
+        setError("Couldn't load this puzzle.")
         setLoading(false)
       })
   }, [levelId])
@@ -97,7 +95,6 @@ const CrosswordPlay = () => {
       const word = findWordAt(level, row, col, preferredDirection || direction)
       if (!word) return
       
-      playSound('click');
       setSelected({ row, col })
       setDirection(word.direction)
       setActiveWordIndex(level.words.indexOf(word))
@@ -109,7 +106,6 @@ const CrosswordPlay = () => {
     const key = `${row}-${col}`
     if (!cellMap.has(key)) return
     
-    // Tapping same cell toggles direction
     if (selected && selected.row === row && selected.col === col) {
       const otherDirection = direction === "across" ? "down" : "across"
       const otherWord = findWordAt(level, row, col, otherDirection)
@@ -129,7 +125,6 @@ const CrosswordPlay = () => {
 
     level.words.forEach(word => {
       if (isWordCorrect(word, nextFilled)) {
-        // If word is newly completed, lock its cells
         const cells = getWordCells(word);
         const isNew = cells.some(c => !newLockedSet.has(`${c.row}-${c.col}`));
         
@@ -141,8 +136,23 @@ const CrosswordPlay = () => {
     });
 
     if (newlySolved) {
-      playSound('solve');
+      playCorrectSound();
       setLockedCells(newLockedSet);
+
+      // Auto-Advance to next unsolved word
+      const nextUnsolvedWordIndex = level.words.findIndex(w => !isWordCorrect(w, nextFilled));
+      if (nextUnsolvedWordIndex !== -1) {
+        const nextWord = level.words[nextUnsolvedWordIndex];
+        const cells = getWordCells(nextWord);
+        // Find the first completely empty cell in the new word
+        const firstEmpty = cells.find(c => !nextFilled[`${c.row}-${c.col}`]);
+        
+        if (firstEmpty) {
+          setActiveWordIndex(nextUnsolvedWordIndex);
+          setDirection(nextWord.direction);
+          setSelected(firstEmpty);
+        }
+      }
     }
 
     if (isPuzzleComplete(level, nextFilled)) {
@@ -153,15 +163,23 @@ const CrosswordPlay = () => {
     }
   }
 
+  const advanceToNextUnfilled = (row, col, currentFilled) => {
+    let next = nextCellInWord(activeWord, row, col)
+    
+    // Skip any cell that already has a letter filled inside it
+    while (next && currentFilled[`${next.row}-${next.col}`]) {
+      next = nextCellInWord(activeWord, next.row, next.col)
+    }
+    
+    if (next) setSelected(next)
+  }
+
   const handleLetterInput = (letter) => {
     if (!selected || !activeWord || isComplete) return
-    playSound('click');
-
     const key = `${selected.row}-${selected.col}`
     
-    // Prevent overwriting a locked cell (from an already solved word)
-    if (lockedCells.has(key) && filled[key]) {
-      advanceToNextUnfilled(selected.row, selected.col);
+    if (lockedCells.has(key)) {
+      advanceToNextUnfilled(selected.row, selected.col, filled);
       return;
     }
 
@@ -171,34 +189,18 @@ const CrosswordPlay = () => {
     advanceToNextUnfilled(selected.row, selected.col, nextFilled)
   }
 
-  const advanceToNextUnfilled = (row, col, currentFilled = filled) => {
-    let next = nextCellInWord(activeWord, row, col)
-    
-    // Auto-skip cells that are locked
-    while (next && lockedCells.has(`${next.row}-${next.col}`)) {
-      next = nextCellInWord(activeWord, next.row, next.col)
-    }
-    
-    if (next) {
-      setSelected(next)
-    }
-  }
-
   const handleBackspace = () => {
     if (!selected || !activeWord || isComplete) return
-    playSound('click');
     const key = `${selected.row}-${selected.col}`
     
-    // If current cell has an unlocked letter, delete it
     if (filled[key] && !lockedCells.has(key)) {
       const nextFilled = { ...filled }
       delete nextFilled[key]
       setFilled(nextFilled)
     } else {
-      // Move back to the previous cell
       let prev = prevCellInWord(activeWord, selected.row, selected.col)
       
-      // Keep moving back if the previous cell is locked
+      // Auto-skip backwards over locked/filled cells
       while (prev && lockedCells.has(`${prev.row}-${prev.col}`)) {
         prev = prevCellInWord(activeWord, prev.row, prev.col)
       }
@@ -207,7 +209,6 @@ const CrosswordPlay = () => {
         const prevKey = `${prev.row}-${prev.col}`
         const nextFilled = { ...filled }
         
-        // Delete only if it's not locked
         if (!lockedCells.has(prevKey)) {
           delete nextFilled[prevKey]
         }
@@ -220,7 +221,6 @@ const CrosswordPlay = () => {
 
   const goToWord = (delta) => {
     if (!level) return
-    playSound('click');
     const nextIndex = (activeWordIndex + delta + level.words.length) % level.words.length
     const word = level.words[nextIndex]
     setActiveWordIndex(nextIndex)
@@ -239,41 +239,27 @@ const CrosswordPlay = () => {
     
     if (!unfilledCell) return
 
-    playSound('click');
     const idx = cellsForWord.indexOf(unfilledCell)
     const key = `${unfilledCell.row}-${unfilledCell.col}`
-    
     const nextFilled = { ...filled, [key]: activeWord.answer[idx] }
-    setFilled(nextFilled)
     
+    setFilled(nextFilled)
     setHintsUsedThisLevel(prev => prev + 1)
     recordHintUsed(level.levelId)
     checkCompletionAndLocks(nextFilled)
   }
 
-  if (loading) {
-    return <div className={styles.crosswordPage}><div className={styles.cwStatusFull}>Loading puzzle…</div></div>
-  }
-
-  if (error || !level) {
-    return (
-      <div className={styles.crosswordPage}>
-        <div className={styles.cwStatusFull}>
-          <p>{error || "Puzzle not found."}</p>
-          <Link to="/crossword" className={styles.cwBackToListLink}>Back to puzzle list</Link>
-        </div>
-      </div>
-    )
-  }
+  if (loading || !level) return <div className={styles.cwStatusFull}>Loading...</div>
 
   return (
     <div className={styles.crosswordPage}>
       <header className={styles.cwHeader}>
         <div className={styles.cwHeaderContent}>
-          <Link to="/crossword" className={styles.cwBackBtn} aria-label="Back to puzzle list">
+          <Link to="/crossword" className={styles.cwBackBtn}>
             <i className="fas fa-arrow-left"></i>
           </Link>
-          <h1>{level.title}</h1>
+          {/* Changed title directly to Level X */}
+          <h1>Level {level.levelId}</h1>
           <div className={styles.cwStarBadge}>
             <i className="fas fa-star"></i>
             <span>{progress.starsBalance}</span>
@@ -315,8 +301,6 @@ const CrosswordPlay = () => {
               const isInActiveWord = activeWordCells.some((ac) => ac.row === r && ac.col === c)
               const isLocked = lockedCells.has(key)
               const letter = filled[key] || ""
-              
-              // Active Clue Highlight Color for Number
               const isStartOfActiveWord = activeWord.row === r && activeWord.col === c;
 
               return (
@@ -342,7 +326,6 @@ const CrosswordPlay = () => {
         </div>
       </div>
 
-      {/* Fixed Bottom UI: Clue + Keyboard */}
       <div className={styles.cwBottomContainer}>
         <div className={styles.cwClueBar}>
           <button type="button" onClick={() => goToWord(-1)} className={styles.cwClueNavBtn}>
@@ -373,25 +356,16 @@ const CrosswordPlay = () => {
                 <span className={styles.cwModalStatLabel}>Time</span>
                 <span className={styles.cwModalStatValue}>{formatTime(secondsElapsed)}</span>
               </div>
-              <div className={styles.cwModalStat}>
-                <span className={styles.cwModalStatLabel}>Words</span>
-                <span className={styles.cwModalStatValue}>{level.words.length}</span>
-              </div>
-              <div className={styles.cwModalStars}>
-                {[1, 2, 3].map((i) => (
-                  <i key={i} className={`fas fa-star ${i <= (hintsUsedThisLevel === 0 ? 3 : hintsUsedThisLevel <= 2 ? 2 : 1) ? styles.cwStarEarned : styles.cwStarEmpty}`}></i>
-                ))}
-              </div>
             </div>
             <div className={styles.cwModalActions}>
-              <Link to="/crossword" className={styles.cwModalSecondaryBtn}>List</Link>
+              <Link to="/crossword" className={styles.cwModalSecondaryBtn}>Levels</Link>
               {(totalLevels === null || level.levelId < totalLevels) && (
                 <button
                   type="button"
                   className={styles.cwModalPrimaryBtn}
                   onClick={() => navigate(`/crossword/play/${level.levelId + 1}`)}
                 >
-                  Next
+                  Next Level
                 </button>
               )}
             </div>
@@ -408,7 +382,6 @@ function formatTime(seconds) {
   return `${m}:${String(s).padStart(2, "0")}`
 }
 
-// Custom Keyboard Component
 const CustomKeyboard = ({ onKeyPress, onBackspace }) => {
   const rows = [
     ["Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P"],
@@ -420,9 +393,7 @@ const CustomKeyboard = ({ onKeyPress, onBackspace }) => {
     <div className={styles.cwKeyboard}>
       {rows.map((row, i) => (
         <div key={i} className={styles.cwKeyRow}>
-          {i === 2 && (
-             <button type="button" className={styles.cwKeyGhost} disabled></button>
-          )}
+          {i === 2 && <button type="button" className={styles.cwKeyGhost} disabled></button>}
           {row.map(key => (
             <button key={key} type="button" className={styles.cwKey} onClick={() => onKeyPress(key)}>
               {key}
