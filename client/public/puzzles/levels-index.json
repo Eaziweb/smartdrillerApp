@@ -1,0 +1,45 @@
+{
+  "totalLevels": 5,
+  "levels": [
+    {
+      "levelId": 1,
+      "title": "First Steps",
+      "theme": "Everyday Words",
+      "difficulty": "easy",
+      "wordCount": 5,
+      "parSeconds": 90
+    },
+    {
+      "levelId": 2,
+      "title": "Around the House",
+      "theme": "Home & Living",
+      "difficulty": "easy",
+      "wordCount": 10,
+      "parSeconds": 120
+    },
+    {
+      "levelId": 3,
+      "title": "Mind & Motion",
+      "theme": "General Knowledge",
+      "difficulty": "medium",
+      "wordCount": 10,
+      "parSeconds": 150
+    },
+    {
+      "levelId": 4,
+      "title": "World Geography",
+      "theme": "Geography",
+      "difficulty": "medium",
+      "wordCount": 12,
+      "parSeconds": 180
+    },
+    {
+      "levelId": 5,
+      "title": "Science & Space",
+      "theme": "Science",
+      "difficulty": "hard",
+      "wordCount": 14,
+      "parSeconds": 240
+    }
+  ]
+}
