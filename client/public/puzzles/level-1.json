@@ -1,14 +1,11 @@
 {
   "levelId": 1,
-  "title": "First Steps",
-  "rows": 5,
-  "cols": 5,
+  "rows": 3,
+  "cols": 3,
   "words": [
-    { "number": 1, "direction": "across", "row": 0, "col": 0, "answer": "HIS", "clue": "Masculine possessive pronoun" },
-    { "number": 3, "direction": "across", "row": 0, "col": 4, "answer": "A", "clue": "Indefinite article" },
-    { "number": 1, "direction": "down", "row": 0, "col": 0, "answer": "HOW", "clue": "In what way?" },
-    { "number": 2, "direction": "down", "row": 0, "col": 2, "answer": "SAD", "clue": "Unhappy" },
-    { "number": 4, "direction": "across", "row": 2, "col": 0, "answer": "WAR", "clue": "Active struggle" },
-    { "number": 5, "direction": "across", "row": 4, "col": 0, "answer": "WIN", "clue": "Be victorious" }
+    { "number": 1, "direction": "across", "row": 0, "col": 0, "answer": "GAS", "clue": "Fuel for a car" },
+    { "number": 1, "direction": "down", "row": 0, "col": 0, "answer": "GET", "clue": "Acquire or obtain" },
+    { "number": 2, "direction": "down", "row": 0, "col": 2, "answer": "SUN", "clue": "The star in our sky" },
+    { "number": 3, "direction": "across", "row": 2, "col": 0, "answer": "TEN", "clue": "Half a score" }
   ]
 }
