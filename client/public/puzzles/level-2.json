@@ -6,6 +6,6 @@
     { "number": 1, "direction": "across", "row": 0, "col": 0, "answer": "PLAY", "clue": "Have fun with a game" },
     { "number": 1, "direction": "down", "row": 0, "col": 0, "answer": "PAGE", "clue": "Leaf of a book" },
     { "number": 2, "direction": "down", "row": 0, "col": 3, "answer": "YARD", "clue": "Lawn area around a house" },
-    { "number": 3, "direction": "across", "row": 2, "col": 0, "answer": "GOOD", "clue": "Opposite of bad" }
+    { "number": 3, "direction": "across", "row": 2, "col": 0, "answer": "GEAR", "clue": "Toothed wheel or equipment" }
   ]
 }
