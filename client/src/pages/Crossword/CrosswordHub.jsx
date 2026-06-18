@@ -5,16 +5,14 @@ import { fetchLevelsIndex } from "../../utils/crosswordApi"
 import { useCrosswordProgress } from "../../utils/useCrosswordProgress"
 import styles from "../../styles/Crossword.module.css"
 
-const DIFFICULTY_LABEL = {
-  easy: "Easy",
-  medium: "Medium",
-  hard: "Hard",
-}
+const LEVELS_PER_PAGE = 10
 
 const CrosswordHub = () => {
   const [levels, setLevels] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
+  const [currentPage, setCurrentPage] = useState(0)
+  
   const navigate = useNavigate()
   const { progress } = useCrosswordProgress()
 
@@ -30,9 +28,15 @@ const CrosswordHub = () => {
       })
   }, [])
 
+  const totalCount = levels.length || 0
+  const totalPages = Math.ceil(totalCount / LEVELS_PER_PAGE)
   const completedCount = Object.values(progress.levels).filter((l) => l.completed).length
-  const totalCount = levels.length || 5
   const percentDone = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0
+
+  const visibleLevels = levels.slice(
+    currentPage * LEVELS_PER_PAGE, 
+    (currentPage + 1) * LEVELS_PER_PAGE
+  )
 
   const getLevelState = (levelId) => {
     const result = progress.levels[String(levelId)]
@@ -45,6 +49,14 @@ const CrosswordHub = () => {
   const handleSelect = (levelId, state) => {
     if (state === "locked") return
     navigate(`/crossword/play/${levelId}`)
+  }
+
+  const handleNextPage = () => {
+    if (currentPage < totalPages - 1) setCurrentPage(p => p + 1)
+  }
+
+  const handlePrevPage = () => {
+    if (currentPage > 0) setCurrentPage(p => p - 1)
   }
 
   return (
@@ -77,59 +89,62 @@ const CrosswordHub = () => {
         </div>
       </div>
 
-      <div className={styles.cwPathContainer}>
+      <div className={styles.cwHubContainer}>
         {loading && <p className={styles.cwStatusText}>Loading puzzles…</p>}
         {error && <p className={styles.cwStatusText}>{error}</p>}
 
         {!loading && !error && (
-          <div className={styles.cwPath}>
-            {levels.map((level, idx) => {
-              const state = getLevelState(level.levelId)
-              const isLeft = idx % 2 === 0
-              return (
-                <div
-                  key={level.levelId}
-                  className={`${styles.cwPathRow} ${isLeft ? styles.cwPathRowLeft : styles.cwPathRowRight}`}
-                >
-                  {idx > 0 && <div className={styles.cwPathConnector} aria-hidden="true"></div>}
-                  <button
-                    type="button"
-                    className={`${styles.cwLevelNode} ${styles[`cwLevelNode_${state}`]}`}
-                    onClick={() => handleSelect(level.levelId, state)}
-                    disabled={state === "locked"}
-                    aria-label={`${level.title}, ${state === "locked" ? "locked" : DIFFICULTY_LABEL[level.difficulty]}`}
-                  >
-                    <span className={styles.cwLevelNodeNumber}>
-                      {state === "completed" ? <i className="fas fa-check"></i> : level.levelId}
-                    </span>
-                  </button>
-                  <div className={styles.cwLevelCard}>
-                    <div className={styles.cwLevelCardHeader}>
-                      <h3>{level.title}</h3>
-                      <span className={`${styles.cwDifficultyTag} ${styles[`cwDifficulty_${level.difficulty}`]}`}>
-                        {DIFFICULTY_LABEL[level.difficulty]}
+          <>
+            <div className={styles.cwHubGrid}>
+              {visibleLevels.map((level) => {
+                const state = getLevelState(level.levelId)
+                const completionData = progress.levels[String(level.levelId)]
+                
+                return (
+                  <div key={level.levelId} className={styles.cwHubBoxWrapper}>
+                    <button
+                      type="button"
+                      className={`${styles.cwHubBox} ${styles[`cwHubBox_${state}`]}`}
+                      onClick={() => handleSelect(level.levelId, state)}
+                      disabled={state === "locked"}
+                    >
+                      <span className={styles.cwHubBoxNumber}>{level.levelId}</span>
+                      {state === "locked" && <i className={`fas fa-lock ${styles.cwHubLock}`}></i>}
+                    </button>
+                    
+                    {/* Only show time if the level is actually completed */}
+                    {state === "completed" && completionData?.bestTimeSeconds != null && (
+                      <span className={styles.cwHubTime}>
+                        {formatTime(completionData.bestTimeSeconds)}
                       </span>
-                    </div>
-                    <p className={styles.cwLevelTheme}>{level.theme}</p>
-                    <div className={styles.cwLevelMeta}>
-                      <span><i className="fas fa-font"></i> {level.wordCount} words</span>
-                      {progress.levels[String(level.levelId)]?.bestTimeSeconds != null && (
-                        <span>
-                          <i className="fas fa-clock"></i>{" "}
-                          {formatTime(progress.levels[String(level.levelId)].bestTimeSeconds)}
-                        </span>
-                      )}
-                    </div>
-                    {state === "locked" && (
-                      <p className={styles.cwLockedHint}>
-                        <i className="fas fa-lock"></i> Finish puzzle {level.levelId - 1} to unlock
-                      </p>
                     )}
                   </div>
-                </div>
-              )
-            })}
-          </div>
+                )
+              })}
+            </div>
+
+            {totalPages > 1 && (
+              <div className={styles.cwPagination}>
+                <button 
+                  onClick={handlePrevPage} 
+                  disabled={currentPage === 0}
+                  className={styles.cwPageBtn}
+                >
+                  <i className="fas fa-chevron-left"></i> Prev
+                </button>
+                <span className={styles.cwPageIndicator}>
+                  Page {currentPage + 1} of {totalPages}
+                </span>
+                <button 
+                  onClick={handleNextPage} 
+                  disabled={currentPage === totalPages - 1}
+                  className={styles.cwPageBtn}
+                >
+                  Next <i className="fas fa-chevron-right"></i>
+                </button>
+              </div>
+            )}
+          </>
         )}
       </div>
     </div>
