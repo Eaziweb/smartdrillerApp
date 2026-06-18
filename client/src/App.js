@@ -46,7 +46,8 @@ import ResultsHistory from "./pages/user/ResultsHistory"
 import QuestionSearch from "./pages/user/QuestionSearch"
 import Bookmarks from "./pages/user/Bookmarks"
 import CGPACalculator from "./pages/user/CGPACalculator"
-
+import CrosswordHub from "./pages/Crossword/CrosswordHub"
+import CrosswordPlay from "./pages/Crossword/CrosswordPlay"
 // Admin Pages
 import AdminLogin from "./pages/admin/AdminLogin"
 import AdminDashboard from "./pages/admin/AdminDashboard"
@@ -129,7 +130,8 @@ function App() {
               <Route path="/company" element={<Company />} />
               <Route path="/resources" element={<Resources />} />
               <Route path="/legal" element={<LegalPolicies />} />
-
+<Route path="/crossword" element={<CrosswordHub />} />
+<Route path="/crossword/play/:levelId" element={<CrosswordPlay />} />
               {/* --- Admin Routes --- */}
               <Route path="/private/admin/login" element={<AdminLogin />} />
               <Route
