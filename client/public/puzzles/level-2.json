@@ -1,0 +1,91 @@
+{
+  "levelId": 2,
+  "title": "Around the House",
+  "theme": "Home & Living",
+  "difficulty": "easy",
+  "rows": 4,
+  "cols": 8,
+  "parSeconds": 120,
+  "words": [
+    {
+      "number": 1,
+      "answer": "LAMP",
+      "row": 0,
+      "col": 0,
+      "direction": "down",
+      "clue": "Device that lights up a room"
+    },
+    {
+      "number": 1,
+      "answer": "LID",
+      "row": 0,
+      "col": 0,
+      "direction": "across",
+      "clue": "Cover for a jar or pot"
+    },
+    {
+      "number": 2,
+      "answer": "AGE",
+      "row": 1,
+      "col": 0,
+      "direction": "across",
+      "clue": "How many years old someone is"
+    },
+    {
+      "number": 3,
+      "answer": "MUG",
+      "row": 2,
+      "col": 0,
+      "direction": "across",
+      "clue": "Cup with a handle for hot drinks"
+    },
+    {
+      "number": 4,
+      "answer": "PEN",
+      "row": 3,
+      "col": 0,
+      "direction": "across",
+      "clue": "Tool used for writing in ink"
+    },
+    {
+      "number": 5,
+      "answer": "SOFA",
+      "row": 0,
+      "col": 5,
+      "direction": "down",
+      "clue": "Long cushioned seat in a living room"
+    },
+    {
+      "number": 5,
+      "answer": "SUN",
+      "row": 0,
+      "col": 5,
+      "direction": "across",
+      "clue": "The star at the center of our solar system"
+    },
+    {
+      "number": 6,
+      "answer": "ODD",
+      "row": 1,
+      "col": 5,
+      "direction": "across",
+      "clue": "Not divisible by two"
+    },
+    {
+      "number": 7,
+      "answer": "FAN",
+      "row": 2,
+      "col": 5,
+      "direction": "across",
+      "clue": "Device that circulates air, or an enthusiastic supporter"
+    },
+    {
+      "number": 8,
+      "answer": "ART",
+      "row": 3,
+      "col": 5,
+      "direction": "across",
+      "clue": "Creative expression like painting or sculpture"
+    }
+  ]
+}
