@@ -1,0 +1,51 @@
+{
+  "levelId": 1,
+  "title": "First Steps",
+  "theme": "Everyday Words",
+  "difficulty": "easy",
+  "rows": 4,
+  "cols": 4,
+  "parSeconds": 90,
+  "words": [
+    {
+      "number": 1,
+      "answer": "CUBS",
+      "row": 0,
+      "col": 0,
+      "direction": "down",
+      "clue": "Young bears, lions, or the Chicago baseball team"
+    },
+    {
+      "number": 1,
+      "answer": "CAT",
+      "row": 0,
+      "col": 0,
+      "direction": "across",
+      "clue": "Common house pet that purrs"
+    },
+    {
+      "number": 2,
+      "answer": "USE",
+      "row": 1,
+      "col": 0,
+      "direction": "across",
+      "clue": "To put something into action"
+    },
+    {
+      "number": 3,
+      "answer": "BEE",
+      "row": 2,
+      "col": 0,
+      "direction": "across",
+      "clue": "Buzzing insect that makes honey"
+    },
+    {
+      "number": 4,
+      "answer": "SEA",
+      "row": 3,
+      "col": 0,
+      "direction": "across",
+      "clue": "Large body of salt water"
+    }
+  ]
+}
