@@ -1,0 +1,107 @@
+{
+  "levelId": 4,
+  "title": "World Geography",
+  "theme": "Geography",
+  "difficulty": "medium",
+  "rows": 5,
+  "cols": 9,
+  "parSeconds": 180,
+  "words": [
+    {
+      "number": 1,
+      "answer": "PERUS",
+      "row": 0,
+      "col": 0,
+      "direction": "down",
+      "clue": "South American nation home to Machu Picchu, plus letter S"
+    },
+    {
+      "number": 1,
+      "answer": "PIE",
+      "row": 0,
+      "col": 0,
+      "direction": "across",
+      "clue": "Dessert baked in a round crust"
+    },
+    {
+      "number": 2,
+      "answer": "EAR",
+      "row": 1,
+      "col": 0,
+      "direction": "across",
+      "clue": "Organ used for hearing"
+    },
+    {
+      "number": 3,
+      "answer": "RUG",
+      "row": 2,
+      "col": 0,
+      "direction": "across",
+      "clue": "Small carpet covering part of a floor"
+    },
+    {
+      "number": 4,
+      "answer": "UPS",
+      "row": 3,
+      "col": 0,
+      "direction": "across",
+      "clue": "Increases, or the opposite of downs"
+    },
+    {
+      "number": 5,
+      "answer": "SKY",
+      "row": 4,
+      "col": 0,
+      "direction": "across",
+      "clue": "The expanse above the earth, blue by day"
+    },
+    {
+      "number": 6,
+      "answer": "ASIAN",
+      "row": 0,
+      "col": 6,
+      "direction": "down",
+      "clue": "Relating to the world's largest continent"
+    },
+    {
+      "number": 6,
+      "answer": "ART",
+      "row": 0,
+      "col": 6,
+      "direction": "across",
+      "clue": "Creative work displayed in a gallery"
+    },
+    {
+      "number": 7,
+      "answer": "SIR",
+      "row": 1,
+      "col": 6,
+      "direction": "across",
+      "clue": "Respectful term for a man, or a knight's title"
+    },
+    {
+      "number": 8,
+      "answer": "ICE",
+      "row": 2,
+      "col": 6,
+      "direction": "across",
+      "clue": "Frozen water"
+    },
+    {
+      "number": 9,
+      "answer": "AND",
+      "row": 3,
+      "col": 6,
+      "direction": "across",
+      "clue": "Word joining two ideas together"
+    },
+    {
+      "number": 10,
+      "answer": "NUT",
+      "row": 4,
+      "col": 6,
+      "direction": "across",
+      "clue": "Hard-shelled seed like an almond or cashew"
+    }
+  ]
+}
