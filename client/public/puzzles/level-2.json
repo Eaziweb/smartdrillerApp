@@ -1,13 +1,11 @@
 {
   "levelId": 2,
-  "title": "Moving Up",
-  "rows": 6,
-  "cols": 6,
+  "rows": 4,
+  "cols": 4,
   "words": [
-    { "number": 1, "direction": "across", "row": 0, "col": 0, "answer": "TOP", "clue": "Highest point" },
-    { "number": 2, "direction": "down", "row": 0, "col": 0, "answer": "TOO", "clue": "In addition" },
-    { "number": 3, "direction": "across", "row": 2, "col": 0, "answer": "OUT", "clue": "Not in" },
-    { "number": 4, "direction": "down", "row": 0, "col": 2, "answer": "PUT", "clue": "Place something" },
-    { "number": 5, "direction": "across", "row": 4, "col": 2, "answer": "USE", "clue": "Manipulate, utilise" }
+    { "number": 1, "direction": "across", "row": 0, "col": 0, "answer": "PLAY", "clue": "Have fun with a game" },
+    { "number": 1, "direction": "down", "row": 0, "col": 0, "answer": "PAGE", "clue": "Leaf of a book" },
+    { "number": 2, "direction": "down", "row": 0, "col": 3, "answer": "YARD", "clue": "Lawn area around a house" },
+    { "number": 3, "direction": "across", "row": 2, "col": 0, "answer": "GOOD", "clue": "Opposite of bad" }
   ]
 }
