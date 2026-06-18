@@ -1,7 +1,3 @@
-// Pure grid helpers, kept separate from the component so the layout logic
-// (which is the part most likely to have an off-by-one bug) can be reasoned
-// about and unit tested without rendering anything.
-
 export function buildCellMap(levelData) {
   const cells = new Map() // key "r-c" -> { row, col, letter, wordRefs: [{wordIndex, indexInWord}] }
 
@@ -39,14 +35,19 @@ export function getWordCells(word) {
 
 export function isPuzzleComplete(levelData, filledLetters) {
   for (const word of levelData.words) {
-    const cellsForWord = getWordCells(word)
-    for (let i = 0; i < cellsForWord.length; i++) {
-      const { row, col } = cellsForWord[i]
-      const key = `${row}-${col}`
-      if (filledLetters[key] !== word.answer[i]) return false
-    }
+    if (!isWordCorrect(word, filledLetters)) return false;
   }
   return true
+}
+
+export function isWordCorrect(word, filledLetters) {
+  const cellsForWord = getWordCells(word);
+  for (let i = 0; i < cellsForWord.length; i++) {
+    const { row, col } = cellsForWord[i];
+    const key = `${row}-${col}`;
+    if (filledLetters[key] !== word.answer[i]) return false;
+  }
+  return true;
 }
 
 export function findWordAt(levelData, row, col, preferredDirection) {
