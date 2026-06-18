@@ -1,0 +1,684 @@
+/* ============================================================
+   Crossword module — shares the app's chrome tokens (blue header,
+   Inter, rounded cards) but gives the puzzle grid its own material:
+   a warm paper surface with a structural monospace letterform,
+   since a crossword is fundamentally a printed-grid object, not
+   a generic app screen.
+   ============================================================ */
+
+@import url("https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700&display=swap");
+
+:root {
+  --cw-primary-dark: #002060;
+  --cw-primary-light: #0066ff;
+  --cw-primary-gradient: linear-gradient(45deg, #0099ff, #002060 70%);
+  --cw-paper: #fffdf6;
+  --cw-paper-line: #e8e1cf;
+  --cw-ink: #1a2233;
+  --cw-ink-soft: #5b6473;
+  --cw-cell-border: #c9bfa3;
+  --cw-cell-active: #fff3cf;
+  --cw-cell-selected: #ffe8a3;
+  --cw-cell-filled-text: #1a2233;
+  --cw-revealed: #d9e8ff;
+  --cw-gold: #c79a2e;
+  --cw-success: #1f9d63;
+  --cw-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  --cw-shadow-lg: 0 10px 25px -5px rgba(0, 32, 96, 0.15);
+  --cw-radius-md: 12px;
+  --cw-radius-lg: 18px;
+}
+
+.crosswordPage {
+  min-height: 100vh;
+  background: #f4f6fb;
+  color: var(--cw-ink);
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ---------- Header (matches existing app chrome) ---------- */
+.cwHeader {
+  background: var(--cw-primary-gradient);
+  box-shadow: var(--cw-shadow-lg);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  padding: 1rem 0;
+}
+
+.cwHeaderContent {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0 1.25rem;
+  max-width: 760px;
+  margin: 0 auto;
+}
+
+.cwHeaderContent h1 {
+  flex: 1;
+  font-size: 1.2rem;
+  color: white;
+  margin: 0;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cwBackBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  flex-shrink: 0;
+  border-radius: var(--cw-radius-md);
+  background: rgba(255, 255, 255, 0.12);
+  color: white;
+  text-decoration: none;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.cwBackBtn:hover {
+  background: rgba(255, 255, 255, 0.22);
+  transform: translateX(-2px);
+}
+
+.cwStarBadge {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: rgba(255, 255, 255, 0.16);
+  color: white;
+  padding: 0.4rem 0.75rem;
+  border-radius: 999px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  flex-shrink: 0;
+}
+
+.cwStarBadge i {
+  color: #ffd54f;
+}
+
+/* ---------- Progress card (hub) ---------- */
+.cwProgressSection {
+  padding: 1.25rem;
+  max-width: 760px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.cwProgressCard {
+  background: var(--cw-primary-gradient);
+  border-radius: var(--cw-radius-lg);
+  padding: 1.4rem;
+  color: white;
+  box-shadow: 0 8px 20px rgba(0, 32, 96, 0.2);
+}
+
+.cwProgressInfo {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 0.9rem;
+}
+
+.cwProgressStats {
+  display: flex;
+  align-items: baseline;
+  gap: 0.2rem;
+}
+
+.cwStatNumber {
+  font-size: 2.1rem;
+  font-weight: 700;
+}
+
+.cwStatTotal {
+  font-size: 1.2rem;
+  opacity: 0.85;
+}
+
+.cwProgressLabel {
+  font-size: 1rem;
+  opacity: 0.9;
+  font-weight: 500;
+}
+
+.cwProgressBar {
+  height: 8px;
+  background: rgba(255, 255, 255, 0.22);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.cwProgressFill {
+  height: 100%;
+  background: white;
+  border-radius: 999px;
+  transition: width 0.5s ease;
+}
+
+/* ---------- Path / level select (signature element) ---------- */
+.cwPathContainer {
+  flex: 1;
+  max-width: 760px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 0.5rem 1.25rem 3rem;
+}
+
+.cwStatusText {
+  text-align: center;
+  color: var(--cw-ink-soft);
+  padding: 2rem 0;
+}
+
+.cwStatusFull {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  color: var(--cw-ink-soft);
+  padding: 3rem 1.5rem;
+  text-align: center;
+}
+
+.cwBackToListLink {
+  color: var(--cw-primary-light);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.cwPath {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.cwPathRow {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 1.25rem 0;
+}
+
+.cwPathRowRight {
+  flex-direction: row-reverse;
+}
+
+.cwPathConnector {
+  position: absolute;
+  top: -1.25rem;
+  left: 27px;
+  width: 2px;
+  height: 1.25rem;
+  background: repeating-linear-gradient(
+    to bottom,
+    var(--cw-paper-line) 0,
+    var(--cw-paper-line) 6px,
+    transparent 6px,
+    transparent 12px
+  );
+}
+
+.cwPathRowRight .cwPathConnector {
+  left: auto;
+  right: 27px;
+}
+
+.cwLevelNode {
+  flex-shrink: 0;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: "JetBrains Mono", monospace;
+  font-weight: 700;
+  font-size: 1.25rem;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.cwLevelNodeNumber {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+
+.cwPathRowLeft {
+  flex-direction: row;
+}
+
+.cwLevelNode:disabled {
+  cursor: not-allowed;
+}
+
+.cwLevelNode_completed {
+  background: var(--cw-success);
+  color: white;
+  box-shadow: 0 4px 10px rgba(31, 157, 99, 0.35);
+}
+
+.cwLevelNode_current {
+  background: var(--cw-primary-gradient);
+  color: white;
+  box-shadow: 0 0 0 4px rgba(0, 102, 255, 0.18), 0 4px 14px rgba(0, 32, 96, 0.3);
+}
+
+.cwLevelNode_current:hover {
+  transform: scale(1.06);
+}
+
+.cwLevelNode_locked {
+  background: #e2e6ee;
+  color: #aab1c2;
+}
+
+.cwLevelCard {
+  flex: 1;
+  background: white;
+  border-radius: var(--cw-radius-md);
+  padding: 0.95rem 1.1rem;
+  box-shadow: var(--cw-shadow-md);
+}
+
+.cwLevelCardHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.2rem;
+}
+
+.cwLevelCardHeader h3 {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--cw-ink);
+}
+
+.cwDifficultyTag {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  flex-shrink: 0;
+}
+
+.cwDifficulty_easy {
+  background: #e3f6ec;
+  color: var(--cw-success);
+}
+
+.cwDifficulty_medium {
+  background: #fff2dc;
+  color: var(--cw-gold);
+}
+
+.cwDifficulty_hard {
+  background: #fde8e8;
+  color: #d23f3f;
+}
+
+.cwLevelTheme {
+  margin: 0 0 0.5rem 0;
+  font-size: 0.85rem;
+  color: var(--cw-ink-soft);
+}
+
+.cwLevelMeta {
+  display: flex;
+  gap: 1rem;
+  font-size: 0.78rem;
+  color: var(--cw-ink-soft);
+}
+
+.cwLevelMeta i {
+  margin-right: 0.3rem;
+}
+
+.cwLockedHint {
+  margin: 0.5rem 0 0 0;
+  font-size: 0.78rem;
+  color: #aab1c2;
+}
+
+.cwLockedHint i {
+  margin-right: 0.3rem;
+}
+
+/* ---------- Play screen meta bar ---------- */
+.cwPlayMeta {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  padding: 0.85rem 1.25rem;
+  max-width: 760px;
+  width: 100%;
+  margin: 0 auto;
+  font-size: 0.9rem;
+  color: var(--cw-ink-soft);
+  font-weight: 500;
+}
+
+.cwPlayMeta i {
+  margin-right: 0.3rem;
+  color: var(--cw-primary-light);
+}
+
+.cwHintBtn {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: #fff3cf;
+  color: var(--cw-gold);
+  border: none;
+  border-radius: var(--cw-radius-md);
+  padding: 0.5rem 0.9rem;
+  font-weight: 600;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.cwHintBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.cwHintBtn:not(:disabled):hover {
+  background: #ffe8a3;
+}
+
+/* ---------- Grid (the paper surface) ---------- */
+.cwGridWrap {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem 0.75rem;
+  overflow-x: auto;
+}
+
+.cwGrid {
+  display: grid;
+  gap: 3px;
+  background: var(--cw-paper-line);
+  border: 3px solid var(--cw-paper-line);
+  border-radius: 10px;
+  padding: 3px;
+  width: min(94vw, 480px);
+  aspect-ratio: var(--cw-aspect, auto);
+}
+
+.cwCellBlocked {
+  background: transparent;
+}
+
+.cwCell {
+  position: relative;
+  background: var(--cw-paper);
+  border: 1px solid var(--cw-cell-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+  aspect-ratio: 1;
+  transition: background 0.15s ease;
+}
+
+.cwCellActiveWord {
+  background: var(--cw-cell-active);
+}
+
+.cwCellSelected {
+  background: var(--cw-cell-selected);
+  box-shadow: inset 0 0 0 2px var(--cw-primary-light);
+  z-index: 1;
+}
+
+.cwCellRevealed.cwCellFilled {
+  background: var(--cw-revealed);
+}
+
+.cwCellNumber {
+  position: absolute;
+  top: 2px;
+  left: 3px;
+  font-size: 0.55rem;
+  font-weight: 600;
+  color: var(--cw-ink-soft);
+  font-family: "Inter", sans-serif;
+}
+
+.cwCellLetter {
+  font-family: "JetBrains Mono", monospace;
+  font-weight: 700;
+  font-size: clamp(0.9rem, 4vw, 1.3rem);
+  color: var(--cw-cell-filled-text);
+}
+
+.cwHiddenInput {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+  height: 0;
+  width: 0;
+}
+
+/* ---------- Clue bar ---------- */
+.cwClueBar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: var(--cw-primary-dark);
+  color: white;
+  padding: 0.85rem 0.75rem;
+  max-width: 760px;
+  width: 100%;
+  margin: 0 auto;
+  border-radius: var(--cw-radius-md) var(--cw-radius-md) 0 0;
+}
+
+.cwClueNavBtn {
+  flex-shrink: 0;
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  border: none;
+  background: rgba(255, 255, 255, 0.12);
+  color: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s ease;
+}
+
+.cwClueNavBtn:hover {
+  background: rgba(255, 255, 255, 0.22);
+}
+
+.cwClueText {
+  flex: 1;
+  cursor: text;
+  font-size: 0.95rem;
+  line-height: 1.3;
+}
+
+.cwClueNumber {
+  display: block;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #9fc4ff;
+  margin-bottom: 0.1rem;
+}
+
+/* ---------- Completion modal ---------- */
+.cwModalOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 16, 32, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  z-index: 200;
+}
+
+.cwModal {
+  background: white;
+  border-radius: var(--cw-radius-lg);
+  max-width: 360px;
+  width: 100%;
+  overflow: hidden;
+  box-shadow: var(--cw-shadow-lg);
+  animation: cwModalIn 0.25s ease;
+}
+
+@keyframes cwModalIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.cwModalHeader {
+  background: var(--cw-primary-gradient);
+  padding: 1.25rem 1.5rem;
+  text-align: center;
+}
+
+.cwModalHeader h2 {
+  margin: 0;
+  color: white;
+  font-size: 1.4rem;
+  font-weight: 700;
+}
+
+.cwModalBody {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.cwModalStat {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-size: 0.92rem;
+}
+
+.cwModalStatLabel {
+  color: var(--cw-ink-soft);
+}
+
+.cwModalStatValue {
+  font-family: "JetBrains Mono", monospace;
+  font-weight: 700;
+  color: var(--cw-ink);
+}
+
+.cwModalStars {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  font-size: 1.6rem;
+  padding-top: 0.4rem;
+}
+
+.cwStarEarned {
+  color: #ffd54f;
+}
+
+.cwStarEmpty {
+  color: #e2e6ee;
+}
+
+.cwModalActions {
+  display: flex;
+  gap: 0.75rem;
+  padding: 0 1.5rem 1.5rem;
+}
+
+.cwModalSecondaryBtn,
+.cwModalPrimaryBtn {
+  flex: 1;
+  text-align: center;
+  padding: 0.7rem 1rem;
+  border-radius: var(--cw-radius-md);
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  border: none;
+  text-decoration: none;
+}
+
+.cwModalSecondaryBtn {
+  background: #f1f3f8;
+  color: var(--cw-ink);
+}
+
+.cwModalPrimaryBtn {
+  background: var(--cw-primary-gradient);
+  color: white;
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 480px) {
+  .cwHeaderContent h1 {
+    font-size: 1.05rem;
+  }
+
+  .cwLevelNode {
+    width: 46px;
+    height: 46px;
+    font-size: 1.05rem;
+  }
+
+  .cwLevelCard {
+    padding: 0.8rem 0.9rem;
+  }
+
+  .cwGrid {
+    width: min(96vw, 420px);
+  }
+
+  .cwModalActions {
+    flex-direction: column;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cwBackBtn,
+  .cwLevelNode,
+  .cwProgressFill,
+  .cwModal {
+    transition: none;
+    animation: none;
+  }
+}
