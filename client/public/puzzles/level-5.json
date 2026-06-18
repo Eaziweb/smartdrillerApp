@@ -1,0 +1,123 @@
+{
+  "levelId": 5,
+  "title": "Science & Space",
+  "theme": "Science",
+  "difficulty": "hard",
+  "rows": 6,
+  "cols": 10,
+  "parSeconds": 240,
+  "words": [
+    {
+      "number": 1,
+      "answer": "ORBITS",
+      "row": 0,
+      "col": 0,
+      "direction": "down",
+      "clue": "Curved paths planets take around the sun"
+    },
+    {
+      "number": 1,
+      "answer": "OLD",
+      "row": 0,
+      "col": 0,
+      "direction": "across",
+      "clue": "Having lived or existed for a long time"
+    },
+    {
+      "number": 2,
+      "answer": "RUN",
+      "row": 1,
+      "col": 0,
+      "direction": "across",
+      "clue": "To move quickly on foot"
+    },
+    {
+      "number": 3,
+      "answer": "BAT",
+      "row": 2,
+      "col": 0,
+      "direction": "across",
+      "clue": "Nocturnal flying mammal"
+    },
+    {
+      "number": 4,
+      "answer": "ICY",
+      "row": 3,
+      "col": 0,
+      "direction": "across",
+      "clue": "Covered in frozen water"
+    },
+    {
+      "number": 5,
+      "answer": "TOY",
+      "row": 4,
+      "col": 0,
+      "direction": "across",
+      "clue": "Object made for a child to play with"
+    },
+    {
+      "number": 6,
+      "answer": "SEA",
+      "row": 5,
+      "col": 0,
+      "direction": "across",
+      "clue": "Large body of salt water"
+    },
+    {
+      "number": 7,
+      "answer": "ATOMIC",
+      "row": 0,
+      "col": 7,
+      "direction": "down",
+      "clue": "Relating to the smallest unit of an element"
+    },
+    {
+      "number": 7,
+      "answer": "ARE",
+      "row": 0,
+      "col": 7,
+      "direction": "across",
+      "clue": "Plural form of the verb 'is'"
+    },
+    {
+      "number": 8,
+      "answer": "TEN",
+      "row": 1,
+      "col": 7,
+      "direction": "across",
+      "clue": "The number after nine"
+    },
+    {
+      "number": 9,
+      "answer": "ODE",
+      "row": 2,
+      "col": 7,
+      "direction": "across",
+      "clue": "A poem expressing praise for its subject"
+    },
+    {
+      "number": 10,
+      "answer": "MUD",
+      "row": 3,
+      "col": 7,
+      "direction": "across",
+      "clue": "Wet, soft earth"
+    },
+    {
+      "number": 11,
+      "answer": "ICE",
+      "row": 4,
+      "col": 7,
+      "direction": "across",
+      "clue": "Frozen water"
+    },
+    {
+      "number": 12,
+      "answer": "CAR",
+      "row": 5,
+      "col": 7,
+      "direction": "across",
+      "clue": "Vehicle with four wheels used for driving"
+    }
+  ]
+}
