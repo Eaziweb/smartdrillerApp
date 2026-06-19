@@ -1,0 +1,47 @@
+{
+  "levelId": 45,
+  "rows": 7,
+  "cols": 7,
+  "words": [
+    {
+      "number": 1,
+      "direction": "across",
+      "row": 0,
+      "col": 0,
+      "answer": "PHANTOM",
+      "clue": "A ghost or apparition"
+    },
+    {
+      "number": 1,
+      "direction": "down",
+      "row": 0,
+      "col": 0,
+      "answer": "PROFILE",
+      "clue": "A side view; a short biography"
+    },
+    {
+      "number": 2,
+      "direction": "down",
+      "row": 0,
+      "col": 2,
+      "answer": "AMBIENT",
+      "clue": "Relating to the surrounding environment"
+    },
+    {
+      "number": 3,
+      "direction": "down",
+      "row": 0,
+      "col": 6,
+      "answer": "MONTHLY",
+      "clue": "Happening once a month"
+    },
+    {
+      "number": 4,
+      "direction": "across",
+      "row": 6,
+      "col": 0,
+      "answer": "ENTROPY",
+      "clue": "The measure of disorder in a system"
+    }
+  ]
+}

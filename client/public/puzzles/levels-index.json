@@ -1,17 +1,352 @@
-{
-  "totalLevels": 12,
-  "levels": [
-    { "levelId": 1 },
-    { "levelId": 2 },
-    { "levelId": 3 },
-    { "levelId": 4 },
-    { "levelId": 5 },
-    { "levelId": 6 },
-    { "levelId": 7 },
-    { "levelId": 8 },
-    { "levelId": 9 },
-    { "levelId": 10 },
-    { "levelId": 11 },
-    { "levelId": 12 }
-  ]
-}
+[
+  {
+    "levelId": 1,
+    "rows": 3,
+    "cols": 3,
+    "wordCount": 4,
+    "file": "level-1.json"
+  },
+  {
+    "levelId": 2,
+    "rows": 3,
+    "cols": 3,
+    "wordCount": 4,
+    "file": "level-2.json"
+  },
+  {
+    "levelId": 3,
+    "rows": 3,
+    "cols": 3,
+    "wordCount": 4,
+    "file": "level-3.json"
+  },
+  {
+    "levelId": 4,
+    "rows": 3,
+    "cols": 3,
+    "wordCount": 4,
+    "file": "level-4.json"
+  },
+  {
+    "levelId": 5,
+    "rows": 4,
+    "cols": 4,
+    "wordCount": 4,
+    "file": "level-5.json"
+  },
+  {
+    "levelId": 6,
+    "rows": 4,
+    "cols": 4,
+    "wordCount": 4,
+    "file": "level-6.json"
+  },
+  {
+    "levelId": 7,
+    "rows": 4,
+    "cols": 4,
+    "wordCount": 4,
+    "file": "level-7.json"
+  },
+  {
+    "levelId": 8,
+    "rows": 4,
+    "cols": 4,
+    "wordCount": 4,
+    "file": "level-8.json"
+  },
+  {
+    "levelId": 9,
+    "rows": 4,
+    "cols": 4,
+    "wordCount": 4,
+    "file": "level-9.json"
+  },
+  {
+    "levelId": 10,
+    "rows": 4,
+    "cols": 4,
+    "wordCount": 4,
+    "file": "level-10.json"
+  },
+  {
+    "levelId": 11,
+    "rows": 5,
+    "cols": 5,
+    "wordCount": 4,
+    "file": "level-11.json"
+  },
+  {
+    "levelId": 12,
+    "rows": 5,
+    "cols": 5,
+    "wordCount": 4,
+    "file": "level-12.json"
+  },
+  {
+    "levelId": 13,
+    "rows": 5,
+    "cols": 5,
+    "wordCount": 4,
+    "file": "level-13.json"
+  },
+  {
+    "levelId": 14,
+    "rows": 5,
+    "cols": 5,
+    "wordCount": 4,
+    "file": "level-14.json"
+  },
+  {
+    "levelId": 15,
+    "rows": 5,
+    "cols": 5,
+    "wordCount": 4,
+    "file": "level-15.json"
+  },
+  {
+    "levelId": 16,
+    "rows": 5,
+    "cols": 5,
+    "wordCount": 4,
+    "file": "level-16.json"
+  },
+  {
+    "levelId": 17,
+    "rows": 5,
+    "cols": 5,
+    "wordCount": 4,
+    "file": "level-17.json"
+  },
+  {
+    "levelId": 18,
+    "rows": 5,
+    "cols": 5,
+    "wordCount": 4,
+    "file": "level-18.json"
+  },
+  {
+    "levelId": 19,
+    "rows": 5,
+    "cols": 5,
+    "wordCount": 4,
+    "file": "level-19.json"
+  },
+  {
+    "levelId": 20,
+    "rows": 5,
+    "cols": 5,
+    "wordCount": 4,
+    "file": "level-20.json"
+  },
+  {
+    "levelId": 21,
+    "rows": 5,
+    "cols": 5,
+    "wordCount": 4,
+    "file": "level-21.json"
+  },
+  {
+    "levelId": 22,
+    "rows": 6,
+    "cols": 6,
+    "wordCount": 4,
+    "file": "level-22.json"
+  },
+  {
+    "levelId": 23,
+    "rows": 6,
+    "cols": 6,
+    "wordCount": 4,
+    "file": "level-23.json"
+  },
+  {
+    "levelId": 24,
+    "rows": 6,
+    "cols": 6,
+    "wordCount": 4,
+    "file": "level-24.json"
+  },
+  {
+    "levelId": 25,
+    "rows": 6,
+    "cols": 6,
+    "wordCount": 4,
+    "file": "level-25.json"
+  },
+  {
+    "levelId": 26,
+    "rows": 6,
+    "cols": 6,
+    "wordCount": 4,
+    "file": "level-26.json"
+  },
+  {
+    "levelId": 27,
+    "rows": 6,
+    "cols": 6,
+    "wordCount": 4,
+    "file": "level-27.json"
+  },
+  {
+    "levelId": 28,
+    "rows": 6,
+    "cols": 6,
+    "wordCount": 4,
+    "file": "level-28.json"
+  },
+  {
+    "levelId": 29,
+    "rows": 6,
+    "cols": 6,
+    "wordCount": 4,
+    "file": "level-29.json"
+  },
+  {
+    "levelId": 30,
+    "rows": 6,
+    "cols": 6,
+    "wordCount": 4,
+    "file": "level-30.json"
+  },
+  {
+    "levelId": 31,
+    "rows": 7,
+    "cols": 7,
+    "wordCount": 4,
+    "file": "level-31.json"
+  },
+  {
+    "levelId": 32,
+    "rows": 7,
+    "cols": 7,
+    "wordCount": 4,
+    "file": "level-32.json"
+  },
+  {
+    "levelId": 33,
+    "rows": 7,
+    "cols": 7,
+    "wordCount": 4,
+    "file": "level-33.json"
+  },
+  {
+    "levelId": 34,
+    "rows": 7,
+    "cols": 7,
+    "wordCount": 4,
+    "file": "level-34.json"
+  },
+  {
+    "levelId": 35,
+    "rows": 7,
+    "cols": 7,
+    "wordCount": 4,
+    "file": "level-35.json"
+  },
+  {
+    "levelId": 36,
+    "rows": 7,
+    "cols": 7,
+    "wordCount": 4,
+    "file": "level-36.json"
+  },
+  {
+    "levelId": 37,
+    "rows": 7,
+    "cols": 7,
+    "wordCount": 4,
+    "file": "level-37.json"
+  },
+  {
+    "levelId": 38,
+    "rows": 7,
+    "cols": 7,
+    "wordCount": 4,
+    "file": "level-38.json"
+  },
+  {
+    "levelId": 39,
+    "rows": 7,
+    "cols": 7,
+    "wordCount": 4,
+    "file": "level-39.json"
+  },
+  {
+    "levelId": 40,
+    "rows": 7,
+    "cols": 7,
+    "wordCount": 4,
+    "file": "level-40.json"
+  },
+  {
+    "levelId": 41,
+    "rows": 7,
+    "cols": 7,
+    "wordCount": 5,
+    "file": "level-41.json"
+  },
+  {
+    "levelId": 42,
+    "rows": 7,
+    "cols": 7,
+    "wordCount": 5,
+    "file": "level-42.json"
+  },
+  {
+    "levelId": 43,
+    "rows": 7,
+    "cols": 7,
+    "wordCount": 4,
+    "file": "level-43.json"
+  },
+  {
+    "levelId": 44,
+    "rows": 7,
+    "cols": 7,
+    "wordCount": 5,
+    "file": "level-44.json"
+  },
+  {
+    "levelId": 45,
+    "rows": 7,
+    "cols": 7,
+    "wordCount": 5,
+    "file": "level-45.json"
+  },
+  {
+    "levelId": 46,
+    "rows": 8,
+    "cols": 8,
+    "wordCount": 4,
+    "file": "level-46.json"
+  },
+  {
+    "levelId": 47,
+    "rows": 7,
+    "cols": 9,
+    "wordCount": 4,
+    "file": "level-47.json"
+  },
+  {
+    "levelId": 48,
+    "rows": 7,
+    "cols": 9,
+    "wordCount": 4,
+    "file": "level-48.json"
+  },
+  {
+    "levelId": 49,
+    "rows": 7,
+    "cols": 9,
+    "wordCount": 5,
+    "file": "level-49.json"
+  },
+  {
+    "levelId": 50,
+    "rows": 7,
+    "cols": 10,
+    "wordCount": 6,
+    "file": "level-50.json"
+  }
+]

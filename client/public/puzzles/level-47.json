@@ -1,0 +1,39 @@
+{
+  "levelId": 47,
+  "rows": 7,
+  "cols": 9,
+  "words": [
+    {
+      "number": 1,
+      "direction": "across",
+      "row": 0,
+      "col": 0,
+      "answer": "LABYRINTH",
+      "clue": "A complex maze or network of passages"
+    },
+    {
+      "number": 1,
+      "direction": "down",
+      "row": 0,
+      "col": 0,
+      "answer": "LUSTERS",
+      "clue": "Shiny appearances; to shine"
+    },
+    {
+      "number": 2,
+      "direction": "down",
+      "row": 0,
+      "col": 8,
+      "answer": "HASTENS",
+      "clue": "Moves or acts quickly"
+    },
+    {
+      "number": 3,
+      "direction": "across",
+      "row": 6,
+      "col": 0,
+      "answer": "SWEETNESS",
+      "clue": "The quality of being sweet or kind"
+    }
+  ]
+}

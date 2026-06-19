@@ -1,0 +1,39 @@
+{
+  "levelId": 26,
+  "rows": 6,
+  "cols": 6,
+  "words": [
+    {
+      "number": 1,
+      "direction": "across",
+      "row": 0,
+      "col": 0,
+      "answer": "PLANET",
+      "clue": "A celestial body orbiting a star"
+    },
+    {
+      "number": 1,
+      "direction": "down",
+      "row": 0,
+      "col": 0,
+      "answer": "PARDON",
+      "clue": "To forgive; an official release from punishment"
+    },
+    {
+      "number": 2,
+      "direction": "down",
+      "row": 0,
+      "col": 5,
+      "answer": "THRONE",
+      "clue": "A royal chair for a monarch"
+    },
+    {
+      "number": 3,
+      "direction": "across",
+      "row": 5,
+      "col": 0,
+      "answer": "NOODLE",
+      "clue": "A thin pasta strip; to think casually"
+    }
+  ]
+}

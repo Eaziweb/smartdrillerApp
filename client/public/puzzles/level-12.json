@@ -1,0 +1,39 @@
+{
+  "levelId": 12,
+  "rows": 5,
+  "cols": 5,
+  "words": [
+    {
+      "number": 1,
+      "direction": "across",
+      "row": 0,
+      "col": 0,
+      "answer": "PLUMB",
+      "clue": "Perfectly vertical; a plumber's tool"
+    },
+    {
+      "number": 1,
+      "direction": "down",
+      "row": 0,
+      "col": 0,
+      "answer": "PRIDE",
+      "clue": "A feeling of deep satisfaction"
+    },
+    {
+      "number": 2,
+      "direction": "down",
+      "row": 0,
+      "col": 4,
+      "answer": "BUNCH",
+      "clue": "A cluster of things grouped together"
+    },
+    {
+      "number": 3,
+      "direction": "across",
+      "row": 4,
+      "col": 0,
+      "answer": "EARTH",
+      "clue": "The planet we live on; soil"
+    }
+  ]
+}

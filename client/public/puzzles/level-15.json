@@ -1,0 +1,39 @@
+{
+  "levelId": 15,
+  "rows": 5,
+  "cols": 5,
+  "words": [
+    {
+      "number": 1,
+      "direction": "across",
+      "row": 0,
+      "col": 0,
+      "answer": "STONE",
+      "clue": "A small piece of rock"
+    },
+    {
+      "number": 1,
+      "direction": "down",
+      "row": 0,
+      "col": 0,
+      "answer": "SHELF",
+      "clue": "A flat board for storing objects"
+    },
+    {
+      "number": 2,
+      "direction": "down",
+      "row": 0,
+      "col": 4,
+      "answer": "ELDER",
+      "clue": "Older; a respected community figure"
+    },
+    {
+      "number": 3,
+      "direction": "across",
+      "row": 4,
+      "col": 0,
+      "answer": "FLIER",
+      "clue": "A person who flies; an advertising leaflet"
+    }
+  ]
+}

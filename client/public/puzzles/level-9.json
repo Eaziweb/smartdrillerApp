@@ -1,5 +1,5 @@
 {
-  "levelId": 5,
+  "levelId": 9,
   "rows": 4,
   "cols": 4,
   "words": [
@@ -8,32 +8,32 @@
       "direction": "across",
       "row": 0,
       "col": 0,
-      "answer": "LAMP",
-      "clue": "It lights up a dark room"
+      "answer": "COAL",
+      "clue": "A black rock burned for energy"
     },
     {
       "number": 1,
       "direction": "down",
       "row": 0,
       "col": 0,
-      "answer": "LACE",
-      "clue": "Delicate decorative fabric or to tie shoelaces"
+      "answer": "CURB",
+      "clue": "The edge of a sidewalk or pavement"
     },
     {
       "number": 2,
       "direction": "down",
       "row": 0,
       "col": 3,
-      "answer": "PINE",
-      "clue": "An evergreen tree; to long for something"
+      "answer": "LILY",
+      "clue": "A flowering plant with large blooms"
     },
     {
       "number": 3,
       "direction": "across",
       "row": 3,
       "col": 0,
-      "answer": "EASE",
-      "clue": "To relax or make less difficult"
+      "answer": "BURY",
+      "clue": "To place underground; to cover with earth"
     }
   ]
 }

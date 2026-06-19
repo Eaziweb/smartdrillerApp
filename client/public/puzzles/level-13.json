@@ -1,0 +1,39 @@
+{
+  "levelId": 13,
+  "rows": 5,
+  "cols": 5,
+  "words": [
+    {
+      "number": 1,
+      "direction": "across",
+      "row": 0,
+      "col": 0,
+      "answer": "FLINT",
+      "clue": "A hard rock used to make sparks"
+    },
+    {
+      "number": 1,
+      "direction": "down",
+      "row": 0,
+      "col": 0,
+      "answer": "FROST",
+      "clue": "Ice crystals on cold surfaces"
+    },
+    {
+      "number": 2,
+      "direction": "down",
+      "row": 0,
+      "col": 4,
+      "answer": "TIDAL",
+      "clue": "Relating to the rise and fall of the sea"
+    },
+    {
+      "number": 3,
+      "direction": "across",
+      "row": 4,
+      "col": 0,
+      "answer": "TRAIL",
+      "clue": "A path through the wilderness"
+    }
+  ]
+}

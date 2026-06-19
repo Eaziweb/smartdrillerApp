@@ -1,0 +1,39 @@
+{
+  "levelId": 33,
+  "rows": 7,
+  "cols": 7,
+  "words": [
+    {
+      "number": 1,
+      "direction": "across",
+      "row": 0,
+      "col": 0,
+      "answer": "CAPTAIN",
+      "clue": "The leader of a ship, team, or aircraft"
+    },
+    {
+      "number": 1,
+      "direction": "down",
+      "row": 0,
+      "col": 0,
+      "answer": "CHAMBER",
+      "clue": "A room; an enclosed cavity"
+    },
+    {
+      "number": 2,
+      "direction": "down",
+      "row": 0,
+      "col": 6,
+      "answer": "NETWORK",
+      "clue": "A system of connected things or people"
+    },
+    {
+      "number": 3,
+      "direction": "across",
+      "row": 6,
+      "col": 0,
+      "answer": "RANSACK",
+      "clue": "To search through while causing disorder"
+    }
+  ]
+}

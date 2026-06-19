@@ -1,0 +1,39 @@
+{
+  "levelId": 36,
+  "rows": 7,
+  "cols": 7,
+  "words": [
+    {
+      "number": 1,
+      "direction": "across",
+      "row": 0,
+      "col": 0,
+      "answer": "JOURNEY",
+      "clue": "A long trip from one place to another"
+    },
+    {
+      "number": 1,
+      "direction": "down",
+      "row": 0,
+      "col": 0,
+      "answer": "JUSTICE",
+      "clue": "Fair treatment and righteous judgment"
+    },
+    {
+      "number": 2,
+      "direction": "down",
+      "row": 0,
+      "col": 6,
+      "answer": "YELLOWY",
+      "clue": "Somewhat yellow in color"
+    },
+    {
+      "number": 3,
+      "direction": "across",
+      "row": 6,
+      "col": 0,
+      "answer": "ESTUARY",
+      "clue": "The mouth of a river where it meets the sea"
+    }
+  ]
+}

@@ -1,0 +1,39 @@
+{
+  "levelId": 28,
+  "rows": 6,
+  "cols": 6,
+  "words": [
+    {
+      "number": 1,
+      "direction": "across",
+      "row": 0,
+      "col": 0,
+      "answer": "FAMINE",
+      "clue": "A severe shortage of food"
+    },
+    {
+      "number": 1,
+      "direction": "down",
+      "row": 0,
+      "col": 0,
+      "answer": "FRIGHT",
+      "clue": "Sudden intense fear or terror"
+    },
+    {
+      "number": 2,
+      "direction": "down",
+      "row": 0,
+      "col": 5,
+      "answer": "EITHER",
+      "clue": "One or the other of two options"
+    },
+    {
+      "number": 3,
+      "direction": "across",
+      "row": 5,
+      "col": 0,
+      "answer": "TINDER",
+      "clue": "Dry material used to start a fire"
+    }
+  ]
+}

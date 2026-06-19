@@ -1,0 +1,39 @@
+{
+  "levelId": 14,
+  "rows": 5,
+  "cols": 5,
+  "words": [
+    {
+      "number": 1,
+      "direction": "across",
+      "row": 0,
+      "col": 0,
+      "answer": "CRISP",
+      "clue": "Firm and brittle; fresh and cool"
+    },
+    {
+      "number": 1,
+      "direction": "down",
+      "row": 0,
+      "col": 0,
+      "answer": "CROWS",
+      "clue": "Large black intelligent birds"
+    },
+    {
+      "number": 2,
+      "direction": "down",
+      "row": 0,
+      "col": 4,
+      "answer": "PURSE",
+      "clue": "A small bag for carrying money"
+    },
+    {
+      "number": 3,
+      "direction": "across",
+      "row": 4,
+      "col": 0,
+      "answer": "SWINE",
+      "clue": "A pig; an offensive person"
+    }
+  ]
+}

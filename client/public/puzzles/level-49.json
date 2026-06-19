@@ -1,0 +1,47 @@
+{
+  "levelId": 49,
+  "rows": 7,
+  "cols": 9,
+  "words": [
+    {
+      "number": 1,
+      "direction": "across",
+      "row": 0,
+      "col": 0,
+      "answer": "CHALLENGE",
+      "clue": "A difficult task or competition"
+    },
+    {
+      "number": 1,
+      "direction": "down",
+      "row": 0,
+      "col": 0,
+      "answer": "CONTRAS",
+      "clue": "Opposing groups; rebel fighters"
+    },
+    {
+      "number": 2,
+      "direction": "down",
+      "row": 0,
+      "col": 2,
+      "answer": "ASTRIDE",
+      "clue": "With one leg on each side; dominating"
+    },
+    {
+      "number": 3,
+      "direction": "down",
+      "row": 0,
+      "col": 8,
+      "answer": "ECLIPSE",
+      "clue": "When one celestial body blocks another's light"
+    },
+    {
+      "number": 4,
+      "direction": "across",
+      "row": 6,
+      "col": 0,
+      "answer": "SPECTACLE",
+      "clue": "An impressive public display or sight"
+    }
+  ]
+}

@@ -1,0 +1,39 @@
+{
+  "levelId": 23,
+  "rows": 6,
+  "cols": 6,
+  "words": [
+    {
+      "number": 1,
+      "direction": "across",
+      "row": 0,
+      "col": 0,
+      "answer": "BRIDGE",
+      "clue": "A structure spanning a river or gap"
+    },
+    {
+      "number": 1,
+      "direction": "down",
+      "row": 0,
+      "col": 0,
+      "answer": "BLOCKS",
+      "clue": "Solid chunks; to obstruct"
+    },
+    {
+      "number": 2,
+      "direction": "down",
+      "row": 0,
+      "col": 5,
+      "answer": "EXPORT",
+      "clue": "To send goods to another country"
+    },
+    {
+      "number": 3,
+      "direction": "across",
+      "row": 5,
+      "col": 0,
+      "answer": "SCULPT",
+      "clue": "To carve or shape a figure from material"
+    }
+  ]
+}

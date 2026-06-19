@@ -1,0 +1,39 @@
+{
+  "levelId": 37,
+  "rows": 7,
+  "cols": 7,
+  "words": [
+    {
+      "number": 1,
+      "direction": "across",
+      "row": 0,
+      "col": 0,
+      "answer": "MIXTURE",
+      "clue": "A combination of different ingredients"
+    },
+    {
+      "number": 1,
+      "direction": "down",
+      "row": 0,
+      "col": 0,
+      "answer": "MORNING",
+      "clue": "The early part of the day"
+    },
+    {
+      "number": 2,
+      "direction": "down",
+      "row": 0,
+      "col": 6,
+      "answer": "EAGERLY",
+      "clue": "With enthusiasm and impatience"
+    },
+    {
+      "number": 3,
+      "direction": "across",
+      "row": 6,
+      "col": 0,
+      "answer": "GRUFFLY",
+      "clue": "Speaking in a rough, stern manner"
+    }
+  ]
+}

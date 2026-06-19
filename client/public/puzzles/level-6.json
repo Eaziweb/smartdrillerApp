@@ -1,5 +1,5 @@
 {
-  "levelId": 5,
+  "levelId": 6,
   "rows": 4,
   "cols": 4,
   "words": [
@@ -8,32 +8,32 @@
       "direction": "across",
       "row": 0,
       "col": 0,
-      "answer": "LAMP",
-      "clue": "It lights up a dark room"
+      "answer": "ROAD",
+      "clue": "A path for vehicles"
     },
     {
       "number": 1,
       "direction": "down",
       "row": 0,
       "col": 0,
-      "answer": "LACE",
-      "clue": "Delicate decorative fabric or to tie shoelaces"
+      "answer": "RIMS",
+      "clue": "Edges or borders of circular objects"
     },
     {
       "number": 2,
       "direction": "down",
       "row": 0,
       "col": 3,
-      "answer": "PINE",
-      "clue": "An evergreen tree; to long for something"
+      "answer": "DAYS",
+      "clue": "Plural of day"
     },
     {
       "number": 3,
       "direction": "across",
       "row": 3,
       "col": 0,
-      "answer": "EASE",
-      "clue": "To relax or make less difficult"
+      "answer": "SAGS",
+      "clue": "Droops or hangs down loosely"
     }
   ]
 }

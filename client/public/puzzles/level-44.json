@@ -1,0 +1,47 @@
+{
+  "levelId": 44,
+  "rows": 7,
+  "cols": 7,
+  "words": [
+    {
+      "number": 1,
+      "direction": "across",
+      "row": 0,
+      "col": 0,
+      "answer": "COMFORT",
+      "clue": "A state of ease and freedom from pain"
+    },
+    {
+      "number": 1,
+      "direction": "down",
+      "row": 0,
+      "col": 0,
+      "answer": "CHAPTER",
+      "clue": "A division of a book; a branch of an organization"
+    },
+    {
+      "number": 2,
+      "direction": "down",
+      "row": 0,
+      "col": 2,
+      "answer": "MARVELS",
+      "clue": "Wonderful things; to be filled with wonder"
+    },
+    {
+      "number": 3,
+      "direction": "down",
+      "row": 0,
+      "col": 6,
+      "answer": "TORCHES",
+      "clue": "Flaming sticks for light; flashlights"
+    },
+    {
+      "number": 4,
+      "direction": "across",
+      "row": 6,
+      "col": 0,
+      "answer": "RESISTS",
+      "clue": "Opposes or withstands"
+    }
+  ]
+}

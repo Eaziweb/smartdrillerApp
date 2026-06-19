@@ -1,0 +1,39 @@
+{
+  "levelId": 34,
+  "rows": 7,
+  "cols": 7,
+  "words": [
+    {
+      "number": 1,
+      "direction": "across",
+      "row": 0,
+      "col": 0,
+      "answer": "ORCHARD",
+      "clue": "A garden of fruit trees"
+    },
+    {
+      "number": 1,
+      "direction": "down",
+      "row": 0,
+      "col": 0,
+      "answer": "OUTLINE",
+      "clue": "A summary; the outer edge of a shape"
+    },
+    {
+      "number": 2,
+      "direction": "down",
+      "row": 0,
+      "col": 6,
+      "answer": "DARKENS",
+      "clue": "Becomes darker or gloomier"
+    },
+    {
+      "number": 3,
+      "direction": "across",
+      "row": 6,
+      "col": 0,
+      "answer": "ENABLES",
+      "clue": "Makes something possible"
+    }
+  ]
+}

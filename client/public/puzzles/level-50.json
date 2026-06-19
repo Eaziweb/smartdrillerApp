@@ -1,0 +1,55 @@
+{
+  "levelId": 50,
+  "rows": 7,
+  "cols": 10,
+  "words": [
+    {
+      "number": 1,
+      "direction": "across",
+      "row": 0,
+      "col": 0,
+      "answer": "MYSTERIOUS",
+      "clue": "Difficult to understand; full of mystery"
+    },
+    {
+      "number": 1,
+      "direction": "down",
+      "row": 0,
+      "col": 0,
+      "answer": "MAJESTY",
+      "clue": "Impressive beauty; royal dignity"
+    },
+    {
+      "number": 2,
+      "direction": "down",
+      "row": 0,
+      "col": 2,
+      "answer": "SUFFERS",
+      "clue": "Experiences pain or hardship"
+    },
+    {
+      "number": 3,
+      "direction": "down",
+      "row": 0,
+      "col": 6,
+      "answer": "INSTEAD",
+      "clue": "As an alternative; in place of"
+    },
+    {
+      "number": 4,
+      "direction": "down",
+      "row": 0,
+      "col": 9,
+      "answer": "SUNDERS",
+      "clue": "Splits or breaks apart forcefully"
+    },
+    {
+      "number": 5,
+      "direction": "across",
+      "row": 6,
+      "col": 0,
+      "answer": "YESTERDAYS",
+      "clue": "All the days that have already passed"
+    }
+  ]
+}

@@ -1,0 +1,39 @@
+{
+  "levelId": 11,
+  "rows": 5,
+  "cols": 5,
+  "words": [
+    {
+      "number": 1,
+      "direction": "across",
+      "row": 0,
+      "col": 0,
+      "answer": "CRANE",
+      "clue": "A large bird or a construction machine"
+    },
+    {
+      "number": 1,
+      "direction": "down",
+      "row": 0,
+      "col": 0,
+      "answer": "CROPS",
+      "clue": "Plants grown by farmers"
+    },
+    {
+      "number": 2,
+      "direction": "down",
+      "row": 0,
+      "col": 4,
+      "answer": "EAGLE",
+      "clue": "A large bird of prey with keen eyesight"
+    },
+    {
+      "number": 3,
+      "direction": "across",
+      "row": 4,
+      "col": 0,
+      "answer": "SPINE",
+      "clue": "The backbone of the human body"
+    }
+  ]
+}

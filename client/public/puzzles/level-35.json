@@ -1,0 +1,39 @@
+{
+  "levelId": 35,
+  "rows": 7,
+  "cols": 7,
+  "words": [
+    {
+      "number": 1,
+      "direction": "across",
+      "row": 0,
+      "col": 0,
+      "answer": "VILLAGE",
+      "clue": "A small settlement smaller than a town"
+    },
+    {
+      "number": 1,
+      "direction": "down",
+      "row": 0,
+      "col": 0,
+      "answer": "VERBOSE",
+      "clue": "Using more words than necessary; wordy"
+    },
+    {
+      "number": 2,
+      "direction": "down",
+      "row": 0,
+      "col": 6,
+      "answer": "ENTHUSE",
+      "clue": "To fill with excitement and eagerness"
+    },
+    {
+      "number": 3,
+      "direction": "across",
+      "row": 6,
+      "col": 0,
+      "answer": "EMBRACE",
+      "clue": "To hug; to accept willingly"
+    }
+  ]
+}

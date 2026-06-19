@@ -1,39 +1,39 @@
 {
-  "levelId": 2,
-  "rows": 3,
-  "cols": 3,
+  "levelId": 24,
+  "rows": 6,
+  "cols": 6,
   "words": [
     {
       "number": 1,
       "direction": "across",
       "row": 0,
       "col": 0,
-      "answer": "HOP",
-      "clue": "To jump on one foot"
+      "answer": "FROZEN",
+      "clue": "Turned to ice; unable to move"
     },
     {
       "number": 1,
       "direction": "down",
       "row": 0,
       "col": 0,
-      "answer": "HOT",
-      "clue": "Very warm in temperature"
+      "answer": "FIGHTS",
+      "clue": "Physical conflicts; struggles"
     },
     {
       "number": 2,
       "direction": "down",
       "row": 0,
-      "col": 2,
-      "answer": "PEN",
-      "clue": "A writing instrument"
+      "col": 5,
+      "answer": "NINETY",
+      "clue": "The number 90"
     },
     {
       "number": 3,
       "direction": "across",
-      "row": 2,
+      "row": 5,
       "col": 0,
-      "answer": "TEN",
-      "clue": "The number after nine"
+      "answer": "STEELY",
+      "clue": "Hard and determined; steel-like"
     }
   ]
 }

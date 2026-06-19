@@ -1,0 +1,39 @@
+{
+  "levelId": 25,
+  "rows": 6,
+  "cols": 6,
+  "words": [
+    {
+      "number": 1,
+      "direction": "across",
+      "row": 0,
+      "col": 0,
+      "answer": "PRISON",
+      "clue": "A place where criminals are confined"
+    },
+    {
+      "number": 1,
+      "direction": "down",
+      "row": 0,
+      "col": 0,
+      "answer": "PREACH",
+      "clue": "To deliver a sermon or moral lesson"
+    },
+    {
+      "number": 2,
+      "direction": "down",
+      "row": 0,
+      "col": 5,
+      "answer": "NEEDLE",
+      "clue": "A thin pointed sewing implement"
+    },
+    {
+      "number": 3,
+      "direction": "across",
+      "row": 5,
+      "col": 0,
+      "answer": "HEXANE",
+      "clue": "A chemical solvent with six carbons"
+    }
+  ]
+}

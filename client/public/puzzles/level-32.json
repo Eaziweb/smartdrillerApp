@@ -1,0 +1,39 @@
+{
+  "levelId": 32,
+  "rows": 7,
+  "cols": 7,
+  "words": [
+    {
+      "number": 1,
+      "direction": "across",
+      "row": 0,
+      "col": 0,
+      "answer": "BLANKET",
+      "clue": "A large piece of fabric for warmth"
+    },
+    {
+      "number": 1,
+      "direction": "down",
+      "row": 0,
+      "col": 0,
+      "answer": "BUDGETS",
+      "clue": "Financial plans for spending"
+    },
+    {
+      "number": 2,
+      "direction": "down",
+      "row": 0,
+      "col": 6,
+      "answer": "TOPKNOT",
+      "clue": "A knot or bun of hair on top of the head"
+    },
+    {
+      "number": 3,
+      "direction": "across",
+      "row": 6,
+      "col": 0,
+      "answer": "SPINOUT",
+      "clue": "A skid causing a vehicle to rotate"
+    }
+  ]
+}

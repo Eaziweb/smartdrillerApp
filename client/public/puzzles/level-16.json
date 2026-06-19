@@ -1,0 +1,39 @@
+{
+  "levelId": 16,
+  "rows": 5,
+  "cols": 5,
+  "words": [
+    {
+      "number": 1,
+      "direction": "across",
+      "row": 0,
+      "col": 0,
+      "answer": "GIANT",
+      "clue": "An enormous person or creature"
+    },
+    {
+      "number": 1,
+      "direction": "down",
+      "row": 0,
+      "col": 0,
+      "answer": "GLOOM",
+      "clue": "Darkness; a feeling of sadness"
+    },
+    {
+      "number": 2,
+      "direction": "down",
+      "row": 0,
+      "col": 4,
+      "answer": "TWIRL",
+      "clue": "To spin or rotate quickly"
+    },
+    {
+      "number": 3,
+      "direction": "across",
+      "row": 4,
+      "col": 0,
+      "answer": "MOTEL",
+      "clue": "A roadside hotel for motorists"
+    }
+  ]
+}

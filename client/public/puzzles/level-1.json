@@ -3,9 +3,37 @@
   "rows": 3,
   "cols": 3,
   "words": [
-    { "number": 1, "direction": "across", "row": 0, "col": 0, "answer": "GAS", "clue": "Fuel for a car" },
-    { "number": 1, "direction": "down", "row": 0, "col": 0, "answer": "GET", "clue": "Acquire or obtain" },
-    { "number": 2, "direction": "down", "row": 0, "col": 2, "answer": "SUN", "clue": "The star in our sky" },
-    { "number": 3, "direction": "across", "row": 2, "col": 0, "answer": "TEN", "clue": "Half a score" }
+    {
+      "number": 1,
+      "direction": "across",
+      "row": 0,
+      "col": 0,
+      "answer": "CAT",
+      "clue": "A small furry pet that meows"
+    },
+    {
+      "number": 1,
+      "direction": "down",
+      "row": 0,
+      "col": 0,
+      "answer": "COP",
+      "clue": "A police officer (informal)"
+    },
+    {
+      "number": 2,
+      "direction": "down",
+      "row": 0,
+      "col": 2,
+      "answer": "TOY",
+      "clue": "Something children play with"
+    },
+    {
+      "number": 3,
+      "direction": "across",
+      "row": 2,
+      "col": 0,
+      "answer": "PAY",
+      "clue": "To hand over money"
+    }
   ]
 }

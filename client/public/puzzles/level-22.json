@@ -1,0 +1,39 @@
+{
+  "levelId": 22,
+  "rows": 6,
+  "cols": 6,
+  "words": [
+    {
+      "number": 1,
+      "direction": "across",
+      "row": 0,
+      "col": 0,
+      "answer": "SHIVER",
+      "clue": "To tremble from cold or fear"
+    },
+    {
+      "number": 1,
+      "direction": "down",
+      "row": 0,
+      "col": 0,
+      "answer": "SHAPES",
+      "clue": "The outlines or forms of objects"
+    },
+    {
+      "number": 2,
+      "direction": "down",
+      "row": 0,
+      "col": 5,
+      "answer": "REPEAT",
+      "clue": "To say or do something again"
+    },
+    {
+      "number": 3,
+      "direction": "across",
+      "row": 5,
+      "col": 0,
+      "answer": "STREET",
+      "clue": "A public road in a town or city"
+    }
+  ]
+}

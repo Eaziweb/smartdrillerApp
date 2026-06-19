@@ -1,0 +1,39 @@
+{
+  "levelId": 19,
+  "rows": 5,
+  "cols": 5,
+  "words": [
+    {
+      "number": 1,
+      "direction": "across",
+      "row": 0,
+      "col": 0,
+      "answer": "CLAMP",
+      "clue": "A device for holding things tightly together"
+    },
+    {
+      "number": 1,
+      "direction": "down",
+      "row": 0,
+      "col": 0,
+      "answer": "CHEWS",
+      "clue": "Bites and grinds food with the teeth"
+    },
+    {
+      "number": 2,
+      "direction": "down",
+      "row": 0,
+      "col": 4,
+      "answer": "PRICE",
+      "clue": "The cost of something"
+    },
+    {
+      "number": 3,
+      "direction": "across",
+      "row": 4,
+      "col": 0,
+      "answer": "SINCE",
+      "clue": "From a past time until now"
+    }
+  ]
+}

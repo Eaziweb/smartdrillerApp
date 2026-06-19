@@ -1,0 +1,39 @@
+{
+  "levelId": 39,
+  "rows": 7,
+  "cols": 7,
+  "words": [
+    {
+      "number": 1,
+      "direction": "across",
+      "row": 0,
+      "col": 0,
+      "answer": "BALANCE",
+      "clue": "An even distribution of weight or amounts"
+    },
+    {
+      "number": 1,
+      "direction": "down",
+      "row": 0,
+      "col": 0,
+      "answer": "BLAZING",
+      "clue": "Burning intensely with bright flames"
+    },
+    {
+      "number": 2,
+      "direction": "down",
+      "row": 0,
+      "col": 6,
+      "answer": "ENHANCE",
+      "clue": "To improve or increase the quality of"
+    },
+    {
+      "number": 3,
+      "direction": "across",
+      "row": 6,
+      "col": 0,
+      "answer": "GAZETTE",
+      "clue": "An official journal or newspaper"
+    }
+  ]
+}

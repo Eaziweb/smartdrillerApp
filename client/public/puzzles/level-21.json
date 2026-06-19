@@ -1,39 +1,39 @@
 {
-  "levelId": 2,
-  "rows": 3,
-  "cols": 3,
+  "levelId": 21,
+  "rows": 5,
+  "cols": 5,
   "words": [
     {
       "number": 1,
       "direction": "across",
       "row": 0,
       "col": 0,
-      "answer": "HOP",
-      "clue": "To jump on one foot"
+      "answer": "CLOTH",
+      "clue": "Woven fabric used for clothing"
     },
     {
       "number": 1,
       "direction": "down",
       "row": 0,
       "col": 0,
-      "answer": "HOT",
-      "clue": "Very warm in temperature"
+      "answer": "CRIME",
+      "clue": "An illegal act"
     },
     {
       "number": 2,
       "direction": "down",
       "row": 0,
-      "col": 2,
-      "answer": "PEN",
-      "clue": "A writing instrument"
+      "col": 4,
+      "answer": "HOURS",
+      "clue": "Periods of sixty minutes"
     },
     {
       "number": 3,
       "direction": "across",
-      "row": 2,
+      "row": 4,
       "col": 0,
-      "answer": "TEN",
-      "clue": "The number after nine"
+      "answer": "EARNS",
+      "clue": "Gets money through work"
     }
   ]
 }

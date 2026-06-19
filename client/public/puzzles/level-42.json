@@ -1,0 +1,47 @@
+{
+  "levelId": 42,
+  "rows": 7,
+  "cols": 7,
+  "words": [
+    {
+      "number": 1,
+      "direction": "across",
+      "row": 0,
+      "col": 0,
+      "answer": "CABINET",
+      "clue": "A piece of furniture with shelves or drawers"
+    },
+    {
+      "number": 1,
+      "direction": "down",
+      "row": 0,
+      "col": 0,
+      "answer": "COMPASS",
+      "clue": "A navigation tool pointing north"
+    },
+    {
+      "number": 2,
+      "direction": "down",
+      "row": 0,
+      "col": 2,
+      "answer": "BLIGHTS",
+      "clue": "Plant diseases; things that spoil"
+    },
+    {
+      "number": 3,
+      "direction": "down",
+      "row": 0,
+      "col": 6,
+      "answer": "TIGHTEN",
+      "clue": "To make more firm or secure"
+    },
+    {
+      "number": 4,
+      "direction": "across",
+      "row": 6,
+      "col": 0,
+      "answer": "SUSTAIN",
+      "clue": "To support or maintain over time"
+    }
+  ]
+}

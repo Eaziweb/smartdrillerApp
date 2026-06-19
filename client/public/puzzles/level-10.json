@@ -1,5 +1,5 @@
 {
-  "levelId": 5,
+  "levelId": 10,
   "rows": 4,
   "cols": 4,
   "words": [
@@ -8,32 +8,32 @@
       "direction": "across",
       "row": 0,
       "col": 0,
-      "answer": "LAMP",
-      "clue": "It lights up a dark room"
+      "answer": "BARK",
+      "clue": "The outer covering of a tree; a dog's sound"
     },
     {
       "number": 1,
       "direction": "down",
       "row": 0,
       "col": 0,
-      "answer": "LACE",
-      "clue": "Delicate decorative fabric or to tie shoelaces"
+      "answer": "BOOT",
+      "clue": "A type of footwear covering the ankle"
     },
     {
       "number": 2,
       "direction": "down",
       "row": 0,
       "col": 3,
-      "answer": "PINE",
-      "clue": "An evergreen tree; to long for something"
+      "answer": "KEEP",
+      "clue": "To hold or retain something"
     },
     {
       "number": 3,
       "direction": "across",
       "row": 3,
       "col": 0,
-      "answer": "EASE",
-      "clue": "To relax or make less difficult"
+      "answer": "TARP",
+      "clue": "A waterproof cover or sheet"
     }
   ]
 }

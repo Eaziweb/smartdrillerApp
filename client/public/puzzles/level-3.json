@@ -1,91 +1,47 @@
 {
   "levelId": 3,
-  "title": "Mind & Motion",
-  "theme": "General Knowledge",
-  "difficulty": "medium",
-  "rows": 4,
-  "cols": 8,
-  "parSeconds": 150,
+  "rows": 5,
+  "cols": 12,
   "words": [
     {
       "number": 1,
-      "answer": "WAGS",
+      "direction": "across",
       "row": 0,
       "col": 0,
-      "direction": "down",
-      "clue": "What a happy dog's tail does"
+      "answer": "SMARTDRILLER",
+      "clue": "The best educational platform for 100 level students"
     },
     {
       "number": 1,
-      "answer": "WIN",
+      "direction": "down",
       "row": 0,
       "col": 0,
-      "direction": "across",
-      "clue": "To be victorious"
+      "answer": "SKILL",
+      "clue": "A learned ability or expertise"
     },
     {
       "number": 2,
-      "answer": "ARM",
-      "row": 1,
-      "col": 0,
-      "direction": "across",
-      "clue": "Limb used for lifting and reaching"
+      "direction": "down",
+      "row": 0,
+      "col": 10,
+      "answer": "EXAMS",
+      "clue": "Tests that assess what you've learned"
     },
     {
       "number": 3,
-      "answer": "GAS",
-      "row": 2,
-      "col": 0,
       "direction": "across",
-      "clue": "Neither solid nor liquid"
+      "row": 4,
+      "col": 0,
+      "answer": "LOG",
+      "clue": "A record of daily entries; a piece of wood"
     },
     {
       "number": 4,
-      "answer": "SHE",
-      "row": 3,
-      "col": 0,
       "direction": "across",
-      "clue": "Opposite of he"
-    },
-    {
-      "number": 5,
-      "answer": "USED",
-      "row": 0,
-      "col": 5,
-      "direction": "down",
-      "clue": "Already employed for a purpose, not new"
-    },
-    {
-      "number": 5,
-      "answer": "UFO",
-      "row": 0,
-      "col": 5,
-      "direction": "across",
-      "clue": "Unexplained object spotted in the sky"
-    },
-    {
-      "number": 6,
-      "answer": "SUM",
-      "row": 1,
-      "col": 5,
-      "direction": "across",
-      "clue": "The result of adding numbers together"
-    },
-    {
-      "number": 7,
-      "answer": "ECO",
-      "row": 2,
-      "col": 5,
-      "direction": "across",
-      "clue": "Prefix meaning relating to the environment"
-    },
-    {
-      "number": 8,
-      "answer": "DRY",
-      "row": 3,
-      "col": 5,
-      "direction": "across",
-      "clue": "Not wet at all"
+      "row": 4,
+      "col": 10,
+      "answer": "SAT",
+      "clue": "Was seated (past tense)"
     }
   ]
 }

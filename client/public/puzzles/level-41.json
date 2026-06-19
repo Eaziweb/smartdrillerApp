@@ -1,0 +1,47 @@
+{
+  "levelId": 41,
+  "rows": 7,
+  "cols": 7,
+  "words": [
+    {
+      "number": 1,
+      "direction": "across",
+      "row": 0,
+      "col": 0,
+      "answer": "ABANDON",
+      "clue": "To leave behind or give up permanently"
+    },
+    {
+      "number": 1,
+      "direction": "down",
+      "row": 0,
+      "col": 0,
+      "answer": "AILMENT",
+      "clue": "An illness or health problem"
+    },
+    {
+      "number": 2,
+      "direction": "down",
+      "row": 0,
+      "col": 3,
+      "answer": "NOTABLE",
+      "clue": "Worthy of attention; a famous person"
+    },
+    {
+      "number": 3,
+      "direction": "down",
+      "row": 0,
+      "col": 6,
+      "answer": "NOTHING",
+      "clue": "Not anything; zero"
+    },
+    {
+      "number": 4,
+      "direction": "across",
+      "row": 6,
+      "col": 0,
+      "answer": "TREEING",
+      "clue": "Chasing an animal up a tree"
+    }
+  ]
+}

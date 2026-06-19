@@ -1,0 +1,39 @@
+{
+  "levelId": 27,
+  "rows": 6,
+  "cols": 6,
+  "words": [
+    {
+      "number": 1,
+      "direction": "across",
+      "row": 0,
+      "col": 0,
+      "answer": "WALNUT",
+      "clue": "A wrinkled brown nut in a hard shell"
+    },
+    {
+      "number": 1,
+      "direction": "down",
+      "row": 0,
+      "col": 0,
+      "answer": "WATERS",
+      "clue": "Bodies of water; to irrigate plants"
+    },
+    {
+      "number": 2,
+      "direction": "down",
+      "row": 0,
+      "col": 5,
+      "answer": "TACKLE",
+      "clue": "Fishing gear; to confront or address"
+    },
+    {
+      "number": 3,
+      "direction": "across",
+      "row": 5,
+      "col": 0,
+      "answer": "SIZZLE",
+      "clue": "To make a hissing sound when frying"
+    }
+  ]
+}

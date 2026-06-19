@@ -1,0 +1,39 @@
+{
+  "levelId": 40,
+  "rows": 7,
+  "cols": 7,
+  "words": [
+    {
+      "number": 1,
+      "direction": "across",
+      "row": 0,
+      "col": 0,
+      "answer": "DIAMOND",
+      "clue": "A precious stone; a baseball field shape"
+    },
+    {
+      "number": 1,
+      "direction": "down",
+      "row": 0,
+      "col": 0,
+      "answer": "DEVOTED",
+      "clue": "Very loyal and dedicated"
+    },
+    {
+      "number": 2,
+      "direction": "down",
+      "row": 0,
+      "col": 6,
+      "answer": "DELIGHT",
+      "clue": "Great pleasure or joy"
+    },
+    {
+      "number": 3,
+      "direction": "across",
+      "row": 6,
+      "col": 0,
+      "answer": "DEFLECT",
+      "clue": "To cause something to change direction"
+    }
+  ]
+}

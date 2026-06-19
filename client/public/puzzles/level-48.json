@@ -1,0 +1,39 @@
+{
+  "levelId": 48,
+  "rows": 7,
+  "cols": 9,
+  "words": [
+    {
+      "number": 1,
+      "direction": "across",
+      "row": 0,
+      "col": 0,
+      "answer": "ELOQUENCE",
+      "clue": "Fluent and persuasive speaking or writing"
+    },
+    {
+      "number": 1,
+      "direction": "down",
+      "row": 0,
+      "col": 0,
+      "answer": "EXPLORE",
+      "clue": "To travel through an unfamiliar area"
+    },
+    {
+      "number": 2,
+      "direction": "down",
+      "row": 0,
+      "col": 8,
+      "answer": "ENGRAVE",
+      "clue": "To cut a design into a hard surface"
+    },
+    {
+      "number": 3,
+      "direction": "across",
+      "row": 6,
+      "col": 0,
+      "answer": "EXPLOSIVE",
+      "clue": "Able to burst with great force; sensational"
+    }
+  ]
+}

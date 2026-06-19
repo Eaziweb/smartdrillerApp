@@ -1,0 +1,39 @@
+{
+  "levelId": 38,
+  "rows": 7,
+  "cols": 7,
+  "words": [
+    {
+      "number": 1,
+      "direction": "across",
+      "row": 0,
+      "col": 0,
+      "answer": "KINGDOM",
+      "clue": "A country ruled by a king or queen"
+    },
+    {
+      "number": 1,
+      "direction": "down",
+      "row": 0,
+      "col": 0,
+      "answer": "KINFOLK",
+      "clue": "One's relatives and family members"
+    },
+    {
+      "number": 2,
+      "direction": "down",
+      "row": 0,
+      "col": 6,
+      "answer": "MEADOWS",
+      "clue": "Grassy fields, often with wildflowers"
+    },
+    {
+      "number": 3,
+      "direction": "across",
+      "row": 6,
+      "col": 0,
+      "answer": "KIDNAPS",
+      "clue": "Takes someone away by force"
+    }
+  ]
+}

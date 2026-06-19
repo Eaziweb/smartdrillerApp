@@ -1,0 +1,39 @@
+{
+  "levelId": 30,
+  "rows": 6,
+  "cols": 6,
+  "words": [
+    {
+      "number": 1,
+      "direction": "across",
+      "row": 0,
+      "col": 0,
+      "answer": "COBALT",
+      "clue": "A hard blue metallic element"
+    },
+    {
+      "number": 1,
+      "direction": "down",
+      "row": 0,
+      "col": 0,
+      "answer": "CRACKS",
+      "clue": "Narrow breaks or fissures"
+    },
+    {
+      "number": 2,
+      "direction": "down",
+      "row": 0,
+      "col": 5,
+      "answer": "TANGLE",
+      "clue": "A twisted or knotted mass"
+    },
+    {
+      "number": 3,
+      "direction": "across",
+      "row": 5,
+      "col": 0,
+      "answer": "SPONGE",
+      "clue": "A porous material used for washing"
+    }
+  ]
+}

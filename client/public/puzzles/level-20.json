@@ -1,0 +1,39 @@
+{
+  "levelId": 20,
+  "rows": 5,
+  "cols": 5,
+  "words": [
+    {
+      "number": 1,
+      "direction": "across",
+      "row": 0,
+      "col": 0,
+      "answer": "DRAFT",
+      "clue": "A preliminary version; a current of air"
+    },
+    {
+      "number": 1,
+      "direction": "down",
+      "row": 0,
+      "col": 0,
+      "answer": "DROOP",
+      "clue": "To hang or sag downward"
+    },
+    {
+      "number": 2,
+      "direction": "down",
+      "row": 0,
+      "col": 4,
+      "answer": "TIGER",
+      "clue": "A large striped wild cat"
+    },
+    {
+      "number": 3,
+      "direction": "across",
+      "row": 4,
+      "col": 0,
+      "answer": "POKER",
+      "clue": "A card game; a fire-stoking tool"
+    }
+  ]
+}

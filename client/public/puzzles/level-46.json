@@ -1,0 +1,39 @@
+{
+  "levelId": 46,
+  "rows": 8,
+  "cols": 8,
+  "words": [
+    {
+      "number": 1,
+      "direction": "across",
+      "row": 0,
+      "col": 0,
+      "answer": "TALISMAN",
+      "clue": "An object believed to bring good luck"
+    },
+    {
+      "number": 1,
+      "direction": "down",
+      "row": 0,
+      "col": 0,
+      "answer": "TORPEDO",
+      "clue": "A self-propelled underwater missile"
+    },
+    {
+      "number": 2,
+      "direction": "down",
+      "row": 0,
+      "col": 7,
+      "answer": "NOTHING",
+      "clue": "Not a single thing; zero"
+    },
+    {
+      "number": 3,
+      "direction": "across",
+      "row": 6,
+      "col": 0,
+      "answer": "OUTGOING",
+      "clue": "Friendly and sociable; departing"
+    }
+  ]
+}

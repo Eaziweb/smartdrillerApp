@@ -1,0 +1,39 @@
+{
+  "levelId": 43,
+  "rows": 7,
+  "cols": 7,
+  "words": [
+    {
+      "number": 1,
+      "direction": "across",
+      "row": 0,
+      "col": 0,
+      "answer": "VINTAGE",
+      "clue": "Something from the past of high quality"
+    },
+    {
+      "number": 1,
+      "direction": "down",
+      "row": 0,
+      "col": 0,
+      "answer": "VOLCANO",
+      "clue": "A mountain that can erupt with lava"
+    },
+    {
+      "number": 2,
+      "direction": "down",
+      "row": 0,
+      "col": 6,
+      "answer": "ELEMENT",
+      "clue": "A basic substance; a part of something"
+    },
+    {
+      "number": 3,
+      "direction": "across",
+      "row": 6,
+      "col": 0,
+      "answer": "OUTCAST",
+      "clue": "A person rejected by society"
+    }
+  ]
+}

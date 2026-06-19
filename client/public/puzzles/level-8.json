@@ -1,5 +1,5 @@
 {
-  "levelId": 5,
+  "levelId": 8,
   "rows": 4,
   "cols": 4,
   "words": [
@@ -8,32 +8,32 @@
       "direction": "across",
       "row": 0,
       "col": 0,
-      "answer": "LAMP",
-      "clue": "It lights up a dark room"
+      "answer": "FIVE",
+      "clue": "The number after four"
     },
     {
       "number": 1,
       "direction": "down",
       "row": 0,
       "col": 0,
-      "answer": "LACE",
-      "clue": "Delicate decorative fabric or to tie shoelaces"
+      "answer": "FOLD",
+      "clue": "To bend paper or fabric over itself"
     },
     {
       "number": 2,
       "direction": "down",
       "row": 0,
       "col": 3,
-      "answer": "PINE",
-      "clue": "An evergreen tree; to long for something"
+      "answer": "EAVE",
+      "clue": "The overhanging edge of a roof"
     },
     {
       "number": 3,
       "direction": "across",
       "row": 3,
       "col": 0,
-      "answer": "EASE",
-      "clue": "To relax or make less difficult"
+      "answer": "DOVE",
+      "clue": "A white bird symbolizing peace"
     }
   ]
 }

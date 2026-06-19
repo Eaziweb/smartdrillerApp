@@ -1,0 +1,39 @@
+{
+  "levelId": 17,
+  "rows": 5,
+  "cols": 5,
+  "words": [
+    {
+      "number": 1,
+      "direction": "across",
+      "row": 0,
+      "col": 0,
+      "answer": "BENCH",
+      "clue": "A long seat for multiple people"
+    },
+    {
+      "number": 1,
+      "direction": "down",
+      "row": 0,
+      "col": 0,
+      "answer": "BLAND",
+      "clue": "Lacking strong flavor or interest"
+    },
+    {
+      "number": 2,
+      "direction": "down",
+      "row": 0,
+      "col": 4,
+      "answer": "HUNCH",
+      "clue": "A feeling without clear reason"
+    },
+    {
+      "number": 3,
+      "direction": "across",
+      "row": 4,
+      "col": 0,
+      "answer": "DUTCH",
+      "clue": "Relating to the Netherlands"
+    }
+  ]
+}

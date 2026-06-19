@@ -1,0 +1,39 @@
+{
+  "levelId": 29,
+  "rows": 6,
+  "cols": 6,
+  "words": [
+    {
+      "number": 1,
+      "direction": "across",
+      "row": 0,
+      "col": 0,
+      "answer": "GRAVEL",
+      "clue": "Small loose stones used on paths"
+    },
+    {
+      "number": 1,
+      "direction": "down",
+      "row": 0,
+      "col": 0,
+      "answer": "GLADLY",
+      "clue": "With pleasure and willingness"
+    },
+    {
+      "number": 2,
+      "direction": "down",
+      "row": 0,
+      "col": 5,
+      "answer": "LEPTON",
+      "clue": "A subatomic particle like an electron"
+    },
+    {
+      "number": 3,
+      "direction": "across",
+      "row": 5,
+      "col": 0,
+      "answer": "YEOMAN",
+      "clue": "A farmer owning land; a naval petty officer"
+    }
+  ]
+}
