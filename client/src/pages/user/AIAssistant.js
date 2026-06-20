@@ -1,179 +1,281 @@
+// AIAssistant.jsx
 "use client"
 
 import { useState, useEffect, useRef } from "react"
+import ReactMarkdown from "react-markdown"
 import { useAuth } from "../../contexts/AuthContext"
 import styles from "../../styles/AIAssistant.module.css"
-import api from "../../utils/api"
 
 const AIAssistant = () => {
   const { user } = useAuth()
-  const [messages, setMessages] = useState([])
+  
+  // State for all messages (local storage) and visible messages (pagination)
+  const [allMessages, setAllMessages] = useState([])
+  const [visibleCount, setVisibleCount] = useState(15)
+  
   const [inputMessage, setInputMessage] = useState("")
   const [isLoading, setIsLoading] = useState(false)
+  const [isListening, setIsListening] = useState(false)
+  
   const messagesEndRef = useRef(null)
+  const chatContainerRef = useRef(null)
+  const recognitionRef = useRef(null)
 
-  // Get user's first name
-  const getUserName = () => {
-    if (!user?.fullName) return "there"
-    const nameParts = user.fullName.trim().split(/\s+/)
-    return nameParts[0]
+  // Load from local storage on mount
+  useEffect(() => {
+    const saved = localStorage.getItem("chatHistory")
+    if (saved) {
+      setAllMessages(JSON.parse(saved))
+    }
+  }, [])
+
+  // Save to local storage whenever allMessages changes
+  useEffect(() => {
+    if (allMessages.length > 0) {
+      localStorage.setItem("chatHistory", JSON.stringify(allMessages))
+    }
+  }, [allMessages])
+
+  // Scroll to bottom when a new message is added or typing happens
+  useEffect(() => {
+    if (!isLoading) {
+      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
+    }
+  }, [allMessages, isLoading])
+
+  // Handle pagination on scroll up
+  const handleScroll = () => {
+    if (chatContainerRef.current.scrollTop === 0) {
+      if (visibleCount < allMessages.length) {
+        setVisibleCount(prev => Math.min(prev + 15, allMessages.length))
+      }
+    }
   }
 
-  useEffect(() => {
-    // Initial greeting
-    const userName = getUserName()
-    const greeting = {
-      id: Date.now(),
-      text: `Hi ${userName}! How can I help you today?`,
-      sender: "ai",
-      timestamp: new Date(),
+  // Speech to Text Logic
+  const toggleListening = () => {
+    if (isListening) stopListening()
+    else startListening()
+  }
+
+  const startListening = () => {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
+    if (!SpeechRecognition) {
+      alert("Browser doesn't support speech recognition.")
+      return
     }
-    setMessages([greeting])
+
+    const recognition = new SpeechRecognition()
+    recognitionRef.current = recognition
+    recognition.continuous = true
+    recognition.interimResults = true 
+
+    recognition.onstart = () => setIsListening(true)
     
-    // Cleanup on unmount
-    return () => setMessages([])
-  }, [user])
-
-  useEffect(() => {
-    scrollToBottom()
-  }, [messages])
-
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
+    recognition.onresult = (event) => {
+      const currentTranscript = Array.from(event.results)
+        .map(result => result[0].transcript)
+        .join('')
+      setInputMessage(currentTranscript)
+    }
+    
+    recognition.onerror = () => setIsListening(false)
+    recognition.onend = () => setIsListening(false)
+    recognition.start()
   }
 
-  const sendMessage = async () => {
-    if (!inputMessage.trim() || isLoading) return
-
-    const userMessage = {
-      id: Date.now(),
-      text: inputMessage,
-      sender: "user",
-      timestamp: new Date(),
+  const stopListening = () => {
+    if (recognitionRef.current) {
+      recognitionRef.current.stop()
+      setIsListening(false)
     }
-    setMessages((prev) => [...prev, userMessage])
-    setInputMessage("")
+  }
+
+  // Cleanup speech on unmount
+  useEffect(() => {
+    return () => {
+      if (recognitionRef.current) recognitionRef.current.stop()
+    }
+  }, [])
+
+  // Send Message Logic with Streaming support
+  const sendMessage = async (overrideText = null) => {
+    const textToSend = overrideText || inputMessage
+    if (!textToSend.trim() || isLoading) return
+
+    const userMsg = {
+      id: Date.now(),
+      text: textToSend,
+      sender: "user",
+      timestamp: new Date().toISOString(),
+    }
+    
+    setAllMessages(prev => [...prev, userMsg])
+    if (!overrideText) setInputMessage("")
     setIsLoading(true)
+
+    const aiMsgId = Date.now() + 1
+    // Create an empty AI message that will be filled chunk by chunk
+    setAllMessages(prev => [...prev, { id: aiMsgId, text: "", sender: "ai", timestamp: new Date().toISOString() }])
 
     try {
       const token = localStorage.getItem("token")
-      const response = await api.post(
-        "/api/ai/chat",
-        {
-          message: inputMessage,
-          userName: messages.length <= 1 ? getUserName() : undefined,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        }
-      )
+      
+      // Get the last 10 messages for context to avoid huge payloads
+      const contextHistory = allMessages.slice(-10)
 
-      if (response.data.success) {
-        const aiMessage = {
-          id: Date.now() + 1,
-          text: response.data.response,
-          sender: "ai",
-          timestamp: new Date(),
+      const response = await fetch("/api/ai/chat", {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ message: textToSend, history: contextHistory }),
+      })
+
+      if (!response.ok) throw new Error("Failed to connect")
+
+      // Stream Reader
+      const reader = response.body.getReader()
+      const decoder = new TextDecoder()
+
+      while (true) {
+        const { done, value } = await reader.read()
+        if (done) break
+
+        const chunk = decoder.decode(value)
+        const lines = chunk.split("\n")
+
+        for (const line of lines) {
+          if (line.startsWith("data: ")) {
+            const dataStr = line.replace("data: ", "")
+            if (dataStr === "[DONE]") break
+            
+            try {
+              const data = JSON.parse(dataStr)
+              if (data.text) {
+                setAllMessages(prev => prev.map(msg => 
+                  msg.id === aiMsgId ? { ...msg, text: msg.text + data.text } : msg
+                ))
+              }
+            } catch (e) { /* Ignore partial JSON parses */ }
+          }
         }
-        setMessages((prev) => [...prev, aiMessage])
-      } else {
-        throw new Error(response.data.message || "Failed to get AI response")
       }
     } catch (error) {
-      console.error("Error sending message:", error)
-      const errorMessage = {
-        id: Date.now() + 1,
-        text: "Sorry, I encountered an error. Please try again.",
-        sender: "ai",
-        timestamp: new Date(),
-      }
-      setMessages((prev) => [...prev, errorMessage])
+      console.error("Chat error:", error)
+      setAllMessages(prev => prev.map(msg => 
+        msg.id === aiMsgId ? { ...msg, text: "Sorry, I encountered an error. Please try again." } : msg
+      ))
     } finally {
       setIsLoading(false)
     }
   }
 
-  const handleKeyPress = (e) => {
+  const handleKeyDown = (e) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault()
       sendMessage()
     }
   }
 
-  const clearChat = () => {
-    const userName = getUserName()
-    const greeting = {
-      id: Date.now(),
-      text: `Hi ${userName}! How can I help you today?`,
-      sender: "ai",
-      timestamp: new Date(),
-    }
-    setMessages([greeting])
+  const copyToClipboard = (text) => {
+    navigator.clipboard.writeText(text)
   }
 
-  const goBack = () => {
-    window.history.back()
+  const retryMessage = (index) => {
+    // Find the last user message before this AI response and resend it
+    const lastUserMsg = allMessages.slice(0, index).reverse().find(m => m.sender === "user")
+    if (lastUserMsg) sendMessage(lastUserMsg.text)
   }
+
+  const clearChat = () => {
+    setAllMessages([])
+    localStorage.removeItem("chatHistory")
+  }
+
+  // Calculate which messages to show based on pagination
+  const displayedMessages = allMessages.slice(-visibleCount)
 
   return (
     <div className={styles.aiAssistant}>
       <div className={styles.aiHeader}>
-        <button className={styles.backBtn} onClick={goBack}>
+        <button className={styles.iconBtn} onClick={() => window.history.back()}>
           <i className="fas fa-arrow-left"></i>
         </button>
         <div className={styles.aiTitle}>
           <h1>AI Assistant</h1>
-          <p>Powered by Gemini 2.0 Flash Experimental</p>
         </div>
-        <button className={styles.clearBtn} onClick={clearChat}>
+        <button className={styles.iconBtn} onClick={clearChat} title="Clear Chat">
           <i className="fas fa-trash"></i>
         </button>
       </div>
       
       <div className={styles.chatContainer}>
-        <div className={styles.messagesContainer}>
-          {messages.map((message) => (
-            <div key={message.id} className={`${styles.message} ${styles[message.sender]}`}>
-              <div className={styles.messageContent}>
-                <div className={styles.messageText}>{message.text}</div>
-                <div className={styles.messageTime}>
-                  {message.timestamp.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+        {allMessages.length === 0 ? (
+          <div className={styles.emptyState}>
+            <div className={styles.glowingOrb}></div>
+            <h2>Ask me anything, Ezey ⚡</h2>
+          </div>
+        ) : (
+          <div 
+            className={styles.messagesContainer} 
+            ref={chatContainerRef}
+            onScroll={handleScroll}
+          >
+            {visibleCount < allMessages.length && (
+              <div className={styles.loadMore}>Scroll up to see older messages...</div>
+            )}
+
+            {displayedMessages.map((message, index) => (
+              <div key={message.id} className={`${styles.message} ${styles[message.sender]}`}>
+                <div className={styles.messageContent}>
+                  <div className={styles.messageText}>
+                    {message.sender === "ai" ? (
+                      <ReactMarkdown>{message.text}</ReactMarkdown>
+                    ) : (
+                      message.text
+                    )}
+                  </div>
+                  
+                  {message.sender === "ai" && !isLoading && (
+                    <div className={styles.messageActions}>
+                      <button onClick={() => copyToClipboard(message.text)} title="Copy">
+                        <i className="far fa-copy"></i>
+                      </button>
+                      <button onClick={() => retryMessage(allMessages.indexOf(message))} title="Regenerate">
+                        <i className="fas fa-sync-alt"></i>
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
-            </div>
-          ))}
-          
-          {isLoading && (
-            <div className={`${styles.message} ${styles.ai}`}>
-              <div className={styles.messageContent}>
-                <div className={styles.typingIndicator}>
-                  <span></span>
-                  <span></span>
-                  <span></span>
-                </div>
-              </div>
-            </div>
-          )}
-          
-          <div ref={messagesEndRef} />
-        </div>
+            ))}
+            
+            <div ref={messagesEndRef} />
+          </div>
+        )}
         
         <div className={styles.inputContainer}>
           <div className={styles.inputWrapper}>
+            <button 
+              onClick={toggleListening}
+              className={`${styles.micBtn} ${isListening ? styles.listening : ""}`}
+            >
+              <i className={`fas fa-microphone${isListening ? "-slash" : ""}`}></i>
+            </button>
+
             <textarea
               value={inputMessage}
               onChange={(e) => setInputMessage(e.target.value)}
-              onKeyPress={handleKeyPress}
-              placeholder="Type your message here..."
-              rows="1"
+              onKeyDown={handleKeyDown}
+              placeholder={isListening ? "Listening..." : "Message AI..."}
               disabled={isLoading}
               className={styles.messageInput}
             />
+            
             <button 
-              onClick={sendMessage} 
+              onClick={() => sendMessage()} 
               disabled={!inputMessage.trim() || isLoading} 
               className={styles.sendBtn}
             >
