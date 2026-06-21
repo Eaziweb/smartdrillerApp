@@ -9,7 +9,6 @@ import styles from "../../styles/AIAssistant.module.css"
 const AIAssistant = () => {
   const { user } = useAuth()
   
-  // State for all messages (local storage) and visible messages (pagination)
   const [allMessages, setAllMessages] = useState([])
   const [visibleCount, setVisibleCount] = useState(15)
   
@@ -21,7 +20,14 @@ const AIAssistant = () => {
   const chatContainerRef = useRef(null)
   const recognitionRef = useRef(null)
 
-  // Load from local storage on mount
+  // Dynamically get user's first name
+  const getUserName = () => {
+    if (!user?.fullName) return "there"
+    const nameParts = user.fullName.trim().split(/\s+/)
+    return nameParts[0]
+  }
+
+  // Load from local storage
   useEffect(() => {
     const saved = localStorage.getItem("chatHistory")
     if (saved) {
@@ -29,21 +35,21 @@ const AIAssistant = () => {
     }
   }, [])
 
-  // Save to local storage whenever allMessages changes
+  // Save to local storage
   useEffect(() => {
     if (allMessages.length > 0) {
       localStorage.setItem("chatHistory", JSON.stringify(allMessages))
     }
   }, [allMessages])
 
-  // Scroll to bottom when a new message is added or typing happens
+  // Scroll to bottom
   useEffect(() => {
     if (!isLoading) {
       messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
     }
   }, [allMessages, isLoading])
 
-  // Handle pagination on scroll up
+  // Pagination
   const handleScroll = () => {
     if (chatContainerRef.current.scrollTop === 0) {
       if (visibleCount < allMessages.length) {
@@ -52,7 +58,7 @@ const AIAssistant = () => {
     }
   }
 
-  // Speech to Text Logic
+  // Speech to Text
   const toggleListening = () => {
     if (isListening) stopListening()
     else startListening()
@@ -91,14 +97,13 @@ const AIAssistant = () => {
     }
   }
 
-  // Cleanup speech on unmount
   useEffect(() => {
     return () => {
       if (recognitionRef.current) recognitionRef.current.stop()
     }
   }, [])
 
-  // Send Message Logic with Streaming support
+  // Send Message & Stream Logic
   const sendMessage = async (overrideText = null) => {
     const textToSend = overrideText || inputMessage
     if (!textToSend.trim() || isLoading) return
@@ -115,13 +120,10 @@ const AIAssistant = () => {
     setIsLoading(true)
 
     const aiMsgId = Date.now() + 1
-    // Create an empty AI message that will be filled chunk by chunk
     setAllMessages(prev => [...prev, { id: aiMsgId, text: "", sender: "ai", timestamp: new Date().toISOString() }])
 
     try {
       const token = localStorage.getItem("token")
-      
-      // Get the last 10 messages for context to avoid huge payloads
       const contextHistory = allMessages.slice(-10)
 
       const response = await fetch("/api/ai/chat", {
@@ -133,9 +135,8 @@ const AIAssistant = () => {
         body: JSON.stringify({ message: textToSend, history: contextHistory }),
       })
 
-      if (!response.ok) throw new Error("Failed to connect")
+      if (!response.ok) throw new Error("Failed to connect to AI")
 
-      // Stream Reader
       const reader = response.body.getReader()
       const decoder = new TextDecoder()
 
@@ -158,14 +159,14 @@ const AIAssistant = () => {
                   msg.id === aiMsgId ? { ...msg, text: msg.text + data.text } : msg
                 ))
               }
-            } catch (e) { /* Ignore partial JSON parses */ }
+            } catch (e) {}
           }
         }
       }
     } catch (error) {
       console.error("Chat error:", error)
       setAllMessages(prev => prev.map(msg => 
-        msg.id === aiMsgId ? { ...msg, text: "Sorry, I encountered an error. Please try again." } : msg
+        msg.id === aiMsgId ? { ...msg, text: "Sorry, I encountered an error communicating with the AI. Please try again." } : msg
       ))
     } finally {
       setIsLoading(false)
@@ -184,7 +185,6 @@ const AIAssistant = () => {
   }
 
   const retryMessage = (index) => {
-    // Find the last user message before this AI response and resend it
     const lastUserMsg = allMessages.slice(0, index).reverse().find(m => m.sender === "user")
     if (lastUserMsg) sendMessage(lastUserMsg.text)
   }
@@ -194,7 +194,6 @@ const AIAssistant = () => {
     localStorage.removeItem("chatHistory")
   }
 
-  // Calculate which messages to show based on pagination
   const displayedMessages = allMessages.slice(-visibleCount)
 
   return (
@@ -204,7 +203,7 @@ const AIAssistant = () => {
           <i className="fas fa-arrow-left"></i>
         </button>
         <div className={styles.aiTitle}>
-          <h1>AI Assistant</h1>
+          <h1>SmartDriller AI</h1>
         </div>
         <button className={styles.iconBtn} onClick={clearChat} title="Clear Chat">
           <i className="fas fa-trash"></i>
@@ -215,7 +214,7 @@ const AIAssistant = () => {
         {allMessages.length === 0 ? (
           <div className={styles.emptyState}>
             <div className={styles.glowingOrb}></div>
-            <h2>Ask me anything, Ezey ⚡</h2>
+            <h2>Ask me anything, {getUserName()} ⚡</h2>
           </div>
         ) : (
           <div 
