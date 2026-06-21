@@ -25,6 +25,8 @@ const AIAssistant = () => {
   const [isListening, setIsListening] = useState(false)
   const [activeModel, setActiveModel] = useState(null)
   const [toast, setToast] = useState(null)
+  // "landing" = welcome screen, "chat" = active conversation view
+  const [viewMode, setViewMode] = useState("landing")
 
   const messagesEndRef = useRef(null)
   const chatContainerRef = useRef(null)
@@ -52,6 +54,13 @@ const AIAssistant = () => {
       localStorage.setItem("chatHistory", JSON.stringify(allMessages))
     }
   }, [allMessages])
+
+  // Guard: never sit in chat view with nothing to show
+  useEffect(() => {
+    if (viewMode === "chat" && allMessages.length === 0 && !isLoading) {
+      setViewMode("landing")
+    }
+  }, [viewMode, allMessages.length, isLoading])
 
   // Scroll to bottom when a new message is added or typing happens
   useEffect(() => {
@@ -134,6 +143,8 @@ const AIAssistant = () => {
   const sendMessage = async (overrideText = null) => {
     const textToSend = overrideText || inputMessage
     if (!textToSend.trim() || isLoading) return
+
+    setViewMode("chat")
 
     const userMsg = {
       id: Date.now(),
@@ -242,12 +253,24 @@ const AIAssistant = () => {
       setAllMessages([])
       setVisibleCount(15)
       localStorage.removeItem("chatHistory")
+      setViewMode("landing")
     }
   }
+
+  const goToLanding = () => setViewMode("landing")
+  const viewPreviousMessages = () => setViewMode("chat")
 
   const handleQuickPrompt = (text) => {
     setInputMessage(text)
     textareaRef.current?.focus()
+  }
+
+  const handleBack = () => {
+    if (viewMode === "chat" && allMessages.length > 0) {
+      goToLanding()
+    } else {
+      window.history.back()
+    }
   }
 
   // Calculate which messages to show based on pagination
@@ -256,7 +279,7 @@ const AIAssistant = () => {
   return (
     <div className={styles.aiAssistant}>
       <div className={styles.aiHeader}>
-        <button className={styles.iconBtn} onClick={() => window.history.back()} aria-label="Go back">
+        <button className={styles.iconBtn} onClick={handleBack} aria-label="Go back">
           <i className="fas fa-arrow-left"></i>
         </button>
         <div className={styles.aiTitle}>
@@ -271,7 +294,7 @@ const AIAssistant = () => {
       </div>
 
       <div className={styles.chatContainer}>
-        {allMessages.length === 0 ? (
+        {viewMode === "landing" ? (
           <div className={styles.emptyState}>
             <div className={styles.glowingOrb}></div>
             <h2>Ask me anything, {getUserName()} ⚡</h2>
@@ -288,6 +311,12 @@ const AIAssistant = () => {
                 </button>
               ))}
             </div>
+
+            {allMessages.length > 0 && (
+              <button className={styles.viewHistoryLink} onClick={viewPreviousMessages}>
+                <i className="fas fa-clock-rotate-left"></i> View previous messages
+              </button>
+            )}
           </div>
         ) : (
           <div
