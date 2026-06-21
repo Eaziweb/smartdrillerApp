@@ -6,39 +6,40 @@
   --text-primary: #1e293b;
   --text-secondary: #64748b;
   --border-color: #e2e8f0;
-  
-  /* SmartDriller Blues */
-  --sd-blue-light: #0066ff;
-  --sd-blue-dark: #002060;
-  --sd-blue-accent: #0099ff;
-  
-  --primary-color: var(--sd-blue-light);
-  --user-msg-bg: linear-gradient(135deg, var(--sd-blue-light), var(--sd-blue-dark));
+  --primary-color: #0066ff;
+  --primary-color-soft: rgba(0, 102, 255, 0.12);
+  --user-msg-bg: linear-gradient(135deg, #0066ff, #002060);
   --ai-msg-bg: #ffffff;
+  --orb-color-a: #0066ff;
+  --orb-color-b: #00c2ff;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg-primary: #0b141a; 
+    --bg-primary: #0b141a; /* WhatsApp/Meta dark background */
     --bg-secondary: #111b21;
     --bg-accent: #202c33;
     --text-primary: #e9edef;
     --text-secondary: #8696a0;
     --border-color: #202c33;
     --ai-msg-bg: #202c33;
-    /* Deep blue for dark mode user messages, replacing the old green */
-    --user-msg-bg: linear-gradient(135deg, #0f3a8d, #061942); 
+    --user-msg-bg: #005c4b; /* Subtle dark green/blue */
   }
 }
 
+* {
+  box-sizing: border-box;
+}
+
 .aiAssistant {
-  height: 100dvh; /* 100dvh prevents jumping when mobile address bar hides */
+  height: 100vh;
+  height: 100dvh; /* keeps layout stable on mobile when the URL bar shows/hides */
   display: flex;
   flex-direction: column;
   background-color: var(--bg-primary);
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   color: var(--text-primary);
-  overflow: hidden; /* Hard lock the main container from scrolling */
+  overflow: hidden; /* prevents the whole page from scrolling/bouncing on swipe */
 }
 
 /* Glassmorphism Header */
@@ -47,27 +48,34 @@
   align-items: center;
   justify-content: space-between;
   padding: 1rem 1.5rem;
-  background: linear-gradient(135deg, rgba(0, 102, 255, 0.9), rgba(0, 32, 96, 0.9));
+  background: rgba(var(--bg-primary), 0.8);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  color: white;
-  flex-shrink: 0; /* Prevents header from resizing */
+  border-bottom: 1px solid var(--border-color);
+  flex-shrink: 0;
   z-index: 100;
 }
 
 .iconBtn {
   width: 40px;
   height: 40px;
-  border-radius: 12px;
+  border-radius: 50%;
   border: none;
-  background: rgba(255, 255, 255, 0.15); /* Match your image's translucent icons */
-  color: white;
+  background: transparent;
+  color: var(--text-primary);
   cursor: pointer;
   transition: background 0.3s;
 }
 
 .iconBtn:hover {
-  background: rgba(255, 255, 255, 0.25);
+  background: var(--bg-accent);
+}
+
+.aiTitle {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.15rem;
 }
 
 .aiTitle h1 {
@@ -76,7 +84,27 @@
   margin: 0;
 }
 
-/* Empty State */
+.modelBadge {
+  font-size: 0.7rem;
+  color: var(--text-secondary);
+  background: var(--bg-accent);
+  padding: 0.1rem 0.5rem;
+  border-radius: 999px;
+  letter-spacing: 0.02em;
+}
+
+/* Chat Layout & Scrollbars — this column owns the scrolling, the page itself never moves */
+.chatContainer {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--bg-primary);
+  min-height: 0; /* required so flex children can scroll instead of overflowing */
+  position: relative;
+}
+
+/* Empty State (Meta AI style) */
 .emptyState {
   flex: 1;
   display: flex;
@@ -84,18 +112,19 @@
   align-items: center;
   justify-content: center;
   background-color: var(--bg-primary);
-  background-image: radial-gradient(circle at center, rgba(0,102,255,0.03) 0%, transparent 100%);
+  background-image: radial-gradient(circle at center, rgba(255,255,255,0.03) 0%, transparent 100%);
+  padding: 2rem;
+  text-align: center;
 }
 
 .glowingOrb {
   width: 80px;
   height: 80px;
   border-radius: 50%;
-  /* Updated to SmartDriller blues */
-  background: conic-gradient(from 0deg, var(--sd-blue-light), var(--sd-blue-accent), var(--sd-blue-dark), var(--sd-blue-light));
+  background: conic-gradient(from 0deg, var(--orb-color-a), var(--orb-color-b), var(--orb-color-a));
   animation: spin 4s linear infinite, pulse 2s ease-in-out infinite;
   margin-bottom: 1.5rem;
-  filter: blur(10px);
+  filter: blur(8px);
 }
 
 @keyframes spin { 100% { transform: rotate(360deg); } }
@@ -105,20 +134,45 @@
   font-size: 1.5rem;
   font-weight: 500;
   color: var(--text-primary);
+  margin: 0 0 0.4rem 0;
 }
 
-/* Chat Layout & Scrollbars */
-.chatContainer {
-  flex: 1;
+.emptySubtext {
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+  margin: 0 0 1.5rem 0;
+}
+
+.quickPrompts {
   display: flex;
-  flex-direction: column;
-  overflow: hidden; /* Ensures only the messages area scrolls */
-  background: var(--bg-primary);
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  justify-content: center;
+  max-width: 420px;
+}
+
+.quickPromptChip {
+  background: var(--bg-accent);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+  padding: 0.5rem 1rem;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.quickPromptChip:hover {
+  border-color: var(--primary-color);
+  background: var(--primary-color-soft);
+  color: var(--primary-color);
 }
 
 .messagesContainer {
   flex: 1;
-  overflow-y: auto; /* Scrollable area */
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain; /* stops swipe-down from dragging the whole page/bar */
   padding: 1.5rem;
   display: flex;
   flex-direction: column;
@@ -191,6 +245,29 @@
   overflow-x: auto;
 }
 
+/* Typing indicator while waiting for first token */
+.typingDots {
+  display: inline-flex;
+  gap: 4px;
+  padding: 0.25rem 0;
+}
+
+.typingDots span {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--text-secondary);
+  animation: typingBounce 1.2s infinite ease-in-out;
+}
+
+.typingDots span:nth-child(2) { animation-delay: 0.15s; }
+.typingDots span:nth-child(3) { animation-delay: 0.3s; }
+
+@keyframes typingBounce {
+  0%, 60%, 100% { transform: translateY(0); opacity: 0.5; }
+  30% { transform: translateY(-4px); opacity: 1; }
+}
+
 /* Copy & Retry Buttons */
 .messageActions {
   display: flex;
@@ -211,23 +288,46 @@
 
 .messageActions button:hover { color: var(--primary-color); }
 
-/* Input Area (Fixed strictly to bottom) */
+/* Toast */
+.toast {
+  position: absolute;
+  bottom: 1rem;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--text-primary);
+  color: var(--bg-primary);
+  padding: 0.5rem 1rem;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 50;
+  animation: toastIn 0.2s ease;
+}
+
+@keyframes toastIn {
+  from { opacity: 0; transform: translate(-50%, 8px); }
+  to { opacity: 1; transform: translate(-50%, 0); }
+}
+
+/* Input Area — flex-shrink:0 + the parent's overflow:hidden keep this bar
+   pinned in place; it no longer drifts when the page bounces on a swipe */
 .inputContainer {
   padding: 1rem 1.5rem;
+  padding-bottom: max(1rem, env(safe-area-inset-bottom));
   background: var(--bg-primary);
   border-top: 1px solid var(--border-color);
-  flex-shrink: 0; /* Prevents the input box from being squished */
+  flex-shrink: 0;
 }
 
 .inputWrapper {
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   gap: 0.75rem;
   background: var(--bg-secondary);
   border-radius: 24px;
   padding: 0.5rem 1rem;
   border: 2px solid transparent;
-  transition: all 0.3s ease;
+  transition: border-color 0.3s ease;
 }
 
 .inputWrapper:has(.messageInput:focus) {
@@ -244,8 +344,10 @@
   color: var(--text-primary);
   max-height: 120px;
   padding: 0.5rem 0;
+  font-family: inherit;
 }
 
+/* Microphone & Send Buttons */
 .micBtn, .sendBtn {
   width: 36px;
   height: 36px;
@@ -256,6 +358,7 @@
   justify-content: center;
   cursor: pointer;
   transition: all 0.3s;
+  flex-shrink: 0;
 }
 
 .micBtn {
