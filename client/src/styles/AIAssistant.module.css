@@ -168,6 +168,23 @@
   color: var(--primary-color);
 }
 
+.viewHistoryLink {
+  margin-top: 1.5rem;
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  transition: color 0.2s ease;
+}
+
+.viewHistoryLink:hover {
+  color: var(--primary-color);
+}
+
 .messagesContainer {
   flex: 1;
   overflow-y: auto;
