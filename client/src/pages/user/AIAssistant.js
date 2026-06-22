@@ -157,103 +157,100 @@ const AIAssistant = () => {
   }, [toast])
 
   const sendMessage = async (overrideText = null) => {
-    const textToSend = overrideText || inputMessage
-    if (!textToSend.trim() && !selectedImage) return // allow sending just an image
+  const textToSend = overrideText || inputMessage
 
-    setViewMode("chat")
+  if (!textToSend.trim() && !selectedImage) return
 
-    const userMsg = {
-      id: Date.now(),
-      text: textToSend,
-      sender: "user",
-      timestamp: new Date().toISOString(),
-      // Display a tiny thumbnail placeholder in the chat log if sent an image
-      hasImage: !!selectedImage 
+  setViewMode("chat")
+
+  const userMsg = {
+    id: Date.now(),
+    text: textToSend,
+    sender: "user",
+    timestamp: new Date().toISOString(),
+    hasImage: !!selectedImage
+  }
+
+  setAllMessages(prev => [...prev, userMsg])
+
+  const currentImage = selectedImage
+
+  if (!overrideText) setInputMessage("")
+  removeImage()
+
+  setIsLoading(true)
+
+  const aiMsgId = Date.now() + 1
+
+  setAllMessages(prev => [
+    ...prev,
+    {
+      id: aiMsgId,
+      text: "",
+      sender: "ai",
+      timestamp: new Date().toISOString()
+    }
+  ])
+
+  try {
+    const token = localStorage.getItem("token")
+
+    const payload = {
+      message: textToSend,
+      history: allMessages.slice(-10)
     }
 
-    setAllMessages(prev => [...prev, userMsg])
-    
-    // Clear inputs immediately
-    if (!overrideText) setInputMessage("")
-    const currentImage = selectedImage
-    removeImage() 
-    
-    setIsLoading(true)
-    setActiveModel(null)
+    if (currentImage) {
+      payload.imageBase64 = currentImage.base64
+      payload.mimeType = currentImage.mimeType
+    }
 
-    const aiMsgId = Date.now() + 1
-    setAllMessages(prev => [...prev, { id: aiMsgId, text: "", sender: "ai", timestamp: new Date().toISOString() }])
+    const response = await fetch("/api/ai/chat", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(payload)
+    })
 
-    try {
-      const token = localStorage.getItem("token")
-      const contextHistory = allMessages.slice(-10)
+    const data = await response.json()
 
-      const payload = {
-        message: textToSend,
-        history: contextHistory
-      }
+    if (!response.ok) {
+      throw new Error(
+        data.message ||
+        JSON.stringify(data.googleError) ||
+        `Server error ${response.status}`
+      )
+    }
 
-      // Append image data if present
-      if (currentImage) {
-        payload.imageBase64 = currentImage.base64
-        payload.mimeType = currentImage.mimeType
-      }
-
-      const response = await fetch("/api/ai/chat", {
-        method: "POST",
-        headers: {
-          "Authorization": `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(payload),
-      })
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.message || `Server error: ${response.status}`);
-      }
-
-      const reader = response.body.getReader()
-      const decoder = new TextDecoder()
-      let buffer = ""
-
-      while (true) {
-        const { done, value } = await reader.read()
-        if (done) break
-
-        buffer += decoder.decode(value, { stream: true })
-        const lines = buffer.split("\n")
-        buffer = lines.pop() 
-
-        for (const line of lines) {
-          if (line.startsWith("data: ")) {
-            const dataStr = line.replace("data: ", "")
-            if (dataStr === "[DONE]") continue
-
-            try {
-              const data = JSON.parse(dataStr)
-              if (data.model) setActiveModel(data.model)
-              if (data.text) {
-                setAllMessages(prev => prev.map(msg =>
-                  msg.id === aiMsgId ? { ...msg, text: msg.text + data.text } : msg
-                ))
-              }
-              if (data.error) throw new Error(data.error)
-            } catch (e) {
-              if(dataStr.includes("error")) console.error("Stream parse issue:", e)
+    setAllMessages(prev =>
+      prev.map(msg =>
+        msg.id === aiMsgId
+          ? {
+              ...msg,
+              text: data.text || "No response received"
             }
-          }
-        }
-      }
-    } catch (error) {
-      console.error("Chat error:", error)
-      setAllMessages(prev => prev.map(msg =>
-        msg.id === aiMsgId ? { ...msg, text: `⚠️ Error: ${error.message}`, isError: true } : msg
-      ))
-    } finally {
-      setIsLoading(false)
-      setActiveModel(null)
-    }
+          : msg
+      )
+    )
+  } catch (error) {
+    console.error(error)
+
+    setAllMessages(prev =>
+      prev.map(msg =>
+        msg.id === aiMsgId
+          ? {
+              ...msg,
+              text: `⚠️ ${error.message}`,
+              isError: true
+            }
+          : msg
+      )
+    )
+  } finally {
+    setIsLoading(false)
+  }
   }
 
   const handleKeyDown = (e) => {
