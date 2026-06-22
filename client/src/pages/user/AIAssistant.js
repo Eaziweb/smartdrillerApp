@@ -1,3 +1,4 @@
+// AIAssistant.jsx
 "use client"
 
 import { useState, useEffect, useRef } from "react"
@@ -15,53 +16,58 @@ const QUICK_PROMPTS = [
 const AIAssistant = () => {
   const { user } = useAuth()
 
+  // State for all messages (local storage) and visible messages (pagination)
   const [allMessages, setAllMessages] = useState([])
   const [visibleCount, setVisibleCount] = useState(15)
+
   const [inputMessage, setInputMessage] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const [isListening, setIsListening] = useState(false)
   const [activeModel, setActiveModel] = useState(null)
   const [toast, setToast] = useState(null)
+  // "landing" = welcome screen, "chat" = active conversation view
   const [viewMode, setViewMode] = useState("landing")
-  
-  // NEW: Image Upload State
-  const [selectedImage, setSelectedImage] = useState(null)
 
   const messagesEndRef = useRef(null)
   const chatContainerRef = useRef(null)
   const recognitionRef = useRef(null)
   const textareaRef = useRef(null)
-  const fileInputRef = useRef(null)
 
+  // Dynamically get user's first name
   const getUserName = () => {
     if (!user?.fullName) return "there"
     const nameParts = user.fullName.trim().split(/\s+/)
     return nameParts[0]
   }
 
+  // Load from local storage on mount
   useEffect(() => {
     const saved = localStorage.getItem("chatHistory")
-    if (saved) setAllMessages(JSON.parse(saved))
+    if (saved) {
+      setAllMessages(JSON.parse(saved))
+    }
   }, [])
 
+  // Save to local storage whenever allMessages changes
   useEffect(() => {
     if (allMessages.length > 0) {
       localStorage.setItem("chatHistory", JSON.stringify(allMessages))
     }
   }, [allMessages])
 
+  // Guard: never sit in chat view with nothing to show
   useEffect(() => {
     if (viewMode === "chat" && allMessages.length === 0 && !isLoading) {
       setViewMode("landing")
     }
   }, [viewMode, allMessages.length, isLoading])
 
+  // Scroll to bottom when a new message is added or typing happens
   useEffect(() => {
-    if (!isLoading) {
-      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
-    }
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
   }, [allMessages, isLoading])
 
+  // Auto-grow textarea, capped by CSS max-height
   useEffect(() => {
     if (textareaRef.current) {
       textareaRef.current.style.height = "auto"
@@ -69,6 +75,7 @@ const AIAssistant = () => {
     }
   }, [inputMessage])
 
+  // Handle pagination on scroll up
   const handleScroll = () => {
     if (chatContainerRef.current.scrollTop === 0) {
       if (visibleCount < allMessages.length) {
@@ -77,35 +84,7 @@ const AIAssistant = () => {
     }
   }
 
-  // --- Image Handling ---
-  const handleImageSelect = (e) => {
-    const file = e.target.files[0]
-    if (!file) return
-
-    if (file.size > 5 * 1024 * 1024) { // 5MB limit
-      setToast("Image is too large (max 5MB).")
-      return
-    }
-
-    const reader = new FileReader()
-    reader.onloadend = () => {
-      setSelectedImage({
-        file: file,
-        base64: reader.result,
-        mimeType: file.type
-      })
-      // Ensure input focuses back after selection
-      textareaRef.current?.focus()
-    }
-    reader.readAsDataURL(file)
-  }
-
-  const removeImage = () => {
-    setSelectedImage(null)
-    if (fileInputRef.current) fileInputRef.current.value = ""
-  }
-  // ----------------------
-
+  // Speech to Text Logic
   const toggleListening = () => {
     if (isListening) stopListening()
     else startListening()
@@ -144,113 +123,86 @@ const AIAssistant = () => {
     }
   }
 
+  // Cleanup speech on unmount
   useEffect(() => {
     return () => {
       if (recognitionRef.current) recognitionRef.current.stop()
     }
   }, [])
 
+  // Auto-dismiss toast
   useEffect(() => {
     if (!toast) return
     const t = setTimeout(() => setToast(null), 3000)
     return () => clearTimeout(t)
   }, [toast])
 
+  // Send Message Logic (Standard JSON Request)
   const sendMessage = async (overrideText = null) => {
-  const textToSend = overrideText || inputMessage
+    const textToSend = overrideText || inputMessage
+    if (!textToSend.trim() || isLoading) return
 
-  if (!textToSend.trim() && !selectedImage) return
+    setViewMode("chat")
 
-  setViewMode("chat")
-
-  const userMsg = {
-    id: Date.now(),
-    text: textToSend,
-    sender: "user",
-    timestamp: new Date().toISOString(),
-    hasImage: !!selectedImage
-  }
-
-  setAllMessages(prev => [...prev, userMsg])
-
-  const currentImage = selectedImage
-
-  if (!overrideText) setInputMessage("")
-  removeImage()
-
-  setIsLoading(true)
-
-  const aiMsgId = Date.now() + 1
-
-  setAllMessages(prev => [
-    ...prev,
-    {
-      id: aiMsgId,
-      text: "",
-      sender: "ai",
-      timestamp: new Date().toISOString()
-    }
-  ])
-
-  try {
-    const token = localStorage.getItem("token")
-
-    const payload = {
-      message: textToSend,
-      history: allMessages.slice(-10)
+    // 1. Add User Message immediately
+    const userMsg = {
+      id: Date.now(),
+      text: textToSend,
+      sender: "user",
+      timestamp: new Date().toISOString(),
     }
 
-    if (currentImage) {
-      payload.imageBase64 = currentImage.base64
-      payload.mimeType = currentImage.mimeType
+    setAllMessages(prev => [...prev, userMsg])
+    if (!overrideText) setInputMessage("")
+    setIsLoading(true)
+    setActiveModel(null)
+
+    try {
+      const token = localStorage.getItem("token")
+      const contextHistory = allMessages.slice(-10)
+
+      // 2. Make the API Call to your standard JSON endpoint
+      const response = await fetch("/api/ai/chat", {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ message: textToSend, history: contextHistory }),
+      })
+
+      const data = await response.json()
+
+      if (!response.ok || !data.success) {
+        throw new Error(data.message || "Failed to connect to AI")
+      }
+
+      // 3. Add the complete AI Message to the chat
+      const aiMsg = {
+        id: Date.now() + 1,
+        text: data.text,
+        sender: "ai",
+        timestamp: new Date().toISOString(),
+      }
+
+      setAllMessages(prev => [...prev, aiMsg])
+      setActiveModel(data.model)
+
+    } catch (error) {
+      console.error("Chat error:", error)
+      
+      const errorMsg = {
+        id: Date.now() + 1,
+        text: "Sorry, I ran into an error. Please try again.",
+        sender: "ai",
+        isError: true,
+        timestamp: new Date().toISOString(),
+      }
+      
+      setAllMessages(prev => [...prev, errorMsg])
+    } finally {
+      setIsLoading(false)
     }
-
-    const response = await fetch("/api/ai/chat", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify(payload)
-    })
-
-    const data = await response.json()
-
-    if (!response.ok) {
-      throw new Error(
-        data.message ||
-        JSON.stringify(data.googleError) ||
-        `Server error ${response.status}`
-      )
-    }
-
-    setAllMessages(prev =>
-      prev.map(msg =>
-        msg.id === aiMsgId
-          ? {
-              ...msg,
-              text: data.text || "No response received"
-            }
-          : msg
-      )
-    )
-  } catch (error) {
-    console.error(error)
-
-    setAllMessages(prev =>
-      prev.map(msg =>
-        msg.id === aiMsgId
-          ? {
-              ...msg,
-              text: `⚠️ ${error.message}`,
-              isError: true
-            }
-          : msg
-      )
-    )
-  } finally {
-    setIsLoading(false)
-  }
   }
 
   const handleKeyDown = (e) => {
@@ -299,6 +251,7 @@ const AIAssistant = () => {
     }
   }
 
+  // Calculate which messages to show based on pagination
   const displayedMessages = allMessages.slice(-visibleCount)
 
   return (
@@ -355,30 +308,18 @@ const AIAssistant = () => {
 
             {displayedMessages.map((message) => {
               const trueIndex = allMessages.indexOf(message)
-              const isStreamingNow = isLoading && message.sender === "ai" && trueIndex === allMessages.length - 1
               return (
                 <div key={message.id} className={`${styles.message} ${styles[message.sender]}`}>
                   <div className={styles.messageContent}>
                     <div className={styles.messageText}>
-                      {message.hasImage && (
-                         <div className={styles.chatImageIndicator}>
-                           <i className="fas fa-image"></i> Image attached
-                         </div>
-                      )}
                       {message.sender === "ai" ? (
-                        message.text ? (
-                          <ReactMarkdown>{message.text}</ReactMarkdown>
-                        ) : (
-                          <span className={styles.typingDots}>
-                            <span></span><span></span><span></span>
-                          </span>
-                        )
+                        <ReactMarkdown>{message.text}</ReactMarkdown>
                       ) : (
                         message.text
                       )}
                     </div>
 
-                    {message.sender === "ai" && !isStreamingNow && message.text && (
+                    {message.sender === "ai" && (
                       <div className={styles.messageActions}>
                         <button onClick={() => copyToClipboard(message.text)} title="Copy">
                           <i className="far fa-copy"></i>
@@ -393,6 +334,19 @@ const AIAssistant = () => {
               )
             })}
 
+            {/* Loading Indicator while waiting for standard API response */}
+            {isLoading && (
+              <div className={`${styles.message} ${styles.ai}`}>
+                <div className={styles.messageContent}>
+                  <div className={styles.messageText}>
+                    <span className={styles.typingDots}>
+                      <span></span><span></span><span></span>
+                    </span>
+                  </div>
+                </div>
+              </div>
+            )}
+
             <div ref={messagesEndRef} />
           </div>
         )}
@@ -400,33 +354,7 @@ const AIAssistant = () => {
         {toast && <div className={styles.toast}>{toast}</div>}
 
         <div className={styles.inputContainer}>
-          {selectedImage && (
-            <div className={styles.imagePreviewContainer}>
-              <img src={selectedImage.base64} alt="Preview" className={styles.imagePreview} />
-              <button className={styles.removeImageBtn} onClick={removeImage}>
-                <i className="fas fa-times"></i>
-              </button>
-            </div>
-          )}
-
           <div className={styles.inputWrapper}>
-            {/* Hidden File Input */}
-            <input 
-              type="file" 
-              accept="image/*" 
-              ref={fileInputRef} 
-              style={{ display: "none" }} 
-              onChange={handleImageSelect} 
-            />
-            
-            <button
-              onClick={() => fileInputRef.current?.click()}
-              className={styles.attachBtn}
-              aria-label="Attach Image"
-            >
-              <i className="fas fa-paperclip"></i>
-            </button>
-
             <button
               onClick={toggleListening}
               className={`${styles.micBtn} ${isListening ? styles.listening : ""}`}
@@ -448,7 +376,7 @@ const AIAssistant = () => {
 
             <button
               onClick={() => sendMessage()}
-              disabled={(!inputMessage.trim() && !selectedImage) || isLoading}
+              disabled={!inputMessage.trim() || isLoading}
               className={styles.sendBtn}
               aria-label="Send message"
             >
