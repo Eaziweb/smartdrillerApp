@@ -8,8 +8,11 @@
   --border-color: #e2e8f0;
   --primary-color: #0066ff;
   --primary-color-soft: rgba(0, 102, 255, 0.12);
-  --user-msg-bg: linear-gradient(135deg, #0066ff, #002060);
+  
+  /* UPDATED: Light blue for user messages, White for AI */
+  --user-msg-bg: #e0f0ff;
   --ai-msg-bg: #ffffff;
+  
   --orb-color-a: #0066ff;
   --orb-color-b: #00c2ff;
 }
@@ -23,7 +26,7 @@
     --text-secondary: #8696a0;
     --border-color: #202c33;
     --ai-msg-bg: #202c33;
-    --user-msg-bg: #005c4b; /* Subtle dark green/blue */
+    --user-msg-bg: #005c4b; /* Subtle dark green/blue for dark mode */
   }
 }
 
@@ -228,9 +231,10 @@
   position: relative;
 }
 
+/* UPDATED: User text color is var(--text-primary) to contrast with the light blue background */
 .message.user .messageContent {
   background: var(--user-msg-bg);
-  color: white;
+  color: var(--text-primary); 
   border-bottom-right-radius: 4px;
 }
 
