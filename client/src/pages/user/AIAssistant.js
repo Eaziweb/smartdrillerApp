@@ -23,11 +23,15 @@ const AIAssistant = () => {
   const [activeModel, setActiveModel] = useState(null)
   const [toast, setToast] = useState(null)
   const [viewMode, setViewMode] = useState("landing")
+  
+  // NEW: Image Upload State
+  const [selectedImage, setSelectedImage] = useState(null)
 
   const messagesEndRef = useRef(null)
   const chatContainerRef = useRef(null)
   const recognitionRef = useRef(null)
   const textareaRef = useRef(null)
+  const fileInputRef = useRef(null)
 
   const getUserName = () => {
     if (!user?.fullName) return "there"
@@ -72,6 +76,35 @@ const AIAssistant = () => {
       }
     }
   }
+
+  // --- Image Handling ---
+  const handleImageSelect = (e) => {
+    const file = e.target.files[0]
+    if (!file) return
+
+    if (file.size > 5 * 1024 * 1024) { // 5MB limit
+      setToast("Image is too large (max 5MB).")
+      return
+    }
+
+    const reader = new FileReader()
+    reader.onloadend = () => {
+      setSelectedImage({
+        file: file,
+        base64: reader.result,
+        mimeType: file.type
+      })
+      // Ensure input focuses back after selection
+      textareaRef.current?.focus()
+    }
+    reader.readAsDataURL(file)
+  }
+
+  const removeImage = () => {
+    setSelectedImage(null)
+    if (fileInputRef.current) fileInputRef.current.value = ""
+  }
+  // ----------------------
 
   const toggleListening = () => {
     if (isListening) stopListening()
@@ -125,7 +158,7 @@ const AIAssistant = () => {
 
   const sendMessage = async (overrideText = null) => {
     const textToSend = overrideText || inputMessage
-    if (!textToSend.trim() || isLoading) return
+    if (!textToSend.trim() && !selectedImage) return // allow sending just an image
 
     setViewMode("chat")
 
@@ -134,10 +167,17 @@ const AIAssistant = () => {
       text: textToSend,
       sender: "user",
       timestamp: new Date().toISOString(),
+      // Display a tiny thumbnail placeholder in the chat log if sent an image
+      hasImage: !!selectedImage 
     }
 
     setAllMessages(prev => [...prev, userMsg])
+    
+    // Clear inputs immediately
     if (!overrideText) setInputMessage("")
+    const currentImage = selectedImage
+    removeImage() 
+    
     setIsLoading(true)
     setActiveModel(null)
 
@@ -148,16 +188,26 @@ const AIAssistant = () => {
       const token = localStorage.getItem("token")
       const contextHistory = allMessages.slice(-10)
 
+      const payload = {
+        message: textToSend,
+        history: contextHistory
+      }
+
+      // Append image data if present
+      if (currentImage) {
+        payload.imageBase64 = currentImage.base64
+        payload.mimeType = currentImage.mimeType
+      }
+
       const response = await fetch("/api/ai/chat", {
         method: "POST",
         headers: {
           "Authorization": `Bearer ${token}`,
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ message: textToSend, history: contextHistory }),
+        body: JSON.stringify(payload),
       })
 
-      // Catch non-streaming backend errors immediately
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
         throw new Error(errorData.message || `Server error: ${response.status}`);
@@ -197,7 +247,6 @@ const AIAssistant = () => {
       }
     } catch (error) {
       console.error("Chat error:", error)
-      // Display the EXACT error to the user to help debug
       setAllMessages(prev => prev.map(msg =>
         msg.id === aiMsgId ? { ...msg, text: `⚠️ Error: ${error.message}`, isError: true } : msg
       ))
@@ -314,6 +363,11 @@ const AIAssistant = () => {
                 <div key={message.id} className={`${styles.message} ${styles[message.sender]}`}>
                   <div className={styles.messageContent}>
                     <div className={styles.messageText}>
+                      {message.hasImage && (
+                         <div className={styles.chatImageIndicator}>
+                           <i className="fas fa-image"></i> Image attached
+                         </div>
+                      )}
                       {message.sender === "ai" ? (
                         message.text ? (
                           <ReactMarkdown>{message.text}</ReactMarkdown>
@@ -349,7 +403,33 @@ const AIAssistant = () => {
         {toast && <div className={styles.toast}>{toast}</div>}
 
         <div className={styles.inputContainer}>
+          {selectedImage && (
+            <div className={styles.imagePreviewContainer}>
+              <img src={selectedImage.base64} alt="Preview" className={styles.imagePreview} />
+              <button className={styles.removeImageBtn} onClick={removeImage}>
+                <i className="fas fa-times"></i>
+              </button>
+            </div>
+          )}
+
           <div className={styles.inputWrapper}>
+            {/* Hidden File Input */}
+            <input 
+              type="file" 
+              accept="image/*" 
+              ref={fileInputRef} 
+              style={{ display: "none" }} 
+              onChange={handleImageSelect} 
+            />
+            
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              className={styles.attachBtn}
+              aria-label="Attach Image"
+            >
+              <i className="fas fa-paperclip"></i>
+            </button>
+
             <button
               onClick={toggleListening}
               className={`${styles.micBtn} ${isListening ? styles.listening : ""}`}
@@ -371,7 +451,7 @@ const AIAssistant = () => {
 
             <button
               onClick={() => sendMessage()}
-              disabled={!inputMessage.trim() || isLoading}
+              disabled={(!inputMessage.trim() && !selectedImage) || isLoading}
               className={styles.sendBtn}
               aria-label="Send message"
             >
