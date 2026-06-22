@@ -1,4 +1,3 @@
-// AIAssistant.jsx
 "use client"
 
 import { useState, useEffect, useRef } from "react"
@@ -16,16 +15,13 @@ const QUICK_PROMPTS = [
 const AIAssistant = () => {
   const { user } = useAuth()
 
-  // State for all messages (local storage) and visible messages (pagination)
   const [allMessages, setAllMessages] = useState([])
   const [visibleCount, setVisibleCount] = useState(15)
-
   const [inputMessage, setInputMessage] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const [isListening, setIsListening] = useState(false)
   const [activeModel, setActiveModel] = useState(null)
   const [toast, setToast] = useState(null)
-  // "landing" = welcome screen, "chat" = active conversation view
   const [viewMode, setViewMode] = useState("landing")
 
   const messagesEndRef = useRef(null)
@@ -33,43 +29,35 @@ const AIAssistant = () => {
   const recognitionRef = useRef(null)
   const textareaRef = useRef(null)
 
-  // Dynamically get user's first name
   const getUserName = () => {
     if (!user?.fullName) return "there"
     const nameParts = user.fullName.trim().split(/\s+/)
     return nameParts[0]
   }
 
-  // Load from local storage on mount
   useEffect(() => {
     const saved = localStorage.getItem("chatHistory")
-    if (saved) {
-      setAllMessages(JSON.parse(saved))
-    }
+    if (saved) setAllMessages(JSON.parse(saved))
   }, [])
 
-  // Save to local storage whenever allMessages changes
   useEffect(() => {
     if (allMessages.length > 0) {
       localStorage.setItem("chatHistory", JSON.stringify(allMessages))
     }
   }, [allMessages])
 
-  // Guard: never sit in chat view with nothing to show
   useEffect(() => {
     if (viewMode === "chat" && allMessages.length === 0 && !isLoading) {
       setViewMode("landing")
     }
   }, [viewMode, allMessages.length, isLoading])
 
-  // Scroll to bottom when a new message is added or typing happens
   useEffect(() => {
     if (!isLoading) {
       messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
     }
   }, [allMessages, isLoading])
 
-  // Auto-grow textarea, capped by CSS max-height
   useEffect(() => {
     if (textareaRef.current) {
       textareaRef.current.style.height = "auto"
@@ -77,7 +65,6 @@ const AIAssistant = () => {
     }
   }, [inputMessage])
 
-  // Handle pagination on scroll up
   const handleScroll = () => {
     if (chatContainerRef.current.scrollTop === 0) {
       if (visibleCount < allMessages.length) {
@@ -86,7 +73,6 @@ const AIAssistant = () => {
     }
   }
 
-  // Speech to Text Logic
   const toggleListening = () => {
     if (isListening) stopListening()
     else startListening()
@@ -125,21 +111,18 @@ const AIAssistant = () => {
     }
   }
 
-  // Cleanup speech on unmount
   useEffect(() => {
     return () => {
       if (recognitionRef.current) recognitionRef.current.stop()
     }
   }, [])
 
-  // Auto-dismiss toast
   useEffect(() => {
     if (!toast) return
     const t = setTimeout(() => setToast(null), 3000)
     return () => clearTimeout(t)
   }, [toast])
 
-  // Send Message Logic with Streaming support
   const sendMessage = async (overrideText = null) => {
     const textToSend = overrideText || inputMessage
     if (!textToSend.trim() || isLoading) return
@@ -159,13 +142,10 @@ const AIAssistant = () => {
     setActiveModel(null)
 
     const aiMsgId = Date.now() + 1
-    // Create an empty AI message that will be filled chunk by chunk
     setAllMessages(prev => [...prev, { id: aiMsgId, text: "", sender: "ai", timestamp: new Date().toISOString() }])
 
     try {
       const token = localStorage.getItem("token")
-
-      // Get the last 10 messages for context to avoid huge payloads
       const contextHistory = allMessages.slice(-10)
 
       const response = await fetch("/api/ai/chat", {
@@ -177,9 +157,12 @@ const AIAssistant = () => {
         body: JSON.stringify({ message: textToSend, history: contextHistory }),
       })
 
-      if (!response.ok) throw new Error("Failed to connect")
+      // Catch non-streaming backend errors immediately
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || `Server error: ${response.status}`);
+      }
 
-      // Stream Reader
       const reader = response.body.getReader()
       const decoder = new TextDecoder()
       let buffer = ""
@@ -190,7 +173,7 @@ const AIAssistant = () => {
 
         buffer += decoder.decode(value, { stream: true })
         const lines = buffer.split("\n")
-        buffer = lines.pop() // keep any incomplete line for next chunk
+        buffer = lines.pop() 
 
         for (const line of lines) {
           if (line.startsWith("data: ")) {
@@ -199,25 +182,24 @@ const AIAssistant = () => {
 
             try {
               const data = JSON.parse(dataStr)
-              if (data.model) {
-                setActiveModel(data.model)
-              }
+              if (data.model) setActiveModel(data.model)
               if (data.text) {
                 setAllMessages(prev => prev.map(msg =>
                   msg.id === aiMsgId ? { ...msg, text: msg.text + data.text } : msg
                 ))
               }
-              if (data.error) {
-                throw new Error(data.error)
-              }
-            } catch (e) { /* Ignore partial JSON parses */ }
+              if (data.error) throw new Error(data.error)
+            } catch (e) {
+              if(dataStr.includes("error")) console.error("Stream parse issue:", e)
+            }
           }
         }
       }
     } catch (error) {
       console.error("Chat error:", error)
+      // Display the EXACT error to the user to help debug
       setAllMessages(prev => prev.map(msg =>
-        msg.id === aiMsgId ? { ...msg, text: "Sorry, I ran into an error. Please try again.", isError: true } : msg
+        msg.id === aiMsgId ? { ...msg, text: `⚠️ Error: ${error.message}`, isError: true } : msg
       ))
     } finally {
       setIsLoading(false)
@@ -238,10 +220,8 @@ const AIAssistant = () => {
   }
 
   const retryMessage = (index) => {
-    // Find the last user message before this AI response and resend it
     const lastUserMsg = allMessages.slice(0, index).reverse().find(m => m.sender === "user")
     if (lastUserMsg) {
-      // Remove the failed/old AI response before retrying
       setAllMessages(prev => prev.slice(0, index))
       sendMessage(lastUserMsg.text)
     }
@@ -273,7 +253,6 @@ const AIAssistant = () => {
     }
   }
 
-  // Calculate which messages to show based on pagination
   const displayedMessages = allMessages.slice(-visibleCount)
 
   return (
