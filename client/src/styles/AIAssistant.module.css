@@ -9,7 +9,6 @@
   --primary-color: #0066ff;
   --primary-color-soft: rgba(0, 102, 255, 0.12);
   
-  /* UPDATED: Light blue for user messages, White for AI */
   --user-msg-bg: #e0f0ff;
   --ai-msg-bg: #ffffff;
   
@@ -19,33 +18,30 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg-primary: #0b141a; /* WhatsApp/Meta dark background */
+    --bg-primary: #0b141a; 
     --bg-secondary: #111b21;
     --bg-accent: #202c33;
     --text-primary: #e9edef;
     --text-secondary: #8696a0;
     --border-color: #202c33;
     --ai-msg-bg: #202c33;
-    --user-msg-bg: #005c4b; /* Subtle dark green/blue for dark mode */
+    --user-msg-bg: #005c4b; 
   }
 }
 
-* {
-  box-sizing: border-box;
-}
+* { box-sizing: border-box; }
 
 .aiAssistant {
   height: 100vh;
-  height: 100dvh; /* keeps layout stable on mobile when the URL bar shows/hides */
+  height: 100dvh;
   display: flex;
   flex-direction: column;
   background-color: var(--bg-primary);
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   color: var(--text-primary);
-  overflow: hidden; /* prevents the whole page from scrolling/bouncing on swipe */
+  overflow: hidden; 
 }
 
-/* Glassmorphism Header */
 .aiHeader {
   display: flex;
   align-items: center;
@@ -70,9 +66,7 @@
   transition: background 0.3s;
 }
 
-.iconBtn:hover {
-  background: var(--bg-accent);
-}
+.iconBtn:hover { background: var(--bg-accent); }
 
 .aiTitle {
   display: flex;
@@ -81,11 +75,7 @@
   gap: 0.15rem;
 }
 
-.aiTitle h1 {
-  font-size: 1.2rem;
-  font-weight: 600;
-  margin: 0;
-}
+.aiTitle h1 { font-size: 1.2rem; font-weight: 600; margin: 0; }
 
 .modelBadge {
   font-size: 0.7rem;
@@ -96,18 +86,16 @@
   letter-spacing: 0.02em;
 }
 
-/* Chat Layout & Scrollbars — this column owns the scrolling, the page itself never moves */
 .chatContainer {
   flex: 1;
   display: flex;
   flex-direction: column;
   overflow: hidden;
   background: var(--bg-primary);
-  min-height: 0; /* required so flex children can scroll instead of overflowing */
+  min-height: 0; 
   position: relative;
 }
 
-/* Empty State (Meta AI style) */
 .emptyState {
   flex: 1;
   display: flex;
@@ -184,15 +172,13 @@
   transition: color 0.2s ease;
 }
 
-.viewHistoryLink:hover {
-  color: var(--primary-color);
-}
+.viewHistoryLink:hover { color: var(--primary-color); }
 
 .messagesContainer {
   flex: 1;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
-  overscroll-behavior-y: contain; /* stops swipe-down from dragging the whole page/bar */
+  overscroll-behavior-y: contain; 
   padding: 1.5rem;
   display: flex;
   flex-direction: column;
@@ -210,7 +196,6 @@
   padding: 0.5rem;
 }
 
-/* Message Bubbles */
 .message {
   display: flex;
   max-width: 85%;
@@ -231,7 +216,6 @@
   position: relative;
 }
 
-/* UPDATED: User text color is var(--text-primary) to contrast with the light blue background */
 .message.user .messageContent {
   background: var(--user-msg-bg);
   color: var(--text-primary); 
@@ -244,43 +228,24 @@
   border-bottom-left-radius: 4px;
 }
 
-/* Markdown Typography */
-.messageText {
-  line-height: 1.6;
-  font-size: 1rem;
-  word-break: break-word;
+.chatImageIndicator {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  margin-bottom: 0.4rem;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
 }
 
+.messageText { line-height: 1.6; font-size: 1rem; word-break: break-word; }
 .messageText p { margin: 0 0 0.75rem 0; }
 .messageText p:last-child { margin-bottom: 0; }
 .messageText ul, .messageText ol { margin: 0.5rem 0; padding-left: 1.5rem; }
-.messageText code {
-  background: rgba(128, 128, 128, 0.2);
-  padding: 0.2rem 0.4rem;
-  border-radius: 4px;
-  font-family: monospace;
-}
-.messageText pre code {
-  display: block;
-  padding: 1rem;
-  overflow-x: auto;
-}
+.messageText code { background: rgba(128, 128, 128, 0.2); padding: 0.2rem 0.4rem; border-radius: 4px; font-family: monospace; }
+.messageText pre code { display: block; padding: 1rem; overflow-x: auto; }
 
-/* Typing indicator while waiting for first token */
-.typingDots {
-  display: inline-flex;
-  gap: 4px;
-  padding: 0.25rem 0;
-}
-
-.typingDots span {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: var(--text-secondary);
-  animation: typingBounce 1.2s infinite ease-in-out;
-}
-
+.typingDots { display: inline-flex; gap: 4px; padding: 0.25rem 0; }
+.typingDots span { width: 6px; height: 6px; border-radius: 50%; background: var(--text-secondary); animation: typingBounce 1.2s infinite ease-in-out; }
 .typingDots span:nth-child(2) { animation-delay: 0.15s; }
 .typingDots span:nth-child(3) { animation-delay: 0.3s; }
 
@@ -289,109 +254,70 @@
   30% { transform: translateY(-4px); opacity: 1; }
 }
 
-/* Copy & Retry Buttons */
-.messageActions {
-  display: flex;
-  gap: 0.5rem;
-  margin-top: 0.5rem;
-  justify-content: flex-end;
-}
-
-.messageActions button {
-  background: transparent;
-  border: none;
-  color: var(--text-secondary);
-  cursor: pointer;
-  padding: 0.25rem;
-  font-size: 0.85rem;
-  transition: color 0.2s;
-}
-
+.messageActions { display: flex; gap: 0.5rem; margin-top: 0.5rem; justify-content: flex-end; }
+.messageActions button { background: transparent; border: none; color: var(--text-secondary); cursor: pointer; padding: 0.25rem; font-size: 0.85rem; transition: color 0.2s; }
 .messageActions button:hover { color: var(--primary-color); }
 
-/* Toast */
-.toast {
-  position: absolute;
-  bottom: 1rem;
-  left: 50%;
-  transform: translateX(-50%);
-  background: var(--text-primary);
-  color: var(--bg-primary);
-  padding: 0.5rem 1rem;
-  border-radius: 999px;
-  font-size: 0.85rem;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  z-index: 50;
-  animation: toastIn 0.2s ease;
-}
+.toast { position: absolute; bottom: 1rem; left: 50%; transform: translateX(-50%); background: var(--text-primary); color: var(--bg-primary); padding: 0.5rem 1rem; border-radius: 999px; font-size: 0.85rem; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); z-index: 50; animation: toastIn 0.2s ease; }
 
 @keyframes toastIn {
   from { opacity: 0; transform: translate(-50%, 8px); }
   to { opacity: 1; transform: translate(-50%, 0); }
 }
 
-/* Input Area — flex-shrink:0 + the parent's overflow:hidden keep this bar
-   pinned in place; it no longer drifts when the page bounces on a swipe */
-.inputContainer {
-  padding: 1rem 1.5rem;
-  padding-bottom: max(1rem, env(safe-area-inset-bottom));
-  background: var(--bg-primary);
-  border-top: 1px solid var(--border-color);
-  flex-shrink: 0;
-}
+.inputContainer { padding: 1rem 1.5rem; padding-bottom: max(1rem, env(safe-area-inset-bottom)); background: var(--bg-primary); border-top: 1px solid var(--border-color); flex-shrink: 0; position: relative;}
 
-.inputWrapper {
-  display: flex;
-  align-items: flex-end;
-  gap: 0.75rem;
+/* Image Upload Preview Formatting */
+.imagePreviewContainer {
+  position: absolute;
+  top: -55px; 
+  left: 1.5rem;
   background: var(--bg-secondary);
-  border-radius: 24px;
-  padding: 0.5rem 1rem;
-  border: 2px solid transparent;
-  transition: border-color 0.3s ease;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 0.25rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  z-index: 10;
 }
 
-.inputWrapper:has(.messageInput:focus) {
-  border-color: var(--primary-color);
+.imagePreview {
+  width: 45px;
+  height: 45px;
+  object-fit: cover;
+  border-radius: 4px;
 }
 
-.messageInput {
-  flex: 1;
+.removeImageBtn {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background: #ef4444;
+  color: white;
   border: none;
-  background: transparent;
-  resize: none;
-  outline: none;
-  font-size: 1rem;
-  color: var(--text-primary);
-  max-height: 120px;
-  padding: 0.5rem 0;
-  font-family: inherit;
-}
-
-/* Microphone & Send Buttons */
-.micBtn, .sendBtn {
-  width: 36px;
-  height: 36px;
   border-radius: 50%;
-  border: none;
+  width: 20px;
+  height: 20px;
   display: flex;
   align-items: center;
   justify-content: center;
+  font-size: 0.65rem;
   cursor: pointer;
-  transition: all 0.3s;
-  flex-shrink: 0;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
 }
 
-.micBtn {
-  background: transparent;
-  color: var(--text-secondary);
-}
+.inputWrapper { display: flex; align-items: flex-end; gap: 0.75rem; background: var(--bg-secondary); border-radius: 24px; padding: 0.5rem 1rem; border: 2px solid transparent; transition: border-color 0.3s ease; }
+.inputWrapper:has(.messageInput:focus) { border-color: var(--primary-color); }
 
-.micBtn.listening {
-  color: #ef4444;
-  background: rgba(239, 68, 68, 0.1);
-  animation: pulseMic 1.5s infinite;
-}
+.messageInput { flex: 1; border: none; background: transparent; resize: none; outline: none; font-size: 1rem; color: var(--text-primary); max-height: 120px; padding: 0.5rem 0; font-family: inherit; }
+
+.attachBtn, .micBtn, .sendBtn { width: 36px; height: 36px; border-radius: 50%; border: none; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.3s; flex-shrink: 0; }
+
+.attachBtn, .micBtn { background: transparent; color: var(--text-secondary); }
+.attachBtn:hover, .micBtn:hover { color: var(--text-primary); background: var(--border-color); }
+
+.micBtn.listening { color: #ef4444; background: rgba(239, 68, 68, 0.1); animation: pulseMic 1.5s infinite; }
 
 @keyframes pulseMic {
   0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
@@ -399,13 +325,5 @@
   100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
 }
 
-.sendBtn {
-  background: var(--primary-color);
-  color: white;
-}
-
-.sendBtn:disabled {
-  background: var(--bg-accent);
-  color: var(--text-secondary);
-  cursor: not-allowed;
-}
+.sendBtn { background: var(--primary-color); color: white; }
+.sendBtn:disabled { background: var(--bg-accent); color: var(--text-secondary); cursor: not-allowed; }
