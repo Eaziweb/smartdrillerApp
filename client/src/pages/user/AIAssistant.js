@@ -5,6 +5,7 @@ import { useState, useEffect, useRef } from "react"
 import ReactMarkdown from "react-markdown"
 import { useAuth } from "../../contexts/AuthContext"
 import styles from "../../styles/AIAssistant.module.css"
+import api from "../../utils/api"
 
 const QUICK_PROMPTS = [
   { label: "Explain a concept", text: "Explain this concept to me in simple terms: " },
@@ -133,11 +134,11 @@ const AIAssistant = () => {
   // Auto-dismiss toast
   useEffect(() => {
     if (!toast) return
-    const t = setTimeout(() => setToast(null), 3000)
+    const t = setTimeout(() => setToast(null), 3000)a
     return () => clearTimeout(t)
   }, [toast])
 
-  // Send Message Logic (Standard JSON Request)
+// Send Message Logic (Using Axios API Instance)
   const sendMessage = async (overrideText = null) => {
     const textToSend = overrideText || inputMessage
     if (!textToSend.trim() || isLoading) return
@@ -158,28 +159,28 @@ const AIAssistant = () => {
     setActiveModel(null)
 
     try {
-      const token = localStorage.getItem("token")
       const contextHistory = allMessages.slice(-10)
 
-      // 2. Make the API Call to your standard JSON endpoint
-      const response = await fetch("/api/ai/chat", {
-        method: "POST",
-        headers: {
-          "Authorization": `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ message: textToSend, history: contextHistory }),
+      // 2. Make the API Call using your Axios instance
+      // FIX: This automatically uses your backend URL, attaches the token, 
+      // and passes the user's name to your backend prompt logic!
+      const response = await api.post("/api/ai/chat", {
+        message: textToSend,
+        history: contextHistory,
+        userName: getUserName() 
       })
 
-      const data = await response.json()
+      // FIX: Axios automatically parses JSON, so we just access .data
+      const data = response.data
 
-      if (!response.ok || !data.success) {
+      if (!data.success) {
         throw new Error(data.message || "Failed to connect to AI")
       }
 
       // 3. Add the complete AI Message to the chat
+      // FIX: Using an accurate Date.now() after the await ensures unique IDs
       const aiMsg = {
-        id: Date.now() + 1,
+        id: Date.now(), 
         text: data.text,
         sender: "ai",
         timestamp: new Date().toISOString(),
@@ -191,9 +192,12 @@ const AIAssistant = () => {
     } catch (error) {
       console.error("Chat error:", error)
       
+      // FIX: Better error handling to catch specific backend messages vs network errors
+      const errorMessage = error.response?.data?.message || "Sorry, I ran into an error. Please try again."
+      
       const errorMsg = {
-        id: Date.now() + 1,
-        text: "Sorry, I ran into an error. Please try again.",
+        id: Date.now(),
+        text: errorMessage,
         sender: "ai",
         isError: true,
         timestamp: new Date().toISOString(),
@@ -275,7 +279,7 @@ const AIAssistant = () => {
         {viewMode === "landing" ? (
           <div className={styles.emptyState}>
             <div className={styles.glowingOrb}></div>
-            <h2>Ask me anything, {getUserName()} ⚡</h2>
+            <h2>Ask me anything, {getUserName()}</h2>
             <p className={styles.emptySubtext}>Your study co-pilot for SmartDriller</p>
 
             <div className={styles.quickPrompts}>
