@@ -261,9 +261,6 @@ const AIAssistant = () => {
         </button>
         <div className={styles.aiTitle}>
           <h1>AI Assistant</h1>
-          {activeModel && (
-            <span className={styles.modelBadge}>{activeModel}</span>
-          )}
         </div>
         <button className={styles.iconBtn} onClick={clearChat} title="Clear Chat" aria-label="Clear chat">
           <i className="fas fa-trash"></i>
@@ -318,11 +315,20 @@ const AIAssistant = () => {
                       )}
                     </div>
 
-                    {message.sender === "ai" && (
+             {message.sender === "ai" && (
                       <div className={styles.messageActions}>
                         <button onClick={() => copyToClipboard(message.text)} title="Copy">
                           <i className="far fa-copy"></i>
                         </button>
+                        
+                        {/* ADD THIS CONTINUE BUTTON */}
+                        <button 
+                          onClick={() => sendMessage("Please continue exactly where you left off.")} 
+                          title="Continue generating"
+                        >
+                          <i className="fas fa-forward"></i> Continue
+                        </button>
+
                         <button onClick={() => retryMessage(trueIndex)} title="Regenerate">
                           <i className="fas fa-sync-alt"></i>
                         </button>
