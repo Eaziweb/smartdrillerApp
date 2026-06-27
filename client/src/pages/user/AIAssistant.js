@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect, useRef } from "react"
+import ReactMarkdown from "react-markdown"
 import { useAuth } from "../../contexts/AuthContext"
 import api from "../../utils/api"
 import styles from "../../styles/AIAssistant.module.css"
