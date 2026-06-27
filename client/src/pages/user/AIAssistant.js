@@ -1,11 +1,9 @@
-// AIAssistant.jsx
 "use client"
 
 import { useState, useEffect, useRef } from "react"
-import ReactMarkdown from "react-markdown"
 import { useAuth } from "../../contexts/AuthContext"
-import styles from "../../styles/AIAssistant.module.css"
 import api from "../../utils/api"
+import styles from "../../styles/AIAssistant.module.css"
 
 const QUICK_PROMPTS = [
   { label: "Explain a concept", text: "Explain this concept to me in simple terms: " },
@@ -134,11 +132,11 @@ const AIAssistant = () => {
   // Auto-dismiss toast
   useEffect(() => {
     if (!toast) return
-    const t = setTimeout(() => setToast(null), 3000)a
+    const t = setTimeout(() => setToast(null), 3000)
     return () => clearTimeout(t)
   }, [toast])
 
-// Send Message Logic (Using Axios API Instance)
+  // Send Message Logic (Using Axios API Instance)
   const sendMessage = async (overrideText = null) => {
     const textToSend = overrideText || inputMessage
     if (!textToSend.trim() || isLoading) return
@@ -162,15 +160,13 @@ const AIAssistant = () => {
       const contextHistory = allMessages.slice(-10)
 
       // 2. Make the API Call using your Axios instance
-      // FIX: This automatically uses your backend URL, attaches the token, 
-      // and passes the user's name to your backend prompt logic!
       const response = await api.post("/api/ai/chat", {
         message: textToSend,
         history: contextHistory,
         userName: getUserName() 
       })
 
-      // FIX: Axios automatically parses JSON, so we just access .data
+      // Axios automatically parses JSON, so we just access .data
       const data = response.data
 
       if (!data.success) {
@@ -178,7 +174,6 @@ const AIAssistant = () => {
       }
 
       // 3. Add the complete AI Message to the chat
-      // FIX: Using an accurate Date.now() after the await ensures unique IDs
       const aiMsg = {
         id: Date.now(), 
         text: data.text,
@@ -192,7 +187,6 @@ const AIAssistant = () => {
     } catch (error) {
       console.error("Chat error:", error)
       
-      // FIX: Better error handling to catch specific backend messages vs network errors
       const errorMessage = error.response?.data?.message || "Sorry, I ran into an error. Please try again."
       
       const errorMsg = {
