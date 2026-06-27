@@ -427,6 +427,35 @@ const Mock = () => {
       submitMock()
     }, 2000) // Wait 2 seconds before auto-submitting
   }
+
+  // Normalize examData.topics into an array of topic strings, regardless of
+  // whether it was stored as "all", a comma-separated string, or an array.
+  // This is what was previously broken: examData.topics could be an ARRAY
+  // (when specific topics were selected on the course-selection page), and
+  // arrays don't have a .split() method, which threw "topics.split is not
+  // a function" and aborted the submission.
+  const getNormalizedTopics = () => {
+    const topics = examData?.topics
+
+    if (!topics || topics === "all") {
+      return []
+    }
+
+    if (Array.isArray(topics)) {
+      return topics
+    }
+
+    if (typeof topics === "string") {
+      // Guard against an accidental "all" wrapped in different casing/whitespace
+      if (topics.trim().toLowerCase() === "all") {
+        return []
+      }
+      return topics.split(",").map((t) => t.trim()).filter(Boolean)
+    }
+
+    // Fallback for any unexpected shape - don't crash the submission
+    return []
+  }
   
   const submitMock = async () => {
     if (submitting) return
@@ -450,7 +479,7 @@ const Mock = () => {
       const resultData = {
         course: examData.course,
         year: examData.year,
-        topics: examData.topics === "all" ? [] : examData.topics.split(","),
+        topics: getNormalizedTopics(),
         totalQuestions: examData.questions.length,
         timeAllowed: examData.timeAllowed,
         timeUsed: Math.max(timeUsed, 0),
