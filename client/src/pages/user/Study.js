@@ -1,6 +1,7 @@
 "use client"
 import { useState, useEffect, useRef } from "react"
 import { useNavigate } from "react-router-dom"
+import ReactMarkdown from "react-markdown"
 import { useAuth } from "../../contexts/AuthContext"
 import api from "../../utils/api"
 import styles from "../../styles/study.module.css"
@@ -30,7 +31,15 @@ const Study = () => {
   const contentRef = useRef(null)
   const voiceReaderOnRef = useRef(voiceReaderOn)
 
-  // Update ref when state changes
+  // AI Integration States
+  const [showAiModal, setShowAiModal] = useState(false)
+  const [showSubWarning, setShowSubWarning] = useState(false)
+  const [aiMessages, setAiMessages] = useState([])
+  const [aiInput, setAiInput] = useState("")
+  const [isAiLoading, setIsAiLoading] = useState(false)
+  const chatEndRef = useRef(null)
+
+  // Update voice ref when state changes
   useEffect(() => {
     voiceReaderOnRef.current = voiceReaderOn
   }, [voiceReaderOn])
@@ -46,6 +55,11 @@ const Study = () => {
       speechRef.current = window.speechSynthesis
     }
   }, [speechSupported])
+
+  // Scroll to bottom of AI chat when new messages arrive
+  useEffect(() => {
+    chatEndRef.current?.scrollIntoView({ behavior: "smooth" })
+  }, [aiMessages, isAiLoading])
 
   // Handle voice reader when question changes
   useEffect(() => {
@@ -70,7 +84,8 @@ const Study = () => {
   // Add keyboard navigation
   useEffect(() => {
     const handleKeyDown = (e) => {
-      if (!examData) return
+      // Don't trigger keyboard nav if the user is typing in a modal
+      if (!examData || showReportModal || showAiModal) return
       
       switch(e.key) {
         case 'ArrowLeft':
@@ -97,7 +112,7 @@ const Study = () => {
     return () => {
       window.removeEventListener('keydown', handleKeyDown)
     }
-  }, [currentQuestionIndex, examData, studiedQuestions])
+  }, [currentQuestionIndex, examData, studiedQuestions, showReportModal, showAiModal])
 
   // Process content with KaTeX when it changes
   useEffect(() => {
@@ -109,14 +124,12 @@ const Study = () => {
   const processMathContent = () => {
     if (!window.katex) return
     
-    // Find all elements with math content
     const mathElements = contentRef.current.querySelectorAll('.math-content')
     
     mathElements.forEach(element => {
       const content = element.getAttribute('data-math')
       if (content) {
         try {
-          // Render the math content
           const renderedMath = window.katex.renderToString(content, {
             throwOnError: false,
             displayMode: element.classList.contains('display-math')
@@ -124,13 +137,13 @@ const Study = () => {
           element.innerHTML = renderedMath
         } catch (e) {
           console.error("KaTeX rendering error:", e)
-          element.innerHTML = content // Fallback to raw content
+          element.innerHTML = content 
         }
       }
     })
   }
 
-  // Stop speech function
+  // --- Voice Reader Functions ---
   const stopSpeech = () => {
     if (speechRef.current) {
       speechRef.current.cancel()
@@ -139,7 +152,6 @@ const Study = () => {
     }
   }
 
-  // Read question and options only
   const readQuestionAndOptions = (question) => {
     if (!speechRef.current) return
     
@@ -151,6 +163,7 @@ const Study = () => {
         .replace(/\$.*?\$/g, '')
         .replace(/\\[a-zA-Z]+/g, '')
         .replace(/[{}]/g, '')
+        .replace(/<[^>]*>?/gm, '') // strip HTML
         .trim()
     }
     
@@ -178,7 +191,6 @@ const Study = () => {
     speechRef.current.speak(utterance)
   }
 
-  // Read question content (for studied questions)
   const readQuestionContent = (question, isStudied) => {
     if (!speechRef.current || !isStudied) return
     
@@ -190,6 +202,7 @@ const Study = () => {
         .replace(/\$.*?\$/g, '')
         .replace(/\\[a-zA-Z]+/g, '')
         .replace(/[{}]/g, '')
+        .replace(/<[^>]*>?/gm, '') // strip HTML
         .trim()
     }
     
@@ -224,7 +237,6 @@ const Study = () => {
     speechRef.current.speak(utterance)
   }
 
-  // Toggle voice reader
   const toggleVoiceReader = () => {
     if (isReading) {
       stopSpeech()
@@ -250,7 +262,72 @@ const Study = () => {
     }
   }
 
-  // Handle study action
+  // --- AI Integration Functions ---
+  const handleAiClick = () => {
+    if (!user?.isSubscribed) {
+      setShowSubWarning(true)
+      return
+    }
+    setShowAiModal(true)
+  }
+
+  const sendAiMessage = async (textToSend = aiInput) => {
+    if (!textToSend.trim() || isAiLoading) return
+
+    const userMsg = { id: Date.now(), text: textToSend, sender: "user" }
+    setAiMessages(prev => [...prev, userMsg])
+    if (textToSend === aiInput) setAiInput("") 
+    setIsAiLoading(true)
+
+    try {
+      const response = await api.post("/api/ai/chat", {
+        message: textToSend,
+        history: aiMessages.slice(-10),
+        userName: user?.fullName?.split(' ')[0] || "Student"
+      })
+
+      if (response.data.success) {
+        setAiMessages(prev => [...prev, {
+          id: Date.now(),
+          text: response.data.text,
+          sender: "ai"
+        }])
+      }
+    } catch (error) {
+      console.error("AI Error:", error)
+      setAiMessages(prev => [...prev, {
+        id: Date.now(),
+        text: "Sorry, I ran into an error connecting to the server. Please try again.",
+        sender: "ai",
+        isError: true
+      }])
+    } finally {
+      setIsAiLoading(false)
+    }
+  }
+
+  const askAboutCurrentQuestion = () => {
+    const q = examData.questions[currentQuestionIndex]
+    const cleanText = (text) => text.replace(/<[^>]*>?/gm, '') 
+    
+    let prompt = `Can you explain this question and help me find the answer?\n\nQuestion: ${cleanText(q.question)}\nOptions:\n`
+    q.options.forEach((opt, i) => {
+      prompt += `${String.fromCharCode(65 + i)}. ${cleanText(opt)}\n`
+    })
+    
+    sendAiMessage(prompt)
+  }
+
+  const generateSimilarQuestion = () => {
+    const q = examData.questions[currentQuestionIndex]
+    const cleanText = (text) => text.replace(/<[^>]*>?/gm, '')
+    
+    const prompt = `Based on this concept, please generate a brand new, similar practice question to test my knowledge.\n\nOriginal Question: ${cleanText(q.question)}\n\nPlease provide 4 options, indicate the correct answer, and give a brief explanation.`
+    
+    sendAiMessage(prompt)
+  }
+
+  // --- Core Study Functions ---
   const handleStudy = async (questionId) => {
     setStudiedQuestions((prev) => new Set([...prev, questionId]))
     setShowExplanation((prev) => ({ ...prev, [questionId]: true }))
@@ -270,13 +347,11 @@ const Study = () => {
     }
   }
 
-  // Navigate to question
   const navigateToQuestion = (index) => {
     stopSpeech()
     setCurrentQuestionIndex(index)
   }
 
-  // Handle back navigation
   const handleBack = () => {
     stopSpeech()
     const progressKey = `study_progress_${examData?.course}_${examData?.year}`
@@ -286,11 +361,6 @@ const Study = () => {
 
   // Initialize component
   useEffect(() => {
-    if (!user?.isSubscribed) {
-      navigate("/home")
-      return
-    }
-    
     loadExamData()
     loadBookmarks()
     
@@ -299,11 +369,7 @@ const Study = () => {
         const katexModule = await import('katex')
         const { render, renderToString } = katexModule
         
-        window.katex = {
-          render,
-          renderToString
-        }
-        
+        window.katex = { render, renderToString }
         setKatexLoaded(true)
       } catch (error) {
         console.error("Failed to load KaTeX:", error)
@@ -311,7 +377,7 @@ const Study = () => {
     }
     
     loadKaTeX()
-  }, [user, navigate])
+  }, [navigate])
   
   // Load progress when exam data is available
   useEffect(() => {
@@ -321,7 +387,6 @@ const Study = () => {
     }
   }, [examData, progressLoaded])
   
-  // Load exam data
   const loadExamData = () => {
     try {
       const storedData = localStorage.getItem("currentExam")
@@ -342,7 +407,6 @@ const Study = () => {
     }
   }
   
-  // Load bookmarks
   const loadBookmarks = async () => {
     try {
       const response = await api.get("/api/bookmarks")
@@ -358,7 +422,6 @@ const Study = () => {
     }
   }
   
-  // Load progress
   const loadProgress = () => {
     if (!examData) return
     try {
@@ -376,7 +439,6 @@ const Study = () => {
     }
   }
   
-  // Save progress
   const saveProgress = () => {
     if (!examData) return
     try {
@@ -394,14 +456,12 @@ const Study = () => {
     }
   }
   
-  // Save progress when relevant data changes
   useEffect(() => {
     if (progressLoaded) {
       saveProgress()
     }
   }, [userAnswers, studiedQuestions, showExplanation, currentQuestionIndex, progressLoaded])
   
-  // Handle answer selection
   const handleAnswerSelect = (questionId, optionIndex) => {
     if (studiedQuestions.has(questionId)) return
     setUserAnswers((prev) => ({
@@ -410,7 +470,6 @@ const Study = () => {
     }))
   }
   
-  // Handle bookmark
   const handleBookmark = async (questionId) => {
     try {
       if (bookmarkedQuestions.has(questionId)) {
@@ -429,7 +488,6 @@ const Study = () => {
     }
   }
   
-  // Handle report submission
   const handleReport = async () => {
     if (!reportDescription.trim()) return
     setSubmittingReport(true)
@@ -448,22 +506,16 @@ const Study = () => {
     }
   }
   
-  // Render content with math - UPDATED to match Correction page
-  const renderContentWithMath = (content, isDisplayMode = false) => {
+  const renderContentWithMath = (content) => {
     if (!content) return null
     
-    // Simple regex to find LaTeX patterns
     const latexPattern = /(\\\(.*?\\\)|\\\[.*?\\\]|\$\$.*?\$\$|\$.*?\$)/g
-    
-    // Split content by LaTeX patterns
     const parts = content.split(latexPattern)
     
     return parts.map((part, index) => {
-      if (index % 2 === 1) { // This is a LaTeX expression
-        // Determine if it's display mode
+      if (index % 2 === 1) { 
         const isDisplay = part.startsWith('\\[') || part.startsWith('$$')
         
-        // Extract the actual LaTeX content
         let latexContent = part
         if (part.startsWith('\\(')) latexContent = part.slice(2, -2)
         if (part.startsWith('\\[')) latexContent = part.slice(2, -2)
@@ -478,26 +530,18 @@ const Study = () => {
           />
         )
       } else {
-        // Regular HTML content
         return <span key={index} dangerouslySetInnerHTML={{ __html: part }} />
       }
     })
   }
   
-  // Get image URL with proper fallback
   const getImageUrl = (imagePath) => {
     if (!imagePath) return null
-    
-    if (imagePath.startsWith('http')) {
-      return imagePath
-    }
-    if (imagePath.startsWith('/uploads')) {
-      return imagePath
-    }
+    if (imagePath.startsWith('http')) return imagePath
+    if (imagePath.startsWith('/uploads')) return imagePath
     return `/uploads${imagePath}`
   }
   
-  // Handle image error
   const handleImageError = (e) => {
     e.target.onerror = null
     e.target.style.display = 'none'
@@ -514,7 +558,7 @@ const Study = () => {
     }
   }
   
-  // Loading state
+  // Render loading state
   if (loading || !examData) {
     return (
       <div className={styles.loadingContainer}>
@@ -542,6 +586,15 @@ const Study = () => {
           </div>
         </div>
         <div className={styles.headerRight}>
+          {/* AI Tutor Button */}
+          <button 
+            className={`${styles.iconBtn} ${styles.aiBtn}`} 
+            onClick={handleAiClick}
+            title="Ask AI Tutor"
+          >
+            <i className="fas fa-robot"></i>
+          </button>
+
           {speechSupported && (
             <button 
               className={`${styles.iconBtn} ${isReading ? styles.active : ''}`}
@@ -671,6 +724,7 @@ const Study = () => {
         </button>
       </div>
       
+      {/* Report Modal */}
       {showReportModal && (
         <div className={styles.reportModalOverlay}>
           <div className={styles.reportModal}>
@@ -694,6 +748,107 @@ const Study = () => {
               </button>
               <button className={`${styles.btn} ${styles.btnPrimary}`} onClick={handleReport} disabled={submittingReport}>
                 {submittingReport ? "Submitting..." : "Submit Report"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Subscription Warning Modal */}
+      {showSubWarning && (
+        <div className={styles.reportModalOverlay}>
+          <div className={styles.reportModal} style={{ textAlign: 'center', padding: '3rem 2rem' }}>
+            <div style={{ fontSize: '3rem', color: '#f59e0b', marginBottom: '1rem' }}>
+              <i className="fas fa-crown"></i>
+            </div>
+            <h3 style={{ marginBottom: '1rem' }}>Premium Feature</h3>
+            <p style={{ color: '#64748b', marginBottom: '2rem' }}>
+              The SmartDriller AI Tutor is available exclusively to subscribed students. Upgrade to get instant explanations and custom practice questions!
+            </p>
+            <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center' }}>
+              <button className={`${styles.btn} ${styles.btnSecondary}`} onClick={() => setShowSubWarning(false)}>
+                Maybe Later
+              </button>
+              <button className={`${styles.btn} ${styles.btnPrimary}`} onClick={() => navigate('/subscription')}>
+                Upgrade Now
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Full-Screen AI Modal */}
+      {showAiModal && (
+        <div className={styles.aiModalOverlay}>
+          <div className={styles.aiModalContainer}>
+            <div className={styles.aiModalHeader}>
+              <div>
+                <h3><i className="fas fa-robot"></i> SmartDriller AI Tutor</h3>
+                <span style={{ fontSize: '0.8rem', opacity: 0.8 }}>Powered by Gemini</span>
+              </div>
+              <button className={styles.closeBtn} onClick={() => setShowAiModal(false)}>
+                &times;
+              </button>
+            </div>
+
+            <div className={styles.aiChatArea}>
+              {aiMessages.length === 0 ? (
+                <div className={styles.aiEmptyState}>
+                  <p>How can I help you with this topic?</p>
+                  <div className={styles.quickActionsGrid}>
+                    <button onClick={askAboutCurrentQuestion} className={styles.quickActionBtn}>
+                      <i className="fas fa-question-circle"></i> Explain Current Question
+                    </button>
+                    <button onClick={generateSimilarQuestion} className={styles.quickActionBtn}>
+                      <i className="fas fa-random"></i> Generate Similar Question
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div className={styles.messagesList}>
+                  {aiMessages.map(msg => (
+                    <div key={msg.id} className={`${styles.chatMsg} ${styles[msg.sender]}`}>
+                      <div className={styles.msgBubble}>
+                        {msg.sender === "ai" ? (
+                          <ReactMarkdown>{msg.text}</ReactMarkdown>
+                        ) : (
+                          msg.text
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                  {isAiLoading && (
+                    <div className={`${styles.chatMsg} ${styles.ai}`}>
+                      <div className={styles.msgBubble}>
+                        <i className="fas fa-spinner fa-spin"></i> Thinking...
+                      </div>
+                    </div>
+                  )}
+                  <div ref={chatEndRef} />
+                </div>
+              )}
+            </div>
+
+            <div className={styles.aiInputArea}>
+              <textarea
+                value={aiInput}
+                onChange={(e) => setAiInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault()
+                    sendAiMessage()
+                  }
+                }}
+                placeholder="Ask a question..."
+                rows="2"
+                disabled={isAiLoading}
+              />
+              <button 
+                onClick={() => sendAiMessage()} 
+                disabled={!aiInput.trim() || isAiLoading}
+                className={styles.sendAiBtn}
+              >
+                <i className="fas fa-paper-plane"></i>
               </button>
             </div>
           </div>
