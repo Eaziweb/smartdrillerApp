@@ -175,8 +175,7 @@ const CourseSelection = () => {
   }, [])
   
   const fetchTopics = useCallback(async (courseCode) => {
-    if (!isSubscribed) return;
-    
+    // Unsubscribed users can now fetch topics to view them
     setFetchingTopics(true)
     try {
       const token = localStorage.getItem("token")
@@ -206,15 +205,10 @@ const CourseSelection = () => {
     } finally {
       setFetchingTopics(false)
     }
-  }, [isSubscribed, showNotification])
+  }, [showNotification])
 
-  // UPDATED: Always show subscription modal when user is not subscribed
   const handleCourseSelect = useCallback((courseCode, isSelected) => {
-    if (!isSubscribed) {
-      setShowSubscriptionModal(true)
-      return false
-    }
-    
+    // Free access to selection
     if (isSelected) {
       if (selectedCourse && selectedCourse !== courseCode) {
         setFormData((prev) => {
@@ -264,7 +258,7 @@ const CourseSelection = () => {
       setSelectedTopics(new Set());
     }
     return true;
-  }, [isSubscribed, selectedCourse, courseYears, fetchTopics, showNotification, isMockMode])
+  }, [selectedCourse, courseYears, fetchTopics, showNotification, isMockMode])
   
   const calculateDropdownPosition = useCallback((courseCode, type) => {
     const triggerElement = dropdownTriggerRefs.current[`${courseCode}-${type}`];
@@ -280,11 +274,6 @@ const CourseSelection = () => {
   }, [])
   
   const handleDropdownClick = useCallback((courseCode, type) => {
-    if (!isSubscribed) {
-      setShowSubscriptionModal(true)
-      return
-    }
-    
     if (openDropdown.courseCode === courseCode && openDropdown.type === type) {
       setOpenDropdown({ courseCode: null, type: null });
       return;
@@ -308,7 +297,7 @@ const CourseSelection = () => {
     setTimeout(() => {
       setOpenDropdown({ courseCode, type });
     }, 10);
-  }, [isSubscribed, openDropdown, courseTopics, showNotification, navigate, calculateDropdownPosition])
+  }, [openDropdown, courseTopics, showNotification, calculateDropdownPosition])
   
   const handleOptionSelect = useCallback((courseCode, type, value, label) => {
     setFormData((prev) => ({
@@ -324,6 +313,12 @@ const CourseSelection = () => {
   }, [])
   
   const handleTopicSelection = useCallback((topic, isSelected) => {
+    // Unsubscribed users cannot modify specific topics
+    if (!isSubscribed) {
+      setShowSubscriptionModal(true);
+      return;
+    }
+
     setSelectedTopics((prev) => {
       const newSet = new Set(prev)
       if (isSelected) {
@@ -333,7 +328,7 @@ const CourseSelection = () => {
       }
       return newSet
     })
-  }, [])
+  }, [isSubscribed])
   
   const handleTopicConfirm = useCallback(() => {
     const topicsArray = Array.from(selectedTopics)
@@ -357,13 +352,7 @@ const CourseSelection = () => {
     setShowTopicPopup(false)
   }, [selectedTopics, courseTopics, currentTopicDropdown])
   
-  // UPDATED: Always show subscription modal when user is not subscribed
 const handleStartExam = useCallback(async () => {
-  if (!isSubscribed) {
-    setShowSubscriptionModal(true)
-    return
-  }
-  
   if (!selectedCourse) {
     showNotification("Please select a course", "error")
     return
@@ -389,11 +378,16 @@ const handleStartExam = useCallback(async () => {
     if (courseDataObj.selectedTopics && courseDataObj.selectedTopics.length < (courseTopics[selectedCourse]?.length || 0)) {
       topicsToSend = courseDataObj.selectedTopics
     }
+
+    // Apply strict limitations for unsubscribed users 
+    const finalQuestionCount = !isSubscribed ? 5 : Number.parseInt(courseDataObj.questions)
+    const finalTopics = !isSubscribed ? "all" : topicsToSend
+
     const requestData = {
       course: selectedCourse,
       year: courseDataObj.year,
-      topics: topicsToSend,
-      questionCount: Number.parseInt(courseDataObj.questions),
+      topics: finalTopics,
+      questionCount: finalQuestionCount,
       examType: examType,
       ...(isMockMode && { timeAllowed: Number.parseInt(courseDataObj.time) }),
     }
@@ -407,10 +401,8 @@ const handleStartExam = useCallback(async () => {
     })
     
     if (!response.data.success) {
-      // Handle the case when no questions are found for selected topics
       if (response.data.noQuestionsForTopics) {
         showNotification(response.data.message, "warning");
-        // Reset the topics selection to "all"
         setFormData(prev => ({
           ...prev,
           [selectedCourse]: {
@@ -437,6 +429,11 @@ const handleStartExam = useCallback(async () => {
         examType: examType,
       }),
     )
+
+    // Notify unsubscribed users of the preview limit
+    if (!isSubscribed) {
+      showNotification("Preview mode: You've received 5 practice questions. Subscribe to unlock full access!", "info")
+    }
     
     navigate(isMockMode ? "/mock" : "/study")
   } catch (error) {
@@ -447,7 +444,6 @@ const handleStartExam = useCallback(async () => {
   }
 }, [isSubscribed, selectedCourse, formData, courseTopics, examType, isMockMode, showNotification, navigate])
   
-  // UPDATED: Initialize payment with new structure (subscriptionType and months)
   const initializePayment = useCallback(async (subscriptionType, months) => {
     setLoadingPayment(true);
     try {
@@ -582,29 +578,13 @@ const handleStartExam = useCallback(async () => {
   
   return (
     <div className={styles.courseSelectionPage}>
-      {/* Subscription Banner for Unsubscribed Users */}
-      {!isSubscribed && (
-        <div className={styles.subscriptionBanner}>
-          <div className={styles.bannerContent}>
-            <i className="fas fa-lock"></i>
-            <p>Subscribe to access study materials and start practicing</p>
-            <button 
-              className={styles.subscribeBtn}
-              onClick={() => setShowSubscriptionModal(true)}
-            >
-              Subscribe Now
-            </button>
-          </div>
-        </div>
-      )}
-      
       {/* Continue Button */}
       <button 
         className={styles.continueBtn} 
         onClick={handleStartExam} 
         disabled={fetchingQuestions || fetchingTopics}
       >
-        {fetchingQuestions ? "Loading Questions..." : "Continue"}
+        {fetchingQuestions ? "Loading..." : "Continue"}
       </button>
       
       {/* Header */}
@@ -613,15 +593,39 @@ const handleStartExam = useCallback(async () => {
           <i className="fa fa-arrow-left"></i>
         </button>
         <div className={styles.navTitle}>Select Courses</div>
-        <div className={styles.searchContainer}>
-          <i className={`fas fa-search ${styles.searchIcon}`}></i>
-          <input
-            className={styles.search}
-            type="search"
-            placeholder="Search courses..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginLeft: 'auto' }}>
+          {!isSubscribed && (
+            <button 
+              onClick={() => setShowSubscriptionModal(true)}
+              style={{
+                background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
+                color: 'white',
+                border: 'none',
+                padding: '0.4rem 1rem',
+                borderRadius: '8px',
+                fontWeight: 'bold',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.4rem',
+                fontSize: '0.9rem'
+              }}
+            >
+              <i className="fas fa-crown"></i> Upgrade
+            </button>
+          )}
+
+          <div className={styles.searchContainer} style={{ marginLeft: 0 }}>
+            <i className={`fas fa-search ${styles.searchIcon}`}></i>
+            <input
+              className={styles.search}
+              type="search"
+              placeholder="Search courses..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
         </div>
       </nav>
       
@@ -636,16 +640,12 @@ const handleStartExam = useCallback(async () => {
           {filteredCourses(courses.first).map((course) => (
             <div 
               key={course.courseCode} 
-              className={`${styles.singleCourse} ${selectedCourse === course.courseCode ? styles.active : ''} ${!isSubscribed ? styles.disabled : ''}`}
+              className={`${styles.singleCourse} ${selectedCourse === course.courseCode ? styles.active : ''}`}
               ref={el => dropdownRefs.current[course.courseCode] = el}
             >
               <div 
                 className={styles.courseName} 
                 onClick={() => {
-                  if (!isSubscribed) {
-                    setShowSubscriptionModal(true)
-                    return
-                  }
                   const checkbox = document.getElementById(`checkbox-${course.courseCode}`)
                   checkbox.checked = !checkbox.checked
                   handleCourseSelect(course.courseCode, checkbox.checked)
@@ -657,13 +657,9 @@ const handleStartExam = useCallback(async () => {
                     id={`checkbox-${course.courseCode}`} 
                     checked={selectedCourse === course.courseCode} 
                     onChange={(e) => handleCourseSelect(course.courseCode, e.target.checked)} 
-                    disabled={!isSubscribed}
                   />
                 </span>
                 {course.courseCode.toUpperCase()} - {course.courseName}
-                {!isSubscribed && (
-                  <i className={`fas fa-lock ${styles.lockIcon}`}></i>
-                )}
               </div>
               
               {/* Course options appear directly under the selected course */}
@@ -771,16 +767,12 @@ const handleStartExam = useCallback(async () => {
           {filteredCourses(courses.second).map((course) => (
             <div 
               key={course.courseCode} 
-              className={`${styles.singleCourse} ${selectedCourse === course.courseCode ? styles.active : ''} ${!isSubscribed ? styles.disabled : ''}`}
+              className={`${styles.singleCourse} ${selectedCourse === course.courseCode ? styles.active : ''}`}
               ref={el => dropdownRefs.current[course.courseCode] = el}
             >
               <div 
                 className={styles.courseName} 
                 onClick={() => {
-                  if (!isSubscribed) {
-                    setShowSubscriptionModal(true)
-                    return
-                  }
                   const checkbox = document.getElementById(`checkbox-${course.courseCode}`)
                   checkbox.checked = !checkbox.checked
                   handleCourseSelect(course.courseCode, checkbox.checked)
@@ -792,13 +784,9 @@ const handleStartExam = useCallback(async () => {
                     id={`checkbox-${course.courseCode}`} 
                     checked={selectedCourse === course.courseCode} 
                     onChange={(e) => handleCourseSelect(course.courseCode, e.target.checked)} 
-                    disabled={!isSubscribed}
                   />
                 </span>
                 {course.courseCode.toUpperCase()} - {course.courseName}
-                {!isSubscribed && (
-                  <i className={`fas fa-lock ${styles.lockIcon}`}></i>
-                )}
               </div>
               
               {/* Course options appear directly under the selected course */}
@@ -970,6 +958,10 @@ const handleStartExam = useCallback(async () => {
                   id="topic-all"
                   checked={selectedTopics.size === courseTopics[currentTopicDropdown]?.length}
                   onChange={(e) => {
+                    if (!isSubscribed) {
+                      setShowSubscriptionModal(true);
+                      return;
+                    }
                     if (e.target.checked) {
                       setSelectedTopics(new Set(courseTopics[currentTopicDropdown] || []))
                     } else {
