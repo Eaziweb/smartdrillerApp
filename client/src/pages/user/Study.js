@@ -44,6 +44,14 @@ const Study = () => {
     voiceReaderOnRef.current = voiceReaderOn
   }, [voiceReaderOn])
 
+  // --- AI Reset Logic ---
+  // Clear AI chat history when moving to a different question
+  useEffect(() => {
+    setAiMessages([])
+    setAiInput("")
+    setIsAiLoading(false)
+  }, [currentQuestionIndex])
+  
   // Check if speech synthesis is supported
   useEffect(() => {
     setSpeechSupported('speechSynthesis' in window)
