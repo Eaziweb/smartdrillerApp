@@ -175,7 +175,6 @@ const CourseSelection = () => {
   }, [])
   
   const fetchTopics = useCallback(async (courseCode) => {
-    // Unsubscribed users can now fetch topics to view them
     setFetchingTopics(true)
     try {
       const token = localStorage.getItem("token")
@@ -208,7 +207,6 @@ const CourseSelection = () => {
   }, [showNotification])
 
   const handleCourseSelect = useCallback((courseCode, isSelected) => {
-    // Free access to selection
     if (isSelected) {
       if (selectedCourse && selectedCourse !== courseCode) {
         setFormData((prev) => {
@@ -313,7 +311,6 @@ const CourseSelection = () => {
   }, [])
   
   const handleTopicSelection = useCallback((topic, isSelected) => {
-    // Unsubscribed users cannot modify specific topics
     if (!isSubscribed) {
       setShowSubscriptionModal(true);
       return;
@@ -352,97 +349,114 @@ const CourseSelection = () => {
     setShowTopicPopup(false)
   }, [selectedTopics, courseTopics, currentTopicDropdown])
   
-const handleStartExam = useCallback(async () => {
-  if (!selectedCourse) {
-    showNotification("Please select a course", "error")
-    return
-  }
-  
-  const courseDataObj = formData[selectedCourse]
-  if (!courseDataObj?.year) {
-    showNotification("Please select a year", "error")
-    return
-  }
-  if (!courseDataObj?.questions) {
-    showNotification("Please select number of questions", "error")
-    return
-  }
-  if (isMockMode && !courseDataObj?.time) {
-    showNotification("Please select time limit", "error")
-    return
-  }
-  
-  setFetchingQuestions(true)
-  try {
-    let topicsToSend = "all"
-    if (courseDataObj.selectedTopics && courseDataObj.selectedTopics.length < (courseTopics[selectedCourse]?.length || 0)) {
-      topicsToSend = courseDataObj.selectedTopics
-    }
-
-    // Apply strict limitations for unsubscribed users 
-    const finalQuestionCount = !isSubscribed ? 5 : Number.parseInt(courseDataObj.questions)
-    const finalTopics = !isSubscribed ? "all" : topicsToSend
-
-    const requestData = {
-      course: selectedCourse,
-      year: courseDataObj.year,
-      topics: finalTopics,
-      questionCount: finalQuestionCount,
-      examType: examType,
-      ...(isMockMode && { timeAllowed: Number.parseInt(courseDataObj.time) }),
+  const handleStartExam = useCallback(async () => {
+    if (!selectedCourse) {
+      showNotification("Please select a course", "error")
+      return
     }
     
-    const token = localStorage.getItem("token")
-    const response = await api.post("/api/questions/fetch", requestData, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-    })
+    const courseDataObj = formData[selectedCourse]
     
-    if (!response.data.success) {
-      if (response.data.noQuestionsForTopics) {
-        showNotification(response.data.message, "warning");
-        setFormData(prev => ({
-          ...prev,
-          [selectedCourse]: {
-            ...prev[selectedCourse],
-            topics: "all",
-            selectedTopics: courseTopics[selectedCourse] || []
-          }
-        }));
-        setSelectedTopics(new Set(courseTopics[selectedCourse] || []));
-        return;
+    // Everyone must select a year
+    if (!courseDataObj?.year) {
+      showNotification("Please select a year", "error")
+      return
+    }
+
+    // ONLY enforce these selections if the user is actually subscribed.
+    if (isSubscribed) {
+      if (!courseDataObj?.questions) {
+        showNotification("Please select number of questions", "error")
+        return
       }
-      throw new Error(response.data.message || "Failed to fetch questions")
+      if (isMockMode && !courseDataObj?.time) {
+        showNotification("Please select time limit", "error")
+        return
+      }
     }
     
-    if (!response.data.questions || response.data.questions.length === 0) {
-      throw new Error("No questions found for the selected criteria. Please try different options.")
-    }
-    
-    localStorage.setItem(
-      "currentExam",
-      JSON.stringify({
-        ...requestData,
-        questions: response.data.questions,
-        examType: examType,
-      }),
-    )
+    setFetchingQuestions(true)
+    try {
+      let topicsToSend = "all"
+      if (courseDataObj?.selectedTopics && courseDataObj.selectedTopics.length < (courseTopics[selectedCourse]?.length || 0)) {
+        topicsToSend = courseDataObj.selectedTopics
+      }
 
-    // Notify unsubscribed users of the preview limit
-    if (!isSubscribed) {
-      showNotification("Preview mode: You've received 5 practice questions. Subscribe to unlock full access!", "info")
+      // --- OVERRIDE LOGIC ---
+      let finalQuestionCount;
+      if (!isSubscribed) {
+        // Force exactly 7 questions for unsubscribed users
+        finalQuestionCount = 7; 
+      } else if (courseDataObj.questions === "all") {
+        finalQuestionCount = "all"; 
+      } else {
+        finalQuestionCount = Number.parseInt(courseDataObj.questions);
+      }
+
+      const finalTopics = !isSubscribed ? "all" : topicsToSend
+
+      const requestData = {
+        course: selectedCourse,
+        year: courseDataObj.year,
+        topics: finalTopics,
+        questionCount: finalQuestionCount,
+        examType: examType,
+        ...(isMockMode && { 
+          timeAllowed: !isSubscribed ? 5 : Number.parseInt(courseDataObj.time) 
+        }),
+      }
+      
+      const token = localStorage.getItem("token")
+      const response = await api.post("/api/questions/fetch", requestData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      })
+      
+      if (!response.data.success) {
+        if (response.data.noQuestionsForTopics) {
+          showNotification(response.data.message, "warning");
+          setFormData(prev => ({
+            ...prev,
+            [selectedCourse]: {
+              ...prev[selectedCourse],
+              topics: "all",
+              selectedTopics: courseTopics[selectedCourse] || []
+            }
+          }));
+          setSelectedTopics(new Set(courseTopics[selectedCourse] || []));
+          return;
+        }
+        throw new Error(response.data.message || "Failed to fetch questions")
+      }
+      
+      if (!response.data.questions || response.data.questions.length === 0) {
+        throw new Error("No questions found for the selected criteria. Please try different options.")
+      }
+      
+      localStorage.setItem(
+        "currentExam",
+        JSON.stringify({
+          ...requestData,
+          questions: response.data.questions,
+          examType: examType,
+        }),
+      )
+
+      // Notify unsubscribed users of the preview limit
+      if (!isSubscribed) {
+        showNotification("Preview mode: You've received 7 practice questions. Subscribe to unlock full access!", "info")
+      }
+      
+      navigate(isMockMode ? "/mock" : "/study")
+    } catch (error) {
+      console.error("Failed to start exam:", error)
+      showNotification(error.response?.data?.message || error.message || "Failed to start exam", "error")
+    } finally {
+      setFetchingQuestions(false)
     }
-    
-    navigate(isMockMode ? "/mock" : "/study")
-  } catch (error) {
-    console.error("Failed to start exam:", error)
-    showNotification(error.response?.data?.message || error.message || "Failed to start exam", "error")
-  } finally {
-    setFetchingQuestions(false)
-  }
-}, [isSubscribed, selectedCourse, formData, courseTopics, examType, isMockMode, showNotification, navigate])
+  }, [isSubscribed, selectedCourse, formData, courseTopics, examType, isMockMode, showNotification, navigate])
   
   const initializePayment = useCallback(async (subscriptionType, months) => {
     setLoadingPayment(true);
